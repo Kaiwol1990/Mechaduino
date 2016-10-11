@@ -34,7 +34,6 @@ void TC5_Handler()
           e_0 = (r - yw);
 
           // IIR Filter for the error
-          Serial.println("");
           Serial.print(e_0);
           e = coeff_b0 * e_0 +  coeff_b1 * e_1 + coeff_b2 * e_2  - coeff_a1 * z_1 - coeff_a2 * z_2;
 
@@ -43,8 +42,8 @@ void TC5_Handler()
 
           e_2 = e_1;
           e_1 = e_0;
-          Serial.print(" ; ");
-          Serial.print(e);
+          Serial.print(" , ");
+          Serial.println(e);
 
           ITerm += (pKi * e);
           ITerm = sign(ITerm) * constrain(abs(ITerm), 0, 150);
