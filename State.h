@@ -1,4 +1,4 @@
-//Contains the declaration of the state variables for the control loop
+//Contains the declaration of the state variables for the control loop  
 
 #ifndef __STATE_H__
 #define __STATE_H__
@@ -7,6 +7,7 @@
 //interrupt vars
 
 extern volatile float ei;
+extern volatile int U;  //control effort (abs)
 extern volatile float r;  //setpoint
 extern volatile float y;  // measured angle
 extern volatile float yw;
@@ -16,16 +17,11 @@ extern volatile float p;  // proportional effort
 extern volatile float i;  // integral effort
 extern volatile float PA;  //
 
-extern volatile float u;  //real control effort
-extern volatile float e_0; 
-extern volatile float e_1;
-extern volatile float e_2;
-extern volatile float z_0; 
-extern volatile float z_1;
+extern volatile float u;  //real control effort (not abs)
+extern volatile long counter;
 
 extern volatile long wrap_count;
 extern volatile float y_1;
-
 
 extern volatile float ITerm;
 
@@ -34,17 +30,18 @@ extern volatile char mode;
 
 extern int dir;
 extern int stepNumber;
-extern void output(float, int);
+extern void output(float,int);
 
 extern volatile int enabled;
 
-extern int uMAX;
-extern int uPEAK;
-extern int uSTEP;
+extern volatile int uMAX;
+extern volatile int uPEAK;
+extern volatile int uSTEP;
 
 extern volatile int PEAKCounter;
 extern int maxPEAKCounter;
 extern int PEAKSPERSECOND;
+
 
 extern volatile float ITerm;
 

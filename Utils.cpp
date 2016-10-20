@@ -6,9 +6,9 @@
 
 #include "Parameters.h"
 #include "Controller.h"
-#include "State.h"
 #include "Utils.h"
-
+#include "State.h"
+#include "analogFastWrite.h"
 
 void setupPins() {
 
@@ -18,7 +18,7 @@ void setupPins() {
   pinMode(IN_3, OUTPUT);
   pinMode(IN_2, OUTPUT);
   pinMode(IN_1, OUTPUT);
-  pinMode(LED, OUTPUT);
+  pinMode(pulse, OUTPUT);
   pinMode(step_pin, INPUT);
   pinMode(dir_pin, INPUT);
   pinMode(ena_pin, INPUT_PULLUP);
@@ -27,11 +27,12 @@ void setupPins() {
   pinMode(4, OUTPUT);
 
   attachInterrupt(1, stepInterrupt, RISING);
-
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
 
-  analogWrite(VREF_2, 64);
-  analogWrite(VREF_1, 64);
+
+
+  analogFastWrite(VREF_2, 64);
+  analogFastWrite(VREF_1, 64);
 
   digitalWrite(IN_4, HIGH);
   digitalWrite(IN_3, LOW);
@@ -58,26 +59,27 @@ void setupSPI() {
 
 }
 
-
 void stepInterrupt() {
   if (enabled) {
     if (digitalRead(dir_pin)) {
-      r += stepangle;
+      r -= stepangle;
     }
     else {
-      r -= stepangle;
+      r += stepangle;
     }
   }
 }
 
 void enaInterrupt() {
   if (digitalRead(ena_pin) == 1) {
-    enabled = 1;
-  }
-  else {
     enabled = 0;
   }
+  else {
+    enabled = 1;
+  }
 }
+
+
 
 void output(float theta, int effort) {                    //////////////////////////////////////////   OUTPUT   ///////////////////
   static int start = 0;
@@ -86,18 +88,19 @@ void output(float theta, int effort) {                    //////////////////////
   static float floatangle;
   static int modangle;
 
-  floatangle = 10000 * ( theta * 0.87266);//) );// 2.3562) );       //changed to 2.3 for NEMA23,NEMA17 dual..... opposite below
-  //floatangle = (10000 * ( theta * 0.87266 + 0.7854) );//) );// 2.3562) );       //changed to 2.3 for NEMA23,NEMA17 dual..... opposite below
+
+
+  floatangle = (10000 * ( theta * 0.87266 + 2.3562) );//0.7854) );// 2.3562) );       //changed to 2.3 for NEMA23,NEMA17 dual..... opposite below
   //floatangle = (10000 * ( theta * 0.87266 + 0.7854) );
 
-  intangle = (int)(floatangle + 7854);
+  intangle = (int)floatangle;
+  //  modangle = (((intangle % 628) + 628) % 628);
   val1 = effort * lookup_sine(intangle);
 
-  analogWrite(VREF_2, abs(val1));
+  analogFastWrite(VREF_2, abs(val1));
 
   if (val1 >= 0)  {
     digitalWrite(IN_4, HIGH);
-    //REG_PIOA_ODSR |= 0x80000;
     //     PORTB |= (B00000001);
     digitalWrite(IN_3, LOW);
     //    PORTB &= ~(B00000010);
@@ -111,25 +114,38 @@ void output(float theta, int effort) {                    //////////////////////
 
   }
 
+
+
+
+
+  floatangle = (10000 * (  theta * 0.8726646 + 0.7854) );//2.3562) );//0.7854) );
   //floatangle = (10000 * ( theta * 0.87266 + 2.3562) );
 
-  intangle = (int)(floatangle + 23562);
+  intangle = (int)floatangle;
+  // modangle = (((intangle % 628) + 628) % 628);
   val2 = effort * lookup_sine(intangle);
 
-  analogWrite(VREF_1, abs(val2));
+  analogFastWrite(VREF_1, abs(val2));
 
   if (val2 >= 0)  {
     digitalWrite(IN_2, HIGH);
     //     PORTB |= (B00000100);
     digitalWrite(IN_1, LOW);
     //     PORTB &= ~(B00001000);
+
   }
   else  {
     digitalWrite(IN_2, LOW);
     //   PORTB &= ~(B00000100);
     digitalWrite(IN_1, HIGH);
     //   PORTB |= (B00001000);
+
   }
+
+
+
+
+
 }
 
 void commandW() {
@@ -148,8 +164,6 @@ void commandW() {
   int ticks = 0;
 
   float lookupAngle = 0.0;
-
-  byte decimals = 4;
 
   encoderReading = readEncoder();
   dir = 1;
@@ -189,8 +203,7 @@ void commandW() {
 
     anglefloat = encoderReading * 0.02197265625;
     fullStepReadings[x] = encoderReading;
-    SerialUSB.println(fullStepReadings[x], 4);
-    //SerialUSB.println(fullStepReadings[x], DEC);
+    SerialUSB.println(fullStepReadings[x], DEC);
     oneStep();
   }
   SerialUSB.println(" ");
@@ -259,7 +272,7 @@ void commandW() {
       if (i == iStart) {
         for (int j = jStart; j < ticks; j++) {
           lookupAngle = 0.001 * mod(1000 * ((aps * i) + ((aps * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle, decimals);
+          SerialUSB.print(lookupAngle);
           SerialUSB.print(" , ");
         }
       }
@@ -267,14 +280,14 @@ void commandW() {
       else if (i == (iStart + spr)) {
         for (int j = 0; j < jStart; j++) {
           lookupAngle = 0.001 * mod(1000 * ((aps * i) + ((aps * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle, decimals);
+          SerialUSB.print(lookupAngle);
           SerialUSB.print(" , ");
         }
       }
       else {
         for (int j = 0; j < ticks; j++) {
           lookupAngle = 0.001 * mod(1000 * ((aps * i) + ((aps * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle, decimals);
+          SerialUSB.print(lookupAngle);
           SerialUSB.print(" , ");
         }
       }
@@ -287,21 +300,21 @@ void commandW() {
       if (i == iStart) {
         for (int j = - ticks; j > (jStart); j--) {
           lookupAngle = 0.001 * mod(1000 * (aps * (i) + (aps * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle, decimals);
+          SerialUSB.print(lookupAngle);
           SerialUSB.print(" , ");
         }
       }
       else if (i == iStart + spr) {
         for (int j = jStart; j > 0; j--) {
           lookupAngle = 0.001 * mod(1000 * (aps * (i) + (aps * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle, decimals);
+          SerialUSB.print(lookupAngle);
           SerialUSB.print(" , ");
         }
       }
       else {
         for (int j = - ticks; j > 0; j--) {
           lookupAngle = 0.001 * mod(1000 * (aps * (i) + (aps * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle, decimals);
+          SerialUSB.print(lookupAngle);
           SerialUSB.print(" , ");
         }
       }
@@ -391,11 +404,18 @@ void serialCheck() {
         break;
 
       case 'k':
-        {
-          parameterEditmain();
+        parameterEditmain();
+        break;
 
-          break;
+      case 'z':
+      
+        if (enabled == 1) {
+          enabled = 0;
         }
+        else {
+          enabled = 1;
+        }
+        break;
 
       default:
         break;
@@ -443,12 +463,13 @@ void parameterQuery() {
   SerialUSB.println(" / Ts;");
 
   SerialUSB.println(' ');
-
-  SerialUSB.println("const PROGMEM float lookup[] = {");
-  for (int i = 0; i < 16384; i++) {
-    SerialUSB.print(lookup_angle(i));
-    SerialUSB.print(", ");
-  }
+  /*
+    SerialUSB.println("const PROGMEM float lookup[] = {");
+    for (int i = 0; i < 16384; i++) {
+      SerialUSB.print(lookup_angle(i));
+      SerialUSB.print(", ");
+    }
+  */
   SerialUSB.println("");
   SerialUSB.println("};");
 
@@ -460,12 +481,9 @@ void parameterQuery() {
 float lookup_angle(int n)
 {
   float a_out;
-
   a_out = pgm_read_float_near(lookup + n);
-
   return a_out;
 }
-
 
 void oneStep() {           /////////////////////////////////   oneStep    ///////////////////////////////
 
@@ -499,8 +517,11 @@ int readEncoder()           ////////////////////////////////////////////////////
 
   digitalWrite(chipSelectPin, HIGH);
   return angleTemp;
-}
 
+
+
+
+}
 
 void readEncoderDiagnostics()           //////////////////////////////////////////////////////   READENCODERDIAGNOSTICS   ////////////////////////////
 {
@@ -706,8 +727,7 @@ void setupTCInterrupts() {
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;   // Set perscaler
   WAIT_TC16_REGS_SYNC(TC5)
 
-  // Overflow variable, calculate with (32768 kHz / sample_frequency)-1
-  // 2AA9 for 3kHz
+
   TC5->COUNT16.CC[0].reg = 0x3E72; //0x4AF0;
   WAIT_TC16_REGS_SYNC(TC5)
 
@@ -722,16 +742,8 @@ void setupTCInterrupts() {
 
   // Enable InterruptVector
   NVIC_EnableIRQ(TC5_IRQn);
-
-
-  // Enable TC
-  //  TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
-  //  WAIT_TC16_REGS_SYNC(TC5)
-
-
-
-
 }
+
 
 void enableTCInterrupts() {
 
@@ -740,8 +752,6 @@ void enableTCInterrupts() {
 }
 
 void disableTCInterrupts() {
-
-
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }

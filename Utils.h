@@ -53,7 +53,6 @@ void parameterEditp();
 void parameterEditv();
 
 void parameterEdito();
-
 //determine the sign of a value
 template <typename type>
 type sign(type value) {

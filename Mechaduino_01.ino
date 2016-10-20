@@ -1,3 +1,4 @@
+
 /*
 
   Mechaduino 0.1 Firmware  --multi file branch
@@ -59,35 +60,35 @@
 #include "Utils.h"
 #include "Parameters.h"
 #include "state.h"
-
+#include "analogFastWrite.h"
 
 //////////////////////////////////////
 /////////////////SETUP////////////////
 //////////////////////////////////////
 
 void setup() {
-
-
   setupPins();
   setupSPI();
   setupTCInterrupts();
 
-  SerialUSB.begin(250000);
-  //SerialUSB.begin(115200);
-
-  // while (!SerialUSB) {};     //wait for serial
-
-  delay(5000);  //This delay seems to make it easier to establish a conncetion when the Mechaduino is configured to start in closed loop mode.
-
-
-  //  enableTCInterrupts();     //start in closed loop mode
-  // mode = 'x';
-  //
-  //  Wire.begin(4);                // join i2c bus with address #8
-  //  Wire.onReceive(receiveEvent); // register event
-
+  SerialUSB.begin(115200);
 
   SerialUSB.println("Mechaduino 0.1 begin...");
+  SerialUSB.println("Postion: X...");
+  for (int k = 1 ; k < 100; k++) {
+    delay(10);
+    a = readEncoder();
+    y = y + lookup_angle(a);
+
+  }
+
+  r = y / 100;
+
+  delay(1000);  //This delay seems to make it easier to establish a conncetion when the Mechaduino is configured to start in closed loop mode.
+
+
+  enableTCInterrupts();     //start in closed loop mode
+  mode = 'x';
 
 }
 
@@ -104,7 +105,9 @@ void loop()
 
   serialCheck();           //checks the serial port for commands
 
-  //r = stepangle * step_count; //step_count is updated by the D1 pin interrupt
+  //r=0.1125*step_count;   //step_count is updated by the D1 pin interrupt
+  // r=0.1*step_count;
+
 
 
 }
