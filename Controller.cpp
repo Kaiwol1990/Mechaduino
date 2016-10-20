@@ -10,7 +10,7 @@
 
 
 void TC5_Handler()
-{  
+{
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
 
     a = readEncoder();
@@ -33,14 +33,18 @@ void TC5_Handler()
 
         case 'x':
           e = (r - yw);
-          
 
-          ITerm += (pKi * e);
-          if (ITerm > 150) ITerm = 150;
-          else if (ITerm < -150) ITerm = -150;
+          ITerm += e;
+
+          if (ITerm > 150) {
+            ITerm = 150;
+          }
+          else if (ITerm < -150) {
+            ITerm = -150;
+          }
 
 
-          u = ((pKp * e) + ITerm - (pKd * (yw - yw_1))); //ARDUINO library style
+          u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1))); //(pKd * (yw - yw_1))); //ARDUINO library style
 
           break;
 
@@ -124,6 +128,7 @@ void TC5_Handler()
 
     yw_1 = yw;
     y_1 = y;
+    e_1 = e;
 
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag

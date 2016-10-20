@@ -22,6 +22,8 @@ extern volatile long counter;
 
 extern volatile long wrap_count;
 extern volatile float y_1;
+extern volatile float e_1;
+
 
 extern volatile float ITerm;
 

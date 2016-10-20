@@ -19,11 +19,12 @@ volatile long counter = 0;
 
 volatile long wrap_count = 0;  //keeps track of how many revolutions the motor has gone though (so you can command angles outside of 0-360)
 volatile float y_1 = 0;
+volatile float e_1 = 0;
 
 volatile int enabled = 1;
 
-const float iMAX = 0.7;  //Be careful adjusting this.  While the A4954 driver is rated for 2.0 Amp peak currents, it cannot handle these currents continuously.  Depending on how you operate the Mechaduino, you may be able to safely raise this value...please refer to the A4954 datasheet for more info
-const float iPEAK = 1.4;
+const float iMAX = 1.2;  //Be careful adjusting this.  While the A4954 driver is rated for 2.0 Amp peak currents, it cannot handle these currents continuously.  Depending on how you operate the Mechaduino, you may be able to safely raise this value...please refer to the A4954 datasheet for more info
+const float iPEAK = 1.6;
 const float rSense = 0.150;
 
 volatile int uMAX = (255/3.3)*(iMAX*10*rSense);

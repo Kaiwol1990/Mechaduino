@@ -72,9 +72,6 @@ void setup() {
   setupTCInterrupts();
 
   SerialUSB.begin(115200);
-
-  SerialUSB.println("Mechaduino 0.1 begin...");
-  SerialUSB.println("Postion: X...");
   for (int k = 1 ; k < 100; k++) {
     delay(10);
     a = readEncoder();
@@ -86,6 +83,8 @@ void setup() {
 
   delay(1000);  //This delay seems to make it easier to establish a conncetion when the Mechaduino is configured to start in closed loop mode.
 
+  SerialUSB.println("Mechaduino 0.1 begin...");
+  SerialUSB.println("Postion: X...");
 
   enableTCInterrupts();     //start in closed loop mode
   mode = 'x';
@@ -101,13 +100,7 @@ void setup() {
 void loop()
 {
 
-
-
   serialCheck();           //checks the serial port for commands
-
-  //r=0.1125*step_count;   //step_count is updated by the D1 pin interrupt
-  // r=0.1*step_count;
-
-
+  SerialUSB.println(e);
 
 }
