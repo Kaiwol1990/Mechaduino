@@ -32,19 +32,15 @@ void TC5_Handler()
       switch (mode) {
 
         case 'x':
-          e = (r - yw);
+          //e = (r - yw);
+          e = (0.8 * (r - yw)) + (0.2 * e);
 
-          ITerm += e;
+          ITerm = (ITerm + e);
 
-          if (ITerm > 150) {
-            ITerm = 150;
-          }
-          else if (ITerm < -150) {
-            ITerm = -150;
-          }
+          //ITerm = constrain(ITerm, -150, 150);
 
+          u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
 
-          u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1))); //(pKd * (yw - yw_1))); //ARDUINO library style
 
           break;
 
@@ -76,35 +72,43 @@ void TC5_Handler()
       u = 0;
     }
 
-    //u_sign = u / abs(u);
 
     if (abs(u) < 1.3 * uMAX) {
-      if (u > uMAX) {                          //saturation limits max current command
+      /*
+        if (u > uMAX) {                          //saturation limits max current command
         u = uMAX;
-      }
-      else if (u < -uMAX) {
+        }
+        else if (u < -uMAX) {
         u = -uMAX;
-      }
+        }
+      */
+      u = constrain(u, -uMAX, uMAX);
       PEAKCounter -= 1;
     }
     else {
       if ((PEAKCounter + uSTEP) <= maxPEAKCounter) {
+        /*
         if (u > uPEAK) {                          //saturation limits max current command
           u = uPEAK;
         }
         else if (u < -uPEAK) {
           u = -uPEAK;
         }
+        */
+      u = constrain(u, -uPEAK, uPEAK);
         PEAKCounter += uSTEP;
       }
       else {
+        /*
         if (u > uMAX) {                          //saturation limits max current command
           u = uMAX;
         }
         else if (u < -uMAX) {
           u = -uMAX;
         }
-        PEAKCounter -= 1;
+      */
+      u = constrain(u, -uMAX, uMAX);
+      PEAKCounter -= 1;
       }
     }
 
@@ -126,7 +130,7 @@ void TC5_Handler()
 
 
 
-    yw_1 = yw;
+    //yw_1 = yw;
     y_1 = y;
     e_1 = e;
 

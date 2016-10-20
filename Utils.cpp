@@ -30,7 +30,6 @@ void setupPins() {
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
 
 
-
   analogFastWrite(VREF_2, 64);
   analogFastWrite(VREF_1, 64);
 
@@ -59,6 +58,7 @@ void setupSPI() {
 
 }
 
+
 void stepInterrupt() {
   if (enabled) {
     if (digitalRead(dir_pin)) {
@@ -70,6 +70,7 @@ void stepInterrupt() {
   }
 }
 
+
 void enaInterrupt() {
   if (digitalRead(ena_pin) == 1) {
     enabled = 0;
@@ -80,72 +81,43 @@ void enaInterrupt() {
 }
 
 
-
-void output(float theta, int effort) {                    //////////////////////////////////////////   OUTPUT   ///////////////////
-  static int start = 0;
-  static int finish = 0;
-  static int intangle;
+void output(float theta, int effort) {
+  static float angle;
   static float floatangle;
-  static int modangle;
 
+  angle = (10000 * theta * 0.87266 );
 
+  floatangle = angle + 23562;
+  //floatangle = angle + 7854;
 
-  floatangle = (10000 * ( theta * 0.87266 + 2.3562) );//0.7854) );// 2.3562) );       //changed to 2.3 for NEMA23,NEMA17 dual..... opposite below
-  //floatangle = (10000 * ( theta * 0.87266 + 0.7854) );
-
-  intangle = (int)floatangle;
-  //  modangle = (((intangle % 628) + 628) % 628);
-  val1 = effort * lookup_sine(intangle);
+  val1 = effort * lookup_sine((int)floatangle);
 
   analogFastWrite(VREF_2, abs(val1));
 
   if (val1 >= 0)  {
     digitalWrite(IN_4, HIGH);
-    //     PORTB |= (B00000001);
     digitalWrite(IN_3, LOW);
-    //    PORTB &= ~(B00000010);
-
   }
   else  {
     digitalWrite(IN_4, LOW);
-    //  PORTB &= ~(B00000001);
     digitalWrite(IN_3, HIGH);
-    //    PORTB |= (B00000010);
-
   }
 
+  floatangle = angle + 7854;
+  //floatangle = angle + 23562;
 
-
-
-
-  floatangle = (10000 * (  theta * 0.8726646 + 0.7854) );//2.3562) );//0.7854) );
-  //floatangle = (10000 * ( theta * 0.87266 + 2.3562) );
-
-  intangle = (int)floatangle;
-  // modangle = (((intangle % 628) + 628) % 628);
-  val2 = effort * lookup_sine(intangle);
+  val2 = effort * lookup_sine((int)floatangle);
 
   analogFastWrite(VREF_1, abs(val2));
 
   if (val2 >= 0)  {
     digitalWrite(IN_2, HIGH);
-    //     PORTB |= (B00000100);
     digitalWrite(IN_1, LOW);
-    //     PORTB &= ~(B00001000);
-
   }
   else  {
     digitalWrite(IN_2, LOW);
-    //   PORTB &= ~(B00000100);
     digitalWrite(IN_1, HIGH);
-    //   PORTB |= (B00001000);
-
   }
-
-
-
-
-
 }
 
 void commandW() {
@@ -213,11 +185,11 @@ void commandW() {
     ticks = fullStepReadings[mod((i + 1), spr)] - fullStepReadings[mod((i), spr)];
     if (ticks < -15000) {
       ticks += cpr;
-
     }
     else if (ticks > 15000) {
       ticks -= cpr;
     }
+    
     SerialUSB.println(ticks);
 
     if (ticks > 1) {
@@ -228,7 +200,6 @@ void commandW() {
           iStart = i;
           jStart = j;
         }
-
       }
     }
 
@@ -243,9 +214,6 @@ void commandW() {
 
       }
     }
-
-
-
   }
 
 
@@ -408,7 +376,7 @@ void serialCheck() {
         break;
 
       case 'z':
-      
+
         if (enabled == 1) {
           enabled = 0;
         }
@@ -728,7 +696,7 @@ void setupTCInterrupts() {
   WAIT_TC16_REGS_SYNC(TC5)
 
 
-  TC5->COUNT16.CC[0].reg = 0x3E72; //0x4AF0;
+  TC5->COUNT16.CC[0].reg = 0x3E72;
   WAIT_TC16_REGS_SYNC(TC5)
 
 

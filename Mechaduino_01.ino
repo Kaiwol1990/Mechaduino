@@ -100,7 +100,11 @@ void setup() {
 void loop()
 {
 
-  serialCheck();           //checks the serial port for commands
-  SerialUSB.println(e);
-
+  serialCheck();           //checks the serial port for commands,
+  /*
+  SerialUSB.print(e);
+  SerialUSB.print(",");
+  SerialUSB.print(ITerm);
+  SerialUSB.println("");
+  */
 }
