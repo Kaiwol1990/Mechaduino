@@ -12,6 +12,8 @@ void stepInterrupt();
 
 void enaInterrupt();
 
+void dirInterrupt();
+
 void output(float theta, int effort);
 
 void commandW();

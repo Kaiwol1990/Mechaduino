@@ -28,6 +28,7 @@ void setupPins() {
 
   attachInterrupt(1, stepInterrupt, RISING);
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
+  attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
 
   analogFastWrite(VREF_2, 64);
@@ -61,12 +62,24 @@ void setupSPI() {
 
 void stepInterrupt() {
   if (enabled) {
-    if (digitalRead(dir_pin)) {
+    r = r + (dir * stepangle);
+    /*
+      if (digitalRead(dir_pin)) {
       r -= stepangle;
-    }
-    else {
+      }
+      else {
       r += stepangle;
-    }
+      }
+    */
+  }
+}
+
+void dirInterrupt() {
+  if (digitalRead(dir_pin)) {
+    dir = -1;
+  }
+  else {
+    dir = 1;
   }
 }
 
@@ -189,7 +202,7 @@ void commandW() {
     else if (ticks > 15000) {
       ticks -= cpr;
     }
-    
+
     SerialUSB.println(ticks);
 
     if (ticks > 1) {

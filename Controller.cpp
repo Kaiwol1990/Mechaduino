@@ -33,7 +33,7 @@ void TC5_Handler()
 
         case 'x':
           //e = (r - yw);
-          e = (0.8 * (r - yw)) + (0.2 * e);
+          e = (0.2 * (r - yw)) + (0.8* e);
 
           ITerm = (ITerm + e);
 
@@ -80,12 +80,12 @@ void TC5_Handler()
     }
     else {
       if ((PEAKCounter + uSTEP) <= maxPEAKCounter) {
-      u = constrain(u, -uPEAK, uPEAK);
+        u = constrain(u, -uPEAK, uPEAK);
         PEAKCounter += uSTEP;
       }
       else {
-      u = constrain(u, -uMAX, uMAX);
-      PEAKCounter -= 1;
+        u = constrain(u, -uMAX, uMAX);
+        PEAKCounter -= 1;
       }
     }
 
@@ -98,7 +98,7 @@ void TC5_Handler()
     }
 
 
-    if (abs(e) < 0.05) {
+    if (abs(e) < 0.1) {
       digitalWrite(pulse, HIGH);
     }
     else  {

@@ -55,7 +55,8 @@
   ...see serialCheck() in Utils for more details
 
 */
-
+float r_0 = 0;
+int jumped = 0;
 
 #include "Utils.h"
 #include "Parameters.h"
@@ -76,15 +77,28 @@ void setup() {
     delay(10);
     a = readEncoder();
     y = y + lookup_angle(a);
-
+  }
+  r = y / 100;
+  r_0 = r;
+  
+  if (digitalRead(ena_pin) == 1) {
+    enabled = 0;
+  }
+  else {
+    enabled = 1;
   }
 
-  r = y / 100;
-
-  delay(1000);  //This delay seems to make it easier to establish a conncetion when the Mechaduino is configured to start in closed loop mode.
+  if (digitalRead(dir_pin)) {
+    dir = -1;
+  }
+  else {
+    dir = 1;
+  }
+  
+  ITerm = 0;
 
   SerialUSB.println("Mechaduino 0.1 begin...");
-  SerialUSB.println("Postion: X...");
+  SerialUSB.println("Postion: Y...");
 
   enableTCInterrupts();     //start in closed loop mode
   mode = 'x';
@@ -99,12 +113,17 @@ void setup() {
 
 void loop()
 {
-
+  /*
+  if (millis() > 5000 && jumped == 0) {
+    r = r_0 + 30;
+    jumped = 1;
+  }
+*/
   serialCheck();           //checks the serial port for commands,
   /*
-  SerialUSB.print(e);
+  SerialUSB.print(yw);
   SerialUSB.print(",");
-  SerialUSB.print(ITerm);
-  SerialUSB.println("");
+  SerialUSB.print(r);
+  SerialUSB.println();
   */
 }

@@ -10,9 +10,10 @@ extern volatile float ei;
 extern volatile int U;  //control effort (abs)
 extern volatile float r;  //setpoint
 extern volatile float y;  // measured angle
+extern volatile float y_1;
 extern volatile float yw;
 extern volatile float yw_1;
-extern volatile float e;  // e = r-y (error)
+
 extern volatile float p;  // proportional effort
 extern volatile float i;  // integral effort
 extern volatile float PA;  //
@@ -21,8 +22,15 @@ extern volatile float u;  //real control effort (not abs)
 extern volatile long counter;
 
 extern volatile long wrap_count;
-extern volatile float y_1;
+
+
+extern volatile float e;// e = r-y (error)
 extern volatile float e_1;
+extern volatile float e_2;
+
+extern volatile float raw_0;
+extern volatile float raw_1;
+extern volatile float raw_2;
 
 
 extern volatile float ITerm;
