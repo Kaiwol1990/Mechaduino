@@ -43,17 +43,17 @@ static inline uint32_t mapResolution(uint32_t value, uint32_t from, uint32_t to)
     return value;
   }
   if (from > to) {
-    return value >> (from-to);
+    return value >> (from - to);
   }
-  return value << (to-from);
+  return value << (to - from);
 }
 
 /*
- * Internal Reference is at 1.0v
- * External Reference should be between 1v and VDDANA-0.6v=2.7v
- *
- * Warning : On Arduino Zero board the input/output voltage for SAMD21G18 is 3.3 volts maximum
- */
+   Internal Reference is at 1.0v
+   External Reference should be between 1v and VDDANA-0.6v=2.7v
+
+   Warning : On Arduino Zero board the input/output voltage for SAMD21G18 is 3.3 volts maximum
+*/
 
 
 
@@ -90,18 +90,18 @@ void analogFastWrite(uint32_t pin, uint32_t value)
 
     uint32_t tcNum = GetTCNumber(pinDesc.ulPWMChannel);
     uint8_t tcChannel = GetTCChannelNumber(pinDesc.ulPWMChannel);
-    static bool tcEnabled[TCC_INST_NUM+TC_INST_NUM];
+    static bool tcEnabled[TCC_INST_NUM + TC_INST_NUM];
 
     if (!tcEnabled[tcNum]) {
       tcEnabled[tcNum] = true;
 
       if (attr & PIN_ATTR_TIMER) {
-        #if !(ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10603)
+#if !(ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10603)
         // Compatibility for cores based on SAMD core <=1.6.2
         if (pinDesc.ulPinType == PIO_TIMER_ALT) {
           pinPeripheral(pin, PIO_TIMER_ALT);
         } else
-        #endif
+#endif
         {
           pinPeripheral(pin, PIO_TIMER);
         }
@@ -167,7 +167,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         Tc* TCx = (Tc*) GetTC(pinDesc.ulPWMChannel);
         TCx->COUNT8.CC[tcChannel].reg = (uint8_t) value;
         syncTC_8(TCx);
-    } else {
+      } else {
         Tcc* TCCx = (Tcc*) GetTC(pinDesc.ulPWMChannel);
         TCCx->CTRLBSET.bit.LUPD = 1;
         syncTCC(TCCx);

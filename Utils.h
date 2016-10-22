@@ -28,13 +28,7 @@ void oneStep(void);
 
 int readEncoder();
 
-void readEncoderDiagnostics();
-
-void print_angle();
-
 void receiveEvent(int howMany);
-
-float lookup_force(int m);
 
 int mod(int xMod, int mMod);
 
@@ -48,17 +42,7 @@ void disableTCInterrupts();
 
 void antiCoggingCal();
 
-void parameterEditmain();
-
 void parameterEditp();
 
-void parameterEditv();
-
-void parameterEdito();
-//determine the sign of a value
-template <typename type>
-type sign(type value) {
-  return type((value > 0) - (value < 0));
-}
-
+void step_response();
 #endif

@@ -1,20 +1,18 @@
 //Contains TC5 Controller definition
 //The main control loop is executed by the TC5 timer interrupt:
 
-
 #include <SPI.h>
-
 #include "State.h"
 #include "Utils.h"
 #include "Parameters.h"
-
 
 void TC5_Handler()
 {
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
 
-    a = readEncoder();
-    y = lookup_angle(a);
+    //a = readEncoder();
+    //y = lookup_angle(a);
+    y = lookup_angle(readEncoder());
 
 
     if ((y - y_1) < -180.0) {
@@ -23,49 +21,18 @@ void TC5_Handler()
     else if ((y - y_1) > 180.0) {
       wrap_count -= 1;
     }
-
     yw = (y + (360.0 * wrap_count));
 
 
 
     if (enabled == 1) {
-      switch (mode) {
+      raw_0 = (r - yw);
 
-        case 'x':
-          //e = (r - yw);
-          e = (0.2 * (r - yw)) + (0.8* e);
+      e = (coeff_b0 * raw_0) + (coeff_b1 * raw_1) + (coeff_b2 * raw_2)  - (coeff_a1 * e_1) - (coeff_a2 * e_2);
 
-          ITerm = (ITerm + e);
+      ITerm = (ITerm + e);
 
-          //ITerm = constrain(ITerm, -150, 150);
-
-          u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
-
-
-          break;
-
-        case 'v':
-
-
-          e = (r - ((yw - yw_1) * Fs * 0.16666667)); //error in degrees per rpm (sample frequency in Hz * (60 seconds/min) / (360 degrees/rev) )
-
-          ITerm += (vKi * e);
-          if (ITerm > 200) ITerm = 200;
-          else if (ITerm < -200) ITerm = -200;
-
-
-          u = ((vKp * e) + ITerm - (vKd * (yw - yw_1)));//+ lookup_force(a)-20; //ARDUINO library style
-
-          break;
-
-        case 't':
-          u = 1.0 * r ;//+ 1.7*(lookup_force(a)-20);
-          break;
-
-        default:
-          u = 0;
-          break;
-      }
+      u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
     }
     else {
       r = yw;
@@ -98,22 +65,19 @@ void TC5_Handler()
     }
 
 
-    if (abs(e) < 0.1) {
-      digitalWrite(pulse, HIGH);
+    if (abs(e) < 0.05) {
+      digitalWrite(ledPin, HIGH);
     }
     else  {
-      digitalWrite(pulse, LOW);
+      digitalWrite(ledPin, LOW);
     }
 
-
-
-    //yw_1 = yw;
     y_1 = y;
+    raw_2 = raw_1;
+    raw_1 = raw_0;
+    e_2 = e_1;
     e_1 = e;
-
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }
-
-
 }
