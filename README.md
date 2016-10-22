@@ -8,6 +8,5 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - some other changes 
 - digital filter for error
 - menu entry for generating an step response
- - deletet all modes other then position 
+- deletet all modes other then position 
 
-all not tested jet, since I haven't recieved my boards jet.
