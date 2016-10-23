@@ -9,9 +9,6 @@
 void TC5_Handler()
 {
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
-
-    //a = readEncoder();
-    //y = lookup_angle(a);
     y = lookup_angle(readEncoder());
 
 
@@ -25,10 +22,8 @@ void TC5_Handler()
 
 
 
-    if (enabled == 1) {
-      raw_0 = (r - yw);
-
-      e = (coeff_b0 * raw_0) + (coeff_b1 * raw_1) + (coeff_b2 * raw_2)  - (coeff_a1 * e_1) - (coeff_a2 * e_2);
+    if (enabled == true) {
+      e = (r - yw);
 
       ITerm = (ITerm + e);
 
@@ -56,7 +51,6 @@ void TC5_Handler()
       }
     }
 
-
     if (u > 0) {
       output(-y - PA, abs(u));
     }
@@ -64,18 +58,14 @@ void TC5_Handler()
       output(-y + PA, abs(u));
     }
 
-
-    if (abs(e) < 0.05) {
-      digitalWrite(ledPin, HIGH);
+    if (e <= 0.1) {
+      REG_PORT_DIRSET0 = PORT_PA17;
     }
-    else  {
-      digitalWrite(ledPin, LOW);
+    else {
+      REG_PORT_OUTCLR0 = PORT_PA17;
     }
 
     y_1 = y;
-    raw_2 = raw_1;
-    raw_1 = raw_0;
-    e_2 = e_1;
     e_1 = e;
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
