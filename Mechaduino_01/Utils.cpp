@@ -28,14 +28,11 @@ void setupPins() {
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
-  REG_PORT_OUTSET0 = PORT_PA20;
-  //digitalWrite(IN_4, HIGH);
-  REG_PORT_OUTCLR0 = PORT_PA15;
-  //digitalWrite(IN_3, LOW);
-  REG_PORT_OUTSET0 = PORT_PA21;
-  //digitalWrite(IN_2, HIGH);
-  REG_PORT_OUTCLR0 = PORT_PA06;
-  //digitalWrite(IN_1, LOW);
+
+  REG_PORT_OUTSET0 = PORT_PA20;  // write IN_4 HIGH
+  REG_PORT_OUTCLR0 = PORT_PA15;  // write IN_3 LOW
+  REG_PORT_OUTSET0 = PORT_PA21;  // write IN_2 HIGH
+  REG_PORT_OUTCLR0 = PORT_PA06;  // write IN_1 LOW
 
 }
 
@@ -61,7 +58,7 @@ void stepInterrupt() {
 }
 
 void dirInterrupt() {
-  if (digitalRead(dir_pin)) {
+  if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
     dir = false;
   }
   else {
@@ -71,7 +68,7 @@ void dirInterrupt() {
 
 
 void enaInterrupt() {
-  if (digitalRead(ena_pin) == 1) {
+  if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
     enabled = false;
   }
   else {
@@ -94,18 +91,16 @@ void output(float theta, int effort) {
   analogFastWrite(VREF_2, abs(val1));
 
   if (val1 >= 0)  {
-    REG_PORT_OUTSET0 = PORT_PA20;
-    //digitalWrite(IN_4, HIGH);
+    REG_PORT_OUTSET0 = PORT_PA20;     //write IN_4 HIGH
 
-    REG_PORT_OUTCLR0 = PORT_PA15;
-    //digitalWrite(IN_3, LOW);
+    REG_PORT_OUTCLR0 = PORT_PA15;     //write IN_3 LOW
+
   }
   else  {
-    REG_PORT_OUTCLR0 = PORT_PA20;
-    //digitalWrite(IN_4, LOW);
+    REG_PORT_OUTCLR0 = PORT_PA20;     //write IN_4 LOW
 
-    REG_PORT_OUTSET0 = PORT_PA15;
-    //digitalWrite(IN_3, HIGH);
+    REG_PORT_OUTSET0 = PORT_PA15;     //write IN_3 HIGH
+
   }
 
   floatangle = angle + 7854;
@@ -116,18 +111,16 @@ void output(float theta, int effort) {
   analogFastWrite(VREF_1, abs(val2));
 
   if (val2 >= 0)  {
-    REG_PORT_OUTSET0 = PORT_PA21;
-    //digitalWrite(IN_2, HIGH);
+    REG_PORT_OUTSET0 = PORT_PA21;     //write IN_2 HIGH
 
-    REG_PORT_OUTCLR0 = PORT_PA06;
-    //igitalWrite(IN_1, LOW);
+    REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
+
   }
   else  {
-    REG_PORT_OUTCLR0 = PORT_PA21;
-    //digitalWrite(IN_2, LOW);
+    REG_PORT_OUTCLR0 = PORT_PA21;     //write IN_2 LOW
 
-    REG_PORT_OUTSET0 = PORT_PA06;
-    // digitalWrite(IN_1, HIGH);
+    REG_PORT_OUTSET0 = PORT_PA06;     //write IN_1 HIGH
+
   }
 }
 
@@ -325,7 +318,7 @@ void serialCheck() {
       case 'p':
         parameterQuery();     // prints copy-able parameters
         break;
-        
+
       case 'e':
         parameterEdit();
         break;
@@ -344,7 +337,7 @@ void serialCheck() {
   }
 
 }
-void Serial_menu(){
+void Serial_menu() {
   SerialUSB.println("");
   SerialUSB.println("");
   SerialUSB.println("----- Mechaduino 0.1 -----");
@@ -358,7 +351,7 @@ void Serial_menu(){
   SerialUSB.println("p  -  print parameter");
   SerialUSB.println("e  -  edit parameter ");
   SerialUSB.println("a  -  anticogging");
-  SerialUSB.println("j  -  setp response");  
+  SerialUSB.println("j  -  setp response");
   SerialUSB.println("");
 }
 
@@ -419,14 +412,15 @@ void oneStep() {           /////////////////////////////////   oneStep    //////
 int readEncoder()           //////////////////////////////////////////////////////   READENCODER   ////////////////////////////
 {
   long angleTemp;
-  digitalWrite(chipSelectPin, LOW);
+
+  REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
 
   byte b1 = SPI.transfer(0xFF);
   byte b2 = SPI.transfer(0xFF);
 
   angleTemp = (((b1 << 8) | b2) & 0B0011111111111111);
 
-  digitalWrite(chipSelectPin, HIGH);
+  REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 
   return angleTemp;
 }
@@ -651,4 +645,5 @@ void step_response() {
     }
   }
 }
+
 

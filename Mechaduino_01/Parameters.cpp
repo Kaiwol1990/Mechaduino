@@ -47,9 +47,9 @@ const int IN_1 = 8; //PA06
 const int ledPin = 13; //PA17
 const int chipSelectPin = A2; //PB08
 
-const int dir_pin = 0;
+const int dir_pin = 0; //PORT_PA11
 const int step_pin  = 1;
-const int ena_pin = 2;
+const int ena_pin = 2; //PORT_PA14
 
 const int microstepping = 16;
 const int steps_per_revolution = 200;

@@ -55,6 +55,11 @@ static inline uint32_t mapResolution(uint32_t value, uint32_t from, uint32_t to)
    Warning : On Arduino Zero board the input/output voltage for SAMD21G18 is 3.3 volts maximum
 */
 
+void digitalWriteDirect(int PIN, bool val) {
+  if (val)  PORT->Group[g_APinDescription[PIN].ulPort].OUTSET.reg = (1ul << g_APinDescription[PIN].ulPin);
+  else     PORT->Group[g_APinDescription[PIN].ulPort].OUTCLR.reg = (1ul << g_APinDescription[PIN].ulPin);
+}
+
 
 
 // Right now, PWM output only works on the pins with
@@ -184,9 +189,9 @@ void analogFastWrite(uint32_t pin, uint32_t value)
   pinMode(pin, OUTPUT);
   value = mapResolution(value, _writeResolution, 8);
   if (value < 128) {
-    digitalWrite(pin, LOW);
+    digitalWriteDirect(pin, LOW);
   } else {
-    digitalWrite(pin, HIGH);
+    digitalWriteDirect(pin, HIGH);
   }
 }
 

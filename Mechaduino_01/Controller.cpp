@@ -8,8 +8,8 @@
 
 void TC5_Handler()
 {
-  //if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
-  if(1){
+  if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
+
     y = lookup_angle(readEncoder());
 
     if ((y - y_1) < -180.0) {
