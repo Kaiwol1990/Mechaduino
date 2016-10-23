@@ -21,17 +21,17 @@
 
   Implemented serial commands are:
 
-  w  -  encoder cal routine
+  c  -  encoder cal routine
 
-  r  -  enter new setpoint
+  s  -  enter new setpoint
 
-  q  - parameter query (prints current parameters)
+  p  - parameter query (prints current parameters)
 
-  k  - parameter edit (edit PID values)
+  e  - parameter edit (edit PID values)
 
   a  - anticogging calibration
 
-  s  - generate step response for PID tuning
+  j  - generate step response for PID tuning
 
   ...see serialCheck() in Utils for more details
 */
