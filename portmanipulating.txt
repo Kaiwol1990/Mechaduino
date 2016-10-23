@@ -1,0 +1,47 @@
+
+
+Direct Digital write:
+
+REG_PORT_OUTSET0 = PORT_PA20;  //write D6 LOW
+REG_PORT_OUTCLR0 = PORT_PA15;  //write D5 LOW
+
+
+Direct Digital read:
+if (REG_PORT_IN0 & PORT_PA19)  // if (digitalRead(12) == HIGH)
+
+if (!(REG_PORT_IN0 | ~PORT_PA19)) // if (digitalRead(12) == LOW)
+
+
+
+Pinmapping for Sam21D
+
+D0 - PORT_PA11
+D1 - PORT_PA10
+D2 - PORT_PA14
+D3 - PORT_PA09
+D4 - PORT_PA08
+D5 - PORT_PA15
+D6 - PORT_PA20
+D7 - PORT_PA21
+D8 - PORT_PA06
+D9 - PORT_PA07
+D10 - PORT_PA18
+D11 - PORT_PA16
+D12 - PORT_PA19
+D13 - PORT_PA17
+
+A0 - PORT_PA02
+A1 - PORT_PB08
+A2 - PORT_PB09
+A3 - PORT_PA04
+A4 - PORT_PA05
+A5 - PORT_PB02
+
+SCK - PORT_PB11
+MISO - PORT_PA12
+MOSI - PORT_PB10
+
+SCL - PORT_PB23
+SDA - PORT_PB22
+
+ATN - PORT_PA13    (Not included on the Zero Pro/M0 Pro)
