@@ -31,14 +31,14 @@ extern volatile float raw_2;
 
 extern volatile float ITerm;
 
-extern volatile char mode;
 
 
-extern int dir;
+extern bool dir;
+
 extern int stepNumber;
 extern void output(float, int);
 
-extern volatile int enabled;
+extern volatile bool enabled;
 
 extern volatile int uMAX;
 extern volatile int uPEAK;

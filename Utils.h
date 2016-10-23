@@ -45,4 +45,8 @@ void antiCoggingCal();
 void parameterEditp();
 
 void step_response();
+
+void digitalWriteDirectHigh(int pin);
+
+void digitalWriteDirectLow(int pin);
 #endif

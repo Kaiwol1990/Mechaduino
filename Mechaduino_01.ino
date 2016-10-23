@@ -41,7 +41,7 @@
 #include "state.h"
 #include "analogFastWrite.h"
 
-
+unsigned long starting;
 
 //////////////////////////////////////
 /////////////////SETUP////////////////
@@ -50,6 +50,7 @@
 void setup() {
 
   SerialUSB.begin(250000);
+ REG_PORT_DIRSET0 = PORT_PA17;
   delay(3000);
 
   SerialUSB.println("Mechaduino 0.1");
@@ -62,8 +63,7 @@ void setup() {
 
   for (int k = 1 ; k < 100; k++) {
     delay(10);
-    a = readEncoder();
-    y = y + lookup_angle(a);
+    y = y + lookup_angle(readEncoder());
   }
   y = (y / 100);
   y_1 = y;
@@ -72,24 +72,27 @@ void setup() {
 
 
   if (digitalRead(ena_pin) == 1) { //read current enable setting
-    enabled = 0;
+    enabled = false;
   }
   else {
-    enabled = 1;
+    enabled = true;
   }
 
   if (digitalRead(dir_pin)) { //read current direction setting
-    dir = -1;
+    dir = false;
   }
   else {
-    dir = 1;
+    dir = true;
   }
 
   enableTCInterrupts();     //start in closed loop mode
 
+  digitalWrite(ledPin, HIGH);
+
   SerialUSB.println("ready!");
   SerialUSB.println("");
   SerialUSB.println("");
+  
 }
 
 
@@ -100,6 +103,5 @@ void setup() {
 
 void loop()
 {
-  serialCheck();           //checks the serial port for commands,
-  
+  serialCheck();
 }

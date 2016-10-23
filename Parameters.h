@@ -8,14 +8,6 @@ extern const String identifier;
 //----Sample Frequenz-----
 extern volatile float Fs;
 
-//----Filter Coeffizienten-----
-extern const float coeff_b0;
-extern const float coeff_b1;
-extern const float coeff_b2;
-
-extern const float coeff_a1;
-extern const float coeff_a2;
-
 //----PID Values-----
 extern volatile float pKp;
 extern volatile float pKi;
@@ -44,13 +36,11 @@ extern const int counts_per_revolution;
 extern const float angle_per_step;
 extern const float stepangle;
 
-extern int dir;		//initialize stepping mode variables
+extern bool dir;		//initialize stepping mode variables
 
 extern long angle; //holds processed angle value
 
 extern float anglefloat;
-
-extern int a;  // raw encoder value in closed loop and print_angle routine (should fix the latter to include LUT)
 
 extern int stepNumber; // step index for cal routine
 

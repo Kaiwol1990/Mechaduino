@@ -24,7 +24,7 @@ volatile float raw_0 = 0.0; // raw_0 = r-y (raw measured error)
 volatile float raw_1 = 0.0;
 volatile float raw_2 = 0.0;
 
-volatile int enabled = 1;
+volatile bool enabled = false;
 
 const float iMAX = 0.6;  //Be careful adjusting this.  While the A4954 driver is rated for 2.0 Amp peak currents, it cannot handle these currents continuously.  Depending on how you operate the Mechaduino, you may be able to safely raise this value...please refer to the A4954 datasheet for more info
 const float iPEAK = 1.6;

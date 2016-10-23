@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include <Wire.h>
 
+#include <Arduino.h>
 #include "Parameters.h"
 #include "Controller.h"
 #include "Utils.h"
@@ -23,30 +24,27 @@ void setupPins() {
   pinMode(step_pin, INPUT);
   pinMode(dir_pin, INPUT);
   pinMode(ena_pin, INPUT_PULLUP);
-
-  //pinMode(3, OUTPUT);
+  pinMode(chipSelectPin, OUTPUT); // CSn -- has to toggle high and low to signal chip to start data transfer
 
   attachInterrupt(step_pin, stepInterrupt, RISING);
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
+  REG_PORT_OUTSET0 = PORT_PA20;
+  //digitalWrite(IN_4, HIGH);
+  REG_PORT_OUTCLR0 = PORT_PA15;
+  //digitalWrite(IN_3, LOW);
+  REG_PORT_OUTSET0 = PORT_PA21;
+  //digitalWrite(IN_2, HIGH);
+  REG_PORT_OUTCLR0 = PORT_PA06;
+  //digitalWrite(IN_1, LOW);
 
-  analogFastWrite(VREF_2, 64);
-  analogFastWrite(VREF_1, 64);
-
-  digitalWrite(IN_4, HIGH);
-  digitalWrite(IN_3, LOW);
-  digitalWrite(IN_2, HIGH);
-  digitalWrite(IN_1, LOW);
-
-  pinMode(ledPin, OUTPUT);
-  pinMode(chipSelectPin, OUTPUT); // CSn -- has to toggle high and low to signal chip to start data transfer
 }
 
 void setupSPI() {
   SerialUSB.println("SPI setup");
 
-  SPISettings settingsA(400000, MSBFIRST, SPI_MODE1);             ///400000, MSBFIRST, SPI_MODE1);
+  SPISettings settingsA(1000000, MSBFIRST, SPI_MODE1);             ///400000, MSBFIRST, SPI_MODE1);
 
   SPI.begin();    //AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
   delay(1000);
@@ -57,26 +55,31 @@ void setupSPI() {
 
 void stepInterrupt() {
   if (enabled) {
-    r = r + (dir * stepangle);
+    if (dir) {
+      r = r + stepangle;
+    }
+    else {
+      r = r - stepangle;
+    }
   }
 }
 
 void dirInterrupt() {
   if (digitalRead(dir_pin)) {
-    dir = -1;
+    dir = false;
   }
   else {
-    dir = 1;
+    dir = true;
   }
 }
 
 
 void enaInterrupt() {
   if (digitalRead(ena_pin) == 1) {
-    enabled = 0;
+    enabled = false;
   }
   else {
-    enabled = 1;
+    enabled = true;
   }
 }
 
@@ -95,12 +98,18 @@ void output(float theta, int effort) {
   analogFastWrite(VREF_2, abs(val1));
 
   if (val1 >= 0)  {
-    digitalWrite(IN_4, HIGH);
-    digitalWrite(IN_3, LOW);
+    REG_PORT_OUTSET0 = PORT_PA20;
+    //digitalWrite(IN_4, HIGH);
+
+    REG_PORT_OUTCLR0 = PORT_PA15;
+    //digitalWrite(IN_3, LOW);
   }
   else  {
-    digitalWrite(IN_4, LOW);
-    digitalWrite(IN_3, HIGH);
+    REG_PORT_OUTCLR0 = PORT_PA20;
+    //digitalWrite(IN_4, LOW);
+
+    REG_PORT_OUTSET0 = PORT_PA15;
+    //digitalWrite(IN_3, HIGH);
   }
 
   floatangle = angle + 7854;
@@ -111,12 +120,18 @@ void output(float theta, int effort) {
   analogFastWrite(VREF_1, abs(val2));
 
   if (val2 >= 0)  {
-    digitalWrite(IN_2, HIGH);
-    digitalWrite(IN_1, LOW);
+    REG_PORT_OUTSET0 = PORT_PA21;
+    //digitalWrite(IN_2, HIGH);
+
+    REG_PORT_OUTCLR0 = PORT_PA06;
+    //igitalWrite(IN_1, LOW);
   }
   else  {
-    digitalWrite(IN_2, LOW);
-    digitalWrite(IN_1, HIGH);
+    REG_PORT_OUTCLR0 = PORT_PA21;
+    //digitalWrite(IN_2, LOW);
+
+    REG_PORT_OUTSET0 = PORT_PA06;
+    // digitalWrite(IN_1, HIGH);
   }
 }
 
@@ -382,15 +397,13 @@ int readEncoder()           ////////////////////////////////////////////////////
   long angleTemp;
   digitalWrite(chipSelectPin, LOW);
 
-  //angle = SPI.transfer(0xFF);
   byte b1 = SPI.transfer(0xFF);
   byte b2 = SPI.transfer(0xFF);
 
-
   angleTemp = (((b1 << 8) | b2) & 0B0011111111111111);
-  //  SerialUSB.println((angle & 0B0011111111111111)*0.02197265625);
 
   digitalWrite(chipSelectPin, HIGH);
+
   return angleTemp;
 }
 
@@ -511,23 +524,26 @@ void antiCoggingCal() {
 
 void parameterEditp() {
   int received_1 = 0;
-  disableTCInterrupts();
+  enabled = 0;
 
-  SerialUSB.println("Edit position loop gains:");
+  SerialUSB.println("---- Edit position loop gains: ----");
   SerialUSB.println();
   SerialUSB.print("p ----- pKp = ");
   SerialUSB.println(pKp, DEC);
+
   SerialUSB.print("i ----- pKi = ");
   SerialUSB.println(pKi, DEC);
+
   SerialUSB.print("d ----- pKd = ");
   SerialUSB.println(pKd, DEC);
+
   SerialUSB.println("q ----- quit");
   SerialUSB.println();
 
 
 
   while (received_1 == 0)  {
-    delay(10);
+    delay(100);
     char inChar2 = (char)SerialUSB.read();
 
     switch (inChar2) {
@@ -543,9 +559,6 @@ void parameterEditp() {
               pKp = temp;
             }
           }
-
-          SerialUSB.print("new pKp = ");
-          SerialUSB.println(pKp, DEC);
           received_1 = 1;
         }
         break;
@@ -561,9 +574,6 @@ void parameterEditp() {
               pKi = temp;
             }
           }
-
-          SerialUSB.print("new pK = ");
-          SerialUSB.println(pKi, DEC);
           received_1 = 1;
         }
         break;
@@ -579,9 +589,6 @@ void parameterEditp() {
               pKd = temp;
             }
           }
-
-          SerialUSB.print("new pKd = ");
-          SerialUSB.println(pKd, DEC);
           received_1 = 1;
         }
         break;
@@ -596,38 +603,31 @@ void parameterEditp() {
   SerialUSB.println();
   SerialUSB.println();
   parameterQuery();
-  enableTCInterrupts();
+  enabled = 1;
 }
 
+
 void step_response() {
-  disableTCInterrupts();
-  //SerialUSB.println("Step response");
 
-  float current_position = 0.0;
-
-  for (int k = 1 ; k < 100; k++) {
-    delay(10);
-    a = readEncoder();
-    current_position = current_position + lookup_angle(a);
-  }
-  current_position = current_position / 100;
-
-  r = current_position;
-
-  enableTCInterrupts();
+  float current_position = yw;
 
   unsigned long start_millis = millis();
 
-  while (millis() < (start_millis + 300)) { //half a second
+  r = current_position;
+
+  while (millis() < (start_millis + 1700)) { //half a second
 
     SerialUSB.print(r - current_position); //print target position
     SerialUSB.print(",");
-    SerialUSB.print(yw - current_position); // print current position
-    SerialUSB.println();
+    SerialUSB.println(yw - current_position); // print current position
 
-    if (millis() > start_millis + 100) {
-      r = (current_position + 60);
+    if (millis() > start_millis + 300) {
+      r = (current_position + 100);
+    }
+
+    if (millis() > start_millis + 1000) {
+      r = current_position;
     }
   }
-
 }
+
