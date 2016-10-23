@@ -51,9 +51,10 @@ void setup() {
   REG_PORT_DIRSET0 = PORT_PA17;
   delay(3000);
 
-  SerialUSB.println("Mechaduino 0.1");
+  SerialUSB.println("----- Mechaduino 0.1 -----");
   SerialUSB.print("Identifier: ");
   SerialUSB.println(identifier);
+  SerialUSB.println("");
 
   setupPins();
   setupSPI();
@@ -90,8 +91,6 @@ void setup() {
   SerialUSB.println("ready!");
   SerialUSB.println("");
   SerialUSB.println("");
-
-  REG_PORT_DIRSET0 = PORT_PA17;
 }
 
 
