@@ -27,6 +27,8 @@ void TC5_Handler()
 
       ITerm = (ITerm + e);
 
+      ITerm = constrain(ITerm, -150, 150);
+
       u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
     }
     else {
