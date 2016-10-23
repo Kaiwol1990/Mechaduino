@@ -54,4 +54,6 @@ extern int val1;
 extern int val2;
 
 
+extern unsigned long next_millis;
+
 #endif

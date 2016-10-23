@@ -12,8 +12,6 @@
 #include "analogFastWrite.h"
 
 void setupPins() {
-  SerialUSB.println("Pin setup");
-
   pinMode(VREF_2, OUTPUT);
   pinMode(VREF_1, OUTPUT);
   pinMode(IN_4, OUTPUT);
@@ -42,8 +40,6 @@ void setupPins() {
 }
 
 void setupSPI() {
-  SerialUSB.println("SPI setup");
-
   SPISettings settingsA(10000000, MSBFIRST, SPI_MODE1);             ///400000, MSBFIRST, SPI_MODE1);
 
   SPI.begin();    //AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
@@ -313,36 +309,32 @@ void commandW() {
 
 
 void serialCheck() {
-
-  if (SerialUSB.available()) {
+  if (SerialUSB.peek() != -1) {
 
     char inChar = (char)SerialUSB.read();
 
     switch (inChar) {
-      case 'w':
+      case 'c':
         commandW();           //cal routine
         break;
 
-      case 'r':             //new setpoint
-        SerialUSB.println("Enter setpoint:");
-        while (SerialUSB.available() == 0)  {}
-        r = SerialUSB.parseFloat();
-        SerialUSB.println(r);
+      case 's':             //new setpoint
+        setpoint();
         break;
 
-      case 'q':
+      case 'p':
         parameterQuery();     // prints copy-able parameters
+        break;
+        
+      case 'e':
+        parameterEdit();
         break;
 
       case 'a':             //anticogging
         antiCoggingCal();
         break;
 
-      case 'k':
-        parameterEditp();
-        break;
-
-      case 's':
+      case 'j':
         step_response();
         break;
 
@@ -352,7 +344,36 @@ void serialCheck() {
   }
 
 }
+void Serial_menu(){
+  SerialUSB.println("");
+  SerialUSB.println("");
+  SerialUSB.println("----- Mechaduino 0.1 -----");
+  SerialUSB.print("Identifier: ");
+  SerialUSB.println(identifier);
+  SerialUSB.println("");
+  SerialUSB.println("");
+  SerialUSB.println("Main menu");
+  SerialUSB.println("c  -  calibration");
+  SerialUSB.println("s  -  setpoint");
+  SerialUSB.println("p  -  print parameter");
+  SerialUSB.println("e  -  edit parameter ");
+  SerialUSB.println("a  -  anticogging");
+  SerialUSB.println("j  -  setp response");  
+  SerialUSB.println("");
+}
 
+void setpoint() {
+  SerialUSB.print("current Setpoint: ");
+  SerialUSB.println(yw);
+
+  SerialUSB.println("Enter setpoint:");
+
+  while (SerialUSB.peek() == -1)  {}
+  r = SerialUSB.parseFloat();
+
+  SerialUSB.print("new Setpoint: ");
+  SerialUSB.println(r);
+}
 
 void parameterQuery() {
   SerialUSB.println(' ');
@@ -451,7 +472,6 @@ float lookup_sine(int m)        ////////////////////////////////////////////////
 
 
 void setupTCInterrupts() {
-  SerialUSB.println("Interrupt setup");
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
   while (GCLK->STATUS.bit.SYNCBUSY);
@@ -525,10 +545,11 @@ void antiCoggingCal() {
 }
 
 
-void parameterEditp() {
+void parameterEdit() {
   int received_1 = 0;
-  enabled = 0;
+  int received_2 = 0;
 
+  SerialUSB.println();
   SerialUSB.println("---- Edit position loop gains: ----");
   SerialUSB.println();
   SerialUSB.print("p ----- pKp = ");
@@ -544,7 +565,6 @@ void parameterEditp() {
   SerialUSB.println();
 
 
-
   while (received_1 == 0)  {
     delay(100);
     char inChar2 = (char)SerialUSB.read();
@@ -553,13 +573,11 @@ void parameterEditp() {
       case 'p':
         {
           SerialUSB.println("enter new pKp!");
-          float temp = 0;
-
-          while (temp == 0) {
+          while (received_2 == 0) {
             delay(100);
-            temp = SerialUSB.parseFloat();
-            if (temp != 0) {
-              pKp = temp;
+            if (SerialUSB.peek() != -1) {
+              pKp = SerialUSB.parseFloat();
+              received_2 = 1;
             }
           }
           received_1 = 1;
@@ -568,13 +586,11 @@ void parameterEditp() {
       case 'i':
         {
           SerialUSB.println("enter new pKi!");
-          float temp = 0;
-
-          while (temp == 0) {
+          while (received_2 == 0) {
             delay(100);
-            temp = SerialUSB.parseFloat();
-            if (temp != 0) {
-              pKi = temp;
+            if (SerialUSB.peek() != -1) {
+              pKi = SerialUSB.parseFloat();
+              received_2 = 1;
             }
           }
           received_1 = 1;
@@ -583,13 +599,11 @@ void parameterEditp() {
       case 'd':
         {
           SerialUSB.println("enter new pKd!");
-          float temp = 0;
-
-          while (temp == 0) {
+          while (received_2 == 0) {
             delay(100);
-            temp = SerialUSB.parseFloat();
-            if (temp != 0) {
-              pKd = temp;
+            if (SerialUSB.peek() != -1) {
+              pKd = SerialUSB.parseFloat();
+              received_2 = 1;
             }
           }
           received_1 = 1;
@@ -606,7 +620,6 @@ void parameterEditp() {
   SerialUSB.println();
   SerialUSB.println();
   parameterQuery();
-  enabled = 1;
 }
 
 

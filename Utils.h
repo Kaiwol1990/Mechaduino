@@ -3,7 +3,6 @@
 #ifndef __UTILS_H__
 #define __UTIL_H__
 
-
 void setupPins();
 
 void setupSPI();
@@ -19,6 +18,10 @@ void output(float theta, int effort);
 void commandW();
 
 void serialCheck();
+
+void Serial_menu();
+
+void setpoint();
 
 void parameterQuery();
 
@@ -42,7 +45,7 @@ void disableTCInterrupts();
 
 void antiCoggingCal();
 
-void parameterEditp();
+void parameterEdit();
 
 void step_response();
 

@@ -43,4 +43,5 @@ int uSTEP = maxPEAKCounter / PEAKSPERSECOND ;
 int val1 = 0;
 int val2 = 0;
 
+unsigned long next_millis = 0;
 

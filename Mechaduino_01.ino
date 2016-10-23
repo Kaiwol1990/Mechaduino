@@ -49,12 +49,8 @@ void setup() {
 
   SerialUSB.begin(250000);
   REG_PORT_DIRSET0 = PORT_PA17;
+  SerialUSB.println("booting");
   delay(3000);
-
-  SerialUSB.println("----- Mechaduino 0.1 -----");
-  SerialUSB.print("Identifier: ");
-  SerialUSB.println(identifier);
-  SerialUSB.println("");
 
   setupPins();
   setupSPI();
@@ -88,9 +84,7 @@ void setup() {
 
   digitalWrite(ledPin, HIGH);
 
-  SerialUSB.println("ready!");
-  SerialUSB.println("");
-  SerialUSB.println("");
+  Serial_menu();
 }
 
 
@@ -102,20 +96,27 @@ void setup() {
 void loop()
 {
   serialCheck();
-  /*
-  int i = 1;
-  int max_counter = 10000;
-  unsigned long starting = micros();
 
-  while (i <= max_counter) {
+  /*
+
+    if (millis() > next_millis) {
+    Serial_menu();
+    next_millis = millis() + 5000;
+    }
+
+    int i = 1;
+    int max_counter = 10000;
+    unsigned long starting = micros();
+
+    while (i <= max_counter) {
     TC5_Handler();
     serialCheck();
     i++;
-  }
+    }
 
-  int frequenz = 1000000 / ((micros() - starting) / max_counter);
+    int frequenz = 1000000 / ((micros() - starting) / max_counter);
 
-  SerialUSB.println(frequenz);
-  SerialUSB.println(0.95*frequenz);
-*/
+    SerialUSB.println(frequenz);
+    SerialUSB.println(0.95*frequenz);
+  */
 }
