@@ -360,13 +360,16 @@ void parameterQuery() {
   SerialUSB.println(' ');
 
   SerialUSB.print("volatile float pKp = ");
-  SerialUSB.println(pKp,4);
+  SerialUSB.print(pKp,4);
+  SerialUSB.println(';');
 
   SerialUSB.print("volatile float pKi = ");
-  SerialUSB.println(pKi,4);
+  SerialUSB.print(pKi,4);
+  SerialUSB.println(';');
 
   SerialUSB.print("volatile float pKd = ");
-  SerialUSB.println(pKd,4);
+  SerialUSB.print(pKd,4);
+  SerialUSB.println(';');
 
 }
 
