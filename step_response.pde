@@ -4,10 +4,10 @@
 
 import processing.serial.*;
 Serial myPort; //creates a software serial port on which you will listen to Arduino
-int max = 8;
+int step = 200;
 
 String val;
-long start_time = 0;
+float start_time = 0;
 
 float last_target = 0.0;
 float last_position = 0.0;
@@ -24,7 +24,7 @@ float [] target_buffer = new float[2000];
 float [] y_buffer = new float[2000];
 float [] y_diff_1 = new float[2000];
 float [] y_diff_2 = new float[2000];
-long [] time_buffer = new long[2000];
+float [] time_buffer = new float[2000];
 
 void setup()
 {
@@ -48,10 +48,7 @@ void setup()
 }
 
 void serialEvent(Serial myPort) {
-  if (first_event) {
-    start_time= millis();
-    first_event =false;
-  }
+
 
   time_buffer[x] =(int)( millis()-start_time);
 
@@ -62,12 +59,19 @@ void serialEvent(Serial myPort) {
 
     float sensorVals[] = float(split(inString, ',')); 
 
-    float target = sensorVals[0];
-    float temp_1 =  map(target, -max, max, -(0.5*height), (0.5*height));
+    if (first_event) {
+      start_time= sensorVals[0];
+      first_event =false;
+    }
+
+    time_buffer[x] = sensorVals[0]-start_time;
+
+    float target = sensorVals[1]/step;
+    float temp_1 =  map(target, -1.5, 1.5, -(0.5*height), (0.5*height));
     target_buffer[x] = temp_1;
 
-    float y = sensorVals[1];
-    float temp_2 =  map(y, -max, max, -(0.5*height), (0.5*height));
+    float y = sensorVals[2]/step;
+    float temp_2 =  map(y, -1.5, 1.5, -(0.5*height), (0.5*height));
     y_buffer[x] = temp_2;
     y_diff_1[x] = temp_2 - y_buffer[x-1];
     y_diff_2[x] = y_diff_1[x] -y_diff_1[x-1]; 
