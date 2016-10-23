@@ -43,7 +43,7 @@ void setup()
   myPort = new Serial(this, portName, 250000); //set up your port to listen to the serial port
 
   background(255, 255, 255);
-  myPort.write('s'); // send s over serial to start step response
+  myPort.write('j'); // send s over serial to start step response
   println("send");
 }
 
@@ -56,26 +56,28 @@ void serialEvent(Serial myPort) {
 
   if (inString!= null) { //We have a reading! Record it.
     inString = trim(inString);
+    println(inString);
 
     float sensorVals[] = float(split(inString, ',')); 
 
     if (first_event) {
       start_time= sensorVals[0];
       first_event =false;
+      step = (int)sensorVals[1];
+    } else {
+
+      time_buffer[x] = sensorVals[0]-start_time;
+
+      float target = sensorVals[1]/step;
+      float temp_1 =  map(target, -1.5, 1.5, -(0.5*height), (0.5*height));
+      target_buffer[x] = temp_1;
+
+      float y = sensorVals[2]/step;
+      float temp_2 =  map(y, -1.5, 1.5, -(0.5*height), (0.5*height));
+      y_buffer[x] = temp_2;
+      y_diff_1[x] = (0.7*(y_diff_1[x-1]))+(0.3*(temp_2 - y_buffer[x-1]));
+      y_diff_2[x] = (0.7*(y_diff_2[x-1]))+(0.3*(y_diff_1[x] -y_diff_1[x-1]));
     }
-
-    time_buffer[x] = sensorVals[0]-start_time;
-
-    float target = sensorVals[1]/step;
-    float temp_1 =  map(target, -1.5, 1.5, -(0.5*height), (0.5*height));
-    target_buffer[x] = temp_1;
-
-    float y = sensorVals[2]/step;
-    float temp_2 =  map(y, -1.5, 1.5, -(0.5*height), (0.5*height));
-    y_buffer[x] = temp_2;
-    y_diff_1[x] = (0.7*(y_diff_1[x-1]))+(0.3*(temp_2 - y_buffer[x-1]));
-    y_diff_2[x] = (0.7*(y_diff_2[x-1]))+(0.3*(y_diff_1[x] -y_diff_1[x-1])); 
-
     x++;
   }
 }
@@ -98,10 +100,9 @@ void draw() {
       lastheight_2 = (int)(0.5*height) -  (int)y_buffer[i];
 
       stroke(0, 0, 255);     //stroke color
-       strokeWeight(1);        //stroke wider
-       line(scale*time_buffer[i-1], lastheight_3, scale*time_buffer[i],   (0.5*height)  - (y_diff_1[i])); 
-       lastheight_3 = (int)(0.5*height) -  (int)(y_diff_1[i]);
-       
+      strokeWeight(1);        //stroke wider
+      line(scale*time_buffer[i-1], lastheight_3, scale*time_buffer[i], (0.5*height)  - (y_diff_1[i])); 
+      lastheight_3 = (int)(0.5*height) -  (int)(y_diff_1[i]);
     }
   }
 }
