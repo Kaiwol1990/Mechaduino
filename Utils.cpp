@@ -44,7 +44,7 @@ void setupPins() {
 void setupSPI() {
   SerialUSB.println("SPI setup");
 
-  SPISettings settingsA(1000000, MSBFIRST, SPI_MODE1);             ///400000, MSBFIRST, SPI_MODE1);
+  SPISettings settingsA(10000000, MSBFIRST, SPI_MODE1);             ///400000, MSBFIRST, SPI_MODE1);
 
   SPI.begin();    //AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
   delay(1000);
@@ -360,15 +360,15 @@ void parameterQuery() {
   SerialUSB.println(' ');
 
   SerialUSB.print("volatile float pKp = ");
-  SerialUSB.print(pKp,4);
+  SerialUSB.print(pKp, 4);
   SerialUSB.println(';');
 
   SerialUSB.print("volatile float pKi = ");
-  SerialUSB.print(pKi,4);
+  SerialUSB.print(pKi, 4);
   SerialUSB.println(';');
 
   SerialUSB.print("volatile float pKd = ");
-  SerialUSB.print(pKd,4);
+  SerialUSB.print(pKd, 4);
   SerialUSB.println(';');
 
 }
@@ -617,6 +617,9 @@ void step_response() {
   unsigned long start_millis = millis();
 
   r = current_position;
+  SerialUSB.print(micros());
+  SerialUSB.print(',');
+  SerialUSB.println(jump);
 
   while (millis() < (start_millis + 1700)) { //half a second
 
@@ -627,7 +630,7 @@ void step_response() {
     SerialUSB.println(yw - current_position); // print current position
 
     if (millis() > start_millis + 300) {
-      r = (current_position + 200);
+      r = (current_position + jump);
     }
 
     if (millis() > start_millis + 1000) {

@@ -13,6 +13,9 @@ extern volatile float pKp;
 extern volatile float pKi;
 extern volatile float pKd;
 
+//----Jump for step respnse-----
+extern int jump; //in degree
+
 //////////////////////////////////////
 //////////////////PINS////////////////
 //////////////////////////////////////

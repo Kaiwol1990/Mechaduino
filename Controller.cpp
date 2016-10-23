@@ -8,9 +8,9 @@
 
 void TC5_Handler()
 {
-  if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
+  //if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
+  if(1){
     y = lookup_angle(readEncoder());
-
 
     if ((y - y_1) < -180.0) {
       wrap_count += 1;
@@ -37,6 +37,7 @@ void TC5_Handler()
       ITerm = 0;
     }
 
+    
 
     if (abs(u) < 1.3 * uMAX) {
       u = constrain(u, -uMAX, uMAX);
@@ -58,13 +59,6 @@ void TC5_Handler()
     }
     else {
       output(-y + PA, abs(u));
-    }
-
-    if (e <= 0.1) {
-      REG_PORT_DIRSET0 = PORT_PA17;
-    }
-    else {
-      REG_PORT_OUTCLR0 = PORT_PA17;
     }
 
     y_1 = y;

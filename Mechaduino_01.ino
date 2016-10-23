@@ -41,8 +41,6 @@
 #include "state.h"
 #include "analogFastWrite.h"
 
-unsigned long starting;
-
 //////////////////////////////////////
 /////////////////SETUP////////////////
 //////////////////////////////////////
@@ -50,7 +48,7 @@ unsigned long starting;
 void setup() {
 
   SerialUSB.begin(250000);
- REG_PORT_DIRSET0 = PORT_PA17;
+  REG_PORT_DIRSET0 = PORT_PA17;
   delay(3000);
 
   SerialUSB.println("Mechaduino 0.1");
@@ -92,7 +90,8 @@ void setup() {
   SerialUSB.println("ready!");
   SerialUSB.println("");
   SerialUSB.println("");
-  
+
+  REG_PORT_DIRSET0 = PORT_PA17;
 }
 
 
@@ -104,5 +103,20 @@ void setup() {
 void loop()
 {
   serialCheck();
+  /*
+  int i = 1;
+  int max_counter = 10000;
+  unsigned long starting = micros();
 
+  while (i <= max_counter) {
+    TC5_Handler();
+    serialCheck();
+    i++;
+  }
+
+  int frequenz = 1000000 / ((micros() - starting) / max_counter);
+
+  SerialUSB.println(frequenz);
+  SerialUSB.println(0.95*frequenz);
+*/
 }
