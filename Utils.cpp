@@ -360,13 +360,13 @@ void parameterQuery() {
   SerialUSB.println(' ');
 
   SerialUSB.print("volatile float pKp = ");
-  SerialUSB.println(pKp);
+  SerialUSB.println(pKp,4);
 
   SerialUSB.print("volatile float pKi = ");
-  SerialUSB.println(pKi);
+  SerialUSB.println(pKi,4);
 
   SerialUSB.print("volatile float pKd = ");
-  SerialUSB.println(pKd);
+  SerialUSB.println(pKd,4);
 
 }
 
@@ -503,19 +503,19 @@ void antiCoggingCal() {
 
   for (int i = 1; i < 657; i++) {
     r = lookup_angle(i);
-    SerialUSB.print(r, DEC);
+    SerialUSB.print(r, 4);
     SerialUSB.print(" , ");
     delay(100);
-    SerialUSB.println(u, DEC);
+    SerialUSB.println(u, 4);
   }
   SerialUSB.println(" -----------------REVERSE!----------------");
 
   for (int i = 656; i > 0; i--) {
     r = lookup_angle(i);
-    SerialUSB.print(r, DEC);
+    SerialUSB.print(r, 4);
     SerialUSB.print(" , ");
     delay(100);
-    SerialUSB.println(u, DEC);
+    SerialUSB.println(u, 4);
   }
   SerialUSB.println(" -----------------DONE!----------------");
   disableTCInterrupts();
@@ -529,13 +529,13 @@ void parameterEditp() {
   SerialUSB.println("---- Edit position loop gains: ----");
   SerialUSB.println();
   SerialUSB.print("p ----- pKp = ");
-  SerialUSB.println(pKp, DEC);
+  SerialUSB.println(pKp, 4);
 
   SerialUSB.print("i ----- pKi = ");
-  SerialUSB.println(pKi, DEC);
+  SerialUSB.println(pKi, 4);
 
   SerialUSB.print("d ----- pKd = ");
-  SerialUSB.println(pKd, DEC);
+  SerialUSB.println(pKd, 4);
 
   SerialUSB.println("q ----- quit");
   SerialUSB.println();
@@ -617,12 +617,14 @@ void step_response() {
 
   while (millis() < (start_millis + 1700)) { //half a second
 
+    SerialUSB.print(micros());
+    SerialUSB.print(',');
     SerialUSB.print(r - current_position); //print target position
     SerialUSB.print(",");
     SerialUSB.println(yw - current_position); // print current position
 
     if (millis() > start_millis + 300) {
-      r = (current_position + 100);
+      r = (current_position + 200);
     }
 
     if (millis() > start_millis + 1000) {
