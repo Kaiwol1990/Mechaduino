@@ -14,9 +14,8 @@ https://processing.org/
 
 2. wait till the Mechaduino is ready and then close every serial monitor etc.
 
-3 in Paramters.cpp set 
-     - const int response_step = 20;
-  to a farly small value (20) works well for me
+3. in Paramters.cpp set
+- const int response_step = 20;  to a farly small value (20) works well for me
   
 4. make sure your motor can move the amount of degree you set it to in both directions
 
@@ -31,6 +30,7 @@ https://processing.org/
 9. send an e to get to paramter edit menu and then the new paramter you want to set (something like p10.0, to set kp to 10.0)
 
 10. close the serial monitor an repeat with step 6.
+
 
 when you are finished open the serial monitor an send an p to get the parameters, you can copy it directly into parameters.cpp.
 
