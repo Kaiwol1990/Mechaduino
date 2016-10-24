@@ -9,24 +9,19 @@
 
 void TC5_Handler()
 {
-  if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
+  if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
     y = lookup_angle(readEncoder());
-    /*
-      if ((y - y_1) < -180.0) {
-        yw = (yw + 360.0) + y;
-      }
-      else if ((y - y_1) > 180.0) {
-        yw = (yw - 360.0) + y;
-      }
-    */
+
     if ((y - y_1) < -180.0) {
-      wrap_count += 1;
+      yw = yw + 360;
     }
     else if ((y - y_1) > 180.0) {
-      wrap_count -= 1;
+      yw = yw - 360;
     }
-    yw = (y + (360.0 * wrap_count));
+
+    yw = yw  + (y - y_1);
+
 
     //change to if(1) if you don't want to use the enable pin
     if (enabled) {

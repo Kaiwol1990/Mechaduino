@@ -659,17 +659,19 @@ void step_response() {
 
 void get_max_frequency() {
   disableTCInterrupts();
-  
+
   SerialUSB.println("make sure you move the motor while testing");
 
-  int i = 1;
+  int k = 1;
   int max_counter = 10000;
   int frequency = 100000;
   int temp_frequency = 0;
   bool last_enabled = enabled;
   enabled = 1;
+  frequency_test = true;
 
-  for (int k = 1; k++; k <= 10) {
+  while (k <= 10) {
+    int i = 1;
 
     unsigned long starting = micros();
 
@@ -690,17 +692,19 @@ void get_max_frequency() {
     SerialUSB.print("/10 frequency = ");
     SerialUSB.println(temp_frequency);
 
+    k++;
+
   }
-  
+
   frequency = 0.98 * frequency;
-  
+
   SerialUSB.println("");
   SerialUSB.println("-----------");
   SerialUSB.print("minimal frequency = ");
   SerialUSB.println(frequency);
   SerialUSB.print("minimal frequency = ");
   SerialUSB.println(frequency, HEX);
-  
+
   enabled = last_enabled;
 
   enableTCInterrupts();

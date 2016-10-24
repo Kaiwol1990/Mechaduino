@@ -56,4 +56,5 @@ extern int val2;
 
 extern unsigned long next_millis;
 
+extern bool frequency_test;
 #endif

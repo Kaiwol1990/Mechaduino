@@ -45,3 +45,5 @@ int val2 = 0;
 
 unsigned long next_millis = 0;
 
+bool frequency_test = false;
+
