@@ -13,8 +13,11 @@ extern volatile float pKp;
 extern volatile float pKi;
 extern volatile float pKd;
 
+//----Baudrate-----
+extern const int baudrate;
+
 //----Jump for step respnse-----
-extern int jump; //in degree
+extern const int jump; //in degree
 
 //////////////////////////////////////
 //////////////////PINS////////////////

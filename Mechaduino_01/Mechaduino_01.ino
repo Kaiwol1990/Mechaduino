@@ -50,7 +50,7 @@
 
 void setup() {
 
-  SerialUSB.begin(250000);
+  SerialUSB.begin(baudrate);
   REG_PORT_DIRSET0 = PORT_PA17;
   SerialUSB.println("booting");
   delay(3000);
@@ -68,14 +68,14 @@ void setup() {
   yw = y;
   r = y;
 
-  #if PIN_EXISTS(ena_pin)
-    if (digitalRead(ena_pin) == 1) { //read current enable setting
-      enabled = false;
-    }
-    else {
-      enabled = true;
-    }
-  #endif
+#if PIN_EXISTS(ena_pin)
+  if (digitalRead(ena_pin) == 1) { //read current enable setting
+    enabled = false;
+  }
+  else {
+    enabled = true;
+  }
+#endif
 
   if (digitalRead(dir_pin)) { //read current direction setting
     dir = false;
