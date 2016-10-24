@@ -5,6 +5,7 @@
 #include "State.h"
 #include "Utils.h"
 #include "Parameters.h"
+#include "macros.h"
 
 void TC5_Handler()
 {
@@ -21,7 +22,7 @@ void TC5_Handler()
     yw = (y + (360.0 * wrap_count));
 
 
-
+#if PIN_EXISTS(ena_pin)
     if (enabled == true) {
       e = (r - yw);
 
@@ -36,8 +37,17 @@ void TC5_Handler()
       u = 0;
       ITerm = 0;
     }
+#else
+    e = (r - yw);
 
-    
+    ITerm = (ITerm + e);
+
+    ITerm = constrain(ITerm, -150, 150);
+
+    u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
+#endif
+
+
 
     if (abs(u) < 1.3 * uMAX) {
       u = constrain(u, -uMAX, uMAX);

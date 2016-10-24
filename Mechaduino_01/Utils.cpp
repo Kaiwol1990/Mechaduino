@@ -10,6 +10,7 @@
 #include "Utils.h"
 #include "State.h"
 #include "analogFastWrite.h"
+#include "macros.h"
 
 void setupPins() {
   pinMode(VREF_2, OUTPUT);
@@ -21,13 +22,16 @@ void setupPins() {
   pinMode(ledPin, OUTPUT);
   pinMode(step_pin, INPUT);
   pinMode(dir_pin, INPUT);
-  pinMode(ena_pin, INPUT_PULLUP);
   pinMode(chipSelectPin, OUTPUT); // CSn -- has to toggle high and low to signal chip to start data transfer
 
+
   attachInterrupt(step_pin, stepInterrupt, RISING);
-  attachInterrupt(ena_pin, enaInterrupt, CHANGE);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
+#if PIN_EXISTS(ena_pin)
+  pinMode(ena_pin, INPUT_PULLUP);
+  attachInterrupt(ena_pin, enaInterrupt, CHANGE);
+#endif
 
   REG_PORT_OUTSET0 = PORT_PA20;  // write IN_4 HIGH
   REG_PORT_OUTCLR0 = PORT_PA15;  // write IN_3 LOW
@@ -47,13 +51,11 @@ void setupSPI() {
 
 
 void stepInterrupt() {
-  if (enabled) {
-    if (dir) {
-      r = r + stepangle;
-    }
-    else {
-      r = r - stepangle;
-    }
+  if (dir) {
+    r = r + stepangle;
+  }
+  else {
+    r = r - stepangle;
   }
 }
 
@@ -66,7 +68,7 @@ void dirInterrupt() {
   }
 }
 
-
+#if PIN_EXISTS(ena_pin)
 void enaInterrupt() {
   if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
     enabled = false;
@@ -75,6 +77,7 @@ void enaInterrupt() {
     enabled = true;
   }
 }
+#endif
 
 
 void output(float theta, int effort) {
@@ -329,6 +332,10 @@ void serialCheck() {
 
       case 'j':
         step_response();
+        break;
+
+      case 'm':
+        Serial_menu();
         break;
 
       default:
@@ -645,5 +652,4 @@ void step_response() {
     }
   }
 }
-
 

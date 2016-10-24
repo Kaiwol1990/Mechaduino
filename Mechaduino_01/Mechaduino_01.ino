@@ -33,6 +33,8 @@
 
   j  - generate step response for PID tuning
 
+  m  - print main menu
+
   ...see serialCheck() in Utils for more details
 */
 
@@ -40,6 +42,7 @@
 #include "Parameters.h"
 #include "state.h"
 #include "analogFastWrite.h"
+#include "macros.h"
 
 //////////////////////////////////////
 /////////////////SETUP////////////////
@@ -65,13 +68,14 @@ void setup() {
   yw = y;
   r = y;
 
-
-  if (digitalRead(ena_pin) == 1) { //read current enable setting
-    enabled = false;
-  }
-  else {
-    enabled = true;
-  }
+  #if PIN_EXISTS(ena_pin)
+    if (digitalRead(ena_pin) == 1) { //read current enable setting
+      enabled = false;
+    }
+    else {
+      enabled = true;
+    }
+  #endif
 
   if (digitalRead(dir_pin)) { //read current direction setting
     dir = false;

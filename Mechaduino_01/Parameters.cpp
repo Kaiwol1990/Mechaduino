@@ -2,6 +2,7 @@
 
 #include <Wire.h>
 #include "Parameters.h"
+#include "macros.h"
 
 
 //----Identifier-----
@@ -49,7 +50,8 @@ const int chipSelectPin = A2; //PB08
 
 const int dir_pin = 0; //PORT_PA11
 const int step_pin  = 1;
-const int ena_pin = 2; //PORT_PA14
+const int ena_pin = 2; // set to -1 to disable the enable function //PORT_PA14
+
 
 const int microstepping = 16;
 const int steps_per_revolution = 200;
