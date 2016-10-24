@@ -4,7 +4,6 @@
 #include "Parameters.h"
 #include "macros.h"
 
-
 //----Identifier-----
 const String identifier = "X";
 

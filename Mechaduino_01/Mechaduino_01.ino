@@ -37,7 +37,7 @@
 
   ...see serialCheck() in Utils for more details
 */
-
+#include "SanityCheck.h"
 #include "Utils.h"
 #include "Parameters.h"
 #include "state.h"
