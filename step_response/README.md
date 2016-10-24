@@ -34,7 +34,9 @@ https://processing.org/
 when you are finished open the serial monitor an send an p to get the parameters, you can copy it directly into parameters.cpp.
 
 this gif shows how you want to set the single values eatch at the time:
+
 ![image](PID_Compensation_Animated.gif)
+
 
 but there are other ways to set the values just  search a little bit for pid tuning everybody use it own methods.
 
