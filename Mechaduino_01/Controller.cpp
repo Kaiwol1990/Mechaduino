@@ -12,7 +12,14 @@ void TC5_Handler()
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
 
     y = lookup_angle(readEncoder());
-
+    /*
+      if ((y - y_1) < -180.0) {
+        yw = (yw + 360.0) + y;
+      }
+      else if ((y - y_1) > 180.0) {
+        yw = (yw - 360.0) + y;
+      }
+    */
     if ((y - y_1) < -180.0) {
       wrap_count += 1;
     }
@@ -21,14 +28,19 @@ void TC5_Handler()
     }
     yw = (y + (360.0 * wrap_count));
 
+    //change to if(1) if you don't want to use the enable pin
+    if (enabled) {
 
-#if PIN_EXISTS(ena_pin)
-    if (enabled == true) {
       e = (r - yw);
 
       ITerm = (ITerm + e);
 
-      ITerm = constrain(ITerm, -150, 150);
+      if (ITerm > 150) {
+        ITerm = 150;
+      }
+      else if (ITerm < -150) {
+        ITerm = -150;
+      }
 
       u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
     }
@@ -37,29 +49,40 @@ void TC5_Handler()
       u = 0;
       ITerm = 0;
     }
-#else
-    e = (r - yw);
-
-    ITerm = (ITerm + e);
-
-    ITerm = constrain(ITerm, -150, 150);
-
-    u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
-#endif
-
 
 
     if (abs(u) < 1.3 * uMAX) {
-      u = constrain(u, -uMAX, uMAX);
+
+      if (u > uMAX) {
+        u = uMAX;
+      }
+      else if (u < -uMAX) {
+        u = -uMAX;
+      }
+
       PEAKCounter -= 1;
     }
     else {
       if ((PEAKCounter + uSTEP) <= maxPEAKCounter) {
-        u = constrain(u, -uPEAK, uPEAK);
+
+        if (u > uPEAK) {
+          u = uPEAK;
+        }
+        else if (u < -uPEAK) {
+          u = -uPEAK;
+        }
+
         PEAKCounter += uSTEP;
       }
       else {
-        u = constrain(u, -uMAX, uMAX);
+
+        if (u > uMAX) {
+          u = uMAX;
+        }
+        else if (u < -uMAX) {
+          u = -uMAX;
+        }
+
         PEAKCounter -= 1;
       }
     }

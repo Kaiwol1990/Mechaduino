@@ -35,6 +35,8 @@
 
   m  - print main menu
 
+  f  - get max loop frequency
+
   ...see serialCheck() in Utils for more details
 */
 #include "SanityCheck.h"
@@ -68,14 +70,14 @@ void setup() {
   yw = y;
   r = y;
 
-#if PIN_EXISTS(ena_pin)
+
   if (digitalRead(ena_pin) == 1) { //read current enable setting
     enabled = false;
   }
   else {
     enabled = true;
   }
-#endif
+
 
   if (digitalRead(dir_pin)) { //read current direction setting
     dir = false;
@@ -107,20 +109,5 @@ void loop()
     Serial_menu();
     next_millis = millis() + 5000;
     }
-
-    int i = 1;
-    int max_counter = 10000;
-    unsigned long starting = micros();
-
-    while (i <= max_counter) {
-    TC5_Handler();
-    serialCheck();
-    i++;
-    }
-
-    int frequenz = 1000000 / ((micros() - starting) / max_counter);
-
-    SerialUSB.println(frequenz);
-    SerialUSB.println(0.95*frequenz);
   */
 }

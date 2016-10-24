@@ -2,27 +2,27 @@
 
 #ifndef __PARAMETERS_H__
 #define __PARAMETERS_H__
-//----Identifier-----
+//---- Identifier -----
 extern const String identifier;
 
-//----Sample Frequenz-----
+//---- Sample Frequenz -----
 extern volatile float Fs;
 
-//----PID Values-----
+//---- PID Values -----
 extern volatile float pKp;
 extern volatile float pKi;
 extern volatile float pKd;
 
-//----Baudrate-----
+//---- Lookup -----
+extern const PROGMEM float lookup[];
+
+//---- Baudrate -----
 extern const int baudrate;
 
-//----Jump for step respnse-----
-extern const int jump; //in degree
+//---- Jump for step respnse -----
+extern const int response_step; //in degree
 
-//////////////////////////////////////
-//////////////////PINS////////////////
-//////////////////////////////////////
-
+//---- Pins -----
 extern const int IN_4;
 extern const int IN_3;
 extern const int VREF_2;
@@ -36,6 +36,8 @@ extern const int dir_pin;
 extern const int step_pin;
 extern const int ena_pin;
 
+
+//---- Step settings -----
 extern const int steps_per_revolution;
 extern const int counts_per_revolution;
 
@@ -44,14 +46,11 @@ extern const float stepangle;
 
 extern bool dir;		//initialize stepping mode variables
 
-extern long angle; //holds processed angle value
-
 extern float anglefloat;
 
 extern int stepNumber; // step index for cal routine
 
 extern const PROGMEM float sine_lookup[];
-extern const PROGMEM float lookup[];
 
 extern const int overflow;
 #endif

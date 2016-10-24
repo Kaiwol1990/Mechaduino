@@ -49,4 +49,6 @@ void parameterEdit();
 
 void step_response();
 
+void get_max_frequency();
+
 #endif

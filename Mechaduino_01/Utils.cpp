@@ -28,10 +28,10 @@ void setupPins() {
   attachInterrupt(step_pin, stepInterrupt, RISING);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
-#if PIN_EXISTS(ena_pin)
+
   pinMode(ena_pin, INPUT_PULLUP);
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
-#endif
+
 
   REG_PORT_OUTSET0 = PORT_PA20;  // write IN_4 HIGH
   REG_PORT_OUTCLR0 = PORT_PA15;  // write IN_3 LOW
@@ -68,7 +68,7 @@ void dirInterrupt() {
   }
 }
 
-#if PIN_EXISTS(ena_pin)
+
 void enaInterrupt() {
   if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
     enabled = false;
@@ -77,7 +77,7 @@ void enaInterrupt() {
     enabled = true;
   }
 }
-#endif
+
 
 
 void output(float theta, int effort) {
@@ -336,6 +336,10 @@ void serialCheck() {
 
       case 'm':
         Serial_menu();
+        break;
+
+      case 'f':
+        get_max_frequency();
         break;
 
       default:
@@ -633,7 +637,7 @@ void step_response() {
   r = current_position;
   SerialUSB.print(micros());
   SerialUSB.print(',');
-  SerialUSB.println(jump);
+  SerialUSB.println(response_step);
 
   while (millis() < (start_millis + 1700)) { //half a second
 
@@ -644,12 +648,61 @@ void step_response() {
     SerialUSB.println(yw - current_position); // print current position
 
     if (millis() > start_millis + 300) {
-      r = (current_position + jump);
+      r = (current_position + response_step);
     }
 
     if (millis() > start_millis + 1000) {
       r = current_position;
     }
   }
+}
+
+void get_max_frequency() {
+  disableTCInterrupts();
+  
+  SerialUSB.println("make sure you move the motor while testing");
+
+  int i = 1;
+  int max_counter = 10000;
+  int frequency = 100000;
+  int temp_frequency = 0;
+  bool last_enabled = enabled;
+  enabled = 1;
+
+  for (int k = 1; k++; k <= 10) {
+
+    unsigned long starting = micros();
+
+    while (i <= max_counter) {
+      TC5_Handler();
+      serialCheck();
+      i++;
+    }
+
+    temp_frequency = 1000000 / ((micros() - starting) / max_counter);
+
+    if (temp_frequency < frequency) {
+      frequency = temp_frequency;
+    }
+
+    SerialUSB.print("loop : ");
+    SerialUSB.print(k);
+    SerialUSB.print("/10 frequency = ");
+    SerialUSB.println(temp_frequency);
+
+  }
+  
+  frequency = 0.98 * frequency;
+  
+  SerialUSB.println("");
+  SerialUSB.println("-----------");
+  SerialUSB.print("minimal frequency = ");
+  SerialUSB.println(frequency);
+  SerialUSB.print("minimal frequency = ");
+  SerialUSB.println(frequency, HEX);
+  
+  enabled = last_enabled;
+
+  enableTCInterrupts();
 }
 
