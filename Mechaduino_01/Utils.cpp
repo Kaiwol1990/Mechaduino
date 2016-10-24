@@ -128,6 +128,7 @@ void output(float theta, int effort) {
 }
 
 void commandW() {
+  disableTCInterrupts();
 
   int encoderReading = 0;     //or float?  not sure if we can average for more res?
   int lastencoderReading = 0;
@@ -145,7 +146,7 @@ void commandW() {
   float lookupAngle = 0.0;
 
   encoderReading = readEncoder();
-  dir = 1;
+  dir = true;
   oneStep();
   delay(500);
 
@@ -158,16 +159,16 @@ void commandW() {
 
   while (stepNumber != 0) {
     if (stepNumber > 0) {
-      dir = 1;
+      dir = true;
     }
     else
     {
-      dir = 0;
+      dir = false;
     }
     oneStep();
     delay(100);
   }
-  dir = 1;
+  dir = true;
   for (int x = 0; x < steps_per_revolution; x++) {
 
     encoderReading = 0;
@@ -299,7 +300,7 @@ void commandW() {
 
   }
   SerialUSB.println(" ");
-
+  enableTCInterrupts();
 
 }
 
