@@ -28,9 +28,10 @@ void setupPins() {
   attachInterrupt(step_pin, stepInterrupt, RISING);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
-
-  pinMode(ena_pin, INPUT_PULLUP);
-  attachInterrupt(ena_pin, enaInterrupt, CHANGE);
+  if (ena_pin != -1) {
+    pinMode(ena_pin, INPUT_PULLUP);
+    attachInterrupt(ena_pin, enaInterrupt, CHANGE);
+  }
 
 
   REG_PORT_OUTSET0 = PORT_PA20;  // write IN_4 HIGH
@@ -127,8 +128,11 @@ void output(float theta, int effort) {
   }
 }
 
-void commandW() {
+void calibration() {
   disableTCInterrupts();
+  SerialUSB.println(" ");
+  SerialUSB.println("calibration:");
+  SerialUSB.println(" ");
 
   int encoderReading = 0;     //or float?  not sure if we can average for more res?
   int lastencoderReading = 0;
@@ -140,10 +144,10 @@ void commandW() {
 
   int fullStepReadings[steps_per_revolution];
   int fullStep = 0;
-  //  float newLookup[counts_per_revolution];
   int ticks = 0;
 
   float lookupAngle = 0.0;
+  float percent = 0.0;
 
   encoderReading = readEncoder();
   dir = true;
@@ -183,12 +187,15 @@ void commandW() {
 
     anglefloat = encoderReading * 0.02197265625;
     fullStepReadings[x] = encoderReading;
-    SerialUSB.println(fullStepReadings[x], DEC);
+
+    //SerialUSB.println(fullStepReadings[x], DEC);
+
+    percent = 100 * ((float)x) / (float)(steps_per_revolution);
+    SerialUSB.print(percent);
+    SerialUSB.println('%');
+
     oneStep();
   }
-  SerialUSB.println(" ");
-  SerialUSB.println("ticks:");
-  SerialUSB.println(" ");
   for (int i = 0; i < steps_per_revolution; i++) {
     ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
     if (ticks < -15000) {
@@ -198,12 +205,9 @@ void commandW() {
       ticks -= counts_per_revolution;
     }
 
-    SerialUSB.println(ticks);
-
     if (ticks > 1) {
       for (int j = 0; j < ticks; j++) {
         stepNo = (mod(fullStepReadings[i] + j, counts_per_revolution));
-        // SerialUSB.println(stepNo);
         if (stepNo == 0) {
           iStart = i;
           jStart = j;
@@ -214,7 +218,6 @@ void commandW() {
     if (ticks < 1) {
       for (int j = -ticks; j > 0; j--) {
         stepNo = (mod(fullStepReadings[steps_per_revolution - 1 - i] + j, counts_per_revolution));
-        // SerialUSB.println(stepNo);
         if (stepNo == 0) {
           iStart = i;
           jStart = j;
@@ -230,6 +233,7 @@ void commandW() {
   SerialUSB.println(" ");
   SerialUSB.println("newLookup:");
   SerialUSB.println(" ");
+  SerialUSB.print("const PROGMEM float lookup[] = ");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
     ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
@@ -241,7 +245,6 @@ void commandW() {
     else if (ticks > 15000) {
       ticks -= counts_per_revolution;
     }
-    //SerialUSB.println(ticks);
 
     if (ticks > 1) {
 
@@ -299,7 +302,8 @@ void commandW() {
 
 
   }
-  SerialUSB.println(" ");
+  SerialUSB.println();
+  SerialUSB.println("};");
   enableTCInterrupts();
 
 }
@@ -312,7 +316,7 @@ void serialCheck() {
 
     switch (inChar) {
       case 'c':
-        commandW();           //cal routine
+        calibration();           //cal routine
         break;
 
       case 's':             //new setpoint
@@ -364,6 +368,8 @@ void Serial_menu() {
   SerialUSB.println("e  -  edit parameter ");
   SerialUSB.println("a  -  anticogging");
   SerialUSB.println("j  -  setp response");
+  SerialUSB.println("m  -  print main menu");
+  SerialUSB.println("f  -  get max loop frequency");
   SerialUSB.println("");
 }
 
@@ -661,7 +667,11 @@ void step_response() {
 void get_max_frequency() {
   disableTCInterrupts();
 
+  SerialUSB.println("");
+  SerialUSB.println("Calibrating loop time");
+  SerialUSB.println("---------------------");
   SerialUSB.println("make sure you move the motor while testing");
+  SerialUSB.println("");
 
   int k = 1;
   int max_counter = 10000;
@@ -701,10 +711,10 @@ void get_max_frequency() {
 
   SerialUSB.println("");
   SerialUSB.println("-----------");
-  SerialUSB.print("minimal frequency = ");
+  SerialUSB.print("max frequency = ");
   SerialUSB.println(frequency);
   SerialUSB.print("const int overflow =  0x");
-  SerialUSB.print((48000000/frequency)-1, HEX);
+  SerialUSB.print((48000000 / frequency) - 1, HEX);
   SerialUSB.println(';');
 
   enabled = last_enabled;

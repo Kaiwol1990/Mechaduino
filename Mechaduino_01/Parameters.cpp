@@ -38,7 +38,7 @@ const int chipSelectPin = A2; //PB08
 
 const int dir_pin = 0;	//PORT_PA11
 const int step_pin = 1;	//Port_PA10
-const int ena_pin = 2;	//PORT_PA14 	// if you don't want to use an enable pin change line 32 in Controller.cpp
+const int ena_pin = 2;	//PORT_PA14 	// ena_pin = -1 if you don't want to use an enable pin
 
 //---- Step settings -----
 const int microstepping = 16;

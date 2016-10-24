@@ -21,21 +21,21 @@
 
   Implemented serial commands are:
 
-  c  -  encoder cal routine
+  c  -  encoder calibration routine
 
   s  -  enter new setpoint
 
-  p  - parameter query (prints current parameters)
+  p  -  parameter query (prints current parameters)
 
-  e  - parameter edit (edit PID values)
+  e  -  parameter edit (edit PID values)
 
-  a  - anticogging calibration
+  a  -  anticogging calibration
 
-  j  - generate step response for PID tuning
+  j  -  generate step response for PID tuning
 
-  m  - print main menu
+  m  -  print main menu
 
-  f  - get max loop frequency
+  f  -  get max loop frequency
 
   ...see serialCheck() in Utils for more details
 */
@@ -53,7 +53,9 @@
 void setup() {
 
   SerialUSB.begin(baudrate);
+
   REG_PORT_DIRSET0 = PORT_PA17;
+
   SerialUSB.println("booting");
   delay(3000);
 
@@ -88,8 +90,6 @@ void setup() {
 
   enableTCInterrupts();     //start in closed loop mode
 
-  REG_PORT_OUTSET0 = PORT_PA17;  // write LED HIGH
-
   Serial_menu();
 }
 
@@ -102,18 +102,5 @@ void setup() {
 void loop()
 {
   serialCheck();
-
-  /*
-
-    if (millis() > next_millis) {
-    Serial_menu();
-    next_millis = millis() + 5000;
-    }
-  */
-
-//SerialUSB.print(r);
-//SerialUSB.print(',');
-//SerialUSB.println(100*e);
-
 
 }

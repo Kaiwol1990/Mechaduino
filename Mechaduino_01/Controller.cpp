@@ -24,7 +24,7 @@ void TC5_Handler()
 
 
     //change to if(1) if you don't want to use the enable pin
-    if (enabled) {
+    if (enabled || ena_pin == -1) {
 
       e = (5 * e) + (5 * (r - yw));
       e = e / 10;
