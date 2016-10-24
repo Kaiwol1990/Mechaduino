@@ -88,7 +88,7 @@ void setup() {
 
   enableTCInterrupts();     //start in closed loop mode
 
-  digitalWrite(ledPin, HIGH);
+  REG_PORT_OUTSET0 = PORT_PA17;  // write LED HIGH
 
   Serial_menu();
 }
@@ -110,10 +110,10 @@ void loop()
     next_millis = millis() + 5000;
     }
   */
-/*
-SerialUSB.print(r);
-SerialUSB.print(',');
-SerialUSB.println(yw);
 
-*/
+//SerialUSB.print(r);
+//SerialUSB.print(',');
+//SerialUSB.println(100*e);
+
+
 }

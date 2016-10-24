@@ -26,7 +26,8 @@ void TC5_Handler()
     //change to if(1) if you don't want to use the enable pin
     if (enabled) {
 
-      e = (r - yw);
+      e = (5 * e) + (5 * (r - yw));
+      e = e / 10;
 
       ITerm = (ITerm + e);
 

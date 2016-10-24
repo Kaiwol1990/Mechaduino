@@ -697,14 +697,15 @@ void get_max_frequency() {
 
   }
 
-  frequency = 0.98 * frequency;
+  frequency = 0.99 * frequency;
 
   SerialUSB.println("");
   SerialUSB.println("-----------");
   SerialUSB.print("minimal frequency = ");
   SerialUSB.println(frequency);
-  SerialUSB.print("minimal frequency = ");
-  SerialUSB.println(frequency, HEX);
+  SerialUSB.print("const int overflow =  0x");
+  SerialUSB.print((48000000/frequency)-1, HEX);
+  SerialUSB.println(';');
 
   enabled = last_enabled;
 

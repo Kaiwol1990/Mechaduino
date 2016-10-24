@@ -7,15 +7,12 @@
 //---- Identifier -----
 const String identifier = "X";
 
-//---- Sample Frequenz -----
-volatile float Fs = 4875 ; //Hz
-
 //---- Overflow Counter ----
-const int overflow =  0x130B;
+const int overflow =  0x2B60;
 
 //---- PID Values -----
 volatile float pKp = 25.0000;
-volatile float pKi = 0.200;
+volatile float pKi = 0.1500;
 volatile float pKd = 30.0000;
 
 //---- Lookup -----
@@ -27,7 +24,7 @@ const PROGMEM float lookup[] = {29.57 , 29.59 , 29.62 , 29.64 , 29.66 , 29.68 , 
 const int baudrate = 250000;
 
 //---- Jump for step respnse -----
-const int response_step = 20; //in degree
+const int response_step = 200; //in degree
 
 //---- Pins -----
 const int IN_4 = 6;		//PA20
