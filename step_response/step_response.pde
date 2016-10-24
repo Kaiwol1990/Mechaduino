@@ -4,7 +4,7 @@
 
 import processing.serial.*;
 Serial myPort; //creates a software serial port on which you will listen to Arduino
-int step = 200;
+int step = 20;
 
 String val;
 float start_time = 0;

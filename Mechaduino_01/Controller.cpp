@@ -11,7 +11,7 @@ void TC5_Handler()
 {
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
-    y = lookup_angle(readEncoder());
+    y = pgm_read_float_near(lookup + readEncoder());
 
     if ((y - y_1) < -180.0) {
       yw = yw + 360;
