@@ -14,8 +14,7 @@ https://processing.org/
 
 2. wait till the Mechaduino is ready and then close every serial monitor etc.
 
-3. in Paramters.cpp set
-- const int response_step = 20;  to a farly small value (20) works well for me
+3. set const int response_step = 20;  to a farly small value (20) works well for me (lockated in Paramters.cpp)
   
 4. make sure your motor can move the amount of degree you set it to in both directions
 
