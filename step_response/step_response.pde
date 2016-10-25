@@ -6,7 +6,9 @@ import processing.serial.*;
 Serial myPort; //creates a software serial port on which you will listen to Arduino
 
 
-int step = 0;
+int step = 200;
+
+
 String val;
 float start_time = 0;
 
@@ -15,6 +17,7 @@ float last_position = 0.0;
 
 boolean flag = true;
 boolean first_event = true;
+boolean second_event = false;
 boolean finished = false;
 int x = 2;
 int lastheight_1 = 0;
@@ -23,21 +26,17 @@ int lastheight_3 = 0;
 
 float [] target_buffer = new float[2000];
 float [] y_buffer = new float[2000];
-float [] y_diff_1 = new float[2000];
-float [] y_diff_2 = new float[2000];
 float [] time_buffer = new float[2000];
 
 void setup()
 {
-  size(1280, 720);
+  size(1920, 1080);
   String portName = Serial.list()[2]; 
   //CAUTION: your Arduino port number is probably different! Mine happened to be 1. Use a "handshake" sketch to figure out and test which port number your Arduino is talking on. A "handshake" establishes that Arduino and Processing are listening/talking on the same port.
   //Here's a link to a basic handshake tutorial: https://processing.org/tutorials/overview/
   for (int i=0; i<2000; i=i+1) {
     target_buffer[i]= 0;
     y_buffer[i] = 0;
-    y_diff_1[i] = 0;
-    y_diff_2[i] = 0;
   }
 
 
@@ -45,6 +44,7 @@ void setup()
 
   background(255, 255, 255);
   myPort.write('j'); // send s over serial to start step response
+
   println("send");
 }
 
@@ -59,25 +59,30 @@ void serialEvent(Serial myPort) {
     inString = trim(inString);
     println(inString);
 
-    float sensorVals[] = float(split(inString, ',')); 
+
 
     if (first_event) {
-      start_time= sensorVals[0];
+      //ignore the first serial command it`s just for manual user input
       first_event =false;
-      step = (int)sensorVals[1];
+      second_event = true;
+      myPort.write(str(step)); //send the step value
+    } else if (second_event) {
+      // get the starttime from the mechaduino 
+      float sensorVals[] = float(split(inString, ',')); 
+      start_time= sensorVals[0];
+      second_event=false;
     } else {
+      float sensorVals[] = float(split(inString, ',')); 
 
       time_buffer[x] = sensorVals[0]-start_time;
 
       float target = sensorVals[1]/step;
-      float temp_1 =  map(target, -1.5, 1.5, -(0.5*height), (0.5*height));
+      float temp_1 =  map(target, -0.5, 1.5, -(0.5*height), (0.5*height));
       target_buffer[x] = temp_1;
 
       float y = sensorVals[2]/step;
-      float temp_2 =  map(y, -1.5, 1.5, -(0.5*height), (0.5*height));
+      float temp_2 =  map(y, -0.5, 1.5, -(0.5*height), (0.5*height));
       y_buffer[x] = temp_2;
-      y_diff_1[x] = (0.7*(y_diff_1[x-1]))+(0.3*(temp_2 - y_buffer[x-1]));
-      y_diff_2[x] = (0.7*(y_diff_2[x-1]))+(0.3*(y_diff_1[x] -y_diff_1[x-1]));
     }
     x++;
   }
@@ -99,11 +104,6 @@ void draw() {
       strokeWeight(1);        //stroke wider
       line(scale*time_buffer[i-1], lastheight_2, scale*time_buffer[i], (0.5*height)  - y_buffer[i]); 
       lastheight_2 = (int)(0.5*height) -  (int)y_buffer[i];
-
-      stroke(0, 0, 255);     //stroke color
-      strokeWeight(1);        //stroke wider
-      line(scale*time_buffer[i-1], lastheight_3, scale*time_buffer[i], (0.5*height)  - (y_diff_1[i])); 
-      lastheight_3 = (int)(0.5*height) -  (int)(y_diff_1[i]);
     }
   }
 }
