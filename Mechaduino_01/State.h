@@ -6,55 +6,84 @@
 
 //interrupt vars
 extern volatile float r;  //setpoint
+
 extern volatile float y;  // measured angle
 extern volatile float y_1;
-extern volatile float yw;
 
-extern volatile float PA;  //
+extern volatile const float PA;  //
 
-extern volatile float u;  //real control effort (not abs)
-
-extern volatile float ITerm; //Integral term
+extern volatile float u;  //real control effort
+extern volatile float u_1;
 
 
-extern volatile long wrap_count;
+extern volatile float ITerm; //integral term
 
 
-extern volatile float e;// e = r-y (error)
+extern volatile float e; // error term
 extern volatile float e_1;
-extern volatile float e_2;
-
-extern volatile float raw_0;
-extern volatile float raw_1;
-extern volatile float raw_2;
 
 
-extern volatile float ITerm;
+extern volatile float y_filtered_0; // raw measured wrapped angle
+extern volatile float y_filtered_1;
+extern volatile float y_filtered_2;
 
 
+extern volatile float yw; //filtered wraped angle
+extern volatile float yw_1;
+extern volatile float yw_2;
 
-extern bool dir;
-
-extern int stepNumber;
-extern void output(float, int);
-
+extern volatile bool dir;
 extern volatile bool enabled;
 
-extern volatile int uMAX;
-extern volatile int uPEAK;
-extern volatile int uSTEP;
 
+//----current settings-----
+extern const int uMAX;
+extern const int uPEAK;
+extern const int uSTEP;
+extern const float iMAX;
+extern const float iPEAK;
+extern const int PEAKSPERSECOND;
 extern volatile int PEAKCounter;
 extern int maxPEAKCounter;
-extern int PEAKSPERSECOND;
 
+//---- Step settings -----
+extern const int counts_per_revolution;
+extern const float angle_per_step;
+extern const float stepangle;
+extern const int microstepping;
+extern const int steps_per_revolution;
 
-//___________________________________
+//---- Pins -----
+extern const int IN_4;
+extern const int IN_3;
+extern const int VREF_2;
+extern const int VREF_1;
+extern const int IN_2;
+extern const int IN_1;
+extern const int ledPin;
+extern const int chipSelectPin;
+extern const int dir_pin;
+extern const int step_pin;
+
+//----Filter Coeffizienten-----
+extern float coeff_b0;
+extern float coeff_b1;
+extern float coeff_b2;
+extern float coeff_a1;
+extern float coeff_a2;
+
+//----Motordriver current values-----
 extern int val1;
 extern int val2;
 
 
-extern unsigned long next_millis;
+
+extern int stepNumber; // step index for cal routine
+extern float step_target;
 
 extern bool frequency_test;
+
+extern const float Pi;
+
+extern const PROGMEM float sine_lookup[];
 #endif

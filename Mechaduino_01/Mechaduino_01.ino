@@ -37,12 +37,14 @@
 
   f  -  get max loop frequency
 
+  o  -  set filter frequency
+
   ...see serialCheck() in Utils for more details
 */
 #include "SanityCheck.h"
 #include "Utils.h"
 #include "Parameters.h"
-#include "state.h"
+#include "State.h"
 #include "analogFastWrite.h"
 #include "macros.h"
 
@@ -54,7 +56,7 @@ void setup() {
 
   SerialUSB.begin(baudrate);
 
-  REG_PORT_DIRSET0 = PORT_PA17;
+  digitalWrite(ledPin, HIGH);
 
   SerialUSB.println("booting");
   delay(3000);
@@ -62,6 +64,8 @@ void setup() {
   setupPins();
   setupSPI();
   setupTCInterrupts();
+
+  set_filter_coeff(Fs , Fc);
 
   for (int k = 1 ; k < 100; k++) {
     delay(10);
@@ -102,5 +106,7 @@ void setup() {
 void loop()
 {
   serialCheck();
+  //SerialUSB.println(1000 * e);
+  //SerialUSB.println(yw);
 
 }

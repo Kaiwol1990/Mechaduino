@@ -14,20 +14,20 @@ void TC5_Handler()
     y = pgm_read_float_near(lookup + readEncoder());
 
     if ((y - y_1) < -180.0) {
-      yw = yw + 360;
+      yw = yw + 360 + (y - y_1);
     }
     else if ((y - y_1) > 180.0) {
-      yw = yw - 360;
+      yw = yw - 360 + (y - y_1);
+    }
+    else {
+      yw = yw  + (y - y_1);
     }
 
-    yw = yw  + (y - y_1);
+    y_filtered_0 =  (coeff_b0 * yw) + (coeff_b1 * yw_1) + (coeff_b2 * yw_2) + (coeff_a1 * y_filtered_1) + (coeff_a2 * y_filtered_2);
 
-
-    //change to if(1) if you don't want to use the enable pin
     if (enabled || ena_pin == -1) {
 
-      e = (5 * e) + (5 * (r - yw));
-      e = e / 10;
+      e = (r - y_filtered_0);
 
       ITerm = (ITerm + e);
 
@@ -38,7 +38,8 @@ void TC5_Handler()
         ITerm = -150;
       }
 
-      u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
+      u =  ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
+
     }
     else {
       r = yw;
@@ -90,7 +91,21 @@ void TC5_Handler()
       output(-y + PA, abs(u));
     }
 
+    if (abs(e) < 0.1) {
+      REG_PORT_OUTSET0 = PORT_PA17;
+    }
+    else {
+      REG_PORT_OUTCLR0 = PORT_PA17;
+    }
+
+    y_filtered_2 = y_filtered_1;
+    y_filtered_1 = y_filtered_0;
+
+    yw_2 = yw_1;
+    yw_1 = yw;
+
     y_1 = y;
+    
     e_1 = e;
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag

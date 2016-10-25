@@ -130,72 +130,122 @@ void output(float theta, int effort) {
 
 void calibration() {
   disableTCInterrupts();
+
   SerialUSB.println(" ");
-  SerialUSB.println("calibration:");
+  SerialUSB.println("---- Calibration Routine ----");
   SerialUSB.println(" ");
 
-  int encoderReading = 0;     //or float?  not sure if we can average for more res?
+  int encoderReading = 0;
   int lastencoderReading = 0;
-  int avg = 10;         //how many readings to average
+
+  int avg = 50;         //how many readings to average
 
   int iStart = 0;
   int jStart = 0;
   int stepNo = 0;
 
   int fullStepReadings[steps_per_revolution];
-  int fullStep = 0;
   int ticks = 0;
 
   float lookupAngle = 0.0;
   float percent = 0.0;
 
-  encoderReading = readEncoder();
+
+  for (int reading = 0; reading < avg; reading++) {
+    lastencoderReading += readEncoder();
+    delay(1);
+  }
+  lastencoderReading = lastencoderReading / avg;
+
   dir = true;
   oneStep();
-  delay(500);
+  delay(100);
 
-  if ((readEncoder() - encoderReading) < 0)
+  for (int reading = 0; reading < avg; reading++) {
+    encoderReading += readEncoder();
+    delay(1);
+  }
+  encoderReading = encoderReading / avg;
+
+
+  if ((encoderReading - lastencoderReading) < 0)
   {
-    //dir = 0;
     SerialUSB.println("Wired backwards");
     return;
   }
 
-  while (stepNumber != 0) {
-    if (stepNumber > 0) {
-      dir = true;
-    }
-    else
-    {
-      dir = false;
-    }
-    oneStep();
-    delay(100);
+  if ((encoderReading * 0.02197265625) < 180.0) {
+    dir = false;
   }
-  dir = true;
-  for (int x = 0; x < steps_per_revolution; x++) {
+  else {
+    dir = true;
+  }
 
-    encoderReading = 0;
-    delay(100);
+  // find the zeropoint of the encoder and get close to it
+  SerialUSB.println("Searching Zeropoint");
+  while (abs(encoderReading * 0.02197265625)  > 3) {
+    encoderReading = 0.0;
+
+    quaterStep();
 
     for (int reading = 0; reading < avg; reading++) {
       encoderReading += readEncoder();
-      delay(10);
+      delay(1);
     }
+    encoderReading = encoderReading / avg;
+  }
 
+
+  // got close to zero position
+  dir = true;
+
+  jump_to_fullstepp(); // jump to the next fullstep
+
+  step_target = 0.0;
+  encoderReading = 0.0;
+
+  for (int reading = 0; reading < avg; reading++) {
+    encoderReading += readEncoder();
+    delay(1);
+  }
+  encoderReading = encoderReading / avg;
+
+  SerialUSB.println();
+  SerialUSB.println("got close to zero position");
+  SerialUSB.print("position = ");
+  SerialUSB.println(encoderReading * 0.02197265625);
+
+  delay(2000);
+
+
+  SerialUSB.println();
+  SerialUSB.println("calibration single steps");
+  // step to every single fullstep position and read the Encoder
+  for (int x = 0; x < steps_per_revolution; x++) {
+
+    encoderReading = 0;
+
+    for (int reading = 0; reading < avg; reading++) {
+      encoderReading += readEncoder();
+      delay(1);
+    }
     encoderReading = encoderReading / avg;
 
-    anglefloat = encoderReading * 0.02197265625;
+
     fullStepReadings[x] = encoderReading;
 
-    //SerialUSB.println(fullStepReadings[x], DEC);
+    oneStep();
+
+    delay(100);
 
     percent = 100 * ((float)x) / (float)(steps_per_revolution);
     SerialUSB.print(percent);
     SerialUSB.println('%');
-
-    oneStep();
   }
+  // end fullsteps
+
+
+  // interpolate between the fullsteps
   for (int i = 0; i < steps_per_revolution; i++) {
     ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
     if (ticks < -15000) {
@@ -233,7 +283,6 @@ void calibration() {
   SerialUSB.println(" ");
   SerialUSB.println("newLookup:");
   SerialUSB.println(" ");
-  SerialUSB.print("const PROGMEM float lookup[] = ");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
     ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
@@ -299,11 +348,8 @@ void calibration() {
       }
 
     }
-
-
   }
   SerialUSB.println();
-  SerialUSB.println("};");
   enableTCInterrupts();
 
 }
@@ -347,6 +393,10 @@ void serialCheck() {
         get_max_frequency();
         break;
 
+      case 'o':
+        set_filter_frequency();
+        break;
+
       default:
         break;
     }
@@ -367,7 +417,7 @@ void Serial_menu() {
   SerialUSB.println("p  -  print parameter");
   SerialUSB.println("e  -  edit parameter ");
   SerialUSB.println("a  -  anticogging");
-  SerialUSB.println("j  -  setp response");
+  SerialUSB.println("j  -  step response");
   SerialUSB.println("m  -  print main menu");
   SerialUSB.println("f  -  get max loop frequency");
   SerialUSB.println("");
@@ -413,18 +463,42 @@ float lookup_angle(int n)
   return a_out;
 }
 
-void oneStep() {           /////////////////////////////////   oneStep    ///////////////////////////////
+void jump_to_fullstepp() {
+  // set coil 2 to zero
+  analogFastWrite(VREF_2, 0);
+  REG_PORT_OUTSET0 = PORT_PA20;     //write IN_4 HIGH
+  REG_PORT_OUTCLR0 = PORT_PA15;     //write IN_3 LOW
+
+  // step coil 1 to some value
+  analogFastWrite(VREF_1, 64);
+  REG_PORT_OUTSET0 = PORT_PA21;     //write IN_2 HIGH
+  REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
+}
+
+void quaterStep() {           /////////////////////////////////   oneStep    ///////////////////////////////
 
   if (dir == 0) {
-    stepNumber += 1;
+    step_target += 0.9;
   }
   else {
-    stepNumber -= 1;
+    step_target -= 0.9;
   }
 
-  output(1.8 * stepNumber, 64); //1.8 = 90/50
+  output(step_target, 64); //1.8 = 90/50
 
-  delay(10);
+}
+
+void oneStep() {
+
+  if (dir == 0) {
+    step_target += 1.8;
+  }
+  else {
+    step_target -= 1.8;
+  }
+
+  output(step_target, 64); //1.8 = 90/50
+
 }
 
 int readEncoder()           //////////////////////////////////////////////////////   READENCODER   ////////////////////////////
@@ -484,6 +558,8 @@ float lookup_sine(int m)        ////////////////////////////////////////////////
 
 
 void setupTCInterrupts() {
+  const int overflow = (48000000 / Fs) - 1;
+
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
   while (GCLK->STATUS.bit.SYNCBUSY);
@@ -501,7 +577,7 @@ void setupTCInterrupts() {
   WAIT_TC16_REGS_SYNC(TC5)
 
 
-  TC5->COUNT16.CC[0].reg = overflow;//0x3E72;
+  TC5->COUNT16.CC[0].reg = overflow;
   WAIT_TC16_REGS_SYNC(TC5)
 
 
@@ -638,13 +714,23 @@ void parameterEdit() {
 void step_response() {
 
   float current_position = yw;
+  bool received = false;
+  int response_step = 0;
 
-  unsigned long start_millis = millis();
+  SerialUSB.println("Enter step value in degree!");
+
+  while (!received) {
+    delay(100);
+    if (SerialUSB.peek() != -1) {
+      response_step = SerialUSB.parseInt();
+      received = true;
+    }
+  }
 
   r = current_position;
-  SerialUSB.print(micros());
-  SerialUSB.print(',');
-  SerialUSB.println(response_step);
+  SerialUSB.println(micros());
+
+  unsigned long start_millis = millis();
 
   while (millis() < (start_millis + 1700)) { //half a second
 
@@ -707,18 +793,52 @@ void get_max_frequency() {
 
   }
 
-  frequency = 0.99 * frequency;
+  frequency = 10 * (floor(( 0.99 * frequency) / 10));
 
   SerialUSB.println("");
   SerialUSB.println("-----------");
-  SerialUSB.print("max frequency = ");
+  SerialUSB.print("volatile float Fs = ");
   SerialUSB.println(frequency);
-  SerialUSB.print("const int overflow =  0x");
-  SerialUSB.print((48000000 / frequency) - 1, HEX);
-  SerialUSB.println(';');
+  SerialUSB.println("; //Hz");
 
   enabled = last_enabled;
 
   enableTCInterrupts();
+}
+
+
+void set_filter_frequency() {
+  bool received = false;
+  SerialUSB.println();
+  SerialUSB.println("set new cutoff frequency");
+  SerialUSB.println();
+  SerialUSB.println("enter new value:");
+
+
+  while (!received) {
+    delay(100);
+
+    if (SerialUSB.peek() != -1) {
+      Fc = SerialUSB.parseFloat();
+      received = true;
+    }
+  }
+
+  set_filter_coeff(Fs , Fc);
+}
+
+void set_filter_coeff(float F_sample, float F_cut) {
+
+  float frequency_ratio = (F_cut / F_sample);
+  float ita = 1.0 / tan(Pi * frequency_ratio);
+  float q = sqrt(2.0);
+
+  coeff_b0 = 1.0 / (1.0 + (q * ita ) + (ita * ita));
+  coeff_b1 = 2 * coeff_b0;
+  coeff_b2 = coeff_b0;
+
+  coeff_a1 = 2.0 * ((ita * ita) - 1.0) * coeff_b0;
+  coeff_a2 = -(1.0 - (q * ita) + (ita * ita)) * coeff_b0;
+
 }
 
