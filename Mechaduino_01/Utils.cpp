@@ -153,7 +153,7 @@ void calibration() {
 
   for (int reading = 0; reading < avg; reading++) {
     lastencoderReading += readEncoder();
-    delay(1);
+    delay(3);
   }
   lastencoderReading = lastencoderReading / avg;
 
@@ -163,7 +163,7 @@ void calibration() {
 
   for (int reading = 0; reading < avg; reading++) {
     encoderReading += readEncoder();
-    delay(1);
+    delay(3);
   }
   encoderReading = encoderReading / avg;
 
@@ -183,37 +183,72 @@ void calibration() {
 
   // find the zeropoint of the encoder and get close to it
   SerialUSB.println("Searching Zeropoint");
-  while (abs(encoderReading * 0.02197265625)  > 3) {
-    encoderReading = 0.0;
 
-    quaterStep();
+  // fast
+  while ( (encoderReading * 0.02197265625)  > 10) {
+    encoderReading = 0;
+
+    oneStep();
+
+    delay(10); //wait for seatle
 
     for (int reading = 0; reading < avg; reading++) {
       encoderReading += readEncoder();
-      delay(1);
+      delay(3);
     }
     encoderReading = encoderReading / avg;
   }
 
+  //slow
+  while ( (encoderReading * 0.02197265625)  > 2) {
+    encoderReading = 0;
 
-  // got close to zero position
-  dir = true;
+    quaterStep();
 
-  jump_to_fullstepp(); // jump to the next fullstep
+    delay(10); //wait for seatle
 
-  step_target = 0.0;
-  encoderReading = 0.0;
-
-  for (int reading = 0; reading < avg; reading++) {
-    encoderReading += readEncoder();
-    delay(1);
+    for (int reading = 0; reading < avg; reading++) {
+      encoderReading += readEncoder();
+      delay(3);
+    }
+    encoderReading = encoderReading / avg;
   }
-  encoderReading = encoderReading / avg;
 
   SerialUSB.println();
   SerialUSB.println("got close to zero position");
   SerialUSB.print("position = ");
   SerialUSB.println(encoderReading * 0.02197265625);
+
+  delay(100); //wait for seatle
+
+  if ((encoderReading * 0.02197265625)  > 0.91) {
+    dir = false;
+    quaterStep();
+    quaterStep();
+    dir = true;
+  }
+
+  SerialUSB.print("position = ");
+  SerialUSB.println(encoderReading * 0.02197265625);
+
+  // got close to zero position
+
+  jump_to_fullstepp(); // jump to the next fullstep
+
+  delay(100); //wait for seatle
+
+  encoderReading = 0;
+  for (int reading = 0; reading < avg; reading++) {
+    encoderReading += readEncoder();
+    delay(3);
+  }
+  encoderReading = encoderReading / avg;
+
+
+  SerialUSB.print("position = ");
+  SerialUSB.println(encoderReading * 0.02197265625);
+
+
 
   delay(2000);
 
@@ -221,13 +256,14 @@ void calibration() {
   SerialUSB.println();
   SerialUSB.println("calibration single steps");
   // step to every single fullstep position and read the Encoder
+  step_target = 0.0;
   for (int x = 0; x < steps_per_revolution; x++) {
 
     encoderReading = 0;
 
     for (int reading = 0; reading < avg; reading++) {
       encoderReading += readEncoder();
-      delay(1);
+      delay(3);
     }
     encoderReading = encoderReading / avg;
 
@@ -424,13 +460,27 @@ void Serial_menu() {
 }
 
 void setpoint() {
+  unsigned long start_millis = millis();
+  int time_out = 5000;
+  bool received = false;
+
+  SerialUSB.println("Enter step value in degree!");
+
   SerialUSB.print("current Setpoint: ");
   SerialUSB.println(yw);
-
   SerialUSB.println("Enter setpoint:");
 
-  while (SerialUSB.peek() == -1)  {}
-  r = SerialUSB.parseFloat();
+  while (!received) {
+    delay(100);
+    if (SerialUSB.peek() != -1) {
+      r = SerialUSB.parseFloat();
+      received = true;
+    }
+    else if (millis() > start_millis + time_out) {
+      SerialUSB.println("time out");
+      return;
+    }
+  }
 
   SerialUSB.print("new Setpoint: ");
   SerialUSB.println(r);
@@ -634,8 +684,10 @@ void antiCoggingCal() {
 
 
 void parameterEdit() {
-  int received_1 = 0;
-  int received_2 = 0;
+  bool received_1 = false;
+  bool received_2 = false;
+  unsigned long start_millis = millis();
+  int time_out = 5000;
 
   SerialUSB.println();
   SerialUSB.println("---- Edit position loop gains: ----");
@@ -653,61 +705,68 @@ void parameterEdit() {
   SerialUSB.println();
 
 
-  while (received_1 == 0)  {
+  while (!received_1)  {
     delay(100);
     char inChar2 = (char)SerialUSB.read();
+
+    if (millis() > start_millis + time_out) {
+      SerialUSB.println("time out");
+      return;
+    }
 
     switch (inChar2) {
       case 'p':
         {
           SerialUSB.println("enter new pKp!");
-          while (received_2 == 0) {
+          while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
               pKp = SerialUSB.parseFloat();
-              received_2 = 1;
+              received_2 = true;
             }
           }
-          received_1 = 1;
+          received_1 = true;
         }
         break;
       case 'i':
         {
           SerialUSB.println("enter new pKi!");
-          while (received_2 == 0) {
+          while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
               pKi = SerialUSB.parseFloat();
-              received_2 = 1;
+              received_2 = true;
             }
           }
-          received_1 = 1;
+          received_1 = true;
         }
         break;
       case 'd':
         {
           SerialUSB.println("enter new pKd!");
-          while (received_2 == 0) {
+          while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
               pKd = SerialUSB.parseFloat();
-              received_2 = 1;
+              received_2 = true;
             }
           }
-          received_1 = 1;
+          received_1 = true;
         }
         break;
       case 'q':
         {
           SerialUSB.println("quit");
-          received_1 = 1;
+          received_1 = true;
         }
         break;
     }
+
+    SerialUSB.println();
+    SerialUSB.println();
+    parameterQuery();
+
   }
-  SerialUSB.println();
-  SerialUSB.println();
-  parameterQuery();
 }
 
 
@@ -717,6 +776,9 @@ void step_response() {
   bool received = false;
   int response_step = 0;
 
+  unsigned long start_millis = millis();
+  int time_out = 5000;
+
   SerialUSB.println("Enter step value in degree!");
 
   while (!received) {
@@ -725,12 +787,16 @@ void step_response() {
       response_step = SerialUSB.parseInt();
       received = true;
     }
+    else if (millis() > start_millis + time_out) {
+      SerialUSB.println("time out");
+      return;
+    }
   }
 
   r = current_position;
   SerialUSB.println(micros());
 
-  unsigned long start_millis = millis();
+  start_millis = millis();
 
   while (millis() < (start_millis + 1700)) { //half a second
 
