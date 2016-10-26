@@ -14,7 +14,7 @@ https://processing.org/
 
 2. wait till the Mechaduino is ready and then close every serial monitor etc.
 
-3. in step_response.pde line 9 set int step = 200; to whatever stepsizeyou want to use
+3. in step_response.pde line 9 set int step = 200; to whatever size you want to use (measured in degree)
 
 4. in step_response.pde line 34 set   String portName = Serial.list()[   x  ]; set x to whatever your port is (1,2,3... depending on how mutch serial ports are available)
 
