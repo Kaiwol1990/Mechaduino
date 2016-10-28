@@ -2,8 +2,13 @@
 
 Direct Digital write:
 
+Port A:
 REG_PORT_OUTSET0 = PORT_PA20;  //write D6 HIGH
 REG_PORT_OUTCLR0 = PORT_PA15;  //write D5 LOW
+
+Port B:
+REG_PORT_OUTSET1 = PORT_PB08;  //write A1 HIGH
+REG_PORT_OUTCLR1 = PORT_PB08;  //write A1 LOW
 
 
 Direct Digital read:
