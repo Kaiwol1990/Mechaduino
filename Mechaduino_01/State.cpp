@@ -62,13 +62,6 @@ const int chipSelectPin = A2; //PB08
 const int dir_pin = 0;	//PORT_PA11
 const int step_pin = 1;	//Port_PA10
 
-//----Filter Coeffizienten-----
-float coeff_b0 = 0.0;
-float coeff_b1 = 0.0;
-float coeff_b2 = 0.0;
-float coeff_a1 = 0.0;
-float coeff_a2 = 0.0;
-
 
 int val1 = 0;
 int val2 = 0;

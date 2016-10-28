@@ -65,8 +65,6 @@ void setup() {
   setupSPI();
   setupTCInterrupts();
 
-  set_filter_coeff(Fs , Fc);
-
   for (int k = 1 ; k < 100; k++) {
     delay(10);
     y = y + lookup_angle(readEncoder());

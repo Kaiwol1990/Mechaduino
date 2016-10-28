@@ -55,8 +55,4 @@ void step_response();
 
 void get_max_frequency();
 
-void set_filter_frequency();
-
-void set_filter_coeff(float F_sample, float F_cut);
-
 #endif

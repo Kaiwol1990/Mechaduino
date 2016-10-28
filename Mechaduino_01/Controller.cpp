@@ -23,7 +23,7 @@ void TC5_Handler()
       yw = yw  + (y - y_1);
     }
 
-    y_filtered_0 =  (coeff_b0 * yw) + (coeff_b1 * yw_1) + (coeff_b2 * yw_2) + (coeff_a1 * y_filtered_1) + (coeff_a2 * y_filtered_2);
+    y_filtered_0 =  (coeff_b0 * yw) + (coeff_b1 * yw_1) + (coeff_b2 * yw_2) - (coeff_a1 * y_filtered_1) - (coeff_a2 * y_filtered_2);
 
     if (enabled || ena_pin == -1) {
 
@@ -38,7 +38,9 @@ void TC5_Handler()
         ITerm = -150;
       }
 
-      u =  ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
+      //u = ((pKp * e) + (pKi * ITerm) - (pKd * (yw - yw_1))); //ARDUINO library style
+
+      u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
 
     }
     else {

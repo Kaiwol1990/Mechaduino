@@ -9,8 +9,6 @@ extern const String identifier;
 //---- Sample Frequenz -----
 extern volatile int Fs;
 
-//---- Filter cutofffrequenz -----
-extern volatile int Fc; //Hz
 
 //---- PID Values -----
 extern volatile float pKp;
@@ -35,4 +33,11 @@ extern const int ena_pin;
 //---- Step settings -----
 extern const int microstepping;
 extern const int steps_per_revolution;
+
+//----Filter Coeffizienten-----
+extern float coeff_b0;
+extern float coeff_b1;
+extern float coeff_b2;
+extern float coeff_a1;
+extern float coeff_a2;
 #endif

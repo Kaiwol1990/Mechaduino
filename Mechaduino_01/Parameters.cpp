@@ -5,20 +5,16 @@
 #include "macros.h"
 
 //---- Identifier -----
-const String identifier = "Y";
+const String identifier = "X";
 
 
 //---- Sample Frequenz -----
 volatile int Fs = 3800; //Hz //change only if you know what you're doing
 
 
-//---- Filter cutoff-frequenz -----
-volatile int Fc = 1000; //Hz //change only if you know what you're doing
-
-
 //---- PID Values -----
-volatile float pKp = 4.0000;
-volatile float pKi = 0.1600;
+volatile float pKp = 3.0000;
+volatile float pKi = 0.1950;
 volatile float pKd = 90.0000;
 
 
@@ -45,3 +41,12 @@ const int ena_pin =2;	//PORT_PA14 	// ena_pin = -1 if you don't want to use an e
 //---- Step settings -----
 const int microstepping = 16;
 const int steps_per_revolution = 200;
+
+//----Filter Coeffizienten-----
+// 1400 Hz
+ float coeff_b0 = 0.18157407856457305;
+ float coeff_b1 = 0.36314815712914611;
+ float coeff_b2 = 0.18157407856457305;
+ 
+ float coeff_a1 = -0.48762773744568083;
+ float coeff_a2 = 0.21392405170397299;

@@ -429,10 +429,6 @@ void serialCheck() {
         get_max_frequency();
         break;
 
-      case 'o':
-        set_filter_frequency();
-        break;
-
       default:
         break;
     }
@@ -870,41 +866,5 @@ void get_max_frequency() {
   enabled = last_enabled;
 
   enableTCInterrupts();
-}
-
-
-void set_filter_frequency() {
-  bool received = false;
-  SerialUSB.println();
-  SerialUSB.println("set new cutoff frequency");
-  SerialUSB.println();
-  SerialUSB.println("enter new value:");
-
-
-  while (!received) {
-    delay(100);
-
-    if (SerialUSB.peek() != -1) {
-      Fc = SerialUSB.parseFloat();
-      received = true;
-    }
-  }
-
-  set_filter_coeff(Fs , Fc);
-}
-
-void set_filter_coeff(float F_sample, float F_cut) {
-
-  float frequency_ratio = (F_cut / F_sample);
-  float ita = 1.0 / tan(Pi * frequency_ratio);
-  float q = sqrt(2.0);
-
-  coeff_b0 = 1.0 / (1.0 + (q * ita ) + (ita * ita));
-  coeff_b1 = 2 * coeff_b0;
-  coeff_b2 = coeff_b0;
-
-  coeff_a1 = 2.0 * ((ita * ita) - 1.0) * coeff_b0;
-  coeff_a2 = -(1.0 - (q * ita) + (ita * ita)) * coeff_b0;
-
 }
 

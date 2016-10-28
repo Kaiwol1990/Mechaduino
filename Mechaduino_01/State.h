@@ -65,12 +65,7 @@ extern const int chipSelectPin;
 extern const int dir_pin;
 extern const int step_pin;
 
-//----Filter Coeffizienten-----
-extern float coeff_b0;
-extern float coeff_b1;
-extern float coeff_b2;
-extern float coeff_a1;
-extern float coeff_a2;
+
 
 //----Motordriver current values-----
 extern int val1;
