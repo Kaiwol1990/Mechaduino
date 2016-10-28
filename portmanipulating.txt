@@ -2,7 +2,7 @@
 
 Direct Digital write:
 
-REG_PORT_OUTSET0 = PORT_PA20;  //write D6 LOW
+REG_PORT_OUTSET0 = PORT_PA20;  //write D6 HIGH
 REG_PORT_OUTCLR0 = PORT_PA15;  //write D5 LOW
 
 
