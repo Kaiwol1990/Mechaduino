@@ -5,14 +5,14 @@
 #include "macros.h"
 
 //---- Identifier -----
-const String identifier = "X";
+const String identifier = "Y";
 
 
 //---- Sample Frequenz -----
-volatile int Fs = 4230; //Hz //change only if you know what you're doing
+volatile int Fs = 4000; //Hz //change only if you know what you're doing
 
 //---- Filter Frequenz -----
-volatile int Fc = 1000; //Hz //change only if you know what you're doing
+volatile int Fc = 800; //Hz //change only if you know what you're doing
 
 
 //---- PID Values -----
@@ -21,9 +21,10 @@ volatile int Fc = 1000; //Hz //change only if you know what you're doing
   volatile float pKi = 0.1630;
   volatile float pKd = 135.0000;
 */
-volatile float pKp = 7.0000;
-volatile float pKi = 0.1700;
-volatile float pKd = 130.0000;
+
+volatile float pKp = 6.0000;
+volatile float pKi = 0.1650;
+volatile float pKd = 150.0000;
 
 
 //----current settings-----
