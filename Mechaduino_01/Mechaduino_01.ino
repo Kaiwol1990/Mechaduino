@@ -64,6 +64,7 @@ void setup() {
   setupPins();
   setupSPI();
   setupTCInterrupts();
+  calcBiquad(Fc, Fs, 0.33);
 
   for (int k = 1 ; k < 100; k++) {
     delay(10);

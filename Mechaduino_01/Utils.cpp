@@ -429,6 +429,10 @@ void serialCheck() {
         get_max_frequency();
         break;
 
+      case 'o':
+        filterEdit();
+        break;
+
       default:
         break;
     }
@@ -767,6 +771,8 @@ void parameterEdit() {
 
 
 void step_response() {
+  bool last_enabled = enabled;
+  enabled = 1;
 
   float current_position = yw;
   bool received = false;
@@ -810,6 +816,7 @@ void step_response() {
       r = current_position;
     }
   }
+  enabled = last_enabled;
 }
 
 void get_max_frequency() {
@@ -860,11 +867,64 @@ void get_max_frequency() {
   SerialUSB.println("");
   SerialUSB.println("-----------");
   SerialUSB.print("volatile float Fs = ");
-  SerialUSB.println(frequency);
+  SerialUSB.print(frequency);
   SerialUSB.println("; //Hz");
 
   enabled = last_enabled;
 
   enableTCInterrupts();
+}
+
+void calcBiquad(int Fc, int Fs, float Q) {
+  float K = tan(Pi * Fc / Fs);
+  float filter_Q = 0.33;
+  float norm =  1 / (1 + (K / filter_Q) + (K * K));
+
+  coeff_b0 = (K * K * norm);
+  coeff_b1 = (2 * coeff_b0);
+  coeff_b2 = coeff_b0;
+  coeff_a1 = (2 * (K * K - 1) * norm);
+  coeff_a2 = (1 - (K / filter_Q) + (K * K)) * norm;
+}
+
+void filterEdit() {
+  bool received_1 = false;
+  unsigned long start_millis = millis();
+  int time_out = 5000;
+
+  SerialUSB.println();
+  SerialUSB.println("---- Edit filter Frequency: ----");
+  SerialUSB.println();
+  SerialUSB.print("Current Frequency = ");
+  SerialUSB.println(Fc);
+  SerialUSB.println();
+  SerialUSB.println("enter new Fc!");
+
+  while (!received_1) {
+    if (millis() > start_millis + time_out) {
+      SerialUSB.println("time out");
+      return;
+    }
+    delay(100);
+    if (SerialUSB.peek() != -1) {
+      Fc = SerialUSB.parseFloat();
+      received_1 = true;
+    }
+  }
+
+  calcBiquad(Fc, Fs, 0.33);
+
+  SerialUSB.println();
+  SerialUSB.print("volatile int Fc = ");
+  SerialUSB.print(Fc);
+  SerialUSB.println("; //Hz");
+
+  SerialUSB.println(coeff_b0, 8);
+  SerialUSB.println(coeff_b1, 8);
+  SerialUSB.println(coeff_b2, 8);
+
+  SerialUSB.println(coeff_a1, 8);
+  SerialUSB.println(coeff_a2, 8);
+
 }
 

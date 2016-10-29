@@ -55,4 +55,8 @@ void step_response();
 
 void get_max_frequency();
 
+void calcBiquad(int Fc, int Fs, float Q);
+
+void filterEdit();
+
 #endif

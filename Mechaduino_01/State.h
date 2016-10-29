@@ -81,4 +81,11 @@ extern bool frequency_test;
 extern const float Pi;
 
 extern const PROGMEM float sine_lookup[];
+
+//----Filter Coeffizienten-----
+extern float coeff_b0;
+extern float coeff_b1;
+extern float coeff_b2;
+extern float coeff_a1;
+extern float coeff_a2;
 #endif
