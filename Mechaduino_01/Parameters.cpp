@@ -16,15 +16,9 @@ volatile int Fc = 900; //Hz //change only if you know what you're doing
 
 
 //---- PID Values -----
-/*
-  volatile float pKp = 3.5000;
-  volatile float pKi = 0.1630;
-  volatile float pKd = 135.0000;
-*/
-
-volatile float pKp = 6.0000;
-volatile float pKi = 0.1650;
-volatile float pKd = 150.0000;
+volatile float pKp = 3.5000;
+volatile float pKi = 0.1630;
+volatile float pKd = 135.0000;
 
 
 //----current settings-----
