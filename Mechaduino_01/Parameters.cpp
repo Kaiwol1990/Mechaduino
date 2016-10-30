@@ -12,7 +12,7 @@ const String identifier = "Y";
 volatile int Fs = 4000; //Hz //change only if you know what you're doing
 
 //---- Filter Frequenz -----
-volatile int Fc = 800; //Hz //change only if you know what you're doing
+volatile int Fc = 900; //Hz //change only if you know what you're doing
 
 
 //---- PID Values -----
