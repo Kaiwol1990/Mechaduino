@@ -642,17 +642,14 @@ void setupTCInterrupts() {
   TC4->COUNT16.INTENSET.bit.MC0 = 1;         // enable compare match to CC0
 
 
-  NVIC_SetPriority(TC5_IRQn, 1);
+
+
+  NVIC_SetPriority(TC4_IRQn, 1);
+  NVIC_SetPriority(TC5_IRQn, 2);
 
 
   // Enable InterruptVector
   NVIC_EnableIRQ(TC5_IRQn);
-
-
-  NVIC_SetPriority(TC4_IRQn, 2);
-
-
-  // Enable InterruptVector
   NVIC_EnableIRQ(TC4_IRQn);
 }
 
@@ -666,14 +663,14 @@ void enableTC5Interrupts() {
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      //wait for sync
 }
-/*
-void disableTC4Interrupts() {
+
+void disableTC5Interrupts() {
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }
-*/
 
-void disableTC5Interrupts() {
+
+void disableTC4Interrupts() {
   TC4->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC4
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }
@@ -839,7 +836,6 @@ void get_max_frequency() {
 
     while (i <= max_counter) {
       TC5_Handler();
-      serialCheck();
       i++;
     }
 
@@ -869,6 +865,7 @@ void get_max_frequency() {
   enabled = last_enabled;
 
   enableTC5Interrupts();
+  enableTC4Interrupts();
 }
 
 void calcBiquad(int cut, int sample) {

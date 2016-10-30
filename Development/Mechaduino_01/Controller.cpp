@@ -92,7 +92,7 @@ void TC5_Handler() {
 void TC4_Handler() {
   // gets called with FSAMPLE frequency
 
-  if (TC4->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
+  if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
 
     raw_0 = pgm_read_float_near(lookup + readEncoder());
     raw_diff = raw_0 - raw_1;

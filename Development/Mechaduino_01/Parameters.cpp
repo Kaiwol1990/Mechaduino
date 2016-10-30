@@ -13,15 +13,15 @@ const String identifier = "Y";
 volatile int FSAMPLE = 40000; //Hz //change only if you know what you're doing
 
 // frequency for the PID loop
-volatile int FPID = 3000; //Hz //change only if you know what you're doing
+volatile int FPID = 2000; //Hz //change only if you know what you're doing
 
 //---- Filter Frequenz -----
 volatile int Fc = FPID; //Hz //change only if you know what you're doing
 
 //---- PID Values -----
-volatile float pKp = 20.0000;
+volatile float pKp = 10.0000;
 volatile float pKi = 0.1650;
-volatile float pKd = 90.0000;
+volatile float pKd = 35.0000;
 
 //----current settings-----
 const int PEAKSPERSECOND = 10;
