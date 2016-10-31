@@ -11,6 +11,7 @@ extern volatile float raw_0;  // measured angle
 extern volatile float raw_1;
 extern volatile float raw_diff;
 
+
 extern volatile const float PA;  //
 
 extern volatile float u;  //real control effort
@@ -24,14 +25,10 @@ extern volatile float e_0; // error term
 extern volatile float e_1;
 
 
-extern volatile float y_filtered_0; // raw measured wrapped angle
-extern volatile float y_filtered_1;
-extern volatile float y_filtered_2;
+extern volatile float y_filtered; // raw measured wrapped angle
 
 
-extern volatile float yw_0; //filtered wraped angle
-extern volatile float yw_1;
-extern volatile float yw_2;
+extern volatile float yw; //filtered wraped angle
 
 extern volatile bool dir;
 extern volatile bool enabled;
@@ -39,13 +36,7 @@ extern volatile bool enabled;
 
 //----current settings-----
 extern const int uMAX;
-extern const int uPEAK;
-extern const int uSTEP;
-extern const float iMAX;
-extern const float iPEAK;
-extern const int PEAKSPERSECOND;
-extern volatile int PEAKCounter;
-extern int maxPEAKCounter;
+extern const int uDEADBAND;
 
 //---- Step settings -----
 extern const int counts_per_revolution;

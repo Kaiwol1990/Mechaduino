@@ -14,7 +14,7 @@ void TC5_Handler() {
 
     if (enabled || ena_pin == -1) {
 
-      e_0 = (r - y_filtered_0);
+      e_0 = (r - y_filtered);
 
       ITerm = (ITerm + e_0);
 
@@ -25,61 +25,28 @@ void TC5_Handler() {
         ITerm = -150;
       }
 
-
       u = ((pKp * e_0) + (pKi * ITerm) + (pKd * (e_0 - e_1)));
-
     }
     else {
-      r = yw_0;
+      r = yw;
+      e_0 = 0;
       u = 0;
       ITerm = 0;
     }
 
-
-    if (abs(u) < 1.3 * uMAX) {
-
-      if (u > uMAX) {
-        u = uMAX;
-      }
-      else if (u < -uMAX) {
-        u = -uMAX;
-      }
-
-      PEAKCounter -= 1;
+    if (u > uMAX) {
+      u = uMAX;
     }
-    else {
-      if ((PEAKCounter + uSTEP) <= maxPEAKCounter) {
-
-        if (u > uPEAK) {
-          u = uPEAK;
-        }
-        else if (u < -uPEAK) {
-          u = -uPEAK;
-        }
-
-        PEAKCounter += uSTEP;
-      }
-      else {
-
-        if (u > uMAX) {
-          u = uMAX;
-        }
-        else if (u < -uMAX) {
-          u = -uMAX;
-        }
-
-        PEAKCounter -= 1;
-      }
+    else if (u < -uMAX) {
+      u = -uMAX;
     }
 
     if (u > 0) {
-      output(-raw_0 - PA, abs(u));
+      output(-raw_0 - PA, abs(u + uDEADBAND));
     }
     else {
-      output(-raw_0 + PA, abs(u));
+      output(-raw_0 + PA, abs(u + uDEADBAND));
     }
-
-
 
     e_1 = e_0;
 
@@ -98,22 +65,17 @@ void TC4_Handler() {
     raw_diff = raw_0 - raw_1;
 
     if (raw_diff < -180.0) {
-      yw_0 = yw_1 + 360 + raw_diff;
+      yw = yw + 360.0 + raw_diff;
     }
     else if (raw_diff > 180.0) {
-      yw_0 = yw_1 - 360 + raw_diff;
+      yw = yw - 360.0 + raw_diff;
     }
     else {
-      yw_0 = yw_1  + raw_diff;
+      yw = yw + raw_diff;
     }
 
-    y_filtered_0 =  (coeff_b0 * yw_0) + (coeff_b1 * yw_1) + (coeff_b2 * yw_2) - (coeff_a1 * y_filtered_1) - (coeff_a2 * y_filtered_2);
 
-    y_filtered_2 = y_filtered_1;
-    y_filtered_1 = y_filtered_0;
-
-    yw_2 = yw_1;
-    yw_1 = yw_0;
+    y_filtered = (coeff_b0 * yw) + (coeff_a1 * y_filtered);
 
     raw_1 = raw_0;
 

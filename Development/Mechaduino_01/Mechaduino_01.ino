@@ -61,25 +61,13 @@ void setup() {
   setupPins();
   setupSPI();
   setupTCInterrupts();
-  calcBiquad(Fc, FSAMPLE);
+  //calcBiquad(Fc, FSAMPLE);
+  calcIIR(Fc, FSAMPLE);
 
-  // get the filter going and ge samples for 1 second
-  for (int k = 0 ; k < FSAMPLE; k++) {
-    raw_0 = pgm_read_float_near(lookup + readEncoder());
-    raw_diff = raw_0 - raw_1;
+  enableTC4Interrupts(); // get the filter going and ge samples for 1 second
+  delay(500);
 
-    yw_0 = yw_1  + raw_diff;
-
-    y_filtered_0 =  (coeff_b0 * yw_0) + (coeff_b1 * yw_1) + (coeff_b2 * yw_2) - (coeff_a1 * y_filtered_1) - (coeff_a2 * y_filtered_2);
-
-    y_filtered_2 = y_filtered_1;
-    y_filtered_1 = y_filtered_0;
-    yw_2 = yw_1;
-    yw_1 = yw_0;
-    raw_1 = raw_0;
-  }
-
-  r = y_filtered_0;
+  r = y_filtered;
 
 
   if (digitalRead(ena_pin) == 1) { //read current enable setting
@@ -97,7 +85,6 @@ void setup() {
     dir = true;
   }
 
-  enableTC4Interrupts();     //start in closed loop mode
   enableTC5Interrupts();     //start in closed loop mode
 
   Serial_menu();
@@ -112,7 +99,7 @@ void setup() {
 void loop()
 {
   serialCheck();
-  //SerialUSB.println(1000 * e_0);
-  //SerialUSB.println(y_filtered_0);
+  SerialUSB.println(1000 * e_0);
+  //SerialUSB.println(y_filtered);
 
 }

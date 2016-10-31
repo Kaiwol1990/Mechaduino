@@ -19,9 +19,8 @@ extern volatile float pKi;
 extern volatile float pKd;
 
 //----current settings-----
-extern const int PEAKSPERSECOND;
 extern const float iMAX;
-extern const float iPEAK;
+extern const float iDEADBAND;
 
 //---- Lookup -----
 extern const PROGMEM float lookup[];

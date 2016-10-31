@@ -63,4 +63,8 @@ void filterEdit();
 
 float modulo(float dividend, float divisor);
 
+
+void calcIIR (int cut, int sample);
+
+int runningAverage(int M);
 #endif

@@ -463,7 +463,7 @@ void setpoint() {
   SerialUSB.println("Enter step value in degree!");
 
   SerialUSB.print("current Setpoint: ");
-  SerialUSB.println(yw_0);
+  SerialUSB.println(yw);
   SerialUSB.println("Enter setpoint:");
 
   while (!received) {
@@ -552,8 +552,13 @@ int readEncoder()           ////////////////////////////////////////////////////
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
 
-  byte b1 = SPI.transfer(0xFF);
-  byte b2 = SPI.transfer(0xFF);
+  //read with Measured angle with dynamic angle error compensation (DAEC)
+  //byte b1 = SPI.transfer(0xFF);
+  //byte b2 = SPI.transfer(0xFF);
+
+  //read with Measured angle without dynamic angle error compensation (DAEC)
+  byte b1 = SPI.transfer(0x7F);
+  byte b2 = SPI.transfer(0xFE);
 
   angleTemp = (((b1 << 8) | b2) & 0B0011111111111111);
 
@@ -644,8 +649,8 @@ void setupTCInterrupts() {
 
 
 
-  NVIC_SetPriority(TC4_IRQn, 1);
-  NVIC_SetPriority(TC5_IRQn, 2);
+  NVIC_SetPriority(TC4_IRQn, 2);
+  NVIC_SetPriority(TC5_IRQn, 1);
 
 
   // Enable InterruptVector
@@ -767,7 +772,7 @@ void step_response() {
   bool last_enabled = enabled;
   enabled = 1;
 
-  float current_position = yw_0;
+  float current_position = yw;
   bool received = false;
   int response_step = 0;
 
@@ -799,7 +804,7 @@ void step_response() {
     SerialUSB.print(',');
     SerialUSB.print(r - current_position); //print target position
     SerialUSB.print(",");
-    SerialUSB.println(yw_0 - current_position); // print current position
+    SerialUSB.println(yw - current_position); // print current position
 
     if (millis() > start_millis + 300) {
       r = (current_position + response_step);
@@ -927,6 +932,11 @@ float modulo(float dividend, float divisor) {
 
   float answer = (((int)dividend % (int)divisor) / 1000);
   return answer;
+}
+
+void calcIIR (int cut, int sample) {
+  coeff_b0 = 1 - exp(-2 * Pi * (((float)cut) / ((float)sample)));
+  coeff_a1 = 1 - coeff_b0;
 }
 
 

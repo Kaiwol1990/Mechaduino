@@ -3,16 +3,17 @@
 
 #include <Wire.h>
 #include "State.h"
+#include "Parameters.h"
+
 
 //interrupt vars
 volatile float r = 0.0;  //setpoint
 
-volatile float raw_0 = 0.0;  // measured angle
+volatile float raw_0 = 0;  // measured angle
 volatile float raw_1 = 0.0;
-volatile float raw_diff = 0.0;
+volatile float raw_diff = 0;
 
-
-volatile const float PA = (360.0/steps_per_revolution);
+volatile const float PA = (360.0 / steps_per_revolution);
 
 
 volatile float u = 0.0;  //real control effort
@@ -24,26 +25,18 @@ volatile float ITerm = 0.0; // Integral term
 volatile float e_0 = 0.0; // error term
 volatile float e_1 = 0.0;
 
-volatile float y_filtered_0 = 0.0; // raw measured wrapped angle
-volatile float y_filtered_1 = 0.0;
-volatile float y_filtered_2 = 0.0;
+volatile float y_filtered = 0.0; // raw measured wrapped angle
 
-volatile float yw_0 = 0.0; //filtered wraped angle
-volatile float yw_1 = 0.0;
-volatile float yw_2 = 0.0;
+volatile float yw = 0.0; //filtered wraped angle
 
 volatile bool dir = true;
 volatile bool enabled = false;
 
 
 //----current settings-----
-volatile int PEAKCounter = 0;
-int maxPEAKCounter = 3000;
-
 const float rSense = 0.150;
-const int uMAX = ((255 * iMAX * 10 * rSense) / 3.3);
-const int uPEAK = ((255 * iPEAK * 10 * rSense) / 3.3);
-const int uSTEP = maxPEAKCounter / PEAKSPERSECOND ;
+const int uDEADBAND = (((255 * iDEADBAND * 10 * rSense) / 3.3) + 0.5);
+const int uMAX = ((255 * iMAX * 10 * rSense) / 3.3) - uDEADBAND;
 
 //---- Step settings -----
 const int counts_per_revolution = 16384;
