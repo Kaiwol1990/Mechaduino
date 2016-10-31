@@ -25,6 +25,7 @@ void TC5_Handler() {
         ITerm = -150;
       }
 
+
       u = ((pKp * e_0) + (pKi * ITerm) + (pKd * (e_0 - e_1)));
     }
     else {
@@ -42,10 +43,10 @@ void TC5_Handler() {
     }
 
     if (u > 0) {
-      output(-raw_0 - PA, abs(u + uDEADBAND));
+      output(-raw_0 - PA, abs(u));
     }
     else {
-      output(-raw_0 + PA, abs(u + uDEADBAND));
+      output(-raw_0 + PA, abs(u));
     }
 
     e_1 = e_0;
@@ -62,7 +63,7 @@ void TC4_Handler() {
   if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
 
     raw_0 = pgm_read_float_near(lookup + readEncoder());
-    raw_diff = raw_0 - raw_1;
+    raw_diff =  (raw_0 - raw_1);
 
     if (raw_diff < -180.0) {
       yw = yw + 360.0 + raw_diff;

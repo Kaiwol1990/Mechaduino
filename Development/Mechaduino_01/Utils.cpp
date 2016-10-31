@@ -424,7 +424,7 @@ void serialCheck() {
       case 'f':
         get_max_frequency();
         break;
-
+        
       case 'o':
         filterEdit();
         break;
@@ -553,12 +553,8 @@ int readEncoder()           ////////////////////////////////////////////////////
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
 
   //read with Measured angle with dynamic angle error compensation (DAEC)
-  //byte b1 = SPI.transfer(0xFF);
-  //byte b2 = SPI.transfer(0xFF);
-
-  //read with Measured angle without dynamic angle error compensation (DAEC)
-  byte b1 = SPI.transfer(0x7F);
-  byte b2 = SPI.transfer(0xFE);
+  byte b1 = SPI.transfer(0xFF);
+  byte b2 = SPI.transfer(0xFF);
 
   angleTemp = (((b1 << 8) | b2) & 0B0011111111111111);
 
@@ -649,8 +645,8 @@ void setupTCInterrupts() {
 
 
 
-  NVIC_SetPriority(TC4_IRQn, 2);
-  NVIC_SetPriority(TC5_IRQn, 1);
+  NVIC_SetPriority(TC4_IRQn, 1);
+  NVIC_SetPriority(TC5_IRQn, 2);
 
 
   // Enable InterruptVector
@@ -873,16 +869,12 @@ void get_max_frequency() {
   enableTC4Interrupts();
 }
 
-void calcBiquad(int cut, int sample) {
-  float K = tan(Pi * (float)cut / (float)sample);
-  float filter_Q = (1.0 / 3.0);
-  float norm =  1.0 / (1.0 + (K / filter_Q) + (K * K));
+float modulo(float dividend, float divisor) {
+  dividend = (1000 * dividend) ;
+  divisor = (1000 * divisor);
 
-  coeff_b0 = (K * K * norm);
-  coeff_b1 = (2.0 * coeff_b0);
-  coeff_b2 = coeff_b0;
-  coeff_a1 = (2.0 * (K * K - 1.0) * norm);
-  coeff_a2 = (1.0 - (K / filter_Q) + (K * K)) * norm;
+  float answer = (((int)dividend % (int)divisor) / 1000);
+  return answer;
 }
 
 void filterEdit() {
@@ -910,33 +902,16 @@ void filterEdit() {
     }
   }
 
-  calcBiquad(Fc, FSAMPLE);
+  calcIIR(Fc, FSAMPLE);
 
   SerialUSB.println();
   SerialUSB.print("volatile int Fc = ");
   SerialUSB.print(Fc);
   SerialUSB.println("; //Hz");
-
-  SerialUSB.println(coeff_b0, 8);
-  SerialUSB.println(coeff_b1, 8);
-  SerialUSB.println(coeff_b2, 8);
-
-  SerialUSB.println(coeff_a1, 8);
-  SerialUSB.println(coeff_a2, 8);
-
 }
 
-float modulo(float dividend, float divisor) {
-  dividend = (1000 * dividend) ;
-  divisor = (1000 * divisor);
-
-  float answer = (((int)dividend % (int)divisor) / 1000);
-  return answer;
-}
 
 void calcIIR (int cut, int sample) {
   coeff_b0 = 1 - exp(-2 * Pi * (((float)cut) / ((float)sample)));
   coeff_a1 = 1 - coeff_b0;
 }
-
-

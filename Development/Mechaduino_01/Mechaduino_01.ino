@@ -37,6 +37,7 @@
 
   o  -  set filter frequency
 
+
   ...see serialCheck() in Utils for more details
 */
 #include "SanityCheck.h"
@@ -61,7 +62,6 @@ void setup() {
   setupPins();
   setupSPI();
   setupTCInterrupts();
-  //calcBiquad(Fc, FSAMPLE);
   calcIIR(Fc, FSAMPLE);
 
   enableTC4Interrupts(); // get the filter going and ge samples for 1 second
@@ -99,7 +99,7 @@ void setup() {
 void loop()
 {
   serialCheck();
-  SerialUSB.println(1000 * e_0);
+  //SerialUSB.println(e_0);
   //SerialUSB.println(y_filtered);
 
 }

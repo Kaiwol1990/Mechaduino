@@ -10,18 +10,19 @@ const String identifier = "Y";
 
 //---- Sample Frequenz -----
 // frequency for samples of the magnetic encoder
-volatile int FSAMPLE = 40000; //Hz //change only if you know what you're doing
+volatile int FSAMPLE = 20000; //Hz //change only if you know what you're doing
 
 // frequency for the PID loop
-volatile int FPID = 2100; //Hz //change only if you know what you're doing
+volatile int FPID = 2600; //Hz //change only if you know what you're doing
 
 //---- Filter Frequenz -----
 volatile int Fc = FPID ; //Hz //change only if you know what you're doing
 
 //---- PID Values -----
-volatile float pKp = 12.0000;
-volatile float pKi = 0.16300;
-volatile float pKd = 60.0000;
+volatile float pKp = 9.0000;
+volatile float pKi = 0.2000;
+volatile float pKd = 50.0000;
+
 
 //----current settings-----
 const float iMAX = 0.6;  //max 2.0 for A4954 driverm should be lower (thermal conditions)

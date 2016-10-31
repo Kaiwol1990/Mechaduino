@@ -57,14 +57,10 @@ void step_response();
 
 void get_max_frequency();
 
-void calcBiquad(int cut, int sample);
+float modulo(float dividend, float divisor);
 
 void filterEdit();
 
-float modulo(float dividend, float divisor);
-
-
 void calcIIR (int cut, int sample);
 
-int runningAverage(int M);
 #endif

@@ -36,7 +36,7 @@ volatile bool enabled = false;
 //----current settings-----
 const float rSense = 0.150;
 const int uDEADBAND = (((255 * iDEADBAND * 10 * rSense) / 3.3) + 0.5);
-const int uMAX = ((255 * iMAX * 10 * rSense) / 3.3) - uDEADBAND;
+const int uMAX = ((255 * iMAX * 10 * rSense) / 3.3);
 
 //---- Step settings -----
 const int counts_per_revolution = 16384;
