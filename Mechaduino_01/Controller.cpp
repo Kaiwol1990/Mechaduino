@@ -7,109 +7,97 @@
 #include "Parameters.h"
 #include "macros.h"
 
-void TC5_Handler()
-{
+void TC5_Handler() {
+  // gets called with FPID frequency
+
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
-
-    y = pgm_read_float_near(lookup + readEncoder());
-
-    if ((y - y_1) < -180.0) {
-      yw = yw + 360 + (y - y_1);
-    }
-    else if ((y - y_1) > 180.0) {
-      yw = yw - 360 + (y - y_1);
-    }
-    else {
-      yw = yw  + (y - y_1);
-    }
-
-    y_filtered_0 =  (coeff_b0 * yw) + (coeff_b1 * yw_1) + (coeff_b2 * yw_2) - (coeff_a1 * y_filtered_1) - (coeff_a2 * y_filtered_2);
 
     if (enabled || ena_pin == -1) {
 
-      e = (r - y_filtered_0);
 
-      ITerm = (ITerm + e);
+      e_0 = (r - y);
 
-      if (ITerm > 150) {
-        ITerm = 150;
+      if (e_0 > 2000) {
+        e_0 = 2000;
       }
-      else if (ITerm < -150) {
-        ITerm = -150;
+      else if (e_0 < -2000) {
+        e_0 = -2000;
       }
 
-      //u = ((pKp * e) + (pKi * ITerm) - (pKd * (yw - yw_1))); //ARDUINO library style
+      ITerm = (ITerm + e_0);
 
-      u = ((pKp * e) + (pKi * ITerm) + (pKd * (e - e_1)));
+      if (ITerm > 50000) {
+        ITerm = 50000;
+      }
+      else if (ITerm < -50000) {
+        ITerm = -50000;
+      }
+
+      u = ( (pKp * e_0) + ((pKi * ITerm) >> 1) + (pKd * (e_0 - e_1)) );
+      u = u >> 16;
 
     }
     else {
-      r = yw;
+      r = y;
+      e_0 = 0;
       u = 0;
       ITerm = 0;
     }
 
 
-    if (abs(u) < 1.3 * uMAX) {
-
-      if (u > uMAX) {
-        u = uMAX;
-      }
-      else if (u < -uMAX) {
-        u = -uMAX;
-      }
-
-      PEAKCounter -= 1;
+    if (u > uMAX) {
+      u = uMAX;
     }
-    else {
-      if ((PEAKCounter + uSTEP) <= maxPEAKCounter) {
-
-        if (u > uPEAK) {
-          u = uPEAK;
-        }
-        else if (u < -uPEAK) {
-          u = -uPEAK;
-        }
-
-        PEAKCounter += uSTEP;
-      }
-      else {
-
-        if (u > uMAX) {
-          u = uMAX;
-        }
-        else if (u < -uMAX) {
-          u = -uMAX;
-        }
-
-        PEAKCounter -= 1;
-      }
+    else if (u < -uMAX) {
+      u = -uMAX;
     }
 
     if (u > 0) {
-      output(-y - PA, abs(u));
+      output(-raw_0 - PA, abs(u));
     }
     else {
-      output(-y + PA, abs(u));
+      output(-raw_0 + PA, abs(u));
     }
 
-    if (abs(e) < 0.1) {
-      REG_PORT_OUTSET0 = PORT_PA17;
-    }
-    else {
-      REG_PORT_OUTCLR0 = PORT_PA17;
-    }
-
-    y_filtered_2 = y_filtered_1;
-    y_filtered_1 = y_filtered_0;
-
-    yw_2 = yw_1;
-    yw_1 = yw;
-
-    y_1 = y;
-    
-    e_1 = e;
+    e_1 = e_0;
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }
 }
+
+
+
+void TC4_Handler() {
+  // gets called with FSAMPLE frequency
+
+  if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
+
+    raw_0 = (pgm_read_word_near(lookup + readEncoder()));
+
+    raw_diff = raw_0 - raw_1;
+
+    if (raw_diff < -18000) {
+      yw_0 = yw_0 + 36000 + raw_diff;
+    }
+    else if (raw_diff > 18000) {
+      yw_0 = yw_0 - 36000 + raw_diff;
+    }
+    else {
+      yw_0 = yw_0  + raw_diff;
+    }
+
+    sum -= LM[pointer];
+    LM[pointer] = yw_0;
+    sum += LM[pointer];
+    pointer++;
+    pointer = pointer % LM_SIZE;
+
+    y = (sum >> shifts);
+
+    raw_1 = raw_0;
+
+    TC4->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
+  }
+}
+
+

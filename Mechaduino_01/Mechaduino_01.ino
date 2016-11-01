@@ -29,15 +29,11 @@
 
   e  -  parameter edit (edit PID values)
 
-  a  -  anticogging calibration
-
   j  -  generate step response for PID tuning
 
   m  -  print main menu
 
   f  -  get max loop frequency
-
-  o  -  set filter frequency
 
   ...see serialCheck() in Utils for more details
 */
@@ -59,20 +55,14 @@ void setup() {
   digitalWrite(ledPin, HIGH);
 
   SerialUSB.println("booting");
-  delay(3000);
 
   setupPins();
   setupSPI();
   setupTCInterrupts();
-  calcBiquad(Fc, Fs, 0.33);
 
-  for (int k = 1 ; k < 100; k++) {
-    delay(10);
-    y = y + lookup_angle(readEncoder());
-  }
-  y = (y / 100);
-  y_1 = y;
-  yw = y;
+  enableTC4Interrupts(); // get the filter going and ge samples for 1 second
+  delay(500);
+
   r = y;
 
 
@@ -91,7 +81,7 @@ void setup() {
     dir = true;
   }
 
-  enableTCInterrupts();     //start in closed loop mode
+  enableTC5Interrupts();     //start in closed loop mode
 
   Serial_menu();
 }
@@ -105,7 +95,10 @@ void setup() {
 void loop()
 {
   serialCheck();
-  //SerialUSB.println(1000 * e);
-  //SerialUSB.println(yw);
+  //SerialUSB.println(e_0);
+  //SerialUSB.println(raw_0 / 100.0);
+  //SerialUSB.println(reading);
+  //SerialUSB.println(raw_0);
+  //SerialUSB.println(u);
 
 }

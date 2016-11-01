@@ -5,32 +5,25 @@
 
 
 //interrupt vars
-extern volatile float r;  //setpoint
+extern volatile int r;  //setpoint
 
-extern volatile float y;  // measured angle
-extern volatile float y_1;
+extern volatile int raw_0;  // measured angle
+extern volatile int raw_1;
+extern volatile int raw_diff;
 
-extern volatile const float PA;  //
+extern volatile int reading ;
 
-extern volatile float u;  //real control effort
-extern volatile float u_1;
+extern volatile const int PA;  //
 
+extern volatile int u;  //real control effort
 
-extern volatile float ITerm; //integral term
+extern volatile int ITerm; //integral term
 
+extern volatile int e_0; // error term
+extern volatile int e_1;
 
-extern volatile float e; // error term
-extern volatile float e_1;
-
-
-extern volatile float y_filtered_0; // raw measured wrapped angle
-extern volatile float y_filtered_1;
-extern volatile float y_filtered_2;
-
-
-extern volatile float yw; //filtered wraped angle
-extern volatile float yw_1;
-extern volatile float yw_2;
+extern volatile int yw_0; //filtered wraped angle
+extern volatile int y;
 
 extern volatile bool dir;
 extern volatile bool enabled;
@@ -38,18 +31,11 @@ extern volatile bool enabled;
 
 //----current settings-----
 extern const int uMAX;
-extern const int uPEAK;
-extern const int uSTEP;
-extern const float iMAX;
-extern const float iPEAK;
-extern const int PEAKSPERSECOND;
-extern volatile int PEAKCounter;
-extern int maxPEAKCounter;
 
 //---- Step settings -----
 extern const int counts_per_revolution;
 extern const float angle_per_step;
-extern const float stepangle;
+extern const int stepangle;
 extern const int microstepping;
 extern const int steps_per_revolution;
 
@@ -74,18 +60,15 @@ extern int val2;
 
 
 extern int stepNumber; // step index for cal routine
-extern float step_target;
+extern int step_target;
 
 extern bool frequency_test;
 
 extern const float Pi;
 
-extern const PROGMEM float sine_lookup[];
+extern const PROGMEM int sine_lookup[];
 
-//----Filter Coeffizienten-----
-extern float coeff_b0;
-extern float coeff_b1;
-extern float coeff_b2;
-extern float coeff_a1;
-extern float coeff_a2;
+extern char pointer;
+extern  long sum;
+
 #endif

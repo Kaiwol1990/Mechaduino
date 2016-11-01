@@ -81,16 +81,17 @@ void enaInterrupt() {
 
 
 
-void output(float theta, int effort) {
-  static float angle;
-  static float floatangle;
+void output(int theta, int effort) {
+  static int angle;
+  static int floatangle;
 
-  angle = (10000 * theta * 0.87266 );
+  angle = (100 * theta );
+  angle = (angle * 0.87266);
 
   floatangle = angle + 23562;
   //floatangle = angle + 7854;
 
-  val1 = effort * lookup_sine((int)floatangle);
+  val1 = effort * lookup_sine(floatangle) / 10000;
 
   analogFastWrite(VREF_2, abs(val1));
 
@@ -110,7 +111,7 @@ void output(float theta, int effort) {
   floatangle = angle + 7854;
   //floatangle = angle + 23562;
 
-  val2 = effort * lookup_sine((int)floatangle);
+  val2 = effort * lookup_sine(floatangle) / 10000;
 
   analogFastWrite(VREF_1, abs(val2));
 
@@ -129,7 +130,8 @@ void output(float theta, int effort) {
 }
 
 void calibration() {
-  disableTCInterrupts();
+  disableTC5Interrupts();
+  disableTC4Interrupts();
 
   SerialUSB.println(" ");
   SerialUSB.println("---- Calibration Routine ----");
@@ -256,7 +258,7 @@ void calibration() {
   SerialUSB.println();
   SerialUSB.println("calibration single steps");
   // step to every single fullstep position and read the Encoder
-  step_target = 0.0;
+  step_target = 0;
   for (int x = 0; x < steps_per_revolution; x++) {
 
     encoderReading = 0;
@@ -274,7 +276,7 @@ void calibration() {
 
     delay(100);
 
-    percent = 100 * ((float)x) / (float)(steps_per_revolution);
+    percent = 100 * ((float)x) / ((float)(steps_per_revolution));
     SerialUSB.print(percent);
     SerialUSB.println('%');
   }
@@ -335,23 +337,23 @@ void calibration() {
 
       if (i == iStart) {
         for (int j = jStart; j < ticks; j++) {
-          lookupAngle = 0.001 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
 
       else if (i == (iStart + steps_per_revolution)) {
         for (int j = 0; j < jStart; j++) {
-          lookupAngle = 0.001 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
       else {
         for (int j = 0; j < ticks; j++) {
-          lookupAngle = 0.001 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
@@ -363,22 +365,22 @@ void calibration() {
     else if (ticks < 1) {
       if (i == iStart) {
         for (int j = - ticks; j > (jStart); j--) {
-          lookupAngle = 0.001 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
       else if (i == iStart + steps_per_revolution) {
         for (int j = jStart; j > 0; j--) {
-          lookupAngle = 0.001 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
       else {
         for (int j = - ticks; j > 0; j--) {
-          lookupAngle = 0.001 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
@@ -386,7 +388,8 @@ void calibration() {
     }
   }
   SerialUSB.println();
-  enableTCInterrupts();
+  enableTC4Interrupts();
+  enableTC5Interrupts();
 
 }
 
@@ -413,10 +416,6 @@ void serialCheck() {
         parameterEdit();
         break;
 
-      case 'a':             //anticogging
-        antiCoggingCal();
-        break;
-
       case 'j':
         step_response();
         break;
@@ -427,10 +426,6 @@ void serialCheck() {
 
       case 'f':
         get_max_frequency();
-        break;
-
-      case 'o':
-        filterEdit();
         break;
 
       default:
@@ -452,7 +447,6 @@ void Serial_menu() {
   SerialUSB.println("s  -  setpoint");
   SerialUSB.println("p  -  print parameter");
   SerialUSB.println("e  -  edit parameter ");
-  SerialUSB.println("a  -  anticogging");
   SerialUSB.println("j  -  step response");
   SerialUSB.println("m  -  print main menu");
   SerialUSB.println("f  -  get max loop frequency");
@@ -460,20 +454,22 @@ void Serial_menu() {
 }
 
 void setpoint() {
-  unsigned long start_millis = millis();
+  
+  unsigned long start_millis;
+  start_millis = millis();
   int time_out = 5000;
   bool received = false;
 
   SerialUSB.println("Enter step value in degree!");
 
   SerialUSB.print("current Setpoint: ");
-  SerialUSB.println(yw);
+  SerialUSB.println((y / 100.0));
   SerialUSB.println("Enter setpoint:");
 
   while (!received) {
     delay(100);
     if (SerialUSB.peek() != -1) {
-      r = SerialUSB.parseFloat();
+      r = 100 * SerialUSB.parseFloat();
       received = true;
     }
     else if (millis() > start_millis + time_out) {
@@ -483,35 +479,27 @@ void setpoint() {
   }
 
   SerialUSB.print("new Setpoint: ");
-  SerialUSB.println(r);
+  SerialUSB.println((r / 100.0));
 }
 
 void parameterQuery() {
   SerialUSB.println(' ');
-  SerialUSB.println("----Current Parameters-----");
-  SerialUSB.println(' ');
+  SerialUSB.println("//---- PID Values -----");
 
-  SerialUSB.print("volatile float pKp = ");
-  SerialUSB.print(pKp, 4);
+  SerialUSB.print("volatile int pKp = ");
+  SerialUSB.print(pKp);
   SerialUSB.println(';');
 
-  SerialUSB.print("volatile float pKi = ");
-  SerialUSB.print(pKi, 4);
+  SerialUSB.print("volatile int pKi = ");
+  SerialUSB.print(pKi);
   SerialUSB.println(';');
 
-  SerialUSB.print("volatile float pKd = ");
-  SerialUSB.print(pKd, 4);
+  SerialUSB.print("volatile int pKd = ");
+  SerialUSB.print(pKd);
   SerialUSB.println(';');
 
 }
 
-
-float lookup_angle(int n)
-{
-  float a_out;
-  a_out = pgm_read_float_near(lookup + n);
-  return a_out;
-}
 
 void jump_to_fullstepp() {
   // set coil 2 to zero
@@ -525,29 +513,29 @@ void jump_to_fullstepp() {
   REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
 }
 
-void quaterStep() {           /////////////////////////////////   oneStep    ///////////////////////////////
+void quaterStep() {
 
   if (dir == 0) {
-    step_target += 0.9;
+    step_target += (PA / 4);
   }
   else {
-    step_target -= 0.9;
+    step_target -= (PA / 4);
   }
 
-  output(step_target, 64); //1.8 = 90/50
+  output(step_target, 64);
 
 }
 
 void oneStep() {
 
   if (dir == 0) {
-    step_target += 1.8;
+    step_target += PA;
   }
   else {
-    step_target -= 1.8;
+    step_target -= PA;
   }
 
-  output(step_target, 64); //1.8 = 90/50
+  output(step_target, 64);
 
 }
 
@@ -557,8 +545,13 @@ int readEncoder()           ////////////////////////////////////////////////////
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
 
+  //read with Measured angle with dynamic angle error compensation (DAEC)
   byte b1 = SPI.transfer(0xFF);
   byte b2 = SPI.transfer(0xFF);
+
+  //read with Measured angle without dynamic angle error compensation (DAEC)
+  //byte b1 = SPI.transfer(0x7F);
+  //byte b2 = SPI.transfer(0xFE);
 
   angleTemp = (((b1 << 8) | b2) & 0B0011111111111111);
 
@@ -587,7 +580,7 @@ int mod(int xMod, int mMod) {
 
 float lookup_sine(int m)        /////////////////////////////////////////////////  LOOKUP_SINE   /////////////////////////////
 {
-  float b_out;
+  int b_out;
 
   m = (0.01 * (((m % 62832) + 62832) % 62832)) + 0.5; //+0.5 for rounding
 
@@ -595,12 +588,12 @@ float lookup_sine(int m)        ////////////////////////////////////////////////
 
   if (m > 314) {
     m = m - 314;
-    b_out = -pgm_read_float_near(sine_lookup + m);
+    b_out = -pgm_read_word_near(sine_lookup + m);
 
   }
   else
   {
-    b_out = pgm_read_float_near(sine_lookup + m);
+    b_out = pgm_read_word_near(sine_lookup + m);
   }
 
   return b_out;
@@ -608,26 +601,32 @@ float lookup_sine(int m)        ////////////////////////////////////////////////
 
 
 void setupTCInterrupts() {
-  const int overflow = (48000000 / Fs) - 1;
+  const int overflow_TC_5 = (48000000 / FPID) - 1;
+  const int overflow_TC_4 = (48000000 / FSAMPLE) - 1;
 
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
   while (GCLK->STATUS.bit.SYNCBUSY);
 
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TCx
+  TC4->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TCx
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_MODE_COUNT16;   // Set Timer counter Mode to 16 bits
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_MODE_COUNT16;   // Set Timer counter Mode to 16 bits
   WAIT_TC16_REGS_SYNC(TC5)
 
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ; // Set TC as normal Normal Frq
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ; // Set TC as normal Normal Frq
   WAIT_TC16_REGS_SYNC(TC5)
 
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;   // Set perscaler
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;   // Set perscaler
   WAIT_TC16_REGS_SYNC(TC5)
 
 
-  TC5->COUNT16.CC[0].reg = overflow;
+  TC5->COUNT16.CC[0].reg = overflow_TC_5;
+  TC4->COUNT16.CC[0].reg = overflow_TC_4;
   WAIT_TC16_REGS_SYNC(TC5)
 
 
@@ -636,51 +635,44 @@ void setupTCInterrupts() {
   TC5->COUNT16.INTENSET.bit.MC0 = 1;         // enable compare match to CC0
 
 
+  TC4->COUNT16.INTENSET.reg = 0;              // disable all interrupts
+  TC4->COUNT16.INTENSET.bit.OVF = 1;          // enable overfollow
+  TC4->COUNT16.INTENSET.bit.MC0 = 1;         // enable compare match to CC0
+
+
+
+
+  NVIC_SetPriority(TC4_IRQn, 2);
   NVIC_SetPriority(TC5_IRQn, 1);
 
 
   // Enable InterruptVector
   NVIC_EnableIRQ(TC5_IRQn);
+  NVIC_EnableIRQ(TC4_IRQn);
+}
+
+void enableTC4Interrupts() {
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC4
+  WAIT_TC16_REGS_SYNC(TC5)                      //wait for sync
 }
 
 
-void enableTCInterrupts() {
+void enableTC5Interrupts() {
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      //wait for sync
 }
 
-void disableTCInterrupts() {
+void disableTC5Interrupts() {
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }
 
 
-void antiCoggingCal() {
-  SerialUSB.println(" -----------------BEGIN ANTICOGGING CALIBRATION!----------------");
-  r = lookup_angle(1);
-  enableTCInterrupts();
-  delay(1000);
-
-
-  for (int i = 1; i < 657; i++) {
-    r = lookup_angle(i);
-    SerialUSB.print(r, 4);
-    SerialUSB.print(" , ");
-    delay(100);
-    SerialUSB.println(u, 4);
-  }
-  SerialUSB.println(" -----------------REVERSE!----------------");
-
-  for (int i = 656; i > 0; i--) {
-    r = lookup_angle(i);
-    SerialUSB.print(r, 4);
-    SerialUSB.print(" , ");
-    delay(100);
-    SerialUSB.println(u, 4);
-  }
-  SerialUSB.println(" -----------------DONE!----------------");
-  disableTCInterrupts();
+void disableTC4Interrupts() {
+  TC4->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC4
+  WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }
+
 
 
 void parameterEdit() {
@@ -693,13 +685,13 @@ void parameterEdit() {
   SerialUSB.println("---- Edit position loop gains: ----");
   SerialUSB.println();
   SerialUSB.print("p ----- pKp = ");
-  SerialUSB.println(pKp, 4);
+  SerialUSB.println(pKp);
 
   SerialUSB.print("i ----- pKi = ");
-  SerialUSB.println(pKi, 4);
+  SerialUSB.println(pKi);
 
   SerialUSB.print("d ----- pKd = ");
-  SerialUSB.println(pKd, 4);
+  SerialUSB.println(pKd);
 
   SerialUSB.println("q ----- quit");
   SerialUSB.println();
@@ -721,7 +713,7 @@ void parameterEdit() {
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKp = SerialUSB.parseFloat();
+              pKp = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -734,7 +726,7 @@ void parameterEdit() {
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKi = SerialUSB.parseFloat();
+              pKi = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -747,7 +739,7 @@ void parameterEdit() {
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKd = SerialUSB.parseFloat();
+              pKd = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -761,12 +753,11 @@ void parameterEdit() {
         }
         break;
     }
-
-    SerialUSB.println();
-    SerialUSB.println();
-    parameterQuery();
-
   }
+
+  SerialUSB.println();
+  SerialUSB.println();
+  parameterQuery();
 }
 
 
@@ -774,7 +765,7 @@ void step_response() {
   bool last_enabled = enabled;
   enabled = 1;
 
-  float current_position = yw;
+  int current_position = y;
   bool received = false;
   int response_step = 0;
 
@@ -786,7 +777,7 @@ void step_response() {
   while (!received) {
     delay(100);
     if (SerialUSB.peek() != -1) {
-      response_step = SerialUSB.parseInt();
+      response_step = 100 * SerialUSB.parseInt();
       received = true;
     }
     else if (millis() > start_millis + time_out) {
@@ -804,9 +795,9 @@ void step_response() {
 
     SerialUSB.print(micros());
     SerialUSB.print(',');
-    SerialUSB.print(r - current_position); //print target position
+    SerialUSB.print((r - current_position) / 100.0); //print target position
     SerialUSB.print(",");
-    SerialUSB.println(yw - current_position); // print current position
+    SerialUSB.println((y - current_position) / 100.0); // print current position
 
     if (millis() > start_millis + 300) {
       r = (current_position + response_step);
@@ -820,7 +811,7 @@ void step_response() {
 }
 
 void get_max_frequency() {
-  disableTCInterrupts();
+  disableTC5Interrupts();
 
   SerialUSB.println("");
   SerialUSB.println("Calibrating loop time");
@@ -843,7 +834,6 @@ void get_max_frequency() {
 
     while (i <= max_counter) {
       TC5_Handler();
-      serialCheck();
       i++;
     }
 
@@ -866,65 +856,23 @@ void get_max_frequency() {
 
   SerialUSB.println("");
   SerialUSB.println("-----------");
-  SerialUSB.print("volatile float Fs = ");
+  SerialUSB.print("volatile int FPID = ");
   SerialUSB.print(frequency);
   SerialUSB.println("; //Hz");
 
   enabled = last_enabled;
 
-  enableTCInterrupts();
+  enableTC5Interrupts();
+  enableTC4Interrupts();
 }
 
-void calcBiquad(int Fc, int Fs, float Q) {
-  float K = tan(Pi * Fc / Fs);
-  float filter_Q = 0.33;
-  float norm =  1 / (1 + (K / filter_Q) + (K * K));
 
-  coeff_b0 = (K * K * norm);
-  coeff_b1 = (2 * coeff_b0);
-  coeff_b2 = coeff_b0;
-  coeff_a1 = (2 * (K * K - 1) * norm);
-  coeff_a2 = (1 - (K / filter_Q) + (K * K)) * norm;
+float modulo(float dividend, float divisor) {
+  dividend = (1000 * dividend) ;
+  divisor = (1000 * divisor);
+
+  float answer = (((int)dividend % (int)divisor) / 1000);
+  return answer;
 }
 
-void filterEdit() {
-  bool received_1 = false;
-  unsigned long start_millis = millis();
-  int time_out = 5000;
-
-  SerialUSB.println();
-  SerialUSB.println("---- Edit filter Frequency: ----");
-  SerialUSB.println();
-  SerialUSB.print("Current Frequency = ");
-  SerialUSB.println(Fc);
-  SerialUSB.println();
-  SerialUSB.println("enter new Fc!");
-
-  while (!received_1) {
-    if (millis() > start_millis + time_out) {
-      SerialUSB.println("time out");
-      return;
-    }
-    delay(100);
-    if (SerialUSB.peek() != -1) {
-      Fc = SerialUSB.parseFloat();
-      received_1 = true;
-    }
-  }
-
-  calcBiquad(Fc, Fs, 0.33);
-
-  SerialUSB.println();
-  SerialUSB.print("volatile int Fc = ");
-  SerialUSB.print(Fc);
-  SerialUSB.println("; //Hz");
-
-  SerialUSB.println(coeff_b0, 8);
-  SerialUSB.println(coeff_b1, 8);
-  SerialUSB.println(coeff_b2, 8);
-
-  SerialUSB.println(coeff_a1, 8);
-  SerialUSB.println(coeff_a2, 8);
-
-}
 

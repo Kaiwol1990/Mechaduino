@@ -10,4 +10,7 @@
 void TC5_Handler();
 
 
+void TC4_Handler();
+
+
 #endif
