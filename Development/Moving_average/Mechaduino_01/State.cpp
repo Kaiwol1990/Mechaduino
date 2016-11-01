@@ -21,12 +21,6 @@ volatile const int PA = (36000 / steps_per_revolution);
 
 volatile int u = 0;  //real control effort
 
-/*
-  volatile float ITerm = 0.0; // Integral term
-
-  volatile float e_0 = 0.0; // error term
-  volatile float e_1 = 0.0;
-*/
 volatile int ITerm = 0; // Integral term
 
 volatile int e_0 = 0; // error term

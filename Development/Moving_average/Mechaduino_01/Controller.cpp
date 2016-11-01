@@ -14,7 +14,15 @@ void TC5_Handler() {
 
     if (enabled || ena_pin == -1) {
 
+
       e_0 = (r - y);
+
+      if (e_0 > 2000) {
+        e_0 = 2000;
+      }
+      else if (e_0 < -2000) {
+        e_0 = -2000;
+      }
 
       ITerm = (ITerm + e_0);
 
@@ -25,8 +33,8 @@ void TC5_Handler() {
         ITerm = -50000;
       }
 
-      u = ( ((pKp * e_0) >> 8) + ((pKi * ITerm) >> 9) + ((pKd * (e_0 - e_1)) >> 8) );
-      u = u >> 8;
+      u = ( (pKp * e_0) + ((pKi * ITerm) >> 1) + (pKd * (e_0 - e_1)) );
+      u = u >> 16;
 
     }
     else {

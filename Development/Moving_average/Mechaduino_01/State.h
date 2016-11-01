@@ -16,12 +16,7 @@ extern volatile int reading ;
 extern volatile const int PA;  //
 
 extern volatile int u;  //real control effort
-/*
-  extern volatile float ITerm; //integral term
 
-  extern volatile float e_0; // error term
-  extern volatile float e_1;
-*/
 extern volatile int ITerm; //integral term
 
 extern volatile int e_0; // error term

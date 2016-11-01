@@ -454,8 +454,7 @@ void Serial_menu() {
 }
 
 void setpoint() {
-  disableTC5Interrupts();
-  disableTC4Interrupts();
+  
   unsigned long start_millis;
   start_millis = millis();
   int time_out = 5000;
@@ -478,12 +477,6 @@ void setpoint() {
       return;
     }
   }
-
-  enableTC4Interrupts();
-  enableTC5Interrupts();
-
-  while (abs(r - y) > 100 && millis() < (start_millis + time_out)) {};
-  delay(100);
 
   SerialUSB.print("new Setpoint: ");
   SerialUSB.println((r / 100.0));
