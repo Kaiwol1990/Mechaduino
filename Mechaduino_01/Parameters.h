@@ -11,9 +11,9 @@ extern volatile int FSAMPLE;
 extern volatile int FPID;
 
 //---- PID Values -----
-extern volatile int pKp;
-extern volatile int pKi;
-extern volatile int pKd;
+extern volatile int Kp;
+extern volatile int Ki;
+extern volatile int Kd;
 
 //----current settings-----
 extern const float iMAX;

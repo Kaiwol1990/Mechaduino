@@ -33,7 +33,7 @@ void TC5_Handler() {
         ITerm = -50000;
       }
 
-      u = ( (pKp * e_0) + ((pKi * ITerm) >> 1) + (pKd * (e_0 - e_1)) );
+      u = ( (Kp * e_0) + ((Ki * ITerm) >> 1) + (Kd * (e_0 - e_1)) );
       u = u >> 16;
 
     }

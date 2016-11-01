@@ -16,9 +16,9 @@ volatile int FSAMPLE = 30000; //Hz //change only if you know what you're doing
 volatile int FPID = 4800; //Hz //change only if you know what you're doing
 
 //---- PID Values -----
-volatile int pKp = 7500;
-volatile int pKi = 25;
-volatile int pKd = 130000;
+volatile int Kp = 7500;
+volatile int Ki = 25;
+volatile int Kd = 130000;
 
 
 //----current settings-----

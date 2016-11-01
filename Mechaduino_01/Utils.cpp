@@ -486,16 +486,16 @@ void parameterQuery() {
   SerialUSB.println(' ');
   SerialUSB.println("//---- PID Values -----");
 
-  SerialUSB.print("volatile int pKp = ");
-  SerialUSB.print(pKp);
+  SerialUSB.print("volatile int Kp = ");
+  SerialUSB.print(Kp);
   SerialUSB.println(';');
 
-  SerialUSB.print("volatile int pKi = ");
-  SerialUSB.print(pKi);
+  SerialUSB.print("volatile int Ki = ");
+  SerialUSB.print(Ki);
   SerialUSB.println(';');
 
-  SerialUSB.print("volatile int pKd = ");
-  SerialUSB.print(pKd);
+  SerialUSB.print("volatile int Kd = ");
+  SerialUSB.print(Kd);
   SerialUSB.println(';');
 
 }
@@ -684,14 +684,14 @@ void parameterEdit() {
   SerialUSB.println();
   SerialUSB.println("---- Edit position loop gains: ----");
   SerialUSB.println();
-  SerialUSB.print("p ----- pKp = ");
-  SerialUSB.println(pKp);
+  SerialUSB.print("p ----- Kp = ");
+  SerialUSB.println(Kp);
 
-  SerialUSB.print("i ----- pKi = ");
-  SerialUSB.println(pKi);
+  SerialUSB.print("i ----- Ki = ");
+  SerialUSB.println(Ki);
 
-  SerialUSB.print("d ----- pKd = ");
-  SerialUSB.println(pKd);
+  SerialUSB.print("d ----- Kd = ");
+  SerialUSB.println(Kd);
 
   SerialUSB.println("q ----- quit");
   SerialUSB.println();
@@ -709,11 +709,11 @@ void parameterEdit() {
     switch (inChar2) {
       case 'p':
         {
-          SerialUSB.println("enter new pKp!");
+          SerialUSB.println("enter new Kp!");
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKp = SerialUSB.parseInt();
+              Kp = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -722,11 +722,11 @@ void parameterEdit() {
         break;
       case 'i':
         {
-          SerialUSB.println("enter new pKi!");
+          SerialUSB.println("enter new Ki!");
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKi = SerialUSB.parseInt();
+              Ki = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -735,11 +735,11 @@ void parameterEdit() {
         break;
       case 'd':
         {
-          SerialUSB.println("enter new pKd!");
+          SerialUSB.println("enter new Kd!");
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKd = SerialUSB.parseInt();
+              Kd = SerialUSB.parseInt();
               received_2 = true;
             }
           }
