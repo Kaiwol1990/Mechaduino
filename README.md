@@ -8,7 +8,7 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - menu entry for generating an step response
 - deletet all modes other then position 
 - changed all float to integer operations
-- moved the encoder reading in it's own ISR running at 40 kHz
+- moved the encoder reading in it's own ISR running at 30 kHz
 - added an rolling average to the encoder reading
 - changed the frequency of the PID loop to 4.8 kHz
 
