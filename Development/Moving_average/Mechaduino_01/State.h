@@ -5,7 +5,7 @@
 
 
 //interrupt vars
-extern volatile float r;  //setpoint
+extern volatile int r;  //setpoint
 
 extern volatile int raw_0;  // measured angle
 extern volatile int raw_1;
@@ -13,21 +13,22 @@ extern volatile int raw_diff;
 
 extern volatile int reading ;
 
-extern volatile const float PA;  //
+extern volatile const int PA;  //
 
-extern volatile float u;  //real control effort
-extern volatile float u_1;
+extern volatile int u;  //real control effort
+/*
+  extern volatile float ITerm; //integral term
 
+  extern volatile float e_0; // error term
+  extern volatile float e_1;
+*/
+extern volatile int ITerm; //integral term
 
-extern volatile float ITerm; //integral term
-
-
-extern volatile float e_0; // error term
-extern volatile float e_1;
-
+extern volatile int e_0; // error term
+extern volatile int e_1;
 
 extern volatile int yw_0; //filtered wraped angle
-extern volatile float y;
+extern volatile int y;
 
 extern volatile bool dir;
 extern volatile bool enabled;
@@ -39,7 +40,7 @@ extern const int uMAX;
 //---- Step settings -----
 extern const int counts_per_revolution;
 extern const float angle_per_step;
-extern const float stepangle;
+extern const int stepangle;
 extern const int microstepping;
 extern const int steps_per_revolution;
 
@@ -64,21 +65,13 @@ extern int val2;
 
 
 extern int stepNumber; // step index for cal routine
-extern float step_target;
+extern int step_target;
 
 extern bool frequency_test;
 
 extern const float Pi;
 
-extern const PROGMEM float sine_lookup[];
-
-//----Filter Coeffizienten-----
-extern float coeff_b0;
-extern float coeff_b1;
-extern float coeff_b2;
-extern float coeff_a1;
-extern float coeff_a2;
-
+extern const PROGMEM int sine_lookup[];
 
 extern char pointer;
 extern  long sum;

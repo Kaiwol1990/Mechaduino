@@ -11,15 +11,15 @@ extern volatile int FSAMPLE;
 extern volatile int FPID;
 
 //---- PID Values -----
-extern volatile float pKp;
-extern volatile float pKi;
-extern volatile float pKd;
+extern volatile int pKp;
+extern volatile int pKi;
+extern volatile int pKd;
 
 //----current settings-----
 extern const float iMAX;
 
 //---- Lookup -----
-extern const PROGMEM float lookup[];
+extern const PROGMEM int lookup[];
 
 //---- Baudrate -----
 extern const int baudrate;

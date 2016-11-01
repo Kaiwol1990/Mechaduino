@@ -95,8 +95,8 @@ void setup() {
 void loop()
 {
   serialCheck();
-  //SerialUSB.println(1000 * e_0);
-  //SerialUSB.println(yw_0);
+  //SerialUSB.println(e_0);
+  //SerialUSB.println(raw_0 / 100.0);
   //SerialUSB.println(reading);
   //SerialUSB.println(raw_0);
   //SerialUSB.println(u);

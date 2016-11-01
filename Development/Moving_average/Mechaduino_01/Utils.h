@@ -7,13 +7,15 @@ void setupPins();
 
 void setupSPI();
 
+void setupPID();
+
 void stepInterrupt();
 
 void enaInterrupt();
 
 void dirInterrupt();
 
-void output(float theta, int effort);
+void output(int theta, int effort);
 
 void calibration();
 
@@ -24,8 +26,6 @@ void Serial_menu();
 void setpoint();
 
 void parameterQuery();
-
-float lookup_angle(int n);
 
 void jump_to_fullstepp();
 

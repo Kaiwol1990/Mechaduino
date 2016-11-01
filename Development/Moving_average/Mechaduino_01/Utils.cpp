@@ -81,16 +81,17 @@ void enaInterrupt() {
 
 
 
-void output(float theta, int effort) {
-  static float angle;
-  static float floatangle;
+void output(int theta, int effort) {
+  static int angle;
+  static int floatangle;
 
-  angle = (10000 * theta * 0.87266 );
+  angle = (100 * theta );
+  angle = (angle * 0.87266);
 
   floatangle = angle + 23562;
   //floatangle = angle + 7854;
 
-  val1 = effort * lookup_sine((int)floatangle);
+  val1 = effort * lookup_sine(floatangle) / 10000;
 
   analogFastWrite(VREF_2, abs(val1));
 
@@ -110,7 +111,7 @@ void output(float theta, int effort) {
   floatangle = angle + 7854;
   //floatangle = angle + 23562;
 
-  val2 = effort * lookup_sine((int)floatangle);
+  val2 = effort * lookup_sine(floatangle) / 10000;
 
   analogFastWrite(VREF_1, abs(val2));
 
@@ -335,23 +336,23 @@ void calibration() {
 
       if (i == iStart) {
         for (int j = jStart; j < ticks; j++) {
-          lookupAngle = 0.001 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
 
       else if (i == (iStart + steps_per_revolution)) {
         for (int j = 0; j < jStart; j++) {
-          lookupAngle = 0.001 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
       else {
         for (int j = 0; j < ticks; j++) {
-          lookupAngle = 0.001 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
@@ -363,22 +364,22 @@ void calibration() {
     else if (ticks < 1) {
       if (i == iStart) {
         for (int j = - ticks; j > (jStart); j--) {
-          lookupAngle = 0.001 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
       else if (i == iStart + steps_per_revolution) {
         for (int j = jStart; j > 0; j--) {
-          lookupAngle = 0.001 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
       else {
         for (int j = - ticks; j > 0; j--) {
-          lookupAngle = 0.001 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-          SerialUSB.print(lookupAngle);
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
           SerialUSB.print(" , ");
         }
       }
@@ -458,13 +459,13 @@ void setpoint() {
   SerialUSB.println("Enter step value in degree!");
 
   SerialUSB.print("current Setpoint: ");
-  SerialUSB.println(y);
+  SerialUSB.println((y / 100.0));
   SerialUSB.println("Enter setpoint:");
 
   while (!received) {
     delay(100);
     if (SerialUSB.peek() != -1) {
-      r = SerialUSB.parseFloat();
+      r = 100 * SerialUSB.parseFloat();
       received = true;
     }
     else if (millis() > start_millis + time_out) {
@@ -474,34 +475,27 @@ void setpoint() {
   }
 
   SerialUSB.print("new Setpoint: ");
-  SerialUSB.println(r);
+  SerialUSB.println((r / 100.0));
 }
 
 void parameterQuery() {
   SerialUSB.println(' ');
   SerialUSB.println("//---- PID Values -----");
 
-  SerialUSB.print("volatile float pKp = ");
-  SerialUSB.print(pKp, 4);
+  SerialUSB.print("volatile int pKp = ");
+  SerialUSB.print(pKp);
   SerialUSB.println(';');
 
-  SerialUSB.print("volatile float pKi = ");
-  SerialUSB.print(pKi, 4);
+  SerialUSB.print("volatile int pKi = ");
+  SerialUSB.print(pKi);
   SerialUSB.println(';');
 
-  SerialUSB.print("volatile float pKd = ");
-  SerialUSB.print(pKd, 4);
+  SerialUSB.print("volatile int pKd = ");
+  SerialUSB.print(pKd);
   SerialUSB.println(';');
 
 }
 
-
-float lookup_angle(int n)
-{
-  float a_out;
-  a_out = pgm_read_float_near(lookup + n);
-  return a_out;
-}
 
 void jump_to_fullstepp() {
   // set coil 2 to zero
@@ -582,7 +576,7 @@ int mod(int xMod, int mMod) {
 
 float lookup_sine(int m)        /////////////////////////////////////////////////  LOOKUP_SINE   /////////////////////////////
 {
-  float b_out;
+  int b_out;
 
   m = (0.01 * (((m % 62832) + 62832) % 62832)) + 0.5; //+0.5 for rounding
 
@@ -590,12 +584,12 @@ float lookup_sine(int m)        ////////////////////////////////////////////////
 
   if (m > 314) {
     m = m - 314;
-    b_out = -pgm_read_float_near(sine_lookup + m);
+    b_out = -pgm_read_word_near(sine_lookup + m);
 
   }
   else
   {
-    b_out = pgm_read_float_near(sine_lookup + m);
+    b_out = pgm_read_word_near(sine_lookup + m);
   }
 
   return b_out;
@@ -687,13 +681,13 @@ void parameterEdit() {
   SerialUSB.println("---- Edit position loop gains: ----");
   SerialUSB.println();
   SerialUSB.print("p ----- pKp = ");
-  SerialUSB.println(pKp, 4);
+  SerialUSB.println(pKp);
 
   SerialUSB.print("i ----- pKi = ");
-  SerialUSB.println(pKi, 4);
+  SerialUSB.println(pKi);
 
   SerialUSB.print("d ----- pKd = ");
-  SerialUSB.println(pKd, 4);
+  SerialUSB.println(pKd);
 
   SerialUSB.println("q ----- quit");
   SerialUSB.println();
@@ -715,7 +709,7 @@ void parameterEdit() {
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKp = SerialUSB.parseFloat();
+              pKp = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -728,7 +722,7 @@ void parameterEdit() {
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKi = SerialUSB.parseFloat();
+              pKi = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -741,7 +735,7 @@ void parameterEdit() {
           while (!received_2) {
             delay(100);
             if (SerialUSB.peek() != -1) {
-              pKd = SerialUSB.parseFloat();
+              pKd = SerialUSB.parseInt();
               received_2 = true;
             }
           }
@@ -767,7 +761,7 @@ void step_response() {
   bool last_enabled = enabled;
   enabled = 1;
 
-  float current_position = y;
+  int current_position = y;
   bool received = false;
   int response_step = 0;
 
@@ -779,7 +773,7 @@ void step_response() {
   while (!received) {
     delay(100);
     if (SerialUSB.peek() != -1) {
-      response_step = SerialUSB.parseInt();
+      response_step = 100 * SerialUSB.parseInt();
       received = true;
     }
     else if (millis() > start_millis + time_out) {
@@ -797,9 +791,9 @@ void step_response() {
 
     SerialUSB.print(micros());
     SerialUSB.print(',');
-    SerialUSB.print(r - current_position); //print target position
+    SerialUSB.print((r - current_position) / 100.0); //print target position
     SerialUSB.print(",");
-    SerialUSB.println(y - current_position); // print current position
+    SerialUSB.println((y - current_position) / 100.0); // print current position
 
     if (millis() > start_millis + 300) {
       r = (current_position + response_step);
@@ -858,7 +852,7 @@ void get_max_frequency() {
 
   SerialUSB.println("");
   SerialUSB.println("-----------");
-  SerialUSB.print("volatile float FPID = ");
+  SerialUSB.print("volatile int FPID = ");
   SerialUSB.print(frequency);
   SerialUSB.println("; //Hz");
 

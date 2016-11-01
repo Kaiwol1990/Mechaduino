@@ -14,19 +14,20 @@ void TC5_Handler() {
 
     if (enabled || ena_pin == -1) {
 
-      e_0 = (r - y);;
+      e_0 = (r - y);
 
       ITerm = (ITerm + e_0);
 
-      if (ITerm > 150) {
-        ITerm = 150;
+      if (ITerm > 50000) {
+        ITerm = 50000;
       }
-      else if (ITerm < -150) {
-        ITerm = -150;
+      else if (ITerm < -50000) {
+        ITerm = -50000;
       }
 
+      u = ( ((pKp * e_0) >> 8) + ((pKi * ITerm) >> 9) + ((pKd * (e_0 - e_1)) >> 8) );
+      u = u >> 8;
 
-      u = ((pKp * e_0) + (pKi * ITerm) + (pKd * (e_0 - e_1)));
     }
     else {
       r = y;
@@ -44,10 +45,10 @@ void TC5_Handler() {
     }
 
     if (u > 0) {
-      output(-(raw_0 / 100.0) - PA, abs(u));
+      output(-raw_0 - PA, abs(u));
     }
     else {
-      output(-(raw_0 / 100.0) + PA, abs(u));
+      output(-raw_0 + PA, abs(u));
     }
 
     e_1 = e_0;
@@ -63,8 +64,7 @@ void TC4_Handler() {
 
   if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
 
-    int temp = readEncoder();
-    raw_0 = (100 * pgm_read_float_near(lookup + temp));
+    raw_0 = (pgm_read_word_near(lookup + readEncoder()));
 
     raw_diff = raw_0 - raw_1;
 
@@ -84,7 +84,7 @@ void TC4_Handler() {
     pointer++;
     pointer = pointer % LM_SIZE;
 
-    y = ((sum >> shifts) / 100.0);
+    y = (sum >> shifts);
 
     raw_1 = raw_0;
 
