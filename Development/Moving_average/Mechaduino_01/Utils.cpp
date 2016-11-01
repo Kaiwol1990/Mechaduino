@@ -454,7 +454,8 @@ void Serial_menu() {
 }
 
 void setpoint() {
-  unsigned long start_millis = millis();
+  unsigned long start_millis;
+  start_millis = millis();
   int time_out = 5000;
   bool received = false;
 
@@ -467,7 +468,7 @@ void setpoint() {
   while (!received) {
     delay(100);
     if (SerialUSB.peek() != -1) {
-      r = 100 * SerialUSB.parseFloat();
+      r = 100 * SerialUSB.parseInt();
       received = true;
     }
     else if (millis() > start_millis + time_out) {
@@ -475,6 +476,9 @@ void setpoint() {
       return;
     }
   }
+
+  while (abs(r - y) > 100 && millis() < (start_millis + time_out)) {};
+  delay(100);
 
   SerialUSB.print("new Setpoint: ");
   SerialUSB.println((r / 100.0));
