@@ -131,6 +131,7 @@ void output(int theta, int effort) {
 
 void calibration() {
   disableTC5Interrupts();
+  disableTC4Interrupts();
 
   SerialUSB.println(" ");
   SerialUSB.println("---- Calibration Routine ----");
@@ -257,7 +258,7 @@ void calibration() {
   SerialUSB.println();
   SerialUSB.println("calibration single steps");
   // step to every single fullstep position and read the Encoder
-  step_target = 0.0;
+  step_target = 0;
   for (int x = 0; x < steps_per_revolution; x++) {
 
     encoderReading = 0;
@@ -275,7 +276,7 @@ void calibration() {
 
     delay(100);
 
-    percent = 100 * ((float)x) / (float)(steps_per_revolution);
+    percent = 100 * ((float)x) / ((float)(steps_per_revolution));
     SerialUSB.print(percent);
     SerialUSB.println('%');
   }
@@ -387,6 +388,7 @@ void calibration() {
     }
   }
   SerialUSB.println();
+  enableTC4Interrupts();
   enableTC5Interrupts();
 
 }
@@ -509,7 +511,7 @@ void jump_to_fullstepp() {
   REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
 }
 
-void quaterStep() {           /////////////////////////////////   oneStep    ///////////////////////////////
+void quaterStep() {
 
   if (dir == 0) {
     step_target += (PA / 4);
