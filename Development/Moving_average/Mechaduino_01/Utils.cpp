@@ -454,6 +454,8 @@ void Serial_menu() {
 }
 
 void setpoint() {
+  disableTC5Interrupts();
+  disableTC4Interrupts();
   unsigned long start_millis;
   start_millis = millis();
   int time_out = 5000;
@@ -468,7 +470,7 @@ void setpoint() {
   while (!received) {
     delay(100);
     if (SerialUSB.peek() != -1) {
-      r = 100 * SerialUSB.parseInt();
+      r = 100 * SerialUSB.parseFloat();
       received = true;
     }
     else if (millis() > start_millis + time_out) {
@@ -476,6 +478,9 @@ void setpoint() {
       return;
     }
   }
+
+  enableTC4Interrupts();
+  enableTC5Interrupts();
 
   while (abs(r - y) > 100 && millis() < (start_millis + time_out)) {};
   delay(100);
