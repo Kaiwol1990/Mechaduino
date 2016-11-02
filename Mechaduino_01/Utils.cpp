@@ -86,6 +86,7 @@ void output(int theta, int effort) {
   static int floatangle;
   
   // Maybe change to angle=((theta*89360)>>10);
+  // 0.06% error
 
   angle = (100 * theta );
   angle = (angle * 0.87266);
@@ -587,7 +588,7 @@ float lookup_sine(int m)        ////////////////////////////////////////////////
   m = (0.01 * (((m % 62832) + 62832) % 62832)) + 0.5; //+0.5 for rounding
 
   //SerialUSB.println(m);
-
+// if (m >314) relevant? raw_0 can't get higher than 360.00 °
   if (m > 314) {
     m = m - 314;
     b_out = -pgm_read_word_near(sine_lookup + m);
