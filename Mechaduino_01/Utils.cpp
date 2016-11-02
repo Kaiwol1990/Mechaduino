@@ -84,6 +84,8 @@ void enaInterrupt() {
 void output(int theta, int effort) {
   static int angle;
   static int floatangle;
+  
+  // Maybe change to angle=((theta*89360)>>10);
 
   angle = (100 * theta );
   angle = (angle * 0.87266);
