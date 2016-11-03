@@ -43,7 +43,7 @@ const int microstepping = 16;
 const int steps_per_revolution = 200;
 
 //---- Filter settings -----
-const char shifts = 5;
+const char shifts = 6;
 const int LM_SIZE = 1 << shifts;
 int LM[LM_SIZE] = {0};   // LastMeasurements
 
