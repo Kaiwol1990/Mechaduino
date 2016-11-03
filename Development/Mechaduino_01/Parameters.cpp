@@ -16,9 +16,9 @@ volatile int FSAMPLE = 50000; //Hz //change only if you know what you're doing
 volatile int FPID = 8500; //Hz //change only if you know what you're doing
 
 //---- PID Values -----
-volatile int Kp = 6500;
+volatile int Kp = 7000;
 volatile int Ki = 60;
-volatile int Kd = 130000;
+volatile int Kd = 200000;
 
 //----current settings-----
 const float iMAX = 0.6;  //max 2.0 for A4954 driverm should be lower (thermal conditions)
@@ -43,7 +43,7 @@ const int microstepping = 16;
 const int steps_per_revolution = 200;
 
 //---- Filter settings -----
-const char shifts = 4;
+const char shifts = 5;
 const int LM_SIZE = 1 << shifts;
 int LM[LM_SIZE] = {0};   // LastMeasurements
 

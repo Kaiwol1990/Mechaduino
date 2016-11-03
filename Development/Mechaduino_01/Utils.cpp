@@ -82,16 +82,9 @@ void enaInterrupt() {
 
 
 void output(int theta, int effort) {
-  static int angle;
-  //static int floatangle;
+  static long angle;
 
-  angle = theta * (89360 >> 10);
-
-  //angle = (100 * theta );
-  // angle = (angle * 0.87266);
-
-  //floatangle = angle + 23562;
-  //floatangle = angle + 7854;
+  angle = (theta * 5585) >> 6;
 
   val1 = (effort * lookup_sine(angle + 23562)) >> 10;
 
@@ -99,19 +92,14 @@ void output(int theta, int effort) {
 
   if (val1 >= 0)  {
     REG_PORT_OUTSET0 = PORT_PA20;     //write IN_4 HIGH
-
     REG_PORT_OUTCLR0 = PORT_PA15;     //write IN_3 LOW
 
   }
   else  {
     REG_PORT_OUTCLR0 = PORT_PA20;     //write IN_4 LOW
-
     REG_PORT_OUTSET0 = PORT_PA15;     //write IN_3 HIGH
 
   }
-
-  //floatangle = angle + 7854;
-  //floatangle = angle + 23562;
 
   val2 = (effort * lookup_sine(angle + 7854)) >> 10;
 
@@ -119,13 +107,11 @@ void output(int theta, int effort) {
 
   if (val2 >= 0)  {
     REG_PORT_OUTSET0 = PORT_PA21;     //write IN_2 HIGH
-
     REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
 
   }
   else  {
     REG_PORT_OUTCLR0 = PORT_PA21;     //write IN_2 LOW
-
     REG_PORT_OUTSET0 = PORT_PA06;     //write IN_1 HIGH
 
   }
@@ -593,6 +579,7 @@ int lookup_sine(int m)        ///////////////////////////////////////////////// 
   }
   else
   {
+
     b_out = pgm_read_word_near(sine_lookup + m);
   }
 

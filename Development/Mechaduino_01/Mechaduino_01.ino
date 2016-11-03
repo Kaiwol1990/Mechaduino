@@ -95,7 +95,7 @@ void setup() {
 void loop()
 {
   serialCheck();
-  //SerialUSB.println(e_0);
+ // SerialUSB.println(e_0);
   //SerialUSB.println(y);
   //SerialUSB.println(reading);
   //SerialUSB.println(raw_0);
