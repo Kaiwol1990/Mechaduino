@@ -65,14 +65,18 @@ void setup() {
 
   r = y;
 
-
-  if (digitalRead(ena_pin) == 1) { //read current enable setting
-    enabled = false;
+  if (use_enable_pin == true) {
+    if (digitalRead(ena_pin) == 1) { //read current enable setting
+      enabled = false;
+    }
+    else {
+      enabled = true;
+    }
   }
-  else {
+  else
+  {
     enabled = true;
   }
-
 
   if (digitalRead(dir_pin)) { //read current direction setting
     dir = false;
@@ -95,8 +99,8 @@ void setup() {
 void loop()
 {
   serialCheck();
-  //SerialUSB.println(e_0);
-  //SerialUSB.println(raw_0 / 100.0);
+  // SerialUSB.println(e_0);
+  //SerialUSB.println(y);
   //SerialUSB.println(reading);
   //SerialUSB.println(raw_0);
   //SerialUSB.println(u);

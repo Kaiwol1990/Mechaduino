@@ -39,7 +39,7 @@ void receiveEvent(int howMany);
 
 int mod(int xMod, int mMod);
 
-float lookup_sine(int m);
+int lookup_sine(int m);
 
 void setupTCInterrupts();
 

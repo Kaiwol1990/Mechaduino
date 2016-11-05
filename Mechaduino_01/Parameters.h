@@ -24,8 +24,8 @@ extern const PROGMEM int lookup[];
 //---- Baudrate -----
 extern const int baudrate;
 
-//---- Pins -----
-extern const int ena_pin;
+//---- Enable Pins -----
+extern const bool use_enable_pin;
 
 
 //---- Step settings -----

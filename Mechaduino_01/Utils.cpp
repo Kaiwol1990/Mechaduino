@@ -28,7 +28,8 @@ void setupPins() {
   attachInterrupt(step_pin, stepInterrupt, RISING);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
-  if (ena_pin != -1) {
+
+  if (use_enable_pin == true) {
     pinMode(ena_pin, INPUT_PULLUP);
     attachInterrupt(ena_pin, enaInterrupt, CHANGE);
   }
@@ -80,53 +81,37 @@ void enaInterrupt() {
 }
 
 
-
 void output(int theta, int effort) {
   static int angle;
-  static int floatangle;
-  
-  // Maybe change to angle=((theta*89360)>>10);
-  // 0.06% error
 
-  angle = (100 * theta );
-  angle = (angle * 0.87266);
+  angle = (theta * 5585) >> 6;
 
-  floatangle = angle + 23562;
-  //floatangle = angle + 7854;
-
-  val1 = effort * lookup_sine(floatangle) / 10000;
+  val1 = (effort * lookup_sine(angle + 23562)) >> 10;
 
   analogFastWrite(VREF_2, abs(val1));
 
   if (val1 >= 0)  {
     REG_PORT_OUTSET0 = PORT_PA20;     //write IN_4 HIGH
-
     REG_PORT_OUTCLR0 = PORT_PA15;     //write IN_3 LOW
 
   }
   else  {
     REG_PORT_OUTCLR0 = PORT_PA20;     //write IN_4 LOW
-
     REG_PORT_OUTSET0 = PORT_PA15;     //write IN_3 HIGH
 
   }
 
-  floatangle = angle + 7854;
-  //floatangle = angle + 23562;
-
-  val2 = effort * lookup_sine(floatangle) / 10000;
+  val2 = (effort * lookup_sine(angle + 7854)) >> 10;
 
   analogFastWrite(VREF_1, abs(val2));
 
   if (val2 >= 0)  {
     REG_PORT_OUTSET0 = PORT_PA21;     //write IN_2 HIGH
-
     REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
 
   }
   else  {
     REG_PORT_OUTCLR0 = PORT_PA21;     //write IN_2 LOW
-
     REG_PORT_OUTSET0 = PORT_PA06;     //write IN_1 HIGH
 
   }
@@ -457,7 +442,7 @@ void Serial_menu() {
 }
 
 void setpoint() {
-  
+
   unsigned long start_millis;
   start_millis = millis();
   int time_out = 5000;
@@ -581,14 +566,12 @@ int mod(int xMod, int mMod) {
 }
 
 
-float lookup_sine(int m)        /////////////////////////////////////////////////  LOOKUP_SINE   /////////////////////////////
+int lookup_sine(int m)        /////////////////////////////////////////////////  LOOKUP_SINE   /////////////////////////////
 {
   int b_out;
 
-  m = (0.01 * (((m % 62832) + 62832) % 62832)) + 0.5; //+0.5 for rounding
+  m =  ((((m % 62832) + 62832) % 62832) / 100);
 
-  //SerialUSB.println(m);
-// if (m >314) relevant? raw_0 can't get higher than 360.00 °
   if (m > 314) {
     m = m - 314;
     b_out = -pgm_read_word_near(sine_lookup + m);

@@ -50,7 +50,7 @@ extern const int ledPin;
 extern const int chipSelectPin;
 extern const int dir_pin;
 extern const int step_pin;
-
+extern const int ena_pin;
 
 
 //----Motordriver current values-----
