@@ -15,6 +15,13 @@ void TC5_Handler() {
     if (enabled){
 
       e_0 = (r - y);
+      
+      if (e_0 > 2000) {
+        e_0 = 2000;
+      }
+      else if (e_0 < -2000) {
+        e_0 = -2000;
+      }
 
       ITerm = (ITerm + e_0);
 
