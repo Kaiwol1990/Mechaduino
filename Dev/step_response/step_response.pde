@@ -7,7 +7,7 @@ Serial myPort; //creates a software serial port on which you will listen to Ardu
 
 
 int step = 50;
-
+int microstepping = 16;
 
 String val;
 float start_time = 0;
