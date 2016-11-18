@@ -8,6 +8,9 @@
 #include "analogFastWrite.h"
 
 void setupPins() {
+
+  analogWriteResolution(12);  //set the PWM resolution from 8 bit to to 12 bit
+
   pinMode(VREF_2, OUTPUT);
   pinMode(VREF_1, OUTPUT);
   pinMode(IN_4, OUTPUT);
@@ -75,10 +78,9 @@ void enaInterrupt() {
 
 
 void output(int theta, int effort) {
-  static int angle;
-
-  static int v_coil_A;
-  static int v_coil_B;
+  static volatile int angle;
+  static volatile int v_coil_A;
+  static volatile int v_coil_B;
 
   static int sin_coil_A;
   static int sin_coil_B;
@@ -449,7 +451,7 @@ void oneStep() {
   else {
     step_target -= PA;
   }
-  
+
   output(step_target, 64);
 }
 

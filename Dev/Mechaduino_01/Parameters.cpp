@@ -10,7 +10,7 @@ const String identifier = "Y";   // string to identify the mechaduino with the S
 volatile int FPID = 25000;  // frequency of the PID loop change only if you know what you're doing
 
 //---- PID Values -----
-volatile int Kp = 900;   // proportional constant
+volatile int Kp = 90;    // proportional constan
 volatile int Ki = 16;    // integrational constant
 volatile int Kd = 30000; // differential constant
 
