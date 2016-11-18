@@ -13,4 +13,14 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 
 - Processing script to display the step resonse
 
-[![Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=64GHBDR3Z55JE)
+
+License
+
+All nano stepper related materials are released under the Creative Commons Attribution Share-Alike 4.0 License
+Much of the work is based on Mechaduino project:
+https://github.com/jcchurch13/Mechaduino-Firmware
+
+If you want to support me for further improvments and things like that you can send me a small kickback with paypal
+
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=64GHBDR3Z55JE)
