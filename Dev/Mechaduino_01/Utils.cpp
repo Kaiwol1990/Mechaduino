@@ -1,17 +1,11 @@
 //Contains the definitions of the functions used by the firmware.
-
-
 #include <SPI.h>
-#include <Wire.h>
 
-#include <Arduino.h>
-#include "Parameters.h"
-#include "Controller.h"
 #include "Utils.h"
+#include "Parameters.h"
 #include "State.h"
+#include "Controller.h"
 #include "analogFastWrite.h"
-#include "macros.h"
-#include <avr/pgmspace.h>
 
 void setupPins() {
   pinMode(VREF_2, OUTPUT);
@@ -25,16 +19,13 @@ void setupPins() {
   pinMode(dir_pin, INPUT);
   pinMode(chipSelectPin, OUTPUT); // CSn -- has to toggle high and low to signal chip to start data transfer
 
-
   attachInterrupt(step_pin, stepInterrupt, RISING);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
-
 
   if (use_enable_pin == true) {
     pinMode(ena_pin, INPUT_PULLUP);
     attachInterrupt(ena_pin, enaInterrupt, CHANGE);
   }
-
 
   REG_PORT_OUTSET0 = PORT_PA20;  // write IN_4 HIGH
   REG_PORT_OUTCLR0 = PORT_PA15;  // write IN_3 LOW
@@ -43,15 +34,14 @@ void setupPins() {
 
 }
 
+
 void setupSPI() {
   SPISettings settingsA(10000000, MSBFIRST, SPI_MODE1);             ///400000, MSBFIRST, SPI_MODE1);
 
   SPI.begin();    //AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
   delay(1000);
   SPI.beginTransaction(settingsA);
-
 }
-
 
 
 void stepInterrupt() {
@@ -62,6 +52,7 @@ void stepInterrupt() {
     step_target -= 1;
   }
 }
+
 
 void dirInterrupt() {
   if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
@@ -82,23 +73,24 @@ void enaInterrupt() {
   }
 }
 
+
 void output(int theta, int effort) {
   static int angle;
-  
+
   static int v_coil_A;
   static int v_coil_B;
-  
+
   static int sin_coil_A;
   static int sin_coil_B;
 
   angle = mod((5 * theta) , 3600);
 
-  sin_coil_A = pgm_read_word_near(sine_lookup_val1 + angle);
+  sin_coil_A = pgm_read_word_near(sine_lookup_coil_A + angle);
   if (sin_coil_A > 1024) {
     sin_coil_A = sin_coil_A - 65536;
   }
 
-  sin_coil_B = pgm_read_word_near(sine_lookup_val2 + angle);
+  sin_coil_B = pgm_read_word_near(sine_lookup_coil_B + angle);
   if (sin_coil_B > 1024) {
     sin_coil_B = sin_coil_B - 65536;
   }
@@ -112,19 +104,10 @@ void output(int theta, int effort) {
     v_coil_B = ((7 * v_coil_B) + ((effort * sin_coil_B) / 1024)) / 8;
   }
 
-  analogFastWrite(VREF_2, abs(v_coil_A));
-  analogFastWrite(VREF_1, abs(v_coil_B));
+  analogFastWrite(VREF_1, abs(v_coil_A));
+  analogFastWrite(VREF_2, abs(v_coil_B));
 
   if (v_coil_A >= 0)  {
-    REG_PORT_OUTSET0 = PORT_PA20;     //write IN_4 HIGH
-    REG_PORT_OUTCLR0 = PORT_PA15;     //write IN_3 LOW
-  }
-  else  {
-    REG_PORT_OUTCLR0 = PORT_PA20;     //write IN_4 LOW
-    REG_PORT_OUTSET0 = PORT_PA15;     //write IN_3 HIGH
-  }
-
-  if (v_coil_B >= 0)  {
     REG_PORT_OUTSET0 = PORT_PA21;     //write IN_2 HIGH
     REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
   }
@@ -132,7 +115,17 @@ void output(int theta, int effort) {
     REG_PORT_OUTCLR0 = PORT_PA21;     //write IN_2 LOW
     REG_PORT_OUTSET0 = PORT_PA06;     //write IN_1 HIGH
   }
+
+  if (v_coil_B >= 0)  {
+    REG_PORT_OUTSET0 = PORT_PA20;     //write IN_4 HIGH
+    REG_PORT_OUTCLR0 = PORT_PA15;     //write IN_3 LOW
+  }
+  else  {
+    REG_PORT_OUTCLR0 = PORT_PA20;     //write IN_4 LOW
+    REG_PORT_OUTSET0 = PORT_PA15;     //write IN_3 HIGH
+  }
 }
+
 
 void calibration() {
   calibration_running = true;
@@ -299,8 +292,6 @@ void calibration() {
         }
       }
 
-
-
     }
 
     else if (ticks < 1) {
@@ -334,7 +325,6 @@ void calibration() {
 
   calibration_running = false;
   enableTC5Interrupts();
-
 }
 
 
@@ -378,6 +368,8 @@ void serialCheck() {
   }
 
 }
+
+
 void Serial_menu() {
   SerialUSB.println("");
   SerialUSB.println("");
@@ -397,11 +389,12 @@ void Serial_menu() {
   SerialUSB.println("");
 }
 
-void setpoint() {
 
+void setpoint() {
   unsigned long start_millis;
   start_millis = millis();
   int time_out = 5000;
+  int new_angle = 0;
   bool received = false;
 
   SerialUSB.println("Enter step value in degree!");
@@ -413,18 +406,23 @@ void setpoint() {
   while (!received) {
     delay(100);
     if (SerialUSB.peek() != -1) {
-      r = 100 * SerialUSB.parseFloat();
+      new_angle = 100 * SerialUSB.parseFloat();
+
+      step_target = step_target + ( (new_angle - y) / stepangle);
+
       received = true;
     }
     else if (millis() > start_millis + time_out) {
       SerialUSB.println("time out");
+      new_angle = r * stepangle;
       return;
     }
   }
 
   SerialUSB.print("new Setpoint: ");
-  SerialUSB.println((r / 100.0));
+  SerialUSB.println((new_angle / 100.0));
 }
+
 
 void parameterQuery() {
   SerialUSB.println(' ');
@@ -441,36 +439,22 @@ void parameterQuery() {
   SerialUSB.print("volatile int Kd = ");
   SerialUSB.print(Kd);
   SerialUSB.println(';');
-
 }
 
-void quaterStep() {
-
-  if (dir == 0) {
-    step_target += (PA / 4);
-  }
-  else {
-    step_target -= (PA / 4);
-  }
-
-  output(step_target, 64);
-
-}
 
 void oneStep() {
-
   if (dir == 0) {
     step_target += PA;
   }
   else {
     step_target -= PA;
   }
-
+  
   output(step_target, 64);
-
 }
 
-int readEncoder()           //////////////////////////////////////////////////////   READENCODER   ////////////////////////////
+
+int readEncoder()
 {
   long angleTemp;
 
@@ -491,18 +475,6 @@ int readEncoder()           ////////////////////////////////////////////////////
   return angleTemp;
 }
 
-
-void receiveEvent(int howMany)
-{
-  while (1 < Wire.available()) // loop through all but the last
-  {
-    char c = Wire.read(); // receive byte as a character
-    SerialUSB.print(c);         // print the character
-  }
-  int x = Wire.read();    // receive byte as an integer
-  SerialUSB.println(x);         // print the integer
-  r = 0.1 * ((float)x);
-}
 
 int mod(int xMod, int mMod) {
   return (xMod % mMod + mMod) % mMod;
@@ -538,7 +510,6 @@ void setupTCInterrupts() {
   TC5->COUNT16.INTENSET.bit.OVF = 1;          // enable overfollow
   TC5->COUNT16.INTENSET.bit.MC0 = 1;         // enable compare match to CC0
 
-
   NVIC_SetPriority(TC5_IRQn, 1);
 
   // Enable InterruptVector
@@ -546,19 +517,16 @@ void setupTCInterrupts() {
 }
 
 
-
-
 void enableTC5Interrupts() {
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      //wait for sync
 }
 
+
 void disableTC5Interrupts() {
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }
-
-
 
 
 void parameterEdit() {
@@ -647,7 +615,6 @@ void parameterEdit() {
 }
 
 
-
 void step_response() {
   bool last_enabled = enabled;
   dir = true;
@@ -676,8 +643,6 @@ void step_response() {
   }
 
   SerialUSB.print(micros());
-  SerialUSB.print(',');
-  SerialUSB.print("current_position");
   SerialUSB.println();
 
   start_millis = millis();
@@ -700,6 +665,7 @@ void step_response() {
   }
   enabled = last_enabled;
 }
+
 
 void get_max_frequency() {
   disableTC5Interrupts();
@@ -754,6 +720,5 @@ void get_max_frequency() {
   enabled = last_enabled;
 
   enableTC5Interrupts();
-
 }
 

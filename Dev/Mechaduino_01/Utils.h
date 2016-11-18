@@ -7,8 +7,6 @@ void setupPins();
 
 void setupSPI();
 
-void setupPID();
-
 void stepInterrupt();
 
 void enaInterrupt();
@@ -27,13 +25,9 @@ void setpoint();
 
 void parameterQuery();
 
-void quaterStep();
-
 void oneStep();
 
 int readEncoder();
-
-void receiveEvent(int howMany);
 
 int mod(int xMod, int mMod);
 

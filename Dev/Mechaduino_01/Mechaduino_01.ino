@@ -37,13 +37,12 @@
 
   ...see serialCheck() in Utils for more details
 */
+
 #include "SanityCheck.h"
-#include "Utils.h"
 #include "Parameters.h"
 #include "State.h"
-#include "analogFastWrite.h"
-#include "macros.h"
-#include <avr/pgmspace.h>
+#include "Utils.h"
+
 
 //////////////////////////////////////
 /////////////////SETUP////////////////
@@ -52,8 +51,6 @@
 void setup() {
 
   SerialUSB.begin(baudrate);
-
-  digitalWrite(ledPin, HIGH);
 
   setupPins();
   setupSPI();
@@ -108,6 +105,8 @@ void setup() {
   }
 
   enableTC5Interrupts(); // get the filter going and ge samples for 1 second
+
+  digitalWrite(ledPin, HIGH);
 
   Serial_menu();
 

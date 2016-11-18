@@ -2,14 +2,12 @@
 //The main control loop is executed by the TC5 timer interrupt:
 
 #include <SPI.h>
+#include "Parameters.h"
 #include "State.h"
 #include "Utils.h"
-#include "Parameters.h"
-#include "macros.h"
 
 void TC5_Handler() {
   // gets called with PID frequency
-
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
     r = step_target * stepangle;
