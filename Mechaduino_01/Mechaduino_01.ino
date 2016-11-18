@@ -37,12 +37,12 @@
 
   ...see serialCheck() in Utils for more details
 */
+
 #include "SanityCheck.h"
-#include "Utils.h"
 #include "Parameters.h"
 #include "State.h"
-#include "analogFastWrite.h"
-#include "macros.h"
+#include "Utils.h"
+
 
 //////////////////////////////////////
 /////////////////SETUP////////////////
@@ -52,21 +52,40 @@ void setup() {
 
   SerialUSB.begin(baudrate);
 
-  digitalWrite(ledPin, HIGH);
-
-  SerialUSB.println("booting");
-
   setupPins();
   setupSPI();
   setupTCInterrupts();
 
-  enableTC4Interrupts(); // get the filter going and ge samples for 1 second
+  delay(1000);
+
+  int i = 0;
+  raw_0 = (pgm_read_word_near(lookup + readEncoder()));
+  raw_1 = raw_0;
+
+  while (i < 200) {
+    raw_0 = (pgm_read_word_near(lookup + readEncoder()));
+
+    raw_diff = raw_0 - raw_1;
+
+    if (raw_diff < -18000) {
+      y = y + 36000 + raw_diff;
+    }
+    else if (raw_diff > 18000) {
+      y = y - 36000 + raw_diff;
+    }
+    else {
+      y = y  + raw_diff;
+    }
+    raw_1 = raw_0;
+    i++;
+  }
+
+  step_target = ((y + 5) / stepangle);
+
   delay(500);
 
-  r = y;
-
   if (use_enable_pin == true) {
-    if (digitalRead(ena_pin) == 1) { //read current enable setting
+    if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
       enabled = false;
     }
     else {
@@ -78,14 +97,16 @@ void setup() {
     enabled = true;
   }
 
-  if (digitalRead(dir_pin)) { //read current direction setting
+  if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
     dir = false;
   }
   else {
     dir = true;
   }
 
-  enableTC5Interrupts();     //start in closed loop mode
+  enableTC5Interrupts(); // get the filter going and ge samples for 1 second
+
+  digitalWrite(ledPin, HIGH);
 
   Serial_menu();
 }
@@ -99,10 +120,13 @@ void setup() {
 void loop()
 {
   serialCheck();
-  // SerialUSB.println(e_0);
+  //SerialUSB.println(e_0);
   //SerialUSB.println(y);
   //SerialUSB.println(reading);
-  //SerialUSB.println(raw_0);
+  //SerialUSB.println(raw_diff);
   //SerialUSB.println(u);
-
+  //SerialUSB.println(readEncoder());
+  //SerialUSB.println(raw_0);
+  //SerialUSB.println(r);
+  //SerialUSB.println(step_target);
 }

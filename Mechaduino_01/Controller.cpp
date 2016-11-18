@@ -2,42 +2,48 @@
 //The main control loop is executed by the TC5 timer interrupt:
 
 #include <SPI.h>
+#include "Parameters.h"
 #include "State.h"
 #include "Utils.h"
-#include "Parameters.h"
-#include "macros.h"
 
 void TC5_Handler() {
-  // gets called with FPID frequency
-
+  // gets called with PID frequency
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
-    if (enabled){
+    r = step_target * stepangle;
 
+    raw_0 = (pgm_read_word_near(lookup + readEncoder()));
+
+    raw_diff = raw_0 - raw_1;
+
+    if (raw_diff < -18000) {
+      y = y + 36000 + raw_diff;
+    }
+    else if (raw_diff > 18000) {
+      y = y - 36000 + raw_diff;
+    }
+    else {
+      y = y  + raw_diff;
+    }
+
+
+    if (enabled) {
       e_0 = (r - y);
-      
-      if (e_0 > 2000) {
-        e_0 = 2000;
-      }
-      else if (e_0 < -2000) {
-        e_0 = -2000;
-      }
 
       ITerm = (ITerm + e_0);
 
-      if (ITerm > 50000) {
-        ITerm = 50000;
+      if (ITerm > 15000) {
+        ITerm = 15000;
       }
-      else if (ITerm < -50000) {
-        ITerm = -50000;
+      else if (ITerm < -15000) {
+        ITerm = -15000;
       }
 
-      u = ( (Kp * e_0) + ((Ki * ITerm) >> 1) + (Kd * (e_0 - e_1)) );
-      u = u >> 16;
+      u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 10000;
 
     }
     else {
-      r = y;
+      step_target = ((9 * step_target) + ( y / stepangle)) / 10;
       e_0 = 0;
       u = 0;
       ITerm = 0;
@@ -58,45 +64,12 @@ void TC5_Handler() {
       output(-raw_0 + PA, abs(u));
     }
 
+
+
     e_1 = e_0;
+    raw_1 = raw_0;
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }
 }
-
-
-
-void TC4_Handler() {
-  // gets called with FSAMPLE frequency
-
-  if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {  // A overflow caused the interrupt
-
-    raw_0 = (pgm_read_word_near(lookup + readEncoder()));
-
-    raw_diff = raw_0 - raw_1;
-
-    if (raw_diff < -18000) {
-      yw_0 = yw_0 + 36000 + raw_diff;
-    }
-    else if (raw_diff > 18000) {
-      yw_0 = yw_0 - 36000 + raw_diff;
-    }
-    else {
-      yw_0 = yw_0  + raw_diff;
-    }
-
-    sum -= LM[pointer];
-    LM[pointer] = yw_0;
-    sum += LM[pointer];
-    pointer++;
-    pointer = pointer % LM_SIZE;
-
-    y = (sum >> shifts);
-
-    raw_1 = raw_0;
-
-    TC4->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
-  }
-}
-
 

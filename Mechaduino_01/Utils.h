@@ -7,15 +7,13 @@ void setupPins();
 
 void setupSPI();
 
-void setupPID();
-
 void stepInterrupt();
 
 void enaInterrupt();
 
 void dirInterrupt();
 
-void output(int theta, int effort);
+void output(int theta, int effort) __attribute__ ((optimize("O3")));
 
 void calibration();
 
@@ -27,27 +25,15 @@ void setpoint();
 
 void parameterQuery();
 
-void jump_to_fullstepp();
-
-void quaterStep();
-
 void oneStep();
 
 int readEncoder();
 
-void receiveEvent(int howMany);
-
 int mod(int xMod, int mMod);
-
-int lookup_sine(int m);
 
 void setupTCInterrupts();
 
-void enableTC4Interrupts();
-
 void enableTC5Interrupts();
-
-void disableTC4Interrupts();
 
 void disableTC5Interrupts();
 
@@ -57,6 +43,5 @@ void step_response();
 
 void get_max_frequency();
 
-float modulo(float dividend, float divisor);
-
 #endif
+

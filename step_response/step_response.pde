@@ -6,8 +6,8 @@ import processing.serial.*;
 Serial myPort; //creates a software serial port on which you will listen to Arduino
 
 
-int step = 200;
-
+int step = 500;
+int microstepping = 16;
 
 String val;
 float start_time = 0;
@@ -28,9 +28,11 @@ float [] target_buffer = new float[2000];
 float [] y_buffer = new float[2000];
 float [] time_buffer = new float[2000];
 
+float step_angle = 360.0*(step/(200.0*microstepping));
+
 void setup()
 {
-  size(1920, 1080);
+  size(1600, 900);
   String portName = Serial.list()[2]; 
   //CAUTION: your Arduino port number is probably different! Mine happened to be 1. Use a "handshake" sketch to figure out and test which port number your Arduino is talking on. A "handshake" establishes that Arduino and Processing are listening/talking on the same port.
   //Here's a link to a basic handshake tutorial: https://processing.org/tutorials/overview/
@@ -38,7 +40,6 @@ void setup()
     target_buffer[i]= 0;
     y_buffer[i] = 0;
   }
-
 
   myPort = new Serial(this, portName, 250000); //set up your port to listen to the serial port
 
@@ -76,12 +77,12 @@ void serialEvent(Serial myPort) {
 
       time_buffer[x] = sensorVals[0]-start_time;
 
-      float target = sensorVals[1]/step;
-      float temp_1 =  map(target, -0.5, 1.5, -(0.5*height), (0.5*height));
+      float target = sensorVals[1]/(0.5*step_angle);
+      float temp_1 =  map(target, -0.5, 2.5, -(0.5*height), (0.5*height));
       target_buffer[x] = temp_1;
 
-      float y = sensorVals[2]/step;
-      float temp_2 =  map(y, -0.5, 1.5, -(0.5*height), (0.5*height));
+      float y = sensorVals[2]/(0.5*step_angle);
+      float temp_2 =  map(y, -0.5, 2.5, -(0.5*height), (0.5*height));
       y_buffer[x] = temp_2;
     }
     x++;
