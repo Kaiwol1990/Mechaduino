@@ -468,12 +468,12 @@ int readEncoder()
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
 
   //read with Measured angle with dynamic angle error compensation (DAEC)
-  //byte b1 = SPI.transfer(0xFF);
-  //byte b2 = SPI.transfer(0xFF);
+  byte b1 = SPI.transfer(0xFF);
+  byte b2 = SPI.transfer(0xFF);
 
   //read with Measured angle without dynamic angle error compensation (DAEC)
-  byte b1 = SPI.transfer(0x7F);
-  byte b2 = SPI.transfer(0xFE);
+  //byte b1 = SPI.transfer(0x7F);
+  //byte b2 = SPI.transfer(0xFE);
 
   angleTemp = (((b1 << 8) | b2) & 0B0011111111111111);
 
