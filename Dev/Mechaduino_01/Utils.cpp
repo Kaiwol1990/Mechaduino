@@ -404,7 +404,7 @@ void setpoint() {
   int new_angle = 0;
   bool received = false;
 
-  SerialUSB.println("Enter step value in degree!");
+  SerialUSB.println("Enter steps that should be jumped!");
 
   SerialUSB.print("current Setpoint: ");
   SerialUSB.println((y / 100.0));
