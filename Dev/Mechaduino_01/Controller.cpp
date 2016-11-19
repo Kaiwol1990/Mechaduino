@@ -63,6 +63,10 @@ void TC5_Handler() {
       u = -uMAX;
     }
 
+    if (u < 30 && u > -30) {
+      u = 0;
+    }
+
     if (u > 0) {
       output(-raw_0 - PA, abs(u));
     }

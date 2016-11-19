@@ -918,9 +918,9 @@ void PID_autotune() {
     SerialUSB.println("finished!");
     SerialUSB.println();
     SerialUSB.println("changing Parameters from classic PID to PID with no overshoot!");
-    Kp = (int)((33.0/60.0)*(temp_Kp / loops));
+    Kp = (int)((45.0/60.0)*(temp_Kp / loops));
     Ki = (int)((temp_Ki / loops));
-    Kd = (int)((70.0/30.0)*(temp_Kd / loops));
+    Kd = (int)((60.0/30.0)*(temp_Kd / loops));
 
     parameterQuery(); // print Parameter over Serialport
   }
