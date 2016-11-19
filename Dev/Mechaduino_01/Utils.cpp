@@ -758,20 +758,17 @@ void PID_autotune() {
     tune_running = true;     // start autotune
 
     // measuring the noise while the system is steady
-    double higher_noise = 0;
-    double lower_noise = 0;
+    float higher_noise = 0;
+    float lower_noise = 0;
+    float temp_diff = 0;
 
     for (int i = 0; i < 10000; i++) {
-      if (y - refVal > 0) {
-        higher_noise = higher_noise + (y - refVal);
-      }
-      else {
-        lower_noise = lower_noise - (y - refVal);
-      }
+      temp_diff = y - refVal;
+      if (temp_diff > higher_noise) higher_noise = temp_diff;
+      if (temp_diff < lower_noise) lower_noise = temp_diff;
     }
-    higher_noise = higher_noise / 10000;
-    lower_noise = lower_noise / 10000;
-    double noiseBand = (abs(higher_noise) + abs(lower_noise));
+
+    double noiseBand = (higher_noise - lower_noise);
     SerialUSB.print("Noiseband = ");
     SerialUSB.println(noiseBand);
     SerialUSB.println();
