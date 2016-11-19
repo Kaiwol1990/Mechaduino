@@ -737,7 +737,7 @@ void PID_autotune() {
   SerialUSB.println("Tuning PID Parameters");
   SerialUSB.println();
 
-  double outputStep = (int)(uMAX);
+  int outputStep = (int)(uMAX);
   SerialUSB.print("Outputstep = ");
   SerialUSB.println(outputStep);
 
@@ -754,13 +754,13 @@ void PID_autotune() {
     SerialUSB.print("loop: ");
     SerialUSB.println(k);
 
-    double refVal = y; //use error as input
+    int refVal = y; //use error as input
     tune_running = true;     // start autotune
 
     // measuring the noise while the system is steady
-    float higher_noise = 0;
-    float lower_noise = 0;
-    float temp_diff = 0;
+    int higher_noise = 0;
+    int lower_noise = 0;
+    int temp_diff = 0;
 
     for (int i = 0; i < 10000; i++) {
       temp_diff = y - refVal;
@@ -768,7 +768,7 @@ void PID_autotune() {
       if (temp_diff < lower_noise) lower_noise = temp_diff;
     }
 
-    double noiseBand = (higher_noise - lower_noise);
+    int noiseBand = (higher_noise - lower_noise);
     SerialUSB.print("Noiseband = ");
     SerialUSB.println(noiseBand);
     SerialUSB.println();
@@ -776,16 +776,16 @@ void PID_autotune() {
 
     unsigned long now = 0;
 
-    double lastInputs[91] = {0};
-    double peaks[91] = {0};
+    int lastInputs[91] = {0};
+    int peaks[91] = {0};
 
     int peakType = 0;
     int peakCount = 0;
     bool justchanged = false;
-    double absMax = refVal;
-    double absMin = refVal;
-    double setpoint = refVal;
-    double outputStart = u; //save start value
+    int absMax = refVal;
+    int absMin = refVal;
+    int setpoint = refVal;
+    int outputStart = u; //save start value
 
     unsigned long peak1 = 0;
     unsigned long peak2 = 0;
@@ -829,7 +829,7 @@ void PID_autotune() {
       isMin = true;
 
       for (int i = nLookBack - 1; i >= 0; i--) {
-        double val = lastInputs[i];
+        int val = lastInputs[i];
 
         if (isMax) {
           isMax = refVal > val;
@@ -878,7 +878,7 @@ void PID_autotune() {
       if (justchanged && peakCount > 2) { //we've transitioned.  check if we can autotune based on the last peaks
         double avgSeparation = (abs(peaks[peakCount - 1] - peaks[peakCount - 2]) + abs(peaks[peakCount - 2] - peaks[peakCount - 3])) / 2;
 
-        if ( avgSeparation < 0.05 * (absMax - absMin)) {
+        if ( avgSeparation < 0.01 * ((float)absMax - (float)absMin)) {
           tune_running = false;
         }
         justchanged = false;
@@ -887,26 +887,26 @@ void PID_autotune() {
 
     }
 
-    double Ku = (double)(4.0 * 2.0 * (double)outputStep) / (((double)absMax - (double)absMin)  * M_Pi);
-    double Pu = (double)(peak1 - peak2) / 1000000;
+    double Ku = (float)(4.0 * 2.0 * (float)outputStep) / (((float)absMax - (float)absMin)  * M_Pi);
+    double Pu = (float)(peak1 - peak2) / 1000000.0;
 
     if (k == 1) {
-      temp_Kp = (100 * 0.6 * Ku);
-      temp_Ki = (1000 * 0.075 * Ku * Pu);
-      temp_Kd = ((100 * (1.2 * Ku)) / Pu);
+      temp_Kp = (60 * Ku);
+      temp_Ki = (150 * Ku * Pu);
+      temp_Kd = ((120 * Ku) / Pu);
     }
     else {
-      temp_Kp = (temp_Kp + ( (100 * 0.6 * Ku)));
-      temp_Ki = (temp_Ki + ((1000 * 0.075 * Ku * Pu)));
-      temp_Kd = (temp_Kd + (((100 * (1.2 * Ku)) / Pu)));
+      temp_Kp = (temp_Kp + (60 * Ku));
+      temp_Ki = (temp_Ki + (150 * Ku * Pu));
+      temp_Kd = (temp_Kd + ((120 * Ku) / Pu));
     }
 
     SerialUSB.print("Kp = ");
-    SerialUSB.println((100 * 0.6 * Ku));
+    SerialUSB.println(60 * Ku);
     SerialUSB.print("Ki = ");
-    SerialUSB.println((1000 * 0.075 * Ku * Pu));
+    SerialUSB.println(150 * Ku * Pu);
     SerialUSB.print("Kd = ");
-    SerialUSB.println(((100 * (1.2 * Ku)) / Pu));
+    SerialUSB.println((120 * Ku) / Pu);
     SerialUSB.println();
 
     delay(500);
@@ -918,9 +918,14 @@ void PID_autotune() {
     SerialUSB.println("finished!");
     SerialUSB.println();
     SerialUSB.println("changing Parameters from classic PID to PID with no overshoot!");
-    Kp = (int)((45.0 / 60.0) * (temp_Kp / loops));
-    Ki = (int)((temp_Ki / loops));
-    Kd = (int)((60.0 / 30.0) * (temp_Kd / loops));
+    /*
+      Kp = (int)((45.0 / 60.0) * (temp_Kp / loops));
+      Ki = (int)((temp_Ki / loops));
+      Kd = (int)((60.0 / 30.0) * (temp_Kd / loops));
+    */
+    Kp = (int)((temp_Kp / loops) + 0.5);
+    Ki = (int)((temp_Ki / loops) + 0.5);
+    Kd = (int)((temp_Kd / loops) + 0.5);
 
     parameterQuery(); // print Parameter over Serialport
   }
