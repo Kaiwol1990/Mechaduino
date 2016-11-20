@@ -34,14 +34,13 @@ void TC5_Handler() {
 
         ITerm = (ITerm + e_0);
 
-        if (ITerm > 15000) {
-          ITerm = 15000;
+        if (ITerm > 18000) {
+          ITerm = 18000;
         }
-        else if (ITerm < -15000) {
-          ITerm = -15000;
+        else if (ITerm < -18000) {
+          ITerm = -18000;
         }
 
-        //u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 10000;
         u = ( (Kp * e_0) + ((Ki * ITerm)) - (Kd * (y - y_1)) ) / 10000;
 
       }
@@ -71,9 +70,8 @@ void TC5_Handler() {
       output(-raw_0 + PA, abs(u));
     }
 
-
-    y_1 = y;
-    e_1 = e_0;
+    y_1 = y,
+    //e_1 = e_0;
     raw_1 = raw_0;
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
