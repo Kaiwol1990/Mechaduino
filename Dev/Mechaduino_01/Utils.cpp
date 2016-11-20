@@ -893,12 +893,12 @@ void PID_autotune() {
     if (k == 1) {
       temp_Kp = (0.6 * Ku);
       temp_Ki = ((1.2 * Ku) / (Tu * FPID));
-      temp_Kd = ((0.6 * Ku * Tu * FPID) / 8);
+      temp_Kd = ((0.6 * Ku * Tu * FPID) / 8)*10.0;
     }
     else {
       temp_Kp = (temp_Kp + (0.6 * Ku));
       temp_Ki = (temp_Ki + ((1.2 * Ku) / (Tu * FPID)));
-      temp_Kd = (temp_Kd + ((0.6 * Ku * Tu * FPID) / 8));
+      temp_Kd = (temp_Kd + (10.0*((0.6 * Ku * Tu * FPID) / 8)));
     }
 
     SerialUSB.print("Ku = ");
@@ -926,7 +926,7 @@ void PID_autotune() {
 
     Kp = (int)(((3.3 / 6.0) * (temp_Kp / loops)) + 0.5);
     Ki = (int)(((1.0 / 1.0) * (temp_Ki / loops)) + 0.5);
-    Kd = (int)(((80.0 / 3.0) * (temp_Kd / loops)) + 0.5);
+    Kd = (int)(((8.0 / 3.0) * (temp_Kd / loops)) + 0.5);
 
     parameterQuery(); // print Parameter over Serialport
   }
