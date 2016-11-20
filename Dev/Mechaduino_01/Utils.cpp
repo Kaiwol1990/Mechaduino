@@ -635,7 +635,7 @@ void step_response() {
   unsigned long start_millis = millis();
   int time_out = 5000;
 
-  SerialUSB.println("Enter step value in degree!");
+  //SerialUSB.println("Enter step value in degree!");
 
   while (!received) {
     delay(100);
@@ -649,27 +649,27 @@ void step_response() {
     }
   }
 
-  SerialUSB.print(micros());
-  SerialUSB.println();
+  //SerialUSB.print(millis());
+  //SerialUSB.println();
 
   start_millis = millis();
+  int timeframe = start_millis + 1000;
+  int new_step_target = last_step_target + response_steps;
 
-  while (millis() < (start_millis + 1700)) { //half a second
+  while (millis() < timeframe) { //half a second
 
-    SerialUSB.print(micros());
+    SerialUSB.print(millis() - start_millis);
     SerialUSB.print(',');
-    SerialUSB.print((r - current_position) / 100.0); //print target position
+    SerialUSB.print(r); //print target position
     SerialUSB.print(",");
-    SerialUSB.println((y - current_position) / 100.0); // print current position
+    SerialUSB.println(y); // print current position
 
     if (millis() > start_millis + 300) {
-      step_target = last_step_target + response_steps;
-    }
-
-    if (millis() > start_millis + 1000) {
-      step_target = last_step_target;
+      step_target = new_step_target;
     }
   }
+  step_target = last_step_target;
+  delay(1000);
   enabled = last_enabled;
 }
 
@@ -731,7 +731,7 @@ void get_max_frequency() {
 
 
 void PID_autotune() {
-  int loops = 3;
+  int loops = 10;
   SerialUSB.println("--- Autotuning the PID controller ---");
   SerialUSB.println("Press c to cancle!");
   SerialUSB.println("Tuning PID Parameters");
@@ -741,7 +741,7 @@ void PID_autotune() {
   SerialUSB.print("Outputstep = ");
   SerialUSB.println(outputStep);
 
-  int nLookBack = 90; // set the lookback time and table
+  int nLookBack = 10; // set the lookback time and table
 
   float temp_Kp = 0;
   float temp_Ki = 0;
@@ -887,26 +887,31 @@ void PID_autotune() {
 
     }
 
-    double Ku = (float)(4.0 * 2.0 * (float)outputStep) / (((float)absMax - (float)absMin)  * M_Pi);
-    double Pu = (float)(peak1 - peak2) / 1000000.0;
+    double Ku = (float)(4.0 * 2.0 * (float)outputStep * 100.0) / (((float)absMax - (float)absMin)  * M_Pi);
+    double Tu = (float)(peak1 - peak2) / 1000000.0;
 
     if (k == 1) {
-      temp_Kp = (60 * Ku);
-      temp_Ki = (150 * Ku * Pu);
-      temp_Kd = ((120 * Ku) / Pu);
+      temp_Kp = (0.6 * Ku);
+      temp_Ki = ((1.2 * Ku) / (Tu * FPID));
+      temp_Kd = ((0.6 * Ku * Tu * FPID) / 8);
     }
     else {
-      temp_Kp = (temp_Kp + (60 * Ku));
-      temp_Ki = (temp_Ki + (150 * Ku * Pu));
-      temp_Kd = (temp_Kd + ((120 * Ku) / Pu));
+      temp_Kp = (temp_Kp + (0.6 * Ku));
+      temp_Ki = (temp_Ki + ((1.2 * Ku) / (Tu * FPID)));
+      temp_Kd = (temp_Kd + ((0.6 * Ku * Tu * FPID) / 8));
     }
 
+    SerialUSB.print("Ku = ");
+    SerialUSB.println(Ku, 6);
+    SerialUSB.print("Tu = ");
+    SerialUSB.println(Tu, 6);
+
     SerialUSB.print("Kp = ");
-    SerialUSB.println(60 * Ku);
+    SerialUSB.println((0.6 * Ku));
     SerialUSB.print("Ki = ");
-    SerialUSB.println(150 * Ku * Pu);
+    SerialUSB.println(((1.2 * Ku) / (Tu * FPID)));
     SerialUSB.print("Kd = ");
-    SerialUSB.println((120 * Ku) / Pu);
+    SerialUSB.println(((0.6 * Ku * Tu * FPID) / 8));
     SerialUSB.println();
 
     delay(500);
@@ -918,14 +923,10 @@ void PID_autotune() {
     SerialUSB.println("finished!");
     SerialUSB.println();
     SerialUSB.println("changing Parameters from classic PID to PID with no overshoot!");
-    /*
-      Kp = (int)((45.0 / 60.0) * (temp_Kp / loops));
-      Ki = (int)((temp_Ki / loops));
-      Kd = (int)((60.0 / 30.0) * (temp_Kd / loops));
-    */
-    Kp = (int)((temp_Kp / loops) + 0.5);
-    Ki = (int)((temp_Ki / loops) + 0.5);
-    Kd = (int)((temp_Kd / loops) + 0.5);
+
+    Kp = (int)(((3.3 / 6.0) * (temp_Kp / loops)) + 0.5);
+    Ki = (int)(((1.0 / 1.0) * (temp_Ki / loops)) + 0.5);
+    Kd = (int)(((80.0 / 3.0) * (temp_Kd / loops)) + 0.5);
 
     parameterQuery(); // print Parameter over Serialport
   }

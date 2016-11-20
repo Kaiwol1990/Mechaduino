@@ -7,6 +7,7 @@
 //---- interrupt vars ----
 volatile int r = 0;                 //target angle
 volatile long y = 0;                //current angle
+volatile long y_1 = 0;              //last angle
 
 volatile int raw_0 = 0;             // current measured angle
 volatile int raw_1 = 0;             // last measured angle

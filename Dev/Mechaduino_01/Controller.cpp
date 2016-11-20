@@ -41,7 +41,8 @@ void TC5_Handler() {
           ITerm = -15000;
         }
 
-        u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 10000;
+        //u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 10000;
+        u = ( (Kp * e_0) + ((Ki * ITerm)) - (Kd * (y - y_1)) ) / 10000;
 
       }
       else {
@@ -71,7 +72,7 @@ void TC5_Handler() {
     }
 
 
-
+    y_1 = y;
     e_1 = e_0;
     raw_1 = raw_0;
 
