@@ -3,6 +3,19 @@
 #ifndef __STATE_H__
 #define __STATE_H__
 
+
+#define NANO_ZERO_STEPPER //Define this if using MisfitTech.net's nano zero stepper (NZS)
+
+#ifdef NANO_ZERO_STEPPER
+#define PIN_AS5047D_PWR (11) //pull low to power on AS5047D
+#define SerialUSB (Serial) //Nano Zero uses Serial for the USB
+#endif
+
+#define ADC_BITS_RESOULTION (8) //number of bits resolution sent to AnalogWrite() function
+#define CALIBRATION_CURRENT_MA	(1000) //what current to send to motor during calibration
+#define SENSE_RESISTOR 				(0.1) //sense resistor for the A4954
+#define MA_2_ADC(x)				((x*(1<<ADC_BITS_RESOULTION))/3300 )
+
 //---- interrupt vars ----
 extern volatile int r;            //target angle
 extern volatile long y;           //current angle

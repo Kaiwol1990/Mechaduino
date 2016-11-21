@@ -97,7 +97,7 @@ void output(int theta, int effort) {
     sin_coil_B = sin_coil_B - 65536;
   }
 
-  if (calibration_running) {
+ if (calibration_running) {
     v_coil_A = ((effort * sin_coil_A) / 1024);
     v_coil_B = ((effort * sin_coil_B) / 1024);
   }
@@ -111,11 +111,19 @@ void output(int theta, int effort) {
 
   if (v_coil_A >= 0)  {
     REG_PORT_OUTSET0 = PORT_PA21;     //write IN_2 HIGH
+#ifdef NANO_ZERO_STEPPER //this is not using pin defs in the state.cpp..
+    REG_PORT_OUTCLR0 = PORT_PA05;     //write IN_1 LOW
+#else
     REG_PORT_OUTCLR0 = PORT_PA06;     //write IN_1 LOW
+#endif
   }
   else  {
     REG_PORT_OUTCLR0 = PORT_PA21;     //write IN_2 LOW
+#ifdef NANO_ZERO_STEPPER
+    REG_PORT_OUTSET0 = PORT_PA05;     //write IN_1 HIGH
+#else
     REG_PORT_OUTSET0 = PORT_PA06;     //write IN_1 HIGH
+#endif
   }
 
   if (v_coil_B >= 0)  {
@@ -153,7 +161,7 @@ void calibration() {
   float lookupAngle = 0.0;
 
   dir = true;
-  output(0, 64);
+  output(0, MA_2_ADC(CALIBRATION_CURRENT_MA));
 
   for (int reading = 0; reading < avg; reading++) {
     lastencoderReading += readEncoder();
@@ -161,9 +169,9 @@ void calibration() {
   }
   lastencoderReading = lastencoderReading / avg;
 
-  output(PA, 64);
-  output(2 * PA, 64);
-  output(3 * PA, 64);
+  output(PA, MA_2_ADC(CALIBRATION_CURRENT_MA));
+  output(2 * PA, MA_2_ADC(CALIBRATION_CURRENT_MA));
+  output(3 * PA, MA_2_ADC(CALIBRATION_CURRENT_MA));
 
   delay(500);
 
@@ -180,7 +188,7 @@ void calibration() {
   }
 
   //jump to fullstep
-  output(0, 64);
+  output(0, MA_2_ADC(CALIBRATION_CURRENT_MA));
 
   delay(500);
 
@@ -331,7 +339,7 @@ void calibration() {
 
 
 void serialCheck() {
-  if (SerialUSB.peek() != -1) {
+  if (SerialUSB.available()) {
 
     char inChar = (char)SerialUSB.read();
 
@@ -412,7 +420,7 @@ void setpoint() {
 
   while (!received) {
     delay(100);
-    if (SerialUSB.peek() != -1) {
+    if (SerialUSB.available()) {
       new_angle = 100 * SerialUSB.parseFloat();
 
       step_target = step_target + ( (new_angle - y) / stepangle);
@@ -457,7 +465,7 @@ void oneStep() {
     step_target -= PA;
   }
 
-  output(step_target, 64);
+  output(step_target, MA_2_ADC(CALIBRATION_CURRENT_MA));
 }
 
 
@@ -573,7 +581,7 @@ void parameterEdit() {
           SerialUSB.println("enter new Kp!");
           while (!received_2) {
             delay(100);
-            if (SerialUSB.peek() != -1) {
+            if (SerialUSB.available()) {
               Kp = SerialUSB.parseInt();
               received_2 = true;
             }
@@ -586,7 +594,7 @@ void parameterEdit() {
           SerialUSB.println("enter new Ki!");
           while (!received_2) {
             delay(100);
-            if (SerialUSB.peek() != -1) {
+            if (SerialUSB.available()) {
               Ki = SerialUSB.parseInt();
               received_2 = true;
             }
@@ -599,7 +607,7 @@ void parameterEdit() {
           SerialUSB.println("enter new Kd!");
           while (!received_2) {
             delay(100);
-            if (SerialUSB.peek() != -1) {
+            if (SerialUSB.available()) {
               Kd = SerialUSB.parseInt();
               received_2 = true;
             }
@@ -639,7 +647,7 @@ void step_response() {
 
   while (!received) {
     delay(100);
-    if (SerialUSB.peek() != -1) {
+    if (SerialUSB.available()) {
       response_steps = SerialUSB.parseInt();
       received = true;
     }
@@ -802,7 +810,7 @@ void PID_autotune() {
       refVal = y;
 
       // canceling call if something goes wrong
-      if (SerialUSB.peek() != -1) {
+      if (SerialUSB.available()) {
         if (SerialUSB.read() == 'c') {
           tune_running = false;
           abbort = true;

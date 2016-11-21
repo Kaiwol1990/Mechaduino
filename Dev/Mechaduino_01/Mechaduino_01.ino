@@ -103,6 +103,12 @@ void setup() {
   else {
     dir = true;
   }
+    #ifdef NANO_ZERO_STEPPER
+  //power on the AS5047D
+	pinMode(PIN_AS5047D_PWR,OUTPUT);
+	digitalWrite(PIN_AS5047D_PWR,LOW);
+#endif 
+  
 
   enableTC5Interrupts(); // get the filter going and ge samples for 1 second
 

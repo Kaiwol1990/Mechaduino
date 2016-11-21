@@ -1,6 +1,7 @@
 
 #include "Arduino.h"
 #include "wiring_private.h"
+#include "State.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +9,7 @@ extern "C" {
 
 static int _readResolution = 10;
 static int _ADCResolution = 10;
-static int _writeResolution = 8;
+static int _writeResolution = ADC_BITS_RESOULTION ;
 
 // Wait for synchronization of registers between the clock domains
 static __inline__ void syncADC() __attribute__((always_inline, unused));
@@ -75,18 +76,19 @@ void analogFastWrite(uint32_t pin, uint32_t value)
   {
     // DAC handling code
 
-    if (pin != PIN_A0) { // Only 1 DAC on A0 (PA02)
-      return;
+	 //TBS 11-21-2016 if the pin is a ANALOG pin and not the DAC
+	  // for example analog input this code would fail to issue PWM
+	  // on that pin.
+    if (pin == PIN_A0) { // Only 1 DAC on A0 (PA02)
+		value = mapResolution(value, _writeResolution, 10);
+
+		syncDAC();
+		DAC->DATA.reg = value & 0x3FF;  // DAC on 10 bits.
+		syncDAC();
+		DAC->CTRLA.bit.ENABLE = 0x01;     // Enable DAC
+		syncDAC();
+		return;
     }
-
-    value = mapResolution(value, _writeResolution, 10);
-
-    syncDAC();
-    DAC->DATA.reg = value & 0x3FF;  // DAC on 10 bits.
-    syncDAC();
-    DAC->CTRLA.bit.ENABLE = 0x01;     // Enable DAC
-    syncDAC();
-    return;
   }
 
   if ((attr & PIN_ATTR_PWM) == PIN_ATTR_PWM)
@@ -186,13 +188,13 @@ void analogFastWrite(uint32_t pin, uint32_t value)
   }
 
   // -- Defaults to digital write
-  pinMode(pin, OUTPUT);
-  value = mapResolution(value, _writeResolution, 8);
-  if (value < 128) {
-    digitalWriteDirect(pin, LOW);
-  } else {
-    digitalWriteDirect(pin, HIGH);
-  }
+//  pinMode(pin, OUTPUT);
+//  value = mapResolution(value, _writeResolution, 8);
+//  if (value < 128) {
+//    digitalWriteDirect(pin, LOW);
+//  } else {
+//    digitalWriteDirect(pin, HIGH);
+//  }
 }
 
 #ifdef __cplusplus
