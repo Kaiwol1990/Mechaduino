@@ -102,8 +102,8 @@ void output(int theta, int effort) {
     v_coil_B = ((effort * sin_coil_B) / 1024);
   }
   else {
-    v_coil_A = ((7 * v_coil_A) + ((effort * sin_coil_A) / 1024)) / 8;
-    v_coil_B = ((7 * v_coil_B) + ((effort * sin_coil_B) / 1024)) / 8;
+    v_coil_A = ((5 * v_coil_A) + ((effort * sin_coil_A) / 1024)) / 6;
+    v_coil_B = ((5 * v_coil_B) + ((effort * sin_coil_B) / 1024)) / 6;
   }
 
   analogFastWrite(VREF_1, abs(v_coil_A));
@@ -739,7 +739,7 @@ void get_max_frequency() {
 
 
 void PID_autotune() {
-  int loops = 10;
+  int loops = 5;
   SerialUSB.println("--- Autotuning the PID controller ---");
   SerialUSB.println("Press c to cancle!");
   SerialUSB.println("Tuning PID Parameters");
@@ -749,7 +749,7 @@ void PID_autotune() {
   SerialUSB.print("Outputstep = ");
   SerialUSB.println(outputStep);
 
-  int nLookBack = 10; // set the lookback time and table
+  int nLookBack = 50; // set the lookback time and table
 
   float temp_Kp = 0;
   float temp_Ki = 0;
@@ -895,18 +895,18 @@ void PID_autotune() {
 
     }
 
-    double Ku = (float)(4.0 * 2.0 * (float)outputStep * 100.0) / (((float)absMax - (float)absMin)  * M_Pi);
+    double Ku = (float)(4.0 * 2.0 * (float)outputStep * 1000.0) / (((float)absMax - (float)absMin)  * M_Pi);
     double Tu = (float)(peak1 - peak2) / 1000000.0;
 
     if (k == 1) {
-      temp_Kp = (0.6 * Ku);
-      temp_Ki = ((1.2 * Ku) / (Tu * FPID));
-      temp_Kd = ((0.6 * Ku * Tu * FPID) / 8)*10.0;
+      temp_Kp = (0.06 * Ku);
+      temp_Ki = ((0.12 * Ku) / (Tu * FPID));
+      temp_Kd = ((0.6 * Ku * Tu * FPID) / 8);
     }
     else {
-      temp_Kp = (temp_Kp + (0.6 * Ku));
-      temp_Ki = (temp_Ki + ((1.2 * Ku) / (Tu * FPID)));
-      temp_Kd = (temp_Kd + (10.0*((0.6 * Ku * Tu * FPID) / 8)));
+      temp_Kp = (temp_Kp + (0.06 * Ku));
+      temp_Ki = (temp_Ki + ((0.12 * Ku) / (Tu * FPID)));
+      temp_Kd = (temp_Kd + ((0.6 * Ku * Tu * FPID) / 8));
     }
 
     SerialUSB.print("Ku = ");
@@ -915,9 +915,9 @@ void PID_autotune() {
     SerialUSB.println(Tu, 6);
 
     SerialUSB.print("Kp = ");
-    SerialUSB.println((0.6 * Ku));
+    SerialUSB.println((0.06 * Ku));
     SerialUSB.print("Ki = ");
-    SerialUSB.println(((1.2 * Ku) / (Tu * FPID)));
+    SerialUSB.println(((0.12 * Ku) / (Tu * FPID)));
     SerialUSB.print("Kd = ");
     SerialUSB.println(((0.6 * Ku * Tu * FPID) / 8));
     SerialUSB.println();

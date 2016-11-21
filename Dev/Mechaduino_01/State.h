@@ -19,7 +19,7 @@
 //---- interrupt vars ----
 extern volatile int r;            //target angle
 extern volatile long y;           //current angle
-extern volatile long y_1;         //last angle
+extern volatile long y_1;           //last angle
 
 extern volatile int raw_0;        // current measured angle
 extern volatile int raw_1;        // last measured angle
