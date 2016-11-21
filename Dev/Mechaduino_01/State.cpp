@@ -27,8 +27,13 @@ bool frequency_test = false;        // flag for frequency test
 
 
 //----current settings-----
-const float rSense = 0.150;                           // resistor value
-const int uMAX = ((4096 * iMAX * 10 * rSense) / 3.3);  // max voltage for the vref pins
+#ifdef NANO_ZERO_STEPPER
+const float rSense = 0.100;     // resistor value
+#else
+const float rSense = 0.150;     // resistor value
+#endif
+
+const int uMAX = (((1<<ADC_BITS_RESOULTION) * iMAX * 10 * rSense) / 3.3);  // max voltage for the vref pins
 
 
 //---- Step settings -----
@@ -52,7 +57,11 @@ const int IN_3 = 5;           //PA15
 const int VREF_2 = 4;         //PA08
 const int VREF_1 = 9;         //PA07
 const int IN_2 = 7;           //PA21
+#ifdef NANO_ZERO_STEPPER
+const int IN_1 = 18;           //PA05 (A4)
+#else
 const int IN_1 = 8;           //PA06
+#endif
 const int ledPin = 13;        //PA17
 const int chipSelectPin = A2; //PB08
 const int dir_pin = 0;        //PORT_PA11
