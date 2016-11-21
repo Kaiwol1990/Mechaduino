@@ -2,18 +2,11 @@
 
 #ifndef __STATE_H__
 #define __STATE_H__
-#include "syslog.h"
-
-#define NANO_ZERO_STEPPER //Define this if using MisfitTech.net's nano zero stepper (NZS)
-
-#ifdef NANO_ZERO_STEPPER
-#define PIN_AS5047D_PWR (11) //pull low to power on AS5047D
-#define SerialUSB (Serial) //Nano Zero uses Serial for the USB
-#endif
 
 //---- interrupt vars ----
 extern volatile int r;            //target angle
 extern volatile long y;           //current angle
+extern volatile long y_1;           //last angle
 
 extern volatile int raw_0;        // current measured angle
 extern volatile int raw_1;        // last measured angle
@@ -64,5 +57,10 @@ extern const int dir_pin;
 extern const int step_pin;
 extern const int ena_pin;
 
+
+extern const float M_Pi;
+
+//--- PID autotuning variables ---
+extern bool tune_running; //set flag for running indication
 
 #endif

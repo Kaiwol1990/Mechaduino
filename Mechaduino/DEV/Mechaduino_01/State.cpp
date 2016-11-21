@@ -7,6 +7,7 @@
 //---- interrupt vars ----
 volatile int r = 0;                 //target angle
 volatile long y = 0;                //current angle
+volatile long y_1 = 0;                //last angle
 
 volatile int raw_0 = 0;             // current measured angle
 volatile int raw_1 = 0;             // last measured angle
@@ -27,7 +28,7 @@ bool frequency_test = false;        // flag for frequency test
 
 //----current settings-----
 const float rSense = 0.150;                           // resistor value
-const int uMAX = ((4096 * iMAX * 10 * rSense) / 3.3);  // max voltage for the vref pins
+const int uMAX = ((1024 * iMAX * 10 * rSense) / 3.3);  // max voltage for the vref pins
 
 
 //---- Step settings -----
@@ -51,15 +52,16 @@ const int IN_3 = 5;           //PA15
 const int VREF_2 = 4;         //PA08
 const int VREF_1 = 9;         //PA07
 const int IN_2 = 7;           //PA21
-#ifdef NANO_ZERO_STEPPER
-const int IN_1 = 18;           //PA05 (A4)
-#else
 const int IN_1 = 8;           //PA06
-#endif
 const int ledPin = 13;        //PA17
 const int chipSelectPin = A2; //PB08
 const int dir_pin = 0;        //PORT_PA11
 const int step_pin = 1;       //Port_PA10
 const int ena_pin = 2;        //PORT_PA14
 
+
+const float M_Pi = 3.1415926535897932384626433832795;
+
+//--- PID autotuning variables ---
+bool tune_running = false; //set flag for running indication
 
