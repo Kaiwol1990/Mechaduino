@@ -2,10 +2,6 @@
 #include "Arduino.h"
 #include "wiring_private.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int _readResolution = 10;
 static int _ADCResolution = 10;
 static int _writeResolution = 10;
@@ -195,6 +191,3 @@ void analogFastWrite(uint32_t pin, uint32_t value)
   }
 }
 
-#ifdef __cplusplus
-}
-#endif
