@@ -42,6 +42,7 @@
 #include "Parameters.h"
 #include "State.h"
 #include "Utils.h"
+#include "syslog.h"
 
 
 //////////////////////////////////////
@@ -56,6 +57,9 @@ void setup() {
   setupSPI();
   setupTCInterrupts();
 
+ Serial5.begin(460800);
+  SysLogInit(&Serial5,LOG_DEBUG); //use SWO for the sysloging
+  
   delay(1000);
 
   int i = 0;
@@ -103,6 +107,12 @@ void setup() {
   else {
     dir = true;
   }
+  
+  #ifdef NANO_ZERO_STEPPER
+  //power on the AS5047D
+	pinMode(PIN_AS5047D_PWR,OUTPUT);
+	digitalWrite(PIN_AS5047D_PWR,LOW);
+#endif 
 
   enableTC5Interrupts(); // get the filter going and ge samples for 1 second
 
@@ -119,6 +129,7 @@ void setup() {
 
 void loop()
 {
+//LOG(".");
   serialCheck();
   //SerialUSB.println(e_0);
   //SerialUSB.println(y);

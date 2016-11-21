@@ -331,7 +331,7 @@ void calibration() {
 
 
 void serialCheck() {
-  if (SerialUSB.peek() != -1) {
+  if (SerialUSB.available()) {
 
     char inChar = (char)SerialUSB.read();
 
@@ -366,6 +366,12 @@ void serialCheck() {
 
       default:
         break;
+    }
+
+    //flush any extra key presses
+    while (SerialUSB.available())
+    {
+    	SerialUSB.read();
     }
   }
 
@@ -407,7 +413,7 @@ void setpoint() {
 
   while (!received) {
     delay(100);
-    if (SerialUSB.peek() != -1) {
+    if (SerialUSB.available()) {
       new_angle = 100 * SerialUSB.parseFloat();
 
       step_target = step_target + ( (new_angle - y) / stepangle);
@@ -581,7 +587,7 @@ void parameterEdit() {
           SerialUSB.println("enter new Ki!");
           while (!received_2) {
             delay(100);
-            if (SerialUSB.peek() != -1) {
+            if (SerialUSB.available()) {
               Ki = SerialUSB.parseInt();
               received_2 = true;
             }
@@ -594,7 +600,7 @@ void parameterEdit() {
           SerialUSB.println("enter new Kd!");
           while (!received_2) {
             delay(100);
-            if (SerialUSB.peek() != -1) {
+            if (SerialUSB.available()) {
               Kd = SerialUSB.parseInt();
               received_2 = true;
             }
@@ -634,7 +640,7 @@ void step_response() {
 
   while (!received) {
     delay(100);
-    if (SerialUSB.peek() != -1) {
+    if (SerialUSB.available()) {
       response_steps = SerialUSB.parseInt();
       received = true;
     }
