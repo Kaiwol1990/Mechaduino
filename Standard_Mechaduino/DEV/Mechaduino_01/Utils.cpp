@@ -6,8 +6,6 @@
 #include "State.h"
 #include "Controller.h"
 #include "analogFastWrite.h"
-#include "Arduino.h"
-#include "wiring_private.h"
 
 void setupPins() {
   analogWriteResolution(10);  //set the PWM resolution from 8 bit to to 10 bit
@@ -31,11 +29,10 @@ void setupPins() {
     attachInterrupt(ena_pin, enaInterrupt, CHANGE);
   }
 
-  REG_PORT_OUTSET0 = PORT_PA20;  // write IN_4 HIGH
-  REG_PORT_OUTCLR0 = PORT_PA15;  // write IN_3 LOW
-  REG_PORT_OUTSET0 = PORT_PA21;  // write IN_2 HIGH
-  REG_PORT_OUTCLR0 = PORT_PA06;  // write IN_1 LOW
-
+  digitalWriteDirect(IN_4, true);
+  digitalWriteDirect(IN_3, false);
+  digitalWriteDirect(IN_2, true);
+  digitalWriteDirect(IN_1, false);
 }
 
 
@@ -465,7 +462,7 @@ void oneStep() {
 
 int readEncoder()
 {
-  long angleTemp;
+  int angleTemp;
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
 

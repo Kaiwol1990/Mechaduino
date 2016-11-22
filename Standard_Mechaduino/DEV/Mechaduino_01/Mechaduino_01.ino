@@ -42,6 +42,7 @@
 #include "Parameters.h"
 #include "State.h"
 #include "Utils.h"
+#include "analogFastWrite.h"
 
 
 //////////////////////////////////////
@@ -106,7 +107,7 @@ void setup() {
 
   enableTC5Interrupts(); // get the filter going and ge samples for 1 second
 
-  digitalWrite(ledPin, HIGH);
+  digitalWriteDirect(ledPin, true);
 
   Serial_menu();
 }

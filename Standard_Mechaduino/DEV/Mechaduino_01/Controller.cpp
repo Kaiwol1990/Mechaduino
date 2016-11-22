@@ -42,11 +42,11 @@ void TC5_Handler() {
           ITerm = -32000;
         }
 
-       if (e_0 > 150) {
+        if (e_0 > 150) {
           u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 1000;
         }
         else {
-          u = ( ((Kp * e_0)) + ((Ki * ITerm)/3) + ((Kd * (e_0 - e_1))) ) / 1000;
+          u = ( ((Kp * e_0)) + ((Ki * ITerm) / 3) + ((Kd * (e_0 - e_1))) ) / 1000;
         }
       }
       else {
