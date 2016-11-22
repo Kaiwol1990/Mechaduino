@@ -1,4 +1,3 @@
-
 #include "Arduino.h"
 #include "wiring_private.h"
 
@@ -144,6 +143,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         TCx->COUNT8.CTRLA.bit.ENABLE = 1;
         syncTC_8(TCx);
       } else {
+
         // -- Configure TCC
         Tcc* TCCx = (Tcc*) GetTC(pinDesc.ulPWMChannel);
         // Disable TCCx
@@ -156,7 +156,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         // Set the initial value
         TCCx->CC[tcChannel].reg = (uint32_t) value;
         syncTCC(TCCx);
-        // Set PER to maximum counter value (resolution : 0xFF)
+        // Set PER to maximum counter value (resolution : 0x3FF)
         TCCx->PER.reg = 0x3FF;
         syncTCC(TCCx);
         // Enable TCCx
@@ -178,16 +178,8 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         syncTCC(TCCx);
       }
     }
+
     return;
   }
 
-  // -- Defaults to digital write
-  pinMode(pin, OUTPUT);
-  value = mapResolution(value, _writeResolution, 8);
-  if (value < 128) {
-    digitalWriteDirect(pin, LOW);
-  } else {
-    digitalWriteDirect(pin, HIGH);
-  }
 }
-
