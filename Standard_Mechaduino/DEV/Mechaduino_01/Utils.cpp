@@ -753,6 +753,7 @@ void PID_autotune() {
     if (SerialUSB.peek() != -1) {
       loops = SerialUSB.parseInt();
       received = true;
+      k = 1;
       SerialUSB.print("Tuning for: ");
       SerialUSB.print(loops);
       SerialUSB.println(" loops");
