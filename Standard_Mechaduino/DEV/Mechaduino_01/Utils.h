@@ -45,5 +45,7 @@ void get_max_frequency();
 
 void PID_autotune();
 
+extern int digitalSmooth(int rawIn, int *sensSmoothArray);
+
 #endif
 

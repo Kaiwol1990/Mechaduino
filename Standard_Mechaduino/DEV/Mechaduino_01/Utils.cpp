@@ -732,7 +732,7 @@ void get_max_frequency() {
 void PID_autotune() {
   int loops = 0;
   int outputStep = (int)(uMAX);
-  int nLookBack = 25;
+  int nLookBack = 100;
   float temp_Kp = 0;
   float temp_Ki = 0;
   float temp_Kd = 0;
@@ -743,6 +743,7 @@ void PID_autotune() {
   unsigned long now = millis();
   int refVal = y;
   int k = 0;
+#define max_sample 1000
 
   SerialUSB.println("--- Autotuning the PID controller ---");
   SerialUSB.println("Press c to cancle!");
@@ -791,6 +792,13 @@ void PID_autotune() {
 
     int lastInputs[101] = {0};
     int peaks[90] = {0};
+    unsigned long peak_time[90] = {0};
+
+    unsigned long times[max_sample] = {0};
+    int points [max_sample] = {0};
+    int smoothed[max_sample] = {0};
+#define filterSamples   15
+    int sensSmoothArray1 [filterSamples];
 
     int peakType = 0;
     int peakCount = 0;
@@ -811,9 +819,13 @@ void PID_autotune() {
 
     u = outputStart  + outputStep; // step up the effort
 
-    while (tune_running && peakCount < 90) {
+    int counter = 0;
+    SerialUSB.println();
+    SerialUSB.println("Oscilating Output");
+
+    while (counter < max_sample) {
       now = micros();
-      if (now > last_time + 250) {
+      if (now > last_time + 30) {
 
         raw_0 =  (pgm_read_word_near(lookup + readEncoder()));
 
@@ -831,6 +843,7 @@ void PID_autotune() {
 
         refVal = y;
         last_time = now;
+        raw_1 = raw_0;
 
         // canceling call if something goes wrong
         if (SerialUSB.peek() != -1) {
@@ -862,76 +875,97 @@ void PID_autotune() {
           output(-raw_0 + PA, abs(u));
         }
 
-        y_1 = y,
-        e_1 = e_0;
-        raw_1 = raw_0;
+        times[counter] = now;
+        points[counter] = y;
 
-        // searching for maximum
-        isMax = true;
-        isMin = true;
+        counter++;
+      }
+    }
+    
+    u=0;
 
-        for (int i = nLookBack - 1; i >= 0; i--) {
-          int val = lastInputs[i];
+    enableTC5Interrupts();
 
-          if (isMax) {
-            isMax = refVal > val;
-          }
-          if (isMin) {
-            isMin = refVal < val;
-          }
+    //smoothing the measured data
+    SerialUSB.println();
+    SerialUSB.println("Smoothing data");
+    for (int i = 0; i <= max_sample; i++) {
+      smoothed[i] = digitalSmooth(points[i], sensSmoothArray1);
+    }
 
-          lastInputs[i + 1] = lastInputs[i];
+    
+    SerialUSB.println();
+    SerialUSB.println("Searching for min and maxima");
+    // searching the min and max without first and last max
+    for (int i = 200; i <= max_sample - 100; i++) {
+      refVal = smoothed[i];
+      now = times[i];
+
+      if (refVal > absMax) {
+        absMax = refVal;
+      }
+      if (refVal < absMin) {
+        absMin = refVal;
+      }
+      isMax = true;
+      isMin = true;
+
+      for (int i = nLookBack - 1; i >= 0; i--) {
+        int val = lastInputs[i];
+
+        if (isMax == 1) {
+          isMax = refVal > val;
         }
 
-        lastInputs[0] = refVal;
-
-        if (isMax) {
-          if (peakType == 0) {
-            peakType = 1;
-          }
-          if (peakType == -1)
-          {
-            peakType = 1;
-            justchanged = true;
-            peak2 = peak1;
-          }
-          peak1 = now;
-          peaks[peakCount] = refVal;
-
-        }
-        else if (isMin) {
-
-          if (peakType == 0) {
-            peakType = -1;
-          }
-
-          if (peakType == 1) {
-            peakType = -1;
-            peakCount++;
-            justchanged = true;
-          }
-
-          if (peakCount < 10) {
-            peaks[peakCount] = refVal;
-          }
-
+        if (isMin == 1) {
+          isMin = refVal < val;
         }
 
-        if (justchanged && peakCount > 30) { //we've transitioned.  check if we can autotune based on the last peaks
-          double avgSeparation = (abs(peaks[peakCount - 1] - peaks[peakCount - 2]) + abs(peaks[peakCount - 2] - peaks[peakCount - 3])) / 2;
+        lastInputs[i + 1] = lastInputs[i];
+      }
+      lastInputs[0] = refVal;
 
-          if ( avgSeparation < 0.01 * ((float)absMax - (float)absMin)) {
-            tune_running = false;
-          }
-          justchanged = false;
+      if (isMax) {
+        if (peakType == 0) {
+          peakType = 1;
+        }
+        if (peakType == -1)
+        {
+          peakType = 1;
+          justchanged = true;
+        }
+        peak_time[peakCount] = now;
+        peaks[peakCount] = refVal;
+
+      }
+      else if (isMin) {
+
+        if (peakType == 0) {
+          peakType = -1;
+        }
+
+        if (peakType == 1) {
+          peakType = -1;
+          peakCount++;
+          justchanged = true;
         }
       }
     }
 
-    enableTC5Interrupts();
+    unsigned long average = 0;
+    for (int j = peakCount - 1; j >= 1; j--) {
+      average = average + (peak_time[j] - peak_time[j - 1]);
+    }
 
-    double Ku = (float)(4.0 * 2.0 * (float)outputStep * 1000.0) / (((float)absMax - (float)absMin)  * M_Pi);
-    double Tu = (float)(peak1 - peak2) / 1000000.0;
+    //Amplitude of the sinewave
+    int A = 0;
+    for (int j = 0; j <= peakCount - 1; j++) {
+      A = A + (peaks[j]-setpoint);
+    }
+    A = A / peakCount - 1;
+
+    double Tu = (average / (peakCount - 1)) / 1000000.0;
+    double Ku = 4 * 2 * outputStep * 1000 / (M_Pi * 2 * A);
 
     if (k == 1) {
       temp_Kp = (0.6 * Ku);
@@ -944,6 +978,9 @@ void PID_autotune() {
       temp_Kd = temp_Kd + ((0.6 * Ku * Tu * FPID) / 8);
     }
 
+    
+    SerialUSB.println();
+    SerialUSB.println("loop data");
     SerialUSB.print("Ku = ");
     SerialUSB.println(Ku, 6);
     SerialUSB.print("Tu = ");
@@ -958,12 +995,13 @@ void PID_autotune() {
     SerialUSB.println();
 
     delay(500);
-    k++;
 
+    k++;
   }
   // we are finished
   tune_running = false;
   if (!abbort) { //succses!
+    SerialUSB.println();
     SerialUSB.println("finished!");
     SerialUSB.println();
     SerialUSB.println("Building Average!");
@@ -977,6 +1015,49 @@ void PID_autotune() {
   else {
     SerialUSB.println("cancelled!");
   }
+}
+
+
+
+int digitalSmooth(int rawIn, int *sensSmoothArray) {    // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
+  int j, k, temp, top, bottom;
+  long total;
+  static int i;
+  // static int raw[filterSamples];
+  static int sorted[filterSamples];
+  boolean done;
+
+  i = (i + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  sensSmoothArray[i] = rawIn;                 // input new data into the oldest slot
+
+  for (j = 0; j < filterSamples; j++) { // transfer data array into anther array for sorting and averaging
+    sorted[j] = sensSmoothArray[j];
+  }
+
+  done = 0;                // flag to know when we're done sorting
+  while (done != 1) {      // simple swap sort, sorts numbers from lowest to highest
+    done = 1;
+    for (j = 0; j < (filterSamples - 1); j++) {
+      if (sorted[j] > sorted[j + 1]) {    // numbers are out of order - swap
+        temp = sorted[j + 1];
+        sorted [j + 1] =  sorted[j] ;
+        sorted [j] = temp;
+        done = 0;
+      }
+    }
+  }
+
+  // throw out top and bottom 15% of samples - limit to throw out at least one from top and bottom
+  bottom = max(((filterSamples * 15)  / 100), 1);
+  top = min((((filterSamples * 85) / 100) + 1  ), (filterSamples - 1));   // the + 1 is to make up for asymmetry caused by integer rounding
+  k = 0;
+  total = 0;
+  for ( j = bottom; j < top; j++) {
+    total += sorted[j];  // total remaining indices
+    k++;
+  }
+
+  return total / k;    // divide by number of samples
 }
 
 
