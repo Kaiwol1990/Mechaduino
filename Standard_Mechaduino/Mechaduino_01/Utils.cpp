@@ -992,7 +992,7 @@ void PID_autotune() {
         pd_state = 2;
       }
 
-      if (i == 2) {
+      if (i == 1) {
         thresh = sum * 0.5;
         pd_state = 1;
       }
