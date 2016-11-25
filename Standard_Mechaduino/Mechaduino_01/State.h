@@ -6,6 +6,7 @@
 //---- interrupt vars ----
 extern volatile int r;            //target angle
 extern volatile long y;           //current angle
+extern volatile long y_1;           //last angle
 
 extern volatile int raw_0;        // current measured angle
 extern volatile int raw_1;        // last measured angle
@@ -56,5 +57,10 @@ extern const int dir_pin;
 extern const int step_pin;
 extern const int ena_pin;
 
+
+extern const float M_Pi;
+
+//--- PID autotuning variables ---
+extern bool tune_running; //set flag for running indication
 
 #endif

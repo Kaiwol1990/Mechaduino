@@ -1,14 +1,9 @@
-
 #include "Arduino.h"
 #include "wiring_private.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static int _readResolution = 10;
 static int _ADCResolution = 10;
-static int _writeResolution = 8;
+static int _writeResolution = 10;
 
 // Wait for synchronization of registers between the clock domains
 static __inline__ void syncADC() __attribute__((always_inline, unused));
@@ -91,7 +86,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
 
   if ((attr & PIN_ATTR_PWM) == PIN_ATTR_PWM)
   {
-    value = mapResolution(value, _writeResolution, 8);
+    value = mapResolution(value, _writeResolution, 10);
 
     uint32_t tcNum = GetTCNumber(pinDesc.ulPWMChannel);
     uint8_t tcChannel = GetTCChannelNumber(pinDesc.ulPWMChannel);
@@ -148,6 +143,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         TCx->COUNT8.CTRLA.bit.ENABLE = 1;
         syncTC_8(TCx);
       } else {
+
         // -- Configure TCC
         Tcc* TCCx = (Tcc*) GetTC(pinDesc.ulPWMChannel);
         // Disable TCCx
@@ -160,8 +156,8 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         // Set the initial value
         TCCx->CC[tcChannel].reg = (uint32_t) value;
         syncTCC(TCCx);
-        // Set PER to maximum counter value (resolution : 0xFF)
-        TCCx->PER.reg = 0xFF;
+        // Set PER to maximum counter value (resolution : 0x3FF)
+        TCCx->PER.reg = 0x3FF;
         syncTCC(TCCx);
         // Enable TCCx
         TCCx->CTRLA.bit.ENABLE = 1;
@@ -182,19 +178,8 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         syncTCC(TCCx);
       }
     }
+
     return;
   }
 
-  // -- Defaults to digital write
-  pinMode(pin, OUTPUT);
-  value = mapResolution(value, _writeResolution, 8);
-  if (value < 128) {
-    digitalWriteDirect(pin, LOW);
-  } else {
-    digitalWriteDirect(pin, HIGH);
-  }
 }
-
-#ifdef __cplusplus
-}
-#endif

@@ -12,6 +12,7 @@ void TC5_Handler() {
 
     r = step_target * stepangle;
 
+
     raw_0 = (pgm_read_word_near(lookup + readEncoder()));
 
     raw_diff = raw_0 - raw_1;
@@ -27,26 +28,33 @@ void TC5_Handler() {
     }
 
 
-    if (enabled) {
-      e_0 = (r - y);
+    if (!tune_running) {
+      if (enabled) {
 
-      ITerm = (ITerm + e_0);
+        e_0 = (e_0 + (r - y)) / 2;
 
-      if (ITerm > 15000) {
-        ITerm = 15000;
+        ITerm = ITerm + e_0;
+
+        if (ITerm > 32000) {
+          ITerm = 32000;
+        }
+        else if (ITerm < -32000) {
+          ITerm = -32000;
+        }
+
+        if (e_0 > 150) {
+          u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 1000;
+        }
+        else {
+          u = ( ((Kp * e_0)) + ((Ki * ITerm) / 3) + ((Kd * (e_0 - e_1))) ) / 1000;
+        }
       }
-      else if (ITerm < -15000) {
-        ITerm = -15000;
+      else {
+        step_target = ((9 * step_target) + ( y / stepangle)) / 10;
+        e_0 = 0;
+        u = 0;
+        ITerm = 0;
       }
-
-      u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 10000;
-
-    }
-    else {
-      step_target = ((9 * step_target) + ( y / stepangle)) / 10;
-      e_0 = 0;
-      u = 0;
-      ITerm = 0;
     }
 
 
@@ -64,8 +72,7 @@ void TC5_Handler() {
       output(-raw_0 + PA, abs(u));
     }
 
-
-
+    y_1 = y,
     e_1 = e_0;
     raw_1 = raw_0;
 
