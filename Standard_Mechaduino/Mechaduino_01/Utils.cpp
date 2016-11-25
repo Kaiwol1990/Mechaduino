@@ -77,21 +77,25 @@ void enaInterrupt() {
 
 void output(int theta, int effort) {
   static uint8_t pinState = 0;
-  static volatile int angle;
   static volatile int v_coil_A;
   static volatile int v_coil_B;
+  static volatile int angle_1;
+  static volatile int angle_2;
 
   static int sin_coil_A;
   static int sin_coil_B;
 
-  angle = mod((5 * theta) , 3600);
+  static int phase_multiplier = (10 * steps_per_revolution / 4) / 100;
 
-  sin_coil_A = pgm_read_word_near(sine_lookup_coil_A + angle);
+  angle_1 = mod((phase_multiplier * theta) , 3600);
+  angle_2 = mod((phase_multiplier * theta) + 900 , 3600);
+
+  sin_coil_A = pgm_read_word_near(sin_lookup + angle_1);
   if (sin_coil_A > 1024) {
     sin_coil_A = sin_coil_A - 65536;
   }
 
-  sin_coil_B = pgm_read_word_near(sine_lookup_coil_B + angle);
+  sin_coil_B = pgm_read_word_near(sin_lookup + angle_2);
   if (sin_coil_B > 1024) {
     sin_coil_B = sin_coil_B - 65536;
   }
@@ -827,7 +831,7 @@ void PID_autotune() {
     }
 
 
-#define max_sample 1024
+#define max_sample 1124
     unsigned long times_raw[max_sample] = {0};
     int points_raw[max_sample] = {0};
     int smoothed_raw[max_sample] = {0};
@@ -934,22 +938,22 @@ void PID_autotune() {
     // dump the first and last values
     unsigned long times[max_sample] = {0};
     int points[max_sample] = {0};
-    int smoothed[max_sample] = {0};
+    float smoothed[max_sample] = {0};
 
-    for (int i = 0; i < 512; i++) {
-      times[i] = times_raw[i + 250];
-      points[i] = points_raw[i + 250];
-      smoothed[i] = smoothed_raw[i + 250];
+    for (int i = 0; i < 1024; i++) {
+      times[i] = times_raw[i + 50];
+      points[i] = points_raw[i + 50];
+      smoothed[i] = smoothed_raw[i + 50];
     }
 
     // building mean of the position data
     float sum = 0;
-    for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < 1024; i++) {
       sum = sum + smoothed[i];
     }
-    sum = sum / 512;
+    sum = sum / 1024.0;
 
-    for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < 1024; i++) {
 
       smoothed[i] = smoothed[i] - sum;
       points[i] = points[i] - sum;
@@ -964,7 +968,7 @@ void PID_autotune() {
     }
 
     // searching the main frequency
-    int len = 512;
+    int len = 1024;
     int thresh = 0;
     float sum_old = 0;
     byte pd_state = 0;
@@ -975,7 +979,7 @@ void PID_autotune() {
       sum_old = sum;
       sum = 0;
 
-      for (int k = 1; k < len - 1; k++) {
+      for (int k = 1; k < len - i; k++) {
         sum = sum + (points[k]) * (points[k + i]);
       }
 
@@ -1010,7 +1014,7 @@ void PID_autotune() {
     }
 
     // calculating lookback points
-    int nLookBack = 0.9 * ((1000000 * Tu) / 50);
+    int nLookBack = ((1000000 * Tu) / 50) / 4;
     SerialUSB.print("|   ");
     SerialUSB.print(nLookBack);
     if (nLookBack >= 100) {
@@ -1028,7 +1032,7 @@ void PID_autotune() {
     unsigned long peak_time[20] = {0};
     int refVal = 0;
 
-    for (int i = 0; i < 512; i++) {
+    for (int i = 0; i < 1024; i++) {
       refVal = smoothed[i];
       now = times[i];
 
@@ -1086,10 +1090,10 @@ void PID_autotune() {
 
     //Amplitude of the oscilation
     float A = 0;
-    for (int j = 0; j < peakCount; j++) {
+    for (int j = 1; j <= peakCount - 1; j++) {
       A = A + peaks[j];
     }
-    A = A / peakCount;
+    A = A / (peakCount - 1);
 
     // calculating PID settings
     float Ku = 4 * 2 * outputStep * 1000 / (M_Pi * 2 * A);

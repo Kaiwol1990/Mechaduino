@@ -66,10 +66,10 @@ void TC5_Handler() {
     }
 
     if (u > 0) {
-      output(-raw_0 - PA, abs(u));
+      output(-(raw_0 + PA), abs(u));
     }
     else {
-      output(-raw_0 + PA, abs(u));
+      output(-(raw_0 - PA), abs(u));
     }
 
     y_1 = y,

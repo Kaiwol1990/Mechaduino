@@ -7,12 +7,12 @@
 const String identifier = "Y";   // string to identify the mechaduino with the Serial monitor
 
 //---- PID Frequenz -----
-volatile int FPID = 10000;  // frequency of the PID loop change only if you know what you're doing
+volatile int FPID = 15000;  // frequency of the PID loop change only if you know what you're doing
 
 //---- PID Values -----
-volatile int Kp = 1703;
-volatile int Ki = 52;
-volatile int Kd = 13875;
+volatile int Kp = 1666;
+volatile int Ki = 34;
+volatile int Kd = 20206;
 
 //----current settings-----
 const float iMAX = 1.0; // max current per coil 2.0 A for A4954 driver should be lower (thermal conditions)
@@ -31,4 +31,3 @@ const bool use_enable_pin = true;     //flag for enable pin
 //---- Step settings -----
 const int microstepping = 16;          // microstepping setting for step input
 const int steps_per_revolution = 200;  // fullsteps for 360 degrees
-// note if you're using 400 steps/rev motors you have to uncomment the lines in State.cpp

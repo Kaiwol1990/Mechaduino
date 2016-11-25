@@ -39,9 +39,7 @@ extern volatile int step_target;        // target as step gets incremented if an
 
 
 //--- lookup tables for the coils ---
-// take a look at the current plot for microstepping online
-extern const PROGMEM int_fast16_t sine_lookup_coil_A[];   // lookup for coil A
-extern const PROGMEM int_fast16_t sine_lookup_coil_B[];   // lookup for coil B
+extern const PROGMEM int_fast16_t sin_lookup[];
 
 
 //---- Pins -----
