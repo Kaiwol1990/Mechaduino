@@ -947,7 +947,7 @@ void PID_autotune() {
     }
 
     // building mean of the position data
-    float sum = 0;
+    int sum = 0;
     for (int i = 0; i < 1024; i++) {
       sum = sum + smoothed[i];
     }
@@ -970,7 +970,7 @@ void PID_autotune() {
     // searching the main frequency
     int len = 1024;
     int thresh = 0;
-    float sum_old = 0;
+    int sum_old = 0;
     byte pd_state = 0;
     int period = 0;
 
@@ -1118,7 +1118,7 @@ void PID_autotune() {
     SerialUSB.print(" |");
 
     SerialUSB.println("");
-    delay(500);
+    delay(100);
 
     k++;
   }
