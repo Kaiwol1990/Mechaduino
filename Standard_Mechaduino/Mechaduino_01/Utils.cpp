@@ -184,6 +184,7 @@ void calibration() {
   delay(500);
 
   SerialUSB.println("Calibrating single steps");
+  SerialUSB.println("0%      20%       40%       60%        80%       100%");
   SerialUSB.println("|--------------------------------------------------|");
   SerialUSB.print("|");
 
@@ -456,7 +457,7 @@ void oneStep() {
     step_target -= PA;
   }
 
-  output(step_target, 64);
+  output(step_target, 255);
 }
 
 
@@ -749,7 +750,6 @@ void PID_autotune() {
   SerialUSB.println("--- Autotuning the PID controller ---");
   SerialUSB.println("Press c to cancle!");
   SerialUSB.println("Tuning PID Parameters");
-  SerialUSB.println();
 
   while (!timed_out && !received_1) {
     if (SerialUSB.peek() != -1) {
@@ -773,6 +773,7 @@ void PID_autotune() {
       SerialUSB.print("Tuning for: ");
       SerialUSB.print(loops);
       SerialUSB.println(" loop");
+      SerialUSB.println("");
     }
     if (millis() > now + 5000) {
       timed_out = true;
@@ -781,11 +782,14 @@ void PID_autotune() {
     }
   }
 
+  SerialUSB.println("| loop | Noise | Frequency | lookback | P    | I  | D     |");
+
   // start autotune
   while (k <= loops && !abbort) {
-    SerialUSB.println();
-    SerialUSB.print("loop: ");
-    SerialUSB.println(k);
+    SerialUSB.println("|---------------------------------------------------------|");
+    SerialUSB.print("|   ");
+    SerialUSB.print(k);
+    SerialUSB.print("  ");
 
     tune_running = true;
 
@@ -800,8 +804,6 @@ void PID_autotune() {
       setpoint = setpoint + y;
     }
     setpoint = setpoint / 10000;
-    SerialUSB.print("Setpoint = ");
-    SerialUSB.println(setpoint);
 
     // measuring the noise while the system is steady
     int higher_noise = 0;
@@ -815,9 +817,14 @@ void PID_autotune() {
     }
 
     int noiseBand = (higher_noise - lower_noise);
-    SerialUSB.print("Noiseband = ");
-    SerialUSB.println(noiseBand);
-    SerialUSB.println();
+    SerialUSB.print("|   ");
+    SerialUSB.print(noiseBand);
+    if (noiseBand >= 10) {
+      SerialUSB.print("  ");
+    }
+    else {
+      SerialUSB.print("   ");
+    }
 
 
 #define max_sample 1024
@@ -845,8 +852,6 @@ void PID_autotune() {
     disableTC5Interrupts();
 
 
-    SerialUSB.println("Oscilating Output");
-    SerialUSB.println();
     // step up the effort
     u = outputStep;
 
@@ -921,8 +926,6 @@ void PID_autotune() {
     enableTC5Interrupts();
 
     //smoothing the measured data
-    SerialUSB.println("Smoothing data");
-    SerialUSB.println();
     for (int i = 0; i <= max_sample; i++) {
       smoothed_raw[i] = digitalSmooth(points_raw[i], sensSmoothArray1);
     }
@@ -994,21 +997,31 @@ void PID_autotune() {
     float frequency = (1000000.0 / 50.0) / period;
     double Tu = 1.0 / frequency;
 
-    SerialUSB.print("Main frequency = ");
-    SerialUSB.print(frequency);
-    SerialUSB.println(" Hz");
-    SerialUSB.println();
+    SerialUSB.print("|   ");
+    SerialUSB.print(frequency, 1);
+    if (frequency >= 100.0) {
+      SerialUSB.print("   ");
+    }
+    else if (frequency >= 1000.0) {
+      SerialUSB.print("  ");
+    }
+    else {
+      SerialUSB.print("    ");
+    }
 
     // calculating lookback points
     int nLookBack = 0.9 * ((1000000 * Tu) / 50);
-    SerialUSB.print("lookback size = ");
-    SerialUSB.println(nLookBack);
-    SerialUSB.println();
+    SerialUSB.print("|   ");
+    SerialUSB.print(nLookBack);
+    if (nLookBack >= 100) {
+      SerialUSB.print("    ");
+    }
+    else {
+      SerialUSB.print("     ");
+    }
 
 
     // searching the min and max in data
-    SerialUSB.println("Searching for min and maxima");
-    SerialUSB.println();
 
     int lastInputs[51] = {0};
     int peaks[20] = {0};
@@ -1092,21 +1105,15 @@ void PID_autotune() {
       temp_Kd = temp_Kd + ((0.6 * Ku * Tu * FPID) / 8);
     }
 
+    SerialUSB.print("| ");
+    SerialUSB.print((0.6 * Ku), 0);
+    SerialUSB.print(" | ");
+    SerialUSB.print(((1.2 * Ku) / (Tu * FPID)), 0);
+    SerialUSB.print(" | ");
+    SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8), 0);
+    SerialUSB.print(" |");
 
-    SerialUSB.println("loop data");
-    SerialUSB.print("Ku = ");
-    SerialUSB.println(Ku, 6);
-    SerialUSB.print("Tu = ");
-    SerialUSB.println(Tu, 6);
-
-    SerialUSB.print("Kp = ");
-    SerialUSB.println((0.6 * Ku));
-    SerialUSB.print("Ki = ");
-    SerialUSB.println(((1.2 * Ku) / (Tu * FPID)));
-    SerialUSB.print("Kd = ");
-    SerialUSB.println(((0.6 * Ku * Tu * FPID) / 8));
-    SerialUSB.println();
-
+    SerialUSB.println("");
     delay(500);
 
     k++;
@@ -1114,10 +1121,9 @@ void PID_autotune() {
   // we are finished
   tune_running = false;
   if (!abbort) { //succses!
-    SerialUSB.println("finished!");
+    SerialUSB.println("|---------------------------------------------------------|");
     SerialUSB.println();
     SerialUSB.println("Building Average!");
-    SerialUSB.println();
 
     Kp = (((temp_Kp / loops)) + 0.5);
     Ki = (((temp_Ki / loops)) + 0.5);
