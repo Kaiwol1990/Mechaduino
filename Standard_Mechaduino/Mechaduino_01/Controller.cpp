@@ -31,7 +31,7 @@ void TC5_Handler() {
     if (!tune_running) {
       if (enabled) {
 
-        e_0 = (e_0 + (r - y)) / 2;
+        e_0 = r - y;
 
         ITerm = ITerm + e_0;
 
