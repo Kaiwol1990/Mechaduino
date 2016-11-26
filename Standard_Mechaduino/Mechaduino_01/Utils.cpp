@@ -78,11 +78,11 @@ void enaInterrupt() {
 void output(int theta, int effort) {
   static int v_coil_A;
   static int v_coil_B;
-  
+
   static int phase_multiplier = (10 * steps_per_revolution / 4) / 100;
-  
+
   int angle = mod((phase_multiplier * theta) , 3600);
-  
+
   int sin_coil_A = pgm_read_word_near(sin_lookup + angle);
   if (sin_coil_A > 1024) {
     sin_coil_A = sin_coil_A - 65536;
@@ -784,7 +784,12 @@ void PID_autotune() {
     SerialUSB.println("|---------------------------------------------------------|");
     SerialUSB.print("|   ");
     SerialUSB.print(k);
-    SerialUSB.print("  ");
+    if (k >= 10) {
+      SerialUSB.print(" ");
+    }
+    else {
+      SerialUSB.print("  ");
+    }
 
     tune_running = true;
 
