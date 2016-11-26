@@ -7,7 +7,7 @@
 extern const String identifier;   // string to identify the mechaduino with the Serial monitor
 
 //---- Sample Frequenz -----
-extern volatile int FPID;   // frequency of the PID loop
+extern const int FPID;   // frequency of the PID loop
 
 //---- PID Values -----
 extern volatile int Kp;   // proportional constant

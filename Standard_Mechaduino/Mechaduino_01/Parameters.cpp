@@ -7,7 +7,7 @@
 const String identifier = "Y";   // string to identify the mechaduino with the Serial monitor
 
 //---- PID Frequenz -----
-volatile int FPID = 15000;  // frequency of the PID loop change only if you know what you're doing
+const int FPID = 15000;  // frequency of the PID loop change only if you know what you're doing
 
 //---- PID Values -----
 volatile int Kp = 1666;

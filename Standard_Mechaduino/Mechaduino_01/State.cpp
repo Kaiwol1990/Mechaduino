@@ -6,15 +6,13 @@
 
 //---- interrupt vars ----
 volatile int r = 0;                 //target angle
-volatile long y = 0;                //current angle
-volatile long y_1 = 0;                //last angle
+volatile int y = 0;                //current angle
 
 volatile int raw_0 = 0;             // current measured angle
 volatile int raw_1 = 0;             // last measured angle
 volatile int raw_diff = 0;          // diff of both
-volatile int u = 0;                 // control effort
 
-volatile long ITerm = 0;            // Integral term
+volatile int u = 0;                 // control effort
 
 volatile int e_0 = 0;               // current error term
 volatile int e_1 = 0;               // last error term
@@ -35,7 +33,7 @@ const int uMAX = ((1024 * iMAX * 10 * rSense) / 3.3);  // max voltage for the vr
 const int counts_per_revolution = 16384;                              // encoder counts for 360 degrees
 const float angle_per_step = 360.0 / steps_per_revolution;            // only needed for calibration routine by now
 const int stepangle = 36000 / (steps_per_revolution*microstepping);   // angle of one step as int
-volatile const int PA = (36000 / steps_per_revolution);               // angle of one fullstep
+const int PA = (36000 / steps_per_revolution);                        // angle of one fullstep
 volatile int step_target = 0;                                         // target as step gets incremented if an step is received
 
 

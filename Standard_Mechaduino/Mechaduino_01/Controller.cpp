@@ -8,10 +8,11 @@
 
 void TC5_Handler() {
   // gets called with PID frequency
+  static int ITerm;
+
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
     r = step_target * stepangle;
-
 
     raw_0 = (pgm_read_word_near(lookup + readEncoder()));
 
@@ -46,7 +47,7 @@ void TC5_Handler() {
           u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 1000;
         }
         else {
-          u = ( ((Kp * e_0)) + ((Ki * ITerm) / 3) + ((Kd * (e_0 - e_1))) ) / 1000;
+          u = ( ((Kp * e_0)) + ((Ki * ITerm) / 10) + ((Kd * (e_0 - e_1))) ) / 1000;
         }
       }
       else {
@@ -72,7 +73,6 @@ void TC5_Handler() {
       output(-(raw_0 - PA), abs(u));
     }
 
-    y_1 = y,
     e_1 = e_0;
     raw_1 = raw_0;
 

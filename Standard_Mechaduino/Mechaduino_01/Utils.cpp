@@ -76,24 +76,19 @@ void enaInterrupt() {
 
 
 void output(int theta, int effort) {
-  static volatile int angle;
+  static int v_coil_A;
+  static int v_coil_B;
   
-  static int sin_coil_A;
-  static int sin_coil_B;
-  
-  static volatile int v_coil_A;
-  static volatile int v_coil_B;
-
   static int phase_multiplier = (10 * steps_per_revolution / 4) / 100;
-
-  angle = mod((phase_multiplier * theta) , 3600);
-
-  sin_coil_A = pgm_read_word_near(sin_lookup + angle);
+  
+  int angle = mod((phase_multiplier * theta) , 3600);
+  
+  int sin_coil_A = pgm_read_word_near(sin_lookup + angle);
   if (sin_coil_A > 1024) {
     sin_coil_A = sin_coil_A - 65536;
   }
 
-  sin_coil_B = pgm_read_word_near(cos_lookup + angle);
+  int sin_coil_B = pgm_read_word_near(cos_lookup + angle);
   if (sin_coil_B > 1024) {
     sin_coil_B = sin_coil_B - 65536;
   }
@@ -829,7 +824,7 @@ void PID_autotune() {
     unsigned long times_raw[1124] = {0};
     int points_raw[1124] = {0};
     int smoothed_raw[1124] = {0};
-#define filterSamples   15
+#define filterSamples   10
     int sensSmoothArray1 [filterSamples];
 
     int peakType = 0;
