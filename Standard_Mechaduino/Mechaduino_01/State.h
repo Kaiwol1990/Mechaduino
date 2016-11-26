@@ -40,6 +40,7 @@ extern volatile int step_target;        // target as step gets incremented if an
 
 //--- lookup tables for the coils ---
 extern const PROGMEM int_fast16_t sin_lookup[];
+extern const PROGMEM int_fast16_t cos_lookup[];
 
 
 //---- Pins -----
