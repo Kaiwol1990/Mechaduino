@@ -1131,6 +1131,8 @@ void PID_autotune() {
     Ki = (((temp_Ki / loops)) + 0.5);
     Kd = (((temp_Kd / loops)) + 0.5);
 
+    ITerm_max = (uMAX * 1000) / (3 * Ki);
+
     parameterQuery(); // print Parameter over Serialport
   }
   else {

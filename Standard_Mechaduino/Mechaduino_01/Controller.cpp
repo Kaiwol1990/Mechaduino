@@ -36,11 +36,11 @@ void TC5_Handler() {
 
         ITerm = ITerm + e_0;
 
-        if (ITerm > 32000) {
-          ITerm = 32000;
+        if (ITerm > ITerm_max) {
+          ITerm = ITerm_max;
         }
-        else if (ITerm < -32000) {
-          ITerm = -32000;
+        else if (ITerm < -ITerm_max) {
+          ITerm = -ITerm_max;
         }
 
         u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 1000;

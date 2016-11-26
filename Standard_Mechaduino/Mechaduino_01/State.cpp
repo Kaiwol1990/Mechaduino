@@ -27,6 +27,7 @@ bool frequency_test = false;        // flag for frequency test
 //----current settings-----
 const float rSense = 0.150;                           // resistor value
 const int uMAX = ((1024 * iMAX * 10 * rSense) / 3.3);  // max voltage for the vref pins
+int ITerm_max = (uMAX * 1000) / (3 * Ki);
 
 
 //---- Step settings -----

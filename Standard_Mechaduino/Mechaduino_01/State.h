@@ -25,6 +25,7 @@ extern bool frequency_test;       // flag for frequency test
 
 //----current settings-----
 extern const int uMAX;    // max voltage for the vref pins
+extern int ITerm_max;
 
 
 //---- Step settings -----
