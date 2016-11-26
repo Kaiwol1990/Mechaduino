@@ -98,8 +98,8 @@ void output(int theta, int effort) {
     v_coil_B = ((effort * sin_coil_B) / 1024);
   }
   else {
-    v_coil_A = ((2 * v_coil_A) + ((effort * sin_coil_A) / 1024)) / 3;
-    v_coil_B = ((2 * v_coil_B) + ((effort * sin_coil_B) / 1024)) / 3;
+    v_coil_A = (( 2 * v_coil_A) + ((effort * sin_coil_A) / 1024)) / 3;
+    v_coil_B = (( 2 * v_coil_B) + ((effort * sin_coil_B) / 1024)) / 3;
   }
 
   analogFastWrite(VREF_1, abs(v_coil_A));
