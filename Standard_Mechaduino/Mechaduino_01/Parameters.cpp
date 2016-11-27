@@ -29,5 +29,5 @@ const int baudrate = 115200;    // baudrate speed bit/s
 const bool use_enable_pin = true;     //flag for enable pin
 
 //---- Step settings -----
-const int microstepping = 16;          // microstepping setting for step input
+const int microstepping = 32;          // microstepping setting for step input
 const int steps_per_revolution = 200;  // fullsteps for 360 degrees

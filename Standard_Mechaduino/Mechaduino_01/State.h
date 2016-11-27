@@ -31,7 +31,7 @@ extern int ITerm_max;
 //---- Step settings -----
 extern const int counts_per_revolution; // encoder counts for 360 degrees
 extern const float angle_per_step;      // only needed for calibration routine by now
-extern const int stepangle;             // angle of one step as int
+extern const float stepangle;             // angle of one step as int
 extern const int PA;                    // angle of one fullstep
 extern volatile int step_target;        // target as step gets incremented if an step is received
 
