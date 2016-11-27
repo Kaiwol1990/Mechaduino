@@ -33,7 +33,7 @@ int ITerm_max = (uMAX * 1000) / (3 * Ki);
 //---- Step settings -----
 const int counts_per_revolution = 16384;                              // encoder counts for 360 degrees
 const float angle_per_step = 360.0 / steps_per_revolution;            // only needed for calibration routine by now
-const float stepangle = 36000 / (steps_per_revolution*microstepping);   // angle of one step as int
+const float stepangle = 36000.0 / (steps_per_revolution*microstepping);   // angle of one step as int
 const int PA = (36000 / steps_per_revolution);                        // angle of one fullstep
 volatile int step_target = 0;                                         // target as step gets incremented if an step is received
 
