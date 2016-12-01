@@ -916,8 +916,6 @@ void PID_autotune() {
       }
     }
 
-    // turn PID loop back on
-    enableTC5Interrupts();
 
     //smoothing the measured data
     for (int i = 0; i <= 1124; i++) {
@@ -983,7 +981,7 @@ void PID_autotune() {
         pd_state = 2;
       }
 
-      if (i == 1) {
+      if (!i) {
         thresh = sum * 0.5;
         pd_state = 1;
       }
@@ -993,25 +991,26 @@ void PID_autotune() {
 
     float frequency = (1000000.0 / 50.0) / period;
     double Tu = 1.0 / frequency;
-
+    
+    SerialUSB.print("|   ");
+    SerialUSB.print(frequency, 1);
+    if (frequency >= 100.0) {
+      SerialUSB.print("   ");
+    }
+    else if (frequency >= 1000.0) {
+      SerialUSB.print("  ");
+    }
+    else {
+      SerialUSB.print("    ");
+    }
+    
     if (frequency < 40.0 || frequency > 9950.0) {
       abbort = true;
       SerialUSB.println();
       SerialUSB.println("Autotune failed, frequency not in usable range!");
     }
     else {
-      SerialUSB.print("|   ");
-      SerialUSB.print(frequency, 1);
-      if (frequency >= 100.0) {
-        SerialUSB.print("   ");
-      }
-      else if (frequency >= 1000.0) {
-        SerialUSB.print("  ");
-      }
-      else {
-        SerialUSB.print("    ");
-      }
-
+     
       // calculating lookback points
       int nLookBack = ((1000000 * Tu) / 50) / 4;
       if (nLookBack >= 99) {
@@ -1122,6 +1121,10 @@ void PID_autotune() {
   }
   // we are finished
   tune_running = false;
+  
+  // turn PID loop back on
+  enableTC5Interrupts();
+  
   if (!abbort) { //succses!
     SerialUSB.println("|---------------------------------------------------------|");
     SerialUSB.println();
