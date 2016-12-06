@@ -23,12 +23,20 @@ volatile bool enabled = true;       // flag for enabled setting
 bool calibration_running = false;   // flag for calibration
 bool frequency_test = false;        // flag for frequency test
 
+//---- PID Gains ----
+int big_Kp = (Kp * 2) / 10;
+int big_Ki = Ki;
+int big_Kd = (8 * Kd) / 3;
+
+int small_Kp = (4 * Kp) / 5;
+int small_Ki = Ki / 2;
+int small_Kd = Kd / 5;
 
 //----current settings-----
 const float rSense = 0.150;                           // resistor value
 const int uMAX = ((1024 * iMAX * 10 * rSense) / 3.3);  // max voltage for the vref pins
 int ITerm_max = (uMAX * 1000) / (3 * Ki);
-
+int phase_multiplier = (10 * steps_per_revolution / 4) / 100;
 
 //---- Step settings -----
 const int counts_per_revolution = 16384;                              // encoder counts for 360 degrees

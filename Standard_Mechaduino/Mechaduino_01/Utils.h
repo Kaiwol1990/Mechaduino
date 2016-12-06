@@ -47,5 +47,7 @@ void PID_autotune();
 
 extern int digitalSmooth(int rawIn, int *sensSmoothArray);
 
+void readEncoderDiagnostics(); //check encoder diagnostics registers
+
 #endif
 

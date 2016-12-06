@@ -10,9 +10,10 @@ const String identifier = "Y";   // string to identify the mechaduino with the S
 const int FPID = 15000;  // frequency of the PID loop change only if you know what you're doing
 
 //---- PID Values -----
-volatile int Kp = 1666;
-volatile int Ki = 34;
-volatile int Kd = 20206;
+volatile int Kp = 2151;
+volatile int Ki = 54;
+volatile int Kd = 21301;
+
 
 //----current settings-----
 const float iMAX = 1.0; // max current per coil 2.0 A for A4954 driver should be lower (thermal conditions)

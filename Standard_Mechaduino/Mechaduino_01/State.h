@@ -22,10 +22,19 @@ extern volatile bool enabled;     // flag for  enabled setting
 extern bool calibration_running;  // flag for calibration
 extern bool frequency_test;       // flag for frequency test
 
+//---- PID Gains ----
+extern int big_Kp;
+extern int big_Ki;
+extern int big_Kd;
+
+extern int small_Kp;
+extern int small_Ki;
+extern int small_Kd;
 
 //----current settings-----
 extern const int uMAX;    // max voltage for the vref pins
 extern int ITerm_max;
+extern int phase_multiplier;
 
 
 //---- Step settings -----

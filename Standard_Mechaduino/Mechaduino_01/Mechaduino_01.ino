@@ -83,31 +83,23 @@ void setup() {
 
   step_target = ((y + 5) / stepangle);
 
-  delay(500);
-
   if (use_enable_pin == true) {
-    if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
-      enabled = false;
-    }
-    else {
-      enabled = true;
-    }
+    enaInterrupt();
   }
   else
   {
     enabled = true;
   }
 
-  if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
-    dir = false;
-  }
-  else {
-    dir = true;
-  }
+  dirInterrupt();
 
   enableTC5Interrupts(); // get the filter going and ge samples for 1 second
 
-  digitalWriteDirect(ledPin, true);
+  SerialUSB.println("----- Mechaduino 0.1 -----");
+  SerialUSB.print("Identifier: ");
+  SerialUSB.println(identifier);
+  SerialUSB.println("");
+  SerialUSB.println("");
 
   Serial_menu();
 }

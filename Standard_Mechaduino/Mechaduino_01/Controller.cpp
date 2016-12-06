@@ -42,8 +42,12 @@ void TC5_Handler() {
         else if (ITerm < -ITerm_max) {
           ITerm = -ITerm_max;
         }
-
-        u = ( (Kp * e_0) + ((Ki * ITerm)) + (Kd * (e_0 - e_1)) ) / 1000;
+        if (abs(e_0) > 200) {
+          u = ( (big_Kp * e_0) + (big_Ki * ITerm) + (big_Kd * (e_0 - e_1)) ) / 1000;
+        }
+        else {
+          u = ( (small_Kp * e_0) + (small_Ki * ITerm) + (small_Kd * (e_0 - e_1)) ) / 1000;
+        }
 
       }
       else {
