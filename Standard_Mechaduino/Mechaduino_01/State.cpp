@@ -20,7 +20,6 @@ volatile int e_1 = 0;               // last error term
 volatile bool dir = true;           // flag for dir setting
 volatile bool enabled = true;       // flag for enabled setting
 
-bool calibration_running = false;   // flag for calibration
 bool frequency_test = false;        // flag for frequency test
 
 //---- PID Gains ----

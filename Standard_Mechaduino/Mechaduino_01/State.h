@@ -19,7 +19,6 @@ extern volatile int e_1;          // last error term
 extern volatile bool dir;         // flag for  dir setting
 extern volatile bool enabled;     // flag for  enabled setting
 
-extern bool calibration_running;  // flag for calibration
 extern bool frequency_test;       // flag for frequency test
 
 //---- PID Gains ----

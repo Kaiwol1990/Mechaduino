@@ -121,7 +121,6 @@ void output(int theta, int effort) {
 
 void calibration() {
   bool last_enabled = enabled;
-  calibration_running = true;
   disableTC5Interrupts();
 
   SerialUSB.println("//---- Calibration Routine ----");
@@ -171,7 +170,6 @@ void calibration() {
     SerialUSB.println();
     SerialUSB.print(":> ");
     enabled = last_enabled;
-    calibration_running = false;
     enableTC5Interrupts();
     return;
   }
@@ -198,7 +196,6 @@ void calibration() {
         SerialUSB.println();
         SerialUSB.print(":> ");
         enabled = last_enabled;
-        calibration_running = false;
         enableTC5Interrupts();
         return;
       }
@@ -339,7 +336,6 @@ void calibration() {
   SerialUSB.println();
   SerialUSB.print(":> ");
 
-  calibration_running = false;
   enableTC5Interrupts();
 }
 
