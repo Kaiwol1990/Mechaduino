@@ -67,27 +67,30 @@ void serialEvent(Serial myPort) {
 
     if (first_event) {
       first_event =false;
+      second_event=true;
+    } else if (second_event) {
+      second_event=false;
       current_position = sensorVals[1];
+    } else {
+
+      time_buffer[x] = sensorVals[0];
+
+      float target = (sensorVals[1]-current_position)/(50*step_angle);
+      float temp_1 =  map(target, -0.1, 1.5, -(0.5*height), (0.5*height));
+      target_buffer[x] = temp_1;
+
+      float y =( sensorVals[2]-current_position)/(50*step_angle);
+      float temp_2 =  map(y, -0.1, 1.5, -(0.5*height), (0.5*height));
+      y_buffer[x] = temp_2;
+      x++;
     }
-
-    time_buffer[x] = sensorVals[0];
-
-    float target = (sensorVals[1]-current_position)/(100*step_angle);
-    float temp_1 =  map(target, -0.5, 1.5, -(0.5*height), (0.5*height));
-    target_buffer[x] = temp_1;
-
-    float y =( sensorVals[2]-current_position)/(100*step_angle);
-    float temp_2 =  map(y, -0.5, 1.5, -(0.5*height), (0.5*height));
-    y_buffer[x] = temp_2;
-
-    x++;
   }
 }
 
 
 
 void draw() {
-  if (first_event==false) {
+  if (second_event==false) {
     background(255, 255, 255);
     float scale = ((float)width)/time_buffer[x-1];
     for (int i=0; i<x; i=i+1) {   
@@ -101,7 +104,6 @@ void draw() {
         strokeWeight(1);        //stroke wider
         line(0, (0.5*height)  - y_buffer[i], scale*time_buffer[i], (0.5*height)  - y_buffer[i]); 
         lastheight_2 = (int)(0.5*height) -  (int)y_buffer[i];
-        
       } else {
         stroke(0, 255, 0);     //stroke color
         strokeWeight(1);        //stroke wider
