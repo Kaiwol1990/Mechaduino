@@ -17,6 +17,7 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 
 Changed some Parameters! 
 - The lookuptable is now in its own file (lookup_table.cpp)
+- the Parameters are now in Configuration.h
 - Added Language support, by now only englisch and german
 - added an invert direction setting
 - major cleanup of the Serial interface
