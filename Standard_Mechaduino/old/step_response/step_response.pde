@@ -6,7 +6,7 @@ import processing.serial.*;
 Serial myPort; //creates a software serial port on which you will listen to Arduino
 
 
-int step = 1500;
+int step = 500;
 int microstepping = 16;
 
 String val;
@@ -18,10 +18,7 @@ float last_position = 0.0;
 boolean flag = true;
 boolean first_event = true;
 boolean second_event = false;
-boolean third_event = false;
-boolean fourth_event = false;
 boolean finished = false;
-boolean ready = false;
 int x = 0;
 int lastheight_1 = 0;
 int lastheight_2 = 0;
@@ -49,13 +46,11 @@ void setup()
   myPort = new Serial(this, portName, 250000); //set up your port to listen to the serial port
 
   background(255, 255, 255);
-  myPort.write("response"); // send s over serial to start step response
-  myPort.write("\r"); // send s over serial to start step response
+  myPort.write('j'); // send s over serial to start step response
+  myPort.write(str(step)); //send the step value
 
   println("send");
 }
-
-int i = 0;
 
 void serialEvent(Serial myPort) {
 
@@ -67,29 +62,24 @@ void serialEvent(Serial myPort) {
   if (inString!= null) { //We have a reading! Record it.
     inString = trim(inString);
     println(inString);
-    i++;
+
     float sensorVals[] = float(split(inString, ','));
 
-
-    if (i==1) {
-      print("sending steps");
-      myPort.write(str(step)); //send the step value
-    }
-    if (i==4) {
+    if (first_event) {
+      first_event =false;
+      second_event=true;
+    } else if (second_event) {
+      second_event=false;
       current_position = sensorVals[1];
-      ready = true;
-    }
-
-
-    if (ready) {
+    } else {
 
       time_buffer[x] = sensorVals[0];
 
-      float target = (sensorVals[1]-current_position)/(100*step_angle);
+      float target = (sensorVals[1]-current_position)/(50*step_angle);
       float temp_1 =  map(target, -0.1, 1.5, -(0.5*height), (0.5*height));
       target_buffer[x] = temp_1;
 
-      float y =( sensorVals[2]-current_position)/(100*step_angle);
+      float y =( sensorVals[2]-current_position)/(50*step_angle);
       float temp_2 =  map(y, -0.1, 1.5, -(0.5*height), (0.5*height));
       y_buffer[x] = temp_2;
       x++;
@@ -100,7 +90,7 @@ void serialEvent(Serial myPort) {
 
 
 void draw() {
-  if (ready) {
+  if (second_event==false) {
     background(255, 255, 255);
     float scale = ((float)width)/time_buffer[x-1];
     for (int i=0; i<x; i=i+1) {   
