@@ -11,6 +11,7 @@
 #include "lookup_table.h"
 #include "board.h"
 #include "Serial.h"
+#include "Language.h"
 
 
 
@@ -68,61 +69,52 @@ void calibration() {
   bool last_enabled = enabled;
   disableTC5Interrupts();
 
-  SerialUSB.println("//---- Calibration Routine ----");
-  SerialUSB.println(" ");
+  SerialUSB.println(calibrate_header);
 
   int encoderReading = 0;
   int lastencoderReading = 0;
 
-  int avg = 20;         //how many readings to average
+  int avg = 250;         //how many readings to average
 
   int iStart = 0;
   int jStart = 0;
   int stepNo = 0;
-  //step_target = 0;
 
   int fullStepReadings[steps_per_revolution];
   int ticks = 0;
 
   float lookupAngle = 0.0;
+  float angle_per_step = 360.0 / steps_per_revolution;
 
   dir = true;
-  output(0, 64);
+  output(0, 255);
 
   for (int reading = 0; reading < avg; reading++) {
     lastencoderReading += readEncoder();
-    delay(5);
+    delayMicroseconds(1);
   }
   lastencoderReading = lastencoderReading / avg;
 
   oneStep();
-  delay(200);
   oneStep();
-  delay(200);
   oneStep();
 
   delay(500);
 
   for (int reading = 0; reading < avg; reading++) {
     encoderReading += readEncoder();
-    delay(5);
+    delayMicroseconds(1);
   }
   encoderReading = encoderReading / avg;
 
   if ((encoderReading - lastencoderReading) < 0)
   {
     SerialUSB.println("Wired backwards");
-    SerialUSB.println();
-    SerialUSB.print(":> ");
     enabled = last_enabled;
     enableTC5Interrupts();
     return;
   }
 
-  //jump to fullstep
-  output(0, 64);
-
-  delay(500);
 
   SerialUSB.println("Calibrating single steps");
   SerialUSB.println("0%      20%       40%       60%        80%       100%");
@@ -138,15 +130,11 @@ void calibration() {
       if (SerialUSB.read() == 'c') {
         SerialUSB.println();
         SerialUSB.println("canceled!");
-        SerialUSB.println();
-        SerialUSB.print(":> ");
         enabled = last_enabled;
         enableTC5Interrupts();
         return;
       }
     }
-
-    //output((x * PA), 64);
 
     delay(100);
 
@@ -154,12 +142,9 @@ void calibration() {
 
     for (int reading = 0; reading < avg; reading++) {
       encoderReading += readEncoder();
-      delay(5);
+      delayMicroseconds(1);
     }
-    encoderReading = encoderReading / avg;
-
-
-    fullStepReadings[x] = encoderReading;
+    fullStepReadings[x] = encoderReading / avg;
 
     oneStep();
 
@@ -169,8 +154,6 @@ void calibration() {
   }
 
   SerialUSB.println("|");
-  SerialUSB.println();
-  SerialUSB.println("done!");
   SerialUSB.println();
   // end fullsteps
 
@@ -277,9 +260,6 @@ void calibration() {
   SerialUSB.println();
   SerialUSB.println("};");
   SerialUSB.println();
-
-  SerialUSB.println();
-  SerialUSB.print(":> ");
 
   enableTC5Interrupts();
 }
@@ -414,17 +394,16 @@ void PID_autotune() {
       SerialUSB.print("  ");
     }
 
-    // turn the PID loop off
-    disableTC5Interrupts();
-
-    // set effort to zero for steady position
-    u = 0;
 
     delay(200);
 
+    int raw_0;
+    int raw_1;
+    int raw_diff;
+
     // measure current setpoint
     int setpoint = 0;
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 1000; i++) {
       raw_0 = pgm_read_word_near(lookup + readEncoder());
 
       raw_diff = raw_0 - raw_1;
@@ -446,32 +425,19 @@ void PID_autotune() {
 
     // measuring the noise while the system is steady
     int higher_noise = 0;
-    int lower_noise = 0;
-    int temp_diff = 0;
+    int lower_noise = 36000;
 
-    for (int i = 0; i < 10000; i++) {
-      //temp_diff = y - setpoint;
+    for (int i = 0; i < 1000; i++) {
 
       raw_0 = pgm_read_word_near(lookup + readEncoder());
 
-      raw_diff = raw_0 - raw_1;
-      raw_1 = raw_0;
-      if (raw_diff < -18000) {
-        y = y + 36000 + raw_diff;
-      }
-      else if (raw_diff > 18000) {
-        y = y - 36000 + raw_diff;
-      }
-      else {
-        y = y  + raw_diff;
-      }
+      if (raw_0 > higher_noise) higher_noise = raw_0;
+      if (raw_0 < lower_noise) lower_noise = raw_0;
 
-      temp_diff = y - setpoint;
-      if (temp_diff > higher_noise) higher_noise = temp_diff;
-      if (temp_diff < lower_noise) lower_noise = temp_diff;
     }
 
     int noiseBand = (higher_noise - lower_noise);
+
     SerialUSB.print("|   ");
     SerialUSB.print(noiseBand);
     if (noiseBand >= 10) {
@@ -481,10 +447,11 @@ void PID_autotune() {
       SerialUSB.print("   ");
     }
 
-    unsigned long times_raw[1124] = {0};
-    int points_raw[1124] = {0};
-    int smoothed_raw[1124] = {0};
-#define filterSamples   10
+    unsigned long times[1124] = {0};
+    int points[1124] = {0};
+    float smoothed[1124] = {0};
+
+#define filterSamples   5
     int sensSmoothArray1 [filterSamples];
 
     int peakType = 0;
@@ -500,11 +467,13 @@ void PID_autotune() {
 
 
 
-    // step up the effort
-    u = outputStep;
 
     int counter = 0;
     unsigned long start_millis = millis() + 500;
+
+    raw_0 = pgm_read_word_near(lookup + readEncoder());;
+    raw_1 = raw_0;
+    raw_diff = 0;
 
     // start the oscilations and measure the behavior every 50 microsseconds
     while (counter < 1124) {
@@ -516,13 +485,6 @@ void PID_autotune() {
         SerialUSB.println("canceled!");
         return;
       }
-
-      int temp_0;
-      int temp_1;
-      int temp_2;
-
-      int filtered_1;
-      int filtered_2;
 
       now = micros();
       if (now > last_time + 48) {
@@ -569,31 +531,28 @@ void PID_autotune() {
 
         // wait 1 second to get stable oscilations
         if (millis() > start_millis) {
-          times_raw[counter] = now;
-          points_raw[counter] = y;
+          times[counter] = now;
+          points[counter] = y;
           counter++;
-          u = 0;
+          //u = 0;
         }
 
       }
     }
 
+    output(-raw_0 - PA, 0);
+
 
     //smoothing the measured data
     for (int i = 0; i <= 1124; i++) {
-      smoothed_raw[i] = digitalSmooth(points_raw[i], sensSmoothArray1);
+      smoothed[i] = digitalSmooth(points[i], sensSmoothArray1);
     }
 
 
-    // dump the first values
-    unsigned long times[1024] = {0};
-    int points[1024] = {0};
-    float smoothed[1024] = {0};
-
     for (int i = 0; i < 1024; i++) {
-      times[i] = times_raw[i + 50];
-      points[i] = points_raw[i + 50];
-      smoothed[i] = smoothed_raw[i + 50];
+      times[i] = times[i + 50];
+      points[i] = points[i + 50];
+      smoothed[i] = smoothed[i + 50];
     }
 
     // building mean of the position data
@@ -753,7 +712,7 @@ void PID_autotune() {
     A = A / (peakCount - 1);
 
     // calculating PID settings
-    float Ku = 4 * 2 * outputStep * 1000 / (M_Pi * 2 * A);
+    float Ku = 4 * 2 * outputStep * 1000 / (PI * 2 * A);
 
     if (k == 1) {
       temp_Kp = (0.6 * Ku);
@@ -787,24 +746,19 @@ void PID_autotune() {
   SerialUSB.println("Building Average!");
   SerialUSB.println();
 
-  Kp = (((temp_Kp / loops)) + 0.5);
-  Ki = (((temp_Ki / loops)) + 0.5);
-  Kd = (((temp_Kd / loops)) + 0.5);
+  int_Kp = (((temp_Kp / loops)) + 0.5);
+  int_Ki = (((temp_Ki / loops)) + 0.5);
+  int_Kd = (((temp_Kd / loops)) + 0.5);
 
-  ITerm_max = (uMAX * 1000) / (3 * Ki);
+  ITerm_max = (uMAX * 1000) / (3 * int_Ki);
 
-  big_Kp = (temp_Kp * 2) / 10;
-  big_Ki = temp_Ki;
-  big_Kd = (8 * temp_Kd) / 3;
+  big_Kp = (int_Kp * 2) / 10;
+  big_Ki = int_Ki;
+  big_Kd = (8 * int_Kd) / 3;
 
-  small_Kp =  temp_Kp;
-  small_Ki = temp_Ki / 2;
-  small_Kd = temp_Kd / 4;
-
-  parameterQuery(); // print Parameter over Serialport
-
-  // turn PID loop back on
-  enableTC5Interrupts();
+  small_Kp =  int_Kp;
+  small_Ki = int_Ki / 2;
+  small_Kd = int_Kd / 4;
 }
 
 

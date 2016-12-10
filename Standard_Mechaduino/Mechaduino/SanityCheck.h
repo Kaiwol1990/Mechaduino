@@ -29,6 +29,11 @@
 #error "Oops!  Please define your hardware!"
 #endif
 
+#if (language!=1) && (language!=2)
+#line 50 "Configuration.h"
+#error "Oops!  No valid language selected"
+#endif
+
 
 
 #endif //SANITYCHECK_H

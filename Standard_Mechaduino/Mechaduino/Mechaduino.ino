@@ -60,7 +60,7 @@
 void setup() {
 
   SerialUSB.begin(baudrate);
-  
+
   setupPins();
   setupSPI();
   setupTCInterrupts();
@@ -69,8 +69,9 @@ void setup() {
   delay(1000);
 
   int i = 0;
-  raw_0 = (pgm_read_word_near(lookup + readEncoder()));
-  raw_1 = raw_0;
+  int raw_0 = (pgm_read_word_near(lookup + readEncoder()));
+  int raw_1 = raw_0;
+  int raw_diff;
 
   while (i < 200) {
     raw_0 = (pgm_read_word_near(lookup + readEncoder()));
@@ -102,12 +103,17 @@ void setup() {
 
   enableTC5Interrupts(); // get the filter going and ge samples for 1 second
 
-  SerialUSB.println("----- Mechaduino 0.1 -----");
+  SerialUSB.println("----- Mechaduino -----");
+  SerialUSB.print("Firmware: ");
+  SerialUSB.println(firmware_version);
   SerialUSB.print("Identifier: ");
   SerialUSB.println(identifier);
   SerialUSB.println("");
 
   Serial_menu();
+
+  SerialUSB.println();
+  SerialUSB.println(":>");
 }
 
 
@@ -121,13 +127,9 @@ void loop()
   serialCheck();
   //SerialUSB.print(micros());
   //SerialUSB.print(',');
-  //SerialUSB.println(e_0);
   //SerialUSB.println(y);
-  //SerialUSB.println(reading);
-  //SerialUSB.println(raw_diff);
   // SerialUSB.println(u);
   //SerialUSB.println(readEncoder());
-  // SerialUSB.println(raw_0);
   //SerialUSB.println(r);
   //SerialUSB.println(step_target);
 }

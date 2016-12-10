@@ -15,14 +15,20 @@
 void TC5_Handler() {
   // gets called with PID frequency
   static int ITerm;
-  int reading;
+
+  int raw_0;            // current measured angle
+  static int raw_1;     // last measured angle
+  int raw_diff;         // diff of both
+
+
+  int e_0;               // current error term
+  static int e_1;               // last error term
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
     r = (step_target * stepangle) / 100;
 
-    reading = readEncoder();
-    raw_0 = pgm_read_word_near(lookup + reading);
+    raw_0 = pgm_read_word_near(lookup + readEncoder());
 
 
     raw_diff = raw_0 - raw_1;
