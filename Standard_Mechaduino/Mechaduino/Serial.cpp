@@ -64,10 +64,7 @@ void serialCheck() {
           get_max_frequency();
         }
         else if (inString.indexOf(autotune_command) == 0 && inString.length() == autotune_command.length()) {
-          disableTC5Interrupts();
           PID_autotune();
-          parameterQuery();
-          enableTC5Interrupts();
         }
         else if (inString.indexOf(diagnostics_command) == 0 && inString.length() == diagnostics_command.length()) {
           readEncoderDiagnostics();
@@ -139,7 +136,7 @@ void setpoint() {
   int new_angle = 0;
   bool received = false;
 
-  SerialUSB.println(set_header);
+  SerialUSB.print(set_header);
 
   while (!received) {
     delay(100);
@@ -166,7 +163,7 @@ void setpoint() {
 }
 
 void readangle() {
-  SerialUSB.println(read_header);
+  SerialUSB.print(read_header);
   SerialUSB.println((y / 100.0));
 }
 
@@ -529,6 +526,32 @@ void measure_noise() {
     }
 
   }
+
+  float mean = 0;
+  for (int i = 0; i < 3000; i++) {
+    mean = mean + points[i];
+  }
+  mean = mean / 3000.0;
+
+  float upper;
+  float lower;
+  int upcounter;
+  int lowcounter;
+
+  for (int i = 0; i < 3000; i++) {
+    if (points[i] > mean) {
+      upcounter++;
+      upper = upper + points[i];
+    }
+    else if (points[i] < mean) {
+      lowcounter++;
+      lower = lower + points[i];
+    }
+  }
+  upper = upper / upcounter;
+  lower = lower / lowcounter;
+
+
   for (int i = 0; i < 3000; i++) {
     if (points[i] > highest) {
       highest = points[i];
@@ -537,14 +560,22 @@ void measure_noise() {
       lowest = points[i];
     }
   }
-
-  for (int i = 0; i < 3000; i++) {
-    SerialUSB.print(times[i]);
-    SerialUSB.print(',');
-    SerialUSB.println(points[i]);
-  }
-
-  SerialUSB.println((abs(highest) - abs(lowest)));
+  /*
+    for (int i = 0; i < 3000; i++) {
+      SerialUSB.print(times[i]);
+      SerialUSB.print(',');
+      SerialUSB.println(points[i]);
+    }
+  */
+  SerialUSB.print("mean = ");
+  SerialUSB.print( mean / 100.0, 3 );
+  SerialUSB.println(" degree");
+  SerialUSB.print("mean error = ");
+  SerialUSB.print( (upper - lower) / 100.0, 3 );
+  SerialUSB.println(" degree");
+  SerialUSB.print("peak to peak error = ");
+  SerialUSB.print( (highest - lowest) / 100.0, 3 );
+  SerialUSB.println(" degree");
 
   enableTC5Interrupts();
 }

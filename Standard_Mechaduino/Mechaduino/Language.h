@@ -31,7 +31,7 @@ const String PROGMEM enable_header = "//---- Motor enabled ----";
 
 const String PROGMEM read_command  = "read";
 const String PROGMEM read_menu = "reads the curren angle";
-const String PROGMEM read_header = "//---- current Setpoint ---- \n current Setpoint = ";
+const String PROGMEM read_header = "//---- current Setpoint ---- \n current setpoint = ";
 
 
 const String PROGMEM reset_command  = "reset";
@@ -56,7 +56,7 @@ const String PROGMEM parameter_header = "//---- PID Values -----";
 
 const String PROGMEM set_command  = "set";
 const String PROGMEM set_menu = "enter new setpoint";
-const String PROGMEM set_header = "//---- Setpoint ---- \n Enter new setpoint";
+const String PROGMEM set_header = "//---- Setpoint ---- \n new setpoint = ";
 
 
 const String PROGMEM autotune_command  = "autotune";
@@ -127,7 +127,7 @@ const String PROGMEM parameter_header = "//---- PID Parameter -----";
 
 const String PROGMEM set_command  = "set";
 const String PROGMEM set_menu = "Neuen Sollwert vorgeben";
-const String PROGMEM set_header = "//---- Sollwert ---- \n Neuen Sollwert eintragen";
+const String PROGMEM set_header = "//---- Sollwert ---- \n Neuen Sollwert = ";
 
 
 const String PROGMEM autotune_command  = "autotune";

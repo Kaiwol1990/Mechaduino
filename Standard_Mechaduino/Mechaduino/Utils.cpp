@@ -66,15 +66,16 @@ void enaInterrupt() {
 
 
 void calibration() {
-  bool last_enabled = enabled;
+  SerialUSB.println(calibrate_header);
   disableTC5Interrupts();
 
-  SerialUSB.println(calibrate_header);
+  bool last_enabled = enabled;
+
 
   int encoderReading = 0;
   int lastencoderReading = 0;
 
-  int avg = 250;         //how many readings to average
+  int avg = 500;         //how many readings to average
 
   int iStart = 0;
   int jStart = 0;
@@ -191,7 +192,6 @@ void calibration() {
   }
 
 
-  SerialUSB.println("Generating lookuptable");
   SerialUSB.print("const PROGMEM int lookup[] = {");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
@@ -260,6 +260,8 @@ void calibration() {
   SerialUSB.println();
   SerialUSB.println("};");
   SerialUSB.println();
+
+  parameterQuery();
 
   enableTC5Interrupts();
 }
@@ -439,7 +441,7 @@ void PID_autotune() {
     int noiseBand = (higher_noise - lower_noise);
 
     SerialUSB.print("|   ");
-    SerialUSB.print(noiseBand);
+    SerialUSB.print(noiseBand / 100.0, 3);
     if (noiseBand >= 10) {
       SerialUSB.print("  ");
     }
