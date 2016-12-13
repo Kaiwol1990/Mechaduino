@@ -16,8 +16,6 @@
 #include "Language.h"
 
 void serialCheck() {
-  int counter = 0;
-  char input[100];
   bool ended = false;
 
   String Input = String("");
@@ -53,9 +51,6 @@ void serialCheck() {
     else {
       inString = Input;
     }
-
-    counter = 0;
-    ended = false;
 
 
     if (inString.indexOf(calibrate_command) == 0 && inString.length() == calibrate_command.length()) {
