@@ -6,7 +6,7 @@ import processing.serial.*;
 Serial myPort; //creates a software serial port on which you will listen to Arduino
 
 
-int step = 1500;
+int step = 500;
 int microstepping = 16;
 
 String val;
@@ -49,7 +49,8 @@ void setup()
   myPort = new Serial(this, portName, 250000); //set up your port to listen to the serial port
 
   background(255, 255, 255);
-  myPort.write("response"); // send s over serial to start step response
+  myPort.write("response "); // send s over serial to start step response
+  myPort.write(str(step)); //send the step value
   myPort.write("\r"); // send s over serial to start step response
 
   println("send");
@@ -59,9 +60,6 @@ int i = 0;
 
 void serialEvent(Serial myPort) {
 
-
-  time_buffer[x] =(int)( millis()-start_time);
-
   String inString = myPort.readStringUntil('\n'); //The newline separator separates each Arduino loop. We will parse the data by each newline separator. 
 
   if (inString!= null) { //We have a reading! Record it.
@@ -70,18 +68,14 @@ void serialEvent(Serial myPort) {
     i++;
     float sensorVals[] = float(split(inString, ','));
 
-
-    if (i==1) {
-      print("sending steps");
-      myPort.write(str(step)); //send the step value
-    }
-    if (i==4) {
+    if (i==5) {
       current_position = sensorVals[1];
       ready = true;
     }
 
 
     if (ready) {
+      time_buffer[x] =(int)( millis()-start_time);
 
       time_buffer[x] = sensorVals[0];
 

@@ -16,89 +16,120 @@
 #include "Language.h"
 
 void serialCheck() {
-  static int counter = 0;
-  static char input[100];
+  int counter = 0;
+  char input[100];
+  bool ended = false;
 
-  if (SerialUSB.available() > 0) {
-    if (SerialUSB.peek() == '\r' && counter < 3) {
-      char dump = SerialUSB.read();
-    }
-    else {
+  String Input = String("");
+  while (SerialUSB.available() > 0) {
+    char incomming = SerialUSB.read();
+    if (incomming != '\n' && incomming != '\r') {
 
-      char incomming = SerialUSB.read();
-      counter++;
-      input[counter] = incomming;
+      Input = String(Input  + incomming);
 
       SerialUSB.print(incomming);
-
-      // carriage return received
-      if (input[counter] == 13) {
-        SerialUSB.println();
-        String inString = String("");
-        for (int i = 1; i <= counter - 1; i++) {
-          inString = String(inString  + input[i]);
-        }
-        counter = 0;
-
-
-
-        if (inString.indexOf(calibrate_command) == 0 && inString.length() == calibrate_command.length()) {
-          calibration();
-        }
-        else if (inString.indexOf(set_command) == 0 && inString.length() == set_command.length()) {
-          setpoint();
-        }
-        else if (inString.indexOf(parameter_command) == 0 && inString.length() == parameter_command.length()) {
-          parameterQuery();
-        }
-        else if (inString.indexOf(editparam_command) == 0 && inString.length() == editparam_command.length()) {
-          parameterEdit();
-        }
-        else if (inString.indexOf(step_response_command) == 0 && inString.length() == step_response_command.length()) {
-          step_response();
-        }
-        else if (inString.indexOf(help_command) == 0 && inString.length() == help_command.length()) {
-          Serial_menu();
-        }
-        else if (inString.indexOf(looptime_command) == 0 && inString.length() == looptime_command.length()) {
-          get_max_frequency();
-        }
-        else if (inString.indexOf(autotune_command) == 0 && inString.length() == autotune_command.length()) {
-          PID_autotune();
-        }
-        else if (inString.indexOf(diagnostics_command) == 0 && inString.length() == diagnostics_command.length()) {
-          readEncoderDiagnostics();
-        }
-        else if (inString.indexOf(noise_command) == 0 && inString.length() == noise_command.length()) {
-          measure_noise();
-        }
-        else if (inString.indexOf(enable_command) == 0 && inString.length() == enable_command.length()) {
-          enable();
-        }
-        else if (inString.indexOf(disable_command) == 0 && inString.length() == disable_command.length()) {
-          disable();
-        }
-        else if (inString.indexOf(read_command) == 0 && inString.length() == read_command.length()) {
-          readangle();
-        }
-        else if (inString.indexOf(reset_command) == 0 && inString.length() == reset_command.length()) {
-          SoftReset();
-        }
-        else {
-          SerialUSB.println("unknown command send 'help'");
-        }
-
-        SerialUSB.println("");
-        SerialUSB.print(":>");
-      }
+    }
+    else {
+      ended = true;
     }
   }
+
+  // carriage return received
+  if (ended) {
+    SerialUSB.println();
+
+    // split the input at the first space
+    int first_space = Input.indexOf(' ');
+    String inString = "";
+    String secondString = "";
+
+    if (first_space != -1) {
+      // first command
+      inString = Input.substring(0, first_space);
+
+      // second command
+      secondString = Input.substring(first_space + 1, sizeof(Input));
+    }
+    else {
+      inString = Input;
+    }
+
+    counter = 0;
+    ended = false;
+
+
+    if (inString.indexOf(calibrate_command) == 0 && inString.length() == calibrate_command.length()) {
+      calibration();
+    }
+    else if (inString.indexOf(set_command) == 0 && inString.length() == set_command.length()) {
+      setpoint(secondString);
+    }
+    else if (inString.indexOf(parameter_command) == 0 && inString.length() == parameter_command.length()) {
+      parameterQuery();
+    }
+    else if (inString.indexOf(editparam_command) == 0 && inString.length() == editparam_command.length()) {
+      parameterEdit(secondString);
+    }
+    else if (inString.indexOf(step_response_command) == 0 && inString.length() == step_response_command.length()) {
+      step_response(secondString);
+    }
+    else if (inString.indexOf(help_command) == 0 && inString.length() == help_command.length()) {
+      Serial_menu();
+    }
+    else if (inString.indexOf(looptime_command) == 0 && inString.length() == looptime_command.length()) {
+      get_max_frequency();
+    }
+    else if (inString.indexOf(autotune_command) == 0 && inString.length() == autotune_command.length()) {
+      PID_autotune();
+    }
+    else if (inString.indexOf(diagnostics_command) == 0 && inString.length() == diagnostics_command.length()) {
+      readEncoderDiagnostics();
+    }
+    else if (inString.indexOf(noise_command) == 0 && inString.length() == noise_command.length()) {
+      measure_noise();
+    }
+    else if (inString.indexOf(enable_command) == 0 && inString.length() == enable_command.length()) {
+      enable();
+    }
+    else if (inString.indexOf(disable_command) == 0 && inString.length() == disable_command.length()) {
+      disable();
+    }
+    else if (inString.indexOf(read_command) == 0 && inString.length() == read_command.length()) {
+      readangle();
+    }
+    else if (inString.indexOf(reset_command) == 0 && inString.length() == reset_command.length()) {
+      SoftReset();
+    }
+    else if (inString.indexOf(getstate_command) == 0 && inString.length() == getstate_command.length()) {
+      getstate();
+    }
+    else {
+      SerialUSB.println("unknown command send 'help'");
+    }
+
+    SerialUSB.println("");
+    SerialUSB.print(":>");
+  }
 }
+
 
 void SoftReset() {
   SerialUSB.println(reset_header);
   NVIC_SystemReset();      // processor software reset
 }
+
+
+void getstate() {
+  SerialUSB.println(getstate_header);
+
+  if (enabled) {
+    SerialUSB.println(enable_header);
+  }
+  else {
+    SerialUSB.println(disable_header);
+  }
+}
+
 
 void enable() {
   enabled = true;
@@ -120,6 +151,7 @@ void Serial_menu() {
   SerialUSB.println(enable_command + " - " + enable_menu);
   SerialUSB.println(read_command + " - " + read_menu);
   SerialUSB.println(reset_command + " - " + reset_menu);
+  SerialUSB.println(getstate_command + " - " + getstate_menu);
   SerialUSB.println(step_response_command + " - " + step_response_menu);
   SerialUSB.println(parameter_command + " - " + parameter_menu);
   SerialUSB.println(set_command + " - " + set_menu);
@@ -129,38 +161,55 @@ void Serial_menu() {
 }
 
 
-void setpoint() {
-  unsigned long start_millis;
-  start_millis = millis();
-  int time_out = 5000;
+void setpoint(String arg) {
   int new_angle = 0;
-  bool received = false;
+  bool ended = false;
 
   SerialUSB.print(set_header);
 
-  while (!received) {
-    delay(100);
-    if (SerialUSB.available()) {
-      if (SerialUSB.peek() == '\r') {
-        char dump = SerialUSB.read();
-      }
-      else {
-        new_angle = 100 * SerialUSB.parseFloat();
+  if (arg == "") {
+    // no argument was send!
+    unsigned long start_millis;
+    start_millis = millis();
+    int time_out = 5000;
 
-        step_target = step_target + ( (new_angle - y) / (stepangle / 100.0));
+    while (ended == false && millis() < start_millis + time_out) {
 
-        SerialUSB.println(new_angle / 100.0);
+      while (SerialUSB.available() > 0) {
+        char incomming = SerialUSB.read();
+        if (incomming != '\n' && incomming != '\r') {
 
-        received = true;
+          arg = String(arg  + incomming);
+        }
+        else {
+          ended = true;
+        }
       }
     }
-    else if (millis() > start_millis + time_out) {
-      SerialUSB.println("time out");
-      return;
-    }
+
+  }
+  else {
+    ended = true;
   }
 
+  if (ended) {
+    // get the first char and check if its numeric
+    char first = arg.charAt(0);
+    if (isDigit(first)) {
+      SerialUSB.println(arg);
+
+      new_angle = 100 * arg.toFloat();
+      step_target = step_target + ( (new_angle - y) / (stepangle / 100.0));
+    }
+    else {
+      SerialUSB.println("no valid input!");
+    }
+  }
+  else {
+    SerialUSB.println("time out");
+  }
 }
+
 
 void readangle() {
   SerialUSB.print(read_header);
@@ -182,7 +231,7 @@ void parameterQuery() {
 }
 
 
-void parameterEdit() {
+void parameterEdit(String arg) {
   bool received_1 = false;
   bool received_2 = false;
   unsigned long start_millis = millis();
@@ -300,58 +349,81 @@ void parameterEdit() {
 }
 
 
-void step_response() {
-  bool last_enabled = enabled;
-  dir = true;
-  enabled = 1;
+void step_response(String arg) {
+
+  SerialUSB.print(step_response_header);
 
   int current_position = y;
-  bool received = false;
   int response_steps = 0;
   int last_step_target = step_target;
 
-  unsigned long start_millis = millis();
+  bool ended = false;
+
+  unsigned long start_millis;
+  start_millis = millis();
   int time_out = 5000;
 
-  SerialUSB.println(step_response_header);
+  if (arg == "") {
+    // no argument was send!
 
-  while (!received) {
-    delay(100);
-    if (SerialUSB.available()) {
-      if (SerialUSB.peek() == '\r') {
-        char dump = SerialUSB.read();
-      }
-      else {
-        response_steps = SerialUSB.parseInt();
-        received = true;
+    while (ended == false && millis() < start_millis + time_out) {
+
+      while (SerialUSB.available() > 0) {
+        char incomming = SerialUSB.read();
+        if (incomming != '\n' && incomming != '\r') {
+
+          arg = String(arg  + incomming);
+        }
+        else {
+          ended = true;
+        }
       }
     }
-    else if (millis() > start_millis + time_out) {
-      SerialUSB.println("time out!");
+
+  }
+  else {
+    ended = true;
+  }
+
+  if (ended) {
+    // get the first char and check if its numeric
+    char first = arg.charAt(0);
+    if (isDigit(first)) {
+      SerialUSB.println(arg);
+
+      bool last_enabled = enabled;
+      dir = true;
+      enabled = true;
+
+      response_steps = arg.toInt();
+      start_millis = millis();
+      int timeframe = start_millis + 1000;
+      int new_step_target = last_step_target + response_steps;
+
+      while (millis() < timeframe) { //half a second
+
+        SerialUSB.print(millis() - start_millis);
+        SerialUSB.print(',');
+        SerialUSB.print(r); //print target position
+        SerialUSB.print(", ");
+        SerialUSB.println(y); // print current position
+
+        if (millis() > start_millis + 300) {
+          step_target = new_step_target;
+        }
+      }
+      step_target = last_step_target;
+      delay(1000);
       enabled = last_enabled;
-      return;
+
+    }
+    else {
+      SerialUSB.println("invalid input!");
     }
   }
-
-  start_millis = millis();
-  int timeframe = start_millis + 1000;
-  int new_step_target = last_step_target + response_steps;
-
-  while (millis() < timeframe) { //half a second
-
-    SerialUSB.print(millis() - start_millis);
-    SerialUSB.print(',');
-    SerialUSB.print(r); //print target position
-    SerialUSB.print(", ");
-    SerialUSB.println(y); // print current position
-
-    if (millis() > start_millis + 300) {
-      step_target = new_step_target;
-    }
+  else {
+    SerialUSB.println("time out");
   }
-  step_target = last_step_target;
-  delay(1000);
-  enabled = last_enabled;
 }
 
 
@@ -533,10 +605,10 @@ void measure_noise() {
   }
   mean = mean / 3000.0;
 
-  float upper;
-  float lower;
-  int upcounter;
-  int lowcounter;
+  float upper = 0;
+  float lower = 0;
+  int upcounter = 0;
+  int lowcounter = 0;
 
   for (int i = 0; i < 3000; i++) {
     if (points[i] > mean) {
@@ -571,10 +643,10 @@ void measure_noise() {
   SerialUSB.print( mean / 100.0, 3 );
   SerialUSB.println(" degree");
   SerialUSB.print("mean error = ");
-  SerialUSB.print( (upper - lower) / 100.0, 3 );
+  SerialUSB.print( (abs(upper) - abs(lower)) / 100.0, 3 );
   SerialUSB.println(" degree");
   SerialUSB.print("peak to peak error = ");
-  SerialUSB.print( (highest - lowest) / 100.0, 3 );
+  SerialUSB.print( (abs(highest) - abs(lowest)) / 100.0, 3 );
   SerialUSB.println(" degree");
 
   enableTC5Interrupts();

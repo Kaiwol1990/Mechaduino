@@ -19,6 +19,11 @@ const String PROGMEM disable_menu = "disables the motor";
 const String PROGMEM disable_header = "//---- Motor disabled ----";
 
 
+const String PROGMEM getstate_command  = "state";
+const String PROGMEM getstate_menu = "shows the current motor state";
+const String PROGMEM getstate_header = "//---- State ----";
+
+
 const String PROGMEM editparam_command  = "editparam";
 const String PROGMEM editparam_menu = "edit parameter";
 const String PROGMEM editparam_header = "//---- Edit PID gains ----";
@@ -41,7 +46,7 @@ const String PROGMEM reset_header = "//---- reseting ---- \n Please re-open the 
 
 const String PROGMEM step_response_command  = "response";
 const String PROGMEM step_response_menu = "generates a step response";
-const String PROGMEM step_response_header = "//---- Step response ---- \n Enter step value in degree";
+const String PROGMEM step_response_header = "//---- Step response ---- \n Number of steps = ";
 
 
 const String PROGMEM help_command  = "help";
@@ -90,6 +95,11 @@ const String PROGMEM disable_menu = "Schaltet den Motorstrom aus";
 const String PROGMEM disable_header = "//---- Motor aus ----";
 
 
+const String PROGMEM getstate_command  = "state";
+const String PROGMEM getstate_menu = "Zeigt an ob der Motorstom eingeschaltet ist";
+const String PROGMEM getstate_header = "//---- Status ----";
+
+
 const String PROGMEM editparam_command  = "editparam";
 const String PROGMEM editparam_menu = "Ermoeglicht das bearbeiten der PID Parameter";
 const String PROGMEM editparam_header = "//---- PID Parameter bearbeiten ----";
@@ -112,7 +122,7 @@ const String PROGMEM reset_header = "//---- Reset ---- \n Der Seriallemonitor mu
 
 const String PROGMEM step_response_command  = "response";
 const String PROGMEM step_response_menu = "Erzeugt eine Sprungantwort";
-const String PROGMEM step_response_header = "//---- Sprungantwort ---- \n Anzahl der Schritte angeben";
+const String PROGMEM step_response_header = "//---- Sprungantwort ---- \n Anzahl der Schritte = ";
 
 
 const String PROGMEM help_command  = "help";

@@ -47,6 +47,6 @@
 //---- Language ----
 // 1 = english
 // 2 = german
-#define language 2
+#define language 1
 
 #endif

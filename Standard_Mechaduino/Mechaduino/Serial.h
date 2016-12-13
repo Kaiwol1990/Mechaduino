@@ -1,9 +1,12 @@
 #ifndef __Serial_H__
 #define __Serial_H__
+#include <arduino.h>
 
 void serialCheck();
 
 void SoftReset();
+
+void getstate();
 
 void enable();
 
@@ -11,15 +14,15 @@ void disable();
 
 void Serial_menu();
 
-void setpoint();
+void setpoint(String arg = "");
 
 void readangle();
 
 void parameterQuery();
 
-void parameterEdit();
+void parameterEdit(String arg = "");
 
-void step_response();
+void step_response(String arg = "");
 
 void get_max_frequency();
 
