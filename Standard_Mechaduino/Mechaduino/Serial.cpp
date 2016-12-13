@@ -190,7 +190,9 @@ void setpoint(String arg) {
   if (ended) {
     // get the first char and check if its numeric
     char first = arg.charAt(0);
-    if (isDigit(first)) {
+    char second = arg.charAt(1);
+
+    if (isDigit(first) || (first == '-' && isDigit(second))) {
       SerialUSB.println(arg);
 
       new_angle = 100 * arg.toFloat();
@@ -572,10 +574,8 @@ void measure_noise() {
 
   disableTC5Interrupts();
   int counter = 0;
-  int points[3000] = {0};
+  float points[3000] = {0};
 
-  int highest = 0;
-  int lowest = 36000;
 
   unsigned long times[3000] = {0};
   unsigned long now = micros();
@@ -585,9 +585,7 @@ void measure_noise() {
 
     now = micros();
     if (now > last_time + dt) {
-
       last_time = now;
-      times[counter] = now;
       points[counter] = (pgm_read_word_near(lookup + readEncoder()));
       counter++;
     }
@@ -606,7 +604,7 @@ void measure_noise() {
   int lowcounter = 0;
 
   for (int i = 0; i < 3000; i++) {
-    if (points[i] > mean) {
+    if (points[i] > mean ) {
       upcounter++;
       upper = upper + points[i];
     }
@@ -618,6 +616,8 @@ void measure_noise() {
   upper = upper / upcounter;
   lower = lower / lowcounter;
 
+  float highest = 0;
+  float lowest = 36000;
 
   for (int i = 0; i < 3000; i++) {
     if (points[i] > highest) {
@@ -634,14 +634,20 @@ void measure_noise() {
       SerialUSB.println(points[i]);
     }
   */
+  SerialUSB.print("min = ");
+  SerialUSB.print( lowest / 100.0, 3 );
+  SerialUSB.println(" degree");
+  SerialUSB.print("max = ");
+  SerialUSB.print( highest / 100.0, 3 );
+  SerialUSB.println(" degree");
   SerialUSB.print("mean = ");
   SerialUSB.print( mean / 100.0, 3 );
   SerialUSB.println(" degree");
   SerialUSB.print("mean error = ");
-  SerialUSB.print( (abs(upper) - abs(lower)) / 100.0, 3 );
+  SerialUSB.print( (abs(upper) - abs(lower)) / 100, 3 );
   SerialUSB.println(" degree");
   SerialUSB.print("peak to peak error = ");
-  SerialUSB.print( (abs(highest) - abs(lowest)) / 100.0, 3 );
+  SerialUSB.print( (abs(highest) - abs(lowest)) / 100, 3 );
   SerialUSB.println(" degree");
 
   enableTC5Interrupts();
