@@ -30,4 +30,6 @@ void readEncoderDiagnostics(); //check encoder diagnostics registers
 
 void measure_noise();
 
+String read_serialcommand(int timeout);
+
 #endif
