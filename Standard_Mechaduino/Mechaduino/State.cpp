@@ -15,18 +15,22 @@ volatile bool enabled = true;       // flag for enabled setting
 
 volatile bool frequency_test = false;        // flag for frequency test
 
+
+#if defined(use_PID)
 //---- PID Gains ----
 volatile int int_Kp = Kp * 1000;
 volatile int int_Ki = Ki * 1000;
 volatile int int_Kd = Kd * 1000;
 
-volatile int big_Kp = (int_Kp * 2) / 10;
-volatile int big_Ki = int_Ki;
-volatile int big_Kd = (8 * int_Kd) / 3;
 
-volatile int small_Kp = int_Kp;
-volatile int small_Ki = int_Ki / 2;
-volatile int small_Kd = int_Kd / 4;
+#elif defined(use_PI)
+//---- PD Gains ----
+volatile int  int_Kp = (( Kp * 1000 * 2) / 3);
+volatile int  int_Ki = (( Ki * 1000 * 0.48 / 1.2));
+volatile int  int_Kd = ( Kd * 1000) / 20;
+
+
+#endif
 
 
 volatile int step_target = 0;      // target as step gets incremented if an step is received

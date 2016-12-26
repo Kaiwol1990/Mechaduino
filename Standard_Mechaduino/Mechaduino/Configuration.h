@@ -14,13 +14,13 @@
 
 
 //---- PID Frequenz -----
-#define FPID 15000  // frequency of the PID loop change only if you know what you're doing
+#define FPID 10000  // frequency of the PID loop change only if you know what you're doing
 
 
-//---- PID Parameter -----
-#define Kp 1.80200
-#define Ki 0.04300
-#define Kd 18.88000
+//---- PID Values -----
+#define Kp 1.74600
+#define Ki 0.08640
+#define Kd 9.45700
 
 
 //----current settings-----
@@ -48,5 +48,10 @@
 // 1 = english
 // 2 = german
 #define language 1
+
+
+//---- PI or PID
+#define use_PI
+//#define use_PID
 
 #endif

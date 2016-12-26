@@ -23,26 +23,15 @@ void TC5_Handler() {
 
   int e_0;               // current error term
   static int e_1;               // last error term
+  static int y_1;
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
     r = (step_target * stepangle) / 100;
 
-    raw_0 = pgm_read_word_near(lookup + readEncoder());
-
-
-    raw_diff = raw_0 - raw_1;
-
-    if (raw_diff < -18000) {
-      y = y + 36000 + raw_diff;
-    }
-    else if (raw_diff > 18000) {
-      y = y - 36000 + raw_diff;
-    }
-    else {
-      y = y  + raw_diff;
-    }
-
+    y = readAngle(y_1, raw_1);
+    
+    raw_0 = mod(y, 36000);
 
     if (enabled) {
 
@@ -56,12 +45,8 @@ void TC5_Handler() {
       else if (ITerm < -ITerm_max) {
         ITerm = -ITerm_max;
       }
-      if (abs(e_0) > 150) {
-        u = ( (big_Kp * e_0) + (big_Ki * ITerm) + (big_Kd * (e_0 - e_1)) ) / 1000;
-      }
-      else {
-        u = ( (small_Kp * e_0) + (small_Ki * ITerm) + (small_Kd * (e_0 - e_1)) ) / 1000;
-      }
+
+      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + (int_Kd * (e_0 - e_1)) ) / 1000;
 
 
     }
@@ -80,6 +65,7 @@ void TC5_Handler() {
         u = uMAX;
       }
 
+      //output(-(raw_0 + PA), abs(u));
       output(-(raw_0 + PA), abs(u));
     }
     else {
@@ -88,11 +74,13 @@ void TC5_Handler() {
         u = -uMAX;
       }
 
+      //output(-(raw_0 - PA), abs(u));
       output(-(raw_0 - PA), abs(u));
     }
 
     raw_1 = raw_0;
     e_1 = e_0;
+    y_1 = y;
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }

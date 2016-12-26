@@ -1,38 +1,62 @@
 #include "Encoder.h"
 #include <SPI.h>
+#include "lookup_table.h"
+
 
 int readEncoder() {
-  uint8_t hibyte[8] = {0};
-  uint8_t lobyte[8] = {0};
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
-
-  SERCOM4->SPI.DATA.bit.DATA = 0xFF;
-  SERCOM4->SPI.DATA.bit.DATA & 0xff;
-  delayMicroseconds(1);
-  SERCOM4->SPI.DATA.bit.DATA = 0xFF;
-  SERCOM4->SPI.DATA.bit.DATA & 0xff;
-  delayMicroseconds(1);
+  SPI.transfer(0xFF);
+  SPI.transfer(0xFF);
 
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 
-  for (int i = 0; i < 4; i++) {
+  REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
+  byte hibyte = SPI.transfer(0xFF);
+  byte lobyte = SPI.transfer(0xFF);
+  REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
+
+  return (((hibyte << 8) | lobyte) & 0B0011111111111111);
+
+}
+
+#define samples 6
+int readAngle(int last_angle, int last_raw) {
+  int temp_angle[samples] = {0};
+
+
+  REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
+  SPI.transfer(0xFF);
+  SPI.transfer(0xFF);
+
+  REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
+
+  for (byte i = 0; i < samples; i++) {
     REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
-
-    SERCOM4->SPI.DATA.bit.DATA = 0xFF;
-    hibyte[i] = SERCOM4->SPI.DATA.bit.DATA & 0xff;
-    delayMicroseconds(1);
-    SERCOM4->SPI.DATA.bit.DATA = 0xFF;
-    lobyte[i] = SERCOM4->SPI.DATA.bit.DATA & 0xff;
-    delayMicroseconds(1);
-
+    byte hibyte = SPI.transfer(0xFF);
+    byte lobyte = SPI.transfer(0xFF);
     REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
+
+    int raw = pgm_read_word_near(lookup + (((hibyte << 8) | lobyte) & 0B0011111111111111));
+
+    int raw_diff = raw - last_raw;
+
+    if (raw_diff < -18000) {
+      temp_angle[i] = last_angle + 36000 + raw_diff;
+    }
+    else if (raw_diff > 18000) {
+      temp_angle[i] = last_angle - 36000 + raw_diff;
+    }
+    else {
+      temp_angle[i] = last_angle  + raw_diff;
+    }
+
   }
 
-  int sum = 0;
-  for (int k = 0; k < 4; k++) {
-    sum = sum + (((hibyte[k] << 8) | lobyte[k]) & ~(0xffffffff << 14));
+  int angle = 0;
+  for (byte k = 0; k < samples; k++) {
+    angle = angle + temp_angle[k];
   }
 
-  return sum / 4;
+  return (angle / samples);
 }

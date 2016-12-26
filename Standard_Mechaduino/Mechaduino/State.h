@@ -19,15 +19,6 @@ extern volatile int int_Kp;
 extern volatile int int_Ki;
 extern volatile int int_Kd;
 
-extern volatile int big_Kp;
-extern volatile int big_Ki;
-extern volatile int big_Kd;
-
-extern volatile int small_Kp;
-extern volatile int small_Ki;
-extern volatile int small_Kd;
-
-
 extern volatile int step_target;        // target as step gets incremented if an step is received
 
 #endif

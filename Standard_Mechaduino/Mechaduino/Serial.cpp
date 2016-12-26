@@ -16,52 +16,10 @@
 
 void serialCheck() {
   bool ended = false;
+  String Command = "";
+  String argument = "";
 
-  static String Input = String("");
-
-  while (SerialUSB.available() > 0) {
-    char incomming = SerialUSB.read();
-
-    // check if incomming char is a carriage return or a line feed.
-    if (incomming != '\n' && incomming != '\r') {
-
-      Input = String(Input  + incomming);
-
-      SerialUSB.print(incomming);
-    }
-    else {
-      // if so end the string
-      ended = true;
-    }
-  }
-
-
-
-  // carriage return received
-  if (ended) {
-    SerialUSB.println();
-
-    // split the input at the first space
-    int first_space = Input.indexOf(' ');
-
-    String Command = "";
-    String argument = "";
-
-    if (first_space != -1) {
-      // first command
-      Command = Input.substring(0, first_space);
-
-      // second command
-      argument = Input.substring(first_space + 1, sizeof(Input));
-    }
-    else {
-      Command = Input;
-    }
-
-    // clear the input string for next command
-    Input = String("");
-
-
+  if (read_serialcommand(5000, &Command, &argument)) {
     if (Command.indexOf(calibrate_command) == 0 && Command.length() == calibrate_command.length()) {
       calibration();
     }
@@ -216,7 +174,7 @@ void setpoint(String arg) {
     }
   }
   else {
-    SerialUSB.println(" time out");
+    SerialUSB.println(" timed out");
   }
 }
 
@@ -248,6 +206,8 @@ void parameterEdit(String arg) {
   int time_out = 5000;
 
   SerialUSB.println(editparam_header);
+  SerialUSB.println(cancle_header);
+
   SerialUSB.print("p ----- Kp = ");
   SerialUSB.println(int_Kp / 1000.0);
 
@@ -257,18 +217,13 @@ void parameterEdit(String arg) {
   SerialUSB.print("d ----- Kd = ");
   SerialUSB.println(int_Kd / 1000.0);
 
-  SerialUSB.println("c ----- canceled");
-  SerialUSB.println();
-
-
   while (!received_1)  {
-    delay(100);
-    char inChar2 = (char)SerialUSB.read();
 
-    if (millis() > start_millis + time_out) {
-      SerialUSB.println("time out!");
-      return;
-    }
+    if (timed_out(start_millis, time_out)) return;
+
+    if (canceled()) return;
+
+    char inChar2 = (char)SerialUSB.read();
 
     switch (inChar2) {
       case 'p':
@@ -285,8 +240,6 @@ void parameterEdit(String arg) {
                 SerialUSB.println(temp_Kp);
 
                 int_Kp = 1000 * temp_Kp;
-                big_Kp = (int_Kp * 2) / 10;
-                small_Kp =  int_Kp;
                 received_2 = true;
               }
             }
@@ -309,9 +262,7 @@ void parameterEdit(String arg) {
                 SerialUSB.println(temp_Ki);
 
                 int_Ki = 1000 * temp_Ki;
-                big_Ki = int_Ki;
-                small_Ki = int_Ki / 2;
-                ITerm_max = (uMAX * 1000) / (3 * big_Ki);
+                ITerm_max = (uMAX * 1000) / (3 * int_Ki);
                 received_2 = true;
               }
             }
@@ -333,19 +284,11 @@ void parameterEdit(String arg) {
                 SerialUSB.println(temp_Kd);
 
                 int_Kd = 1000 * temp_Kd;
-                small_Kd = int_Kd / 4;
-                big_Kd = (8 * int_Kd) / 3;
                 received_2 = true;
               }
             }
           }
           received_1 = true;
-        }
-        break;
-      case 'c':
-        {
-          SerialUSB.println("canceled!");
-          return;
         }
         break;
     }
@@ -586,41 +529,57 @@ void readEncoderDiagnostics() {
 }
 
 
-void measure_noise() {
-  SerialUSB.println(noise_header);
+int measure_noise(bool serialoutput) {
+  if (serialoutput) {
+    SerialUSB.println(noise_header);
+  }
 
   disableTC5Interrupts();
   int counter = 0;
   float points[3000] = {0};
 
 
-  unsigned long times[3000] = {0};
+  unsigned long times[1000] = {0};
   unsigned long now = micros();
   unsigned long last_time = now;
   int dt = ((1000000.0 / FPID) - 1);
-  while (counter < 3000) {
+
+  int y_1 = y;
+  int raw_0 = mod(y, 36000);
+  int raw_1 = raw_0;
+
+  while (counter < 1000) {
 
     now = micros();
+
     if (now > last_time + dt) {
       last_time = now;
-      points[counter] = (pgm_read_word_near(lookup + readEncoder()));
+
+      y = readAngle(y_1, raw_1);
+
+      points[counter] = y;
+      raw_0 = mod(y, 36000);
+
+      raw_1 = raw_0;
+      y_1 = y;
       counter++;
     }
+
 
   }
 
   float mean = 0;
-  for (int i = 0; i < 3000; i++) {
+  for (int i = 0; i < 1000; i++) {
     mean = mean + points[i];
   }
-  mean = mean / 3000.0;
+  mean = mean / 1000.0;
 
   float upper = 0;
   float lower = 0;
   int upcounter = 0;
   int lowcounter = 0;
 
-  for (int i = 0; i < 3000; i++) {
+  for (int i = 0; i < 1000; i++) {
     if (points[i] > mean ) {
       upcounter++;
       upper = upper + points[i];
@@ -633,10 +592,10 @@ void measure_noise() {
   upper = upper / upcounter;
   lower = lower / lowcounter;
 
-  float highest = 0;
-  float lowest = 36000;
+  float highest = mean;
+  float lowest = mean;
 
-  for (int i = 0; i < 3000; i++) {
+  for (int i = 0; i < 1000; i++) {
     if (points[i] > highest) {
       highest = points[i];
     }
@@ -651,30 +610,58 @@ void measure_noise() {
       SerialUSB.println(points[i]);
     }
   */
-  SerialUSB.print("min = ");
-  SerialUSB.print( lowest / 100.0, 3 );
-  SerialUSB.println(" degree");
-  SerialUSB.print("max = ");
-  SerialUSB.print( highest / 100.0, 3 );
-  SerialUSB.println(" degree");
-  SerialUSB.print("mean = ");
-  SerialUSB.print( mean / 100.0, 3 );
-  SerialUSB.println(" degree");
-  SerialUSB.print("mean error = ");
-  SerialUSB.print( (abs(upper) - abs(lower)) / 100, 3 );
-  SerialUSB.println(" degree");
-  SerialUSB.print("peak to peak error = ");
-  SerialUSB.print( (abs(highest) - abs(lowest)) / 100, 3 );
-  SerialUSB.println(" degree");
 
-  enableTC5Interrupts();
+  if (serialoutput) {
+    SerialUSB.print("min = ");
+    SerialUSB.print( lowest / 100.0, 3 );
+    SerialUSB.println(" degree");
+    SerialUSB.print("max = ");
+    SerialUSB.print( highest / 100.0, 3 );
+    SerialUSB.println(" degree");
+    SerialUSB.print("mean = ");
+    SerialUSB.print( mean / 100.0, 3 );
+    SerialUSB.println(" degree");
+    SerialUSB.print("mean error = ");
+    SerialUSB.print( (abs(upper) - abs(lower)) / 100, 3 );
+    SerialUSB.println(" degree");
+    SerialUSB.print("peak to peak error = ");
+    SerialUSB.print( (abs(highest) - abs(lowest)) / 100, 3 );
+    SerialUSB.println(" degree");
+
+    enableTC5Interrupts();
+  }
+  else {
+    return abs((abs(highest) - abs(lowest)));
+  }
+
+}
+
+int measure_setpoint() {
+
+  int setpoint = 0;
+  int raw_0 = mod(y, 36000);
+  int raw_1 = raw_0;
+  int y_1 = y;
+
+  for (int i = 0; i < 1000; i++) {
+
+    y = readAngle(y_1, raw_1);
+    raw_0 = mod(y, 36000);
+
+    raw_1 = raw_0;
+    y_1 = y;
+
+    setpoint = setpoint + y;
+  }
+  return setpoint / 1000;
+
 }
 
 
 
 
-String read_serialcommand(int timeout) {
-  String arg = "";
+bool read_serialcommand(int timeout, String *command, String *argument) {
+  static String Input = "";
   unsigned long start_millis;
   start_millis = millis();
   bool ended = false;
@@ -685,14 +672,56 @@ String read_serialcommand(int timeout) {
       char incomming = SerialUSB.read();
       if (incomming != '\n' && incomming != '\r') {
 
-        arg = String(arg  + incomming);
+        Input = String(Input  + incomming);
+
+        SerialUSB.print(incomming);
       }
       else {
+        SerialUSB.println();
         ended = true;
       }
     }
   }
 
-  return arg;
+  // received a full String -> split it
+  if (ended) {
 
+    // split the received command
+    split_command(&Input, command, argument);
+
+    // clear the input String
+    Input = "";
+
+    return true;
+  }
+  // no full command received
+  else {
+
+    return false;
+  }
+}
+
+bool split_command(String *Input_pointer, String *first_substring, String *second_substring) {
+
+  // search for a whitespace as delimieter
+  String Input = *Input_pointer;
+
+  int first_space = Input.indexOf(' ');
+
+  if (first_space != -1) {
+    // command
+    *first_substring = Input.substring(0, first_space);
+
+    // argument
+    *second_substring = Input.substring(first_space + 1, sizeof(Input) / sizeof(char));
+
+    // maybe there are more substrings
+    return false;
+  }
+  else {
+    // no substring found -> last substring
+    *first_substring = Input;
+    *second_substring = "";
+    return true;
+  }
 }

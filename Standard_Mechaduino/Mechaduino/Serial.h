@@ -28,8 +28,12 @@ void get_max_frequency();
 
 void readEncoderDiagnostics(); //check encoder diagnostics registers
 
-void measure_noise();
+int measure_noise(bool serialoutput = true);
 
-String read_serialcommand(int timeout);
+int measure_setpoint();
+
+bool read_serialcommand(int timeout, String *command, String *argument);
+
+bool split_command(String *Input_pointer, String *first_substring, String *second_substring);
 
 #endif

@@ -27,5 +27,9 @@ void PID_autotune();
 
 extern int digitalSmooth(int rawIn, int *sensSmoothArray);
 
+bool canceled();
+
+bool timed_out(unsigned long now, int time_out);
+
 #endif
 

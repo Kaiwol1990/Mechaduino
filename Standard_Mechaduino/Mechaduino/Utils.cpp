@@ -69,9 +69,6 @@ void calibration() {
   SerialUSB.println(calibrate_header);
   disableTC5Interrupts();
 
-  bool last_enabled = enabled;
-
-
   int encoderReading = 0;
   int lastencoderReading = 0;
 
@@ -111,7 +108,6 @@ void calibration() {
   if ((encoderReading - lastencoderReading) < 0)
   {
     SerialUSB.println("Wired backwards");
-    enabled = last_enabled;
     enableTC5Interrupts();
     return;
   }
@@ -127,15 +123,7 @@ void calibration() {
 
   for (int x = 0; x < steps_per_revolution; x++) {
 
-    if (SerialUSB.available()) {
-      if (SerialUSB.read() == 'c') {
-        SerialUSB.println();
-        SerialUSB.println("canceled!");
-        enabled = last_enabled;
-        enableTC5Interrupts();
-        return;
-      }
-    }
+    if (canceled()) return;
 
     delay(100);
 
@@ -332,8 +320,10 @@ void disableTC5Interrupts() {
 
 void PID_autotune() {
 
+  disableTC5Interrupts();
+
   int loops = 0;
-  int outputStep = uMAX;
+  int outputStep = (10 * uMAX) / 10;
 
   float temp_Kp = 0;
   float temp_Ki = 0;
@@ -345,24 +335,21 @@ void PID_autotune() {
   int k = 1;
 
   SerialUSB.println("//---- Autotuning the PID controller ---");
-  SerialUSB.println("Press c to cancle!");
+  SerialUSB.println(cancle_header);
   SerialUSB.println("Enter number of tuning cycles!");
   SerialUSB.print("Cycles = ");
 
   while (!received) {
+    if (canceled()) return;
+
+    if (timed_out(now, 5000)) return;
+
     if (SerialUSB.available()) {
 
       if (SerialUSB.peek() == 'd') {
-        debug = true;
-      }
-
-      if (SerialUSB.peek() == 'c') {
-        SerialUSB.read();
         SerialUSB.println("");
-        SerialUSB.println("canceled!");
-        SerialUSB.println();
-        SerialUSB.print(":> ");
-        return;
+        SerialUSB.println("debug mode!");
+        debug = true;
       }
 
       loops = SerialUSB.parseInt();
@@ -371,13 +358,6 @@ void PID_autotune() {
       SerialUSB.println("");
 
       received = true;
-    }
-    if (millis() > now + 5000) {
-      SerialUSB.println("");
-      SerialUSB.println("timed out!");
-      SerialUSB.println();
-      SerialUSB.print(":> ");
-      return;
     }
   }
 
@@ -396,60 +376,30 @@ void PID_autotune() {
       SerialUSB.print("  ");
     }
 
-
     delay(200);
 
-    int raw_0;
-    int raw_1;
-    int raw_diff;
-
     // measure current setpoint
-    int setpoint = 0;
-    for (int i = 0; i < 1000; i++) {
-      raw_0 = pgm_read_word_near(lookup + readEncoder());
+    int setpoint = measure_setpoint();
 
-      raw_diff = raw_0 - raw_1;
-      raw_1 = raw_0;
-      if (raw_diff < -18000) {
-        y = y + 36000 + raw_diff;
-      }
-      else if (raw_diff > 18000) {
-        y = y - 36000 + raw_diff;
-      }
-      else {
-        y = y  + raw_diff;
-      }
-      setpoint = setpoint + y;
+    // measure the noise from the controller
+    int noiseBand = measure_noise(false) / 2;
+
+    SerialUSB.print("|  ");
+    SerialUSB.print(noiseBand, 3);
+    if (noiseBand >= 100) {
+      SerialUSB.print(" ");
     }
-    setpoint = setpoint / 10000;
-
-
-
-    // measuring the noise while the system is steady
-    int higher_noise = 0;
-    int lower_noise = 36000;
-
-    for (int i = 0; i < 1000; i++) {
-
-      raw_0 = pgm_read_word_near(lookup + readEncoder());
-
-      if (raw_0 > higher_noise) higher_noise = raw_0;
-      if (raw_0 < lower_noise) lower_noise = raw_0;
-
-    }
-
-    int noiseBand = (higher_noise - lower_noise);
-
-    SerialUSB.print("|   ");
-    SerialUSB.print(noiseBand / 100.0, 3);
-    if (noiseBand >= 10) {
+    else if (noiseBand >= 10) {
       SerialUSB.print("  ");
     }
     else {
       SerialUSB.print("   ");
     }
 
-    unsigned long times[1124] = {0};
+    int raw_0 = mod(y, 36000);
+    int raw_1 = raw_0;
+    int y_1 = y;
+
     int points[1124] = {0};
     float smoothed[1124] = {0};
 
@@ -467,45 +417,23 @@ void PID_autotune() {
     bool isMax = true;
     bool isMin = true;
 
-
-
-
     int counter = 0;
     unsigned long start_millis = millis() + 500;
-
-    raw_0 = pgm_read_word_near(lookup + readEncoder());;
-    raw_1 = raw_0;
-    raw_diff = 0;
 
     // start the oscilations and measure the behavior every 50 microsseconds
     while (counter < 1124) {
 
       // canceling call if something goes wrong
-      if (SerialUSB.peek() == 'c') {
-        SerialUSB.read();
-        SerialUSB.println();
-        SerialUSB.println("canceled!");
-        return;
-      }
+      if (canceled()) return;
 
       now = micros();
       if (now > last_time + 48) {
 
-        raw_0 =  pgm_read_word_near(lookup + readEncoder());
-
-        raw_diff = raw_0 - raw_1;
-
-        if (raw_diff < -18000) {
-          y = y + 36000 + raw_diff;
-        }
-        else if (raw_diff > 18000) {
-          y = y - 36000 + raw_diff;
-        }
-        else {
-          y = y  + raw_diff;
-        }
+        y = readAngle(y_1, raw_1);
+        raw_0 = mod(y, 36000);
 
         last_time = now;
+        y_1 = y;
         raw_1 = raw_0;
 
 
@@ -533,10 +461,8 @@ void PID_autotune() {
 
         // wait 1 second to get stable oscilations
         if (millis() > start_millis) {
-          times[counter] = now;
           points[counter] = y;
           counter++;
-          //u = 0;
         }
 
       }
@@ -552,7 +478,6 @@ void PID_autotune() {
 
 
     for (int i = 0; i < 1024; i++) {
-      times[i] = times[i + 50];
       points[i] = points[i + 50];
       smoothed[i] = smoothed[i + 50];
     }
@@ -571,8 +496,6 @@ void PID_autotune() {
 
     if (debug) {
       for (int i = 0; i < 1024; i++) {
-        SerialUSB.print(times[i]);
-        SerialUSB.print(',');
         SerialUSB.print(points[i]);
         SerialUSB.print(',');
         SerialUSB.println(smoothed[i]);
@@ -652,7 +575,6 @@ void PID_autotune() {
 
     for (int i = 0; i < 1024; i++) {
       refVal = smoothed[i];
-      now = times[i];
 
       if (refVal > absMax) {
         absMax = refVal;
@@ -751,16 +673,17 @@ void PID_autotune() {
   int_Kp = (((temp_Kp / loops)) + 0.5);
   int_Ki = (((temp_Ki / loops)) + 0.5);
   int_Kd = (((temp_Kd / loops)) + 0.5);
-
   ITerm_max = (uMAX * 1000) / (3 * int_Ki);
 
-  big_Kp = (int_Kp * 2) / 10;
-  big_Ki = int_Ki;
-  big_Kd = (8 * int_Kd) / 3;
+#if defined(use_PI)
+  //---- PD Gains ----
+  volatile int  int_Kp = (( int_Kp  * 2) / 3);
+  volatile int  int_Ki = (( int_Ki  * 0.48 / 1.2));
+  volatile int  int_Kd = ( int_Kd ) / 20;
+#endif
 
-  small_Kp =  int_Kp;
-  small_Ki = int_Ki / 2;
-  small_Kd = int_Kd / 4;
+
+  enableTC5Interrupts();
 }
 
 
@@ -803,5 +726,35 @@ int digitalSmooth(int rawIn, int *sensSmoothArray) {    // "int *sensSmoothArray
   }
 
   return total / k;    // divide by number of samples
+}
+
+bool canceled() {
+  if (SerialUSB.peek() == 'c') {
+    SerialUSB.read();
+    SerialUSB.read();
+    SerialUSB.read();
+    SerialUSB.println();
+    SerialUSB.println("canceled!");
+    enableTC5Interrupts();
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+
+bool timed_out(unsigned long now, int time_out) {
+
+  if (millis() > now + time_out) {
+    SerialUSB.println("");
+    SerialUSB.println("timed out!");
+    enableTC5Interrupts();
+    return true;
+  }
+  else {
+    return false;
+  }
+
 }
 

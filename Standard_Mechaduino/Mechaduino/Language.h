@@ -4,9 +4,11 @@
 
 
 #if (language ==1)
+const String PROGMEM cancle_header = "press c to cancle";
+
 const String PROGMEM calibrate_command = "calibrate";
 const String PROGMEM calibrate_menu = "starts the calibration routine";
-const String PROGMEM calibrate_header = "//---- Starting calibration routine ---- \n\r press c to cancle";
+const String PROGMEM calibrate_header = "//---- Starting calibration routine ----";
 
 
 const String PROGMEM diagnostics_command  = "diagnose";
@@ -80,6 +82,8 @@ const String PROGMEM noise_header = "//---- Measuring noise ----";
 
 
 #elif (language==2)
+const String PROGMEM cancle_header = "c druecken zum abbrechen";
+
 const String PROGMEM calibrate_command = "calibrate";
 const String PROGMEM calibrate_menu = "Startet die Motor Kalibrierung";
 const String PROGMEM calibrate_header = "//---- Kalibriere ---- \n\r c druecken zum abbrechen";
