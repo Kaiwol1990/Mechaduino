@@ -56,10 +56,8 @@ void dirInterrupt() {
 void enaInterrupt() {
   if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
     enabled = false;
-    REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
   }
   else {
-    REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
     enabled = true;
   }
 }
@@ -650,11 +648,11 @@ void PID_autotune() {
     }
 
     SerialUSB.print("| ");
-    SerialUSB.print((0.6 * Ku), 0);
+    SerialUSB.print((0.6 * Ku) / 1000.0, 4);
     SerialUSB.print(" | ");
-    SerialUSB.print(((1.2 * Ku) / (Tu * FPID)), 0);
+    SerialUSB.print(((1.2 * Ku) / (Tu * FPID)) / 1000.0, 4);
     SerialUSB.print(" | ");
-    SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8), 0);
+    SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8) / 1000.0, 4);
     SerialUSB.print(" |");
 
     SerialUSB.println("");
@@ -677,7 +675,7 @@ void PID_autotune() {
 
 #if defined(use_PI)
   //---- PD Gains ----
-  volatile int  int_Kp = (( int_Kp  * 2) / 3);
+  volatile int  int_Kp = (( int_Kp  * 0.4) / 0.6);
   volatile int  int_Ki = (( int_Ki  * 0.48 / 1.2));
   volatile int  int_Kd = ( int_Kd ) / 20;
 #endif

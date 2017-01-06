@@ -125,10 +125,18 @@ void setup() {
 void loop()
 {
   serialCheck();
+
+  if (enabled) {
+    REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
+  }
+  else {
+    REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
+  }
+
   //SerialUSB.print(micros());
   //SerialUSB.print(',');
   //SerialUSB.println(y);
-  // SerialUSB.println(u);
+  //SerialUSB.println((r-y)/10.0);
   //SerialUSB.println(readEncoder());
   //SerialUSB.println(r);
   //SerialUSB.println(step_target);

@@ -15,6 +15,7 @@
 
 
 void serialCheck() {
+  
   bool ended = false;
   String Command = "";
   String argument = "";

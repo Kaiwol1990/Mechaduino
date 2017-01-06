@@ -17,10 +17,39 @@
 #define FPID 10000  // frequency of the PID loop change only if you know what you're doing
 
 
+//working classic PID
 //---- PID Values -----
-#define Kp 1.74600
-#define Ki 0.08640
-#define Kd 9.45700
+#define Kp 0.83600
+#define Ki 0.01040
+#define Kd 13.4570
+
+
+//---- velocity feedforward----
+#define Kvff 15
+
+/*
+  // some overshoot
+  //---- PID Values -----
+  #define Kp 0.6303
+  #define Ki 0.01240
+  #define Kd 30.552
+*/
+
+
+//---- break frequency in hertz for DTerm----
+#define pLPF 250
+
+
+//---- break frequency in hertz for the effort----
+#define uLPF 500
+
+
+//---- break frequency in hertz for position----
+#define positionLPF 1000
+
+
+//---- RAS constant in ms----
+#define RAS 10
 
 
 //----current settings-----
@@ -51,7 +80,7 @@
 
 
 //---- PI or PID
-#define use_PI
-//#define use_PID
+//#define use_PI
+#define use_PID
 
 #endif

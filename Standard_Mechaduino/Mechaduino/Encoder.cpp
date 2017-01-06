@@ -1,6 +1,7 @@
 #include "Encoder.h"
 #include <SPI.h>
 #include "lookup_table.h"
+#include "State.h"
 
 
 int readEncoder() {
@@ -20,7 +21,7 @@ int readEncoder() {
 
 }
 
-#define samples 6
+#define samples 2
 int readAngle(int last_angle, int last_raw) {
   int temp_angle[samples] = {0};
 
@@ -58,5 +59,5 @@ int readAngle(int last_angle, int last_raw) {
     angle = angle + temp_angle[k];
   }
 
-  return (angle / samples);
+  return (last_angle * positionLPFa + (angle / samples) * positionLPFb) / 1000;
 }
