@@ -13,19 +13,35 @@
 #define firmware_version "0.2"
 
 
+//---- inertia ----
+#define J 100
+
+
 //---- PID Frequenz -----
 #define FPID 10000  // frequency of the PID loop change only if you know what you're doing
 
 
-//working classic PID
+/*
 //---- PID Values -----
-#define Kp 0.83600
+#define Kp 0.63600
 #define Ki 0.01040
 #define Kd 13.4570
+*/
+
+//working classic PID
+//---- PID Values -----
+#define Kp 1.47900
+#define Ki 0.04400
+#define Kd 12.33200
+
+
+
+//---- friction compensation ----
+#define Kfr 15
 
 
 //---- velocity feedforward----
-#define Kvff 15
+#define Kvff 10
 
 /*
   // some overshoot

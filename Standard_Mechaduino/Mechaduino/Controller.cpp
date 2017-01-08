@@ -28,18 +28,25 @@ void TC5_Handler() {
   static int y_1;
   static int r_1;
 
-  int target_raw_0;
+  int target_raw;
   static int target_raw_1;
-  int v_target;
+  int omega;
+  int omega_target;
+  static int omega_target_1;
+  int omega_dot_target;
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
-    target_raw_0 = (step_target * stepangle) / 100;
+    target_raw = (step_target * stepangle) / 100;
 
-    v_target =  (target_raw_0 - target_raw_1); //target velocity
+    if (!anticogging) {
+      r = (RASa * r_1 + RASb * target_raw) / 1000;
+    }
 
+    //omega_target =  (target_raw - target_raw_1); //target angular velocity
+    omega_target =  (r - r_1); //target angular velocity
 
-    r = (RASa * r_1 + RASb * target_raw_0) / 1000;
+    omega_dot_target =  (omega_target - omega_target_1); //target angular acceleration
 
     y = readAngle(y_1, raw_1);
 
@@ -59,16 +66,25 @@ void TC5_Handler() {
         ITerm = -ITerm_max;
       }
 
+      omega = (y - y_1);
 
+      DTerm = (pLPFa * DTerm -  (pLPFb * int_Kd * omega)) / 1000;
 
-      DTerm = (pLPFa * DTerm -  (pLPFb * int_Kd * (y - y_1))) / 1000;
 
       // PID loop                                     +    feedforward term
+      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (omega_target - omega))) / 1000;
 
-      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (v_target - (y - y_1)))) / 1000;
+      // moment of inertia
+      u = u + (J * omega_dot_target ^ 2);
 
       u = (uLPFa * u_1 + uLPFb * u) / 1000;
 
+
+      // friction compensation
+      if (abs(omega_target) > 0) {
+        u = u + (omega_target / abs(omega_target)) * Kfr;
+        //u = u + (e_0 / abs(e_0)) * Kfr;
+      }
 
 
     }
@@ -103,7 +119,16 @@ void TC5_Handler() {
     y_1 = y;
     u_1 = u;
     r_1 = r;
-    target_raw_1 = target_raw_0; //letztes target
+    target_raw_1 = target_raw; //letztes target
+    omega_target_1 = omega_target;
+
+
+    if (abs(e_0) < 10) {
+      REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
+    }
+    else {
+      REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
+    }
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }

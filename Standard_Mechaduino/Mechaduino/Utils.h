@@ -23,6 +23,8 @@ void enableTC5Interrupts();
 
 void disableTC5Interrupts();
 
+void antiCoggingCal();
+
 void PID_autotune();
 
 extern int digitalSmooth(int rawIn, int *sensSmoothArray);

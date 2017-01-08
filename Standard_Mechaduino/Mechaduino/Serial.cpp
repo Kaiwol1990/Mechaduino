@@ -15,7 +15,7 @@
 
 
 void serialCheck() {
-  
+
   bool ended = false;
   String Command = "";
   String argument = "";
@@ -65,6 +65,9 @@ void serialCheck() {
     }
     else if (Command.indexOf(getstate_command) == 0 && Command.length() == getstate_command.length()) {
       getstate();
+    }
+    else if (Command.indexOf(anticogging_command) == 0 && Command.length() == anticogging_command.length()) {
+      antiCoggingCal();
     }
     else {
       SerialUSB.println("unknown command send 'help'");
@@ -533,14 +536,15 @@ void readEncoderDiagnostics() {
 int measure_noise(bool serialoutput) {
   if (serialoutput) {
     SerialUSB.println(noise_header);
+    disableTC5Interrupts();
   }
 
-  disableTC5Interrupts();
+  delay(100);
   int counter = 0;
-  float points[3000] = {0};
+  float points[500] = {0};
 
 
-  unsigned long times[1000] = {0};
+  unsigned long times[500] = {0};
   unsigned long now = micros();
   unsigned long last_time = now;
   int dt = ((1000000.0 / FPID) - 1);
@@ -549,7 +553,7 @@ int measure_noise(bool serialoutput) {
   int raw_0 = mod(y, 36000);
   int raw_1 = raw_0;
 
-  while (counter < 1000) {
+  while (counter < 500) {
 
     now = micros();
 
@@ -570,17 +574,17 @@ int measure_noise(bool serialoutput) {
   }
 
   float mean = 0;
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 500; i++) {
     mean = mean + points[i];
   }
-  mean = mean / 1000.0;
+  mean = mean / 500.0;
 
   float upper = 0;
   float lower = 0;
   int upcounter = 0;
   int lowcounter = 0;
 
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 500; i++) {
     if (points[i] > mean ) {
       upcounter++;
       upper = upper + points[i];
@@ -596,7 +600,7 @@ int measure_noise(bool serialoutput) {
   float highest = mean;
   float lowest = mean;
 
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 500; i++) {
     if (points[i] > highest) {
       highest = points[i];
     }
@@ -623,10 +627,10 @@ int measure_noise(bool serialoutput) {
     SerialUSB.print( mean / 100.0, 3 );
     SerialUSB.println(" degree");
     SerialUSB.print("mean error = ");
-    SerialUSB.print( (abs(upper) - abs(lower)) / 100, 3 );
+    SerialUSB.print( abs(abs(upper) - abs(lower)) / 100.0, 3 );
     SerialUSB.println(" degree");
     SerialUSB.print("peak to peak error = ");
-    SerialUSB.print( (abs(highest) - abs(lowest)) / 100, 3 );
+    SerialUSB.print( abs(abs(highest) - abs(lowest)) / 100.0, 3 );
     SerialUSB.println(" degree");
 
     enableTC5Interrupts();
@@ -654,7 +658,7 @@ int measure_setpoint() {
 
     setpoint = setpoint + y;
   }
-  return setpoint / 1000;
+  return setpoint / 1000.0;
 
 }
 

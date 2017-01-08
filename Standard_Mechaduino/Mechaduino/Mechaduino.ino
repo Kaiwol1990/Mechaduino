@@ -16,26 +16,9 @@
   Many thanks to Will Church and Marco Farrugia.
 
 
-
   Controlled via a SerialUSB terminal at 250000 baud.
+  ...send help to get all commands
 
-  Implemented serial commands are:
-
-  c  -  encoder calibration routine
-
-  s  -  enter new setpoint
-
-  p  -  parameter query (prints current parameters)
-
-  e  -  parameter edit (edit PID values)
-
-  j  -  generate step response for PID tuning
-
-  m  -  print main menu
-
-  f  -  get max loop frequency
-
-  ...see serialCheck() in Utils for more details
 */
 
 #include "SanityCheck.h"
@@ -126,18 +109,11 @@ void loop()
 {
   serialCheck();
 
-  if (enabled) {
-    REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
-  }
-  else {
-    REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
-  }
-
   //SerialUSB.print(micros());
   //SerialUSB.print(',');
   //SerialUSB.println(y);
-  //SerialUSB.println((r-y)/10.0);
-  //SerialUSB.println(readEncoder());
+  //SerialUSB.println((r - y) / 10.0);
+  //SerialUSB.println(u/1.0);
   //SerialUSB.println(r);
   //SerialUSB.println(step_target);
 }

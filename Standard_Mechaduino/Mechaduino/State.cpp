@@ -16,6 +16,8 @@ volatile bool enabled = true;       // flag for enabled setting
 
 volatile bool frequency_test = false;        // flag for frequency test
 
+volatile bool anticogging = false; 
+
 const int pLPFa = (1000 * exp(pLPF * -2 * 3.14159283 / FPID)); // z = e^st pole mapping
 const int pLPFb = (1000 - pLPFa);
 

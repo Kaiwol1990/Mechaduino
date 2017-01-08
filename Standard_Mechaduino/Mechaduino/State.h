@@ -14,6 +14,8 @@ extern volatile bool enabled;     // flag for  enabled setting
 
 extern volatile bool frequency_test;       // flag for frequency test
 
+extern volatile bool anticogging; 
+
 extern const int pLPFa;
 extern const int pLPFb;
 

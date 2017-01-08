@@ -316,6 +316,35 @@ void disableTC5Interrupts() {
 }
 
 
+void antiCoggingCal() {
+  anticogging = true;
+  enabled = true;
+  SerialUSB.println(" -----------------BEGIN ANTICOGGING CALIBRATION!----------------");
+  r = pgm_read_word_near(lookup + 1);
+  //r = lookup_angle(1);
+  delay(1000);
+
+
+  for (int i = 1; i < 657; i++) {
+    r = pgm_read_word_near(lookup + i);
+    SerialUSB.print(r, DEC);
+    SerialUSB.print(" , ");
+    delay(100);
+    SerialUSB.println(u, DEC);
+  }
+  SerialUSB.println(" -----------------REVERSE!----------------");
+
+  for (int i = 656; i > 0; i--) {
+    r = pgm_read_word_near(lookup + i);
+    SerialUSB.print(r, DEC);
+    SerialUSB.print(" , ");
+    delay(100);
+    SerialUSB.println(u, DEC);
+  }
+  SerialUSB.println(" -----------------DONE!----------------");
+  anticogging = false;
+}
+
 void PID_autotune() {
 
   disableTC5Interrupts();
@@ -359,12 +388,13 @@ void PID_autotune() {
     }
   }
 
-  SerialUSB.println("| loop | Noise | Frequency | lookback | P    | I  | D     |");
+  SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
+
 
   // start autotune
   while (k <= loops) {
 
-    SerialUSB.println("|---------------------------------------------------------|");
+    SerialUSB.println("|-----------------------------------------------------------------|");
     SerialUSB.print("|   ");
     SerialUSB.print(k);
     if (k >= 10) {
@@ -377,17 +407,14 @@ void PID_autotune() {
     delay(200);
 
     // measure current setpoint
-    int setpoint = measure_setpoint();
+    int setpoint = measure_setpoint() + 0.5;
 
     // measure the noise from the controller
-    int noiseBand = measure_noise(false) / 2;
+    int noiseBand = (measure_noise(false) / 2) + 0.5;
 
-    SerialUSB.print("|  ");
-    SerialUSB.print(noiseBand, 3);
-    if (noiseBand >= 100) {
-      SerialUSB.print(" ");
-    }
-    else if (noiseBand >= 10) {
+    SerialUSB.print("|   ");
+    SerialUSB.print(noiseBand);
+    if (noiseBand >= 10) {
       SerialUSB.print("  ");
     }
     else {
@@ -663,7 +690,7 @@ void PID_autotune() {
 
   // we are finished
 
-  SerialUSB.println("|---------------------------------------------------------|");
+  SerialUSB.println("|-----------------------------------------------------------------|");
   SerialUSB.println();
   SerialUSB.println("Building Average!");
   SerialUSB.println();
