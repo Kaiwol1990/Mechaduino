@@ -81,6 +81,7 @@ const String PROGMEM noise_menu = "measures the noise of the encoder";
 const String PROGMEM noise_header = "//---- Measuring noise ----";
 
 const String PROGMEM anticogging_command = "cogging";
+const String PROGMEM anticogging_menu = "measures the cogging current";
 
 
 #elif (language==2)
@@ -161,6 +162,7 @@ const String PROGMEM noise_menu = "misst das Rauschen des Sensors";
 const String PROGMEM noise_header = "//---- Rauschen ----";
 
 const String PROGMEM anticogging_command = "cogging";
+const String PROGMEM anticogging_menu = "bestimmt das Rastmoment";
 
 
 #endif
