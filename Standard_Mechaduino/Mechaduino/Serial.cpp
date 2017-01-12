@@ -124,6 +124,7 @@ void Serial_menu() {
   SerialUSB.println(autotune_command + " - " + autotune_menu);
   SerialUSB.println(looptime_command + " - " + looptime_menu);
   SerialUSB.println(noise_command + " - " + noise_menu);
+  SerialUSB.println(anticogging_command  + " - " + anticogging_menu);
 }
 
 
