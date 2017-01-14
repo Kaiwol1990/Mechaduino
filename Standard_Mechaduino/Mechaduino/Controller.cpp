@@ -35,6 +35,8 @@ void TC5_Handler() {
   static int omega_target_1;
   int omega_dot_target;
 
+  static int print_counter;
+
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
     target_raw = (step_target * stepangle) / 100;
@@ -43,12 +45,14 @@ void TC5_Handler() {
       r = (RASa * r_1 + RASb * target_raw) / 1000;
     }
 
-    //omega_target =  (target_raw - target_raw_1); //target angular velocity
-    omega_target =  (r - r_1); //target angular velocity
+    omega_target =  (target_raw - target_raw_1); //target angular velocity
+    //omega_target =  (r - r_1); //target angular velocity
 
     omega_dot_target =  (omega_target - omega_target_1); //target angular acceleration
 
     y = readAngle(y_1, raw_1);
+
+    omega = (y - y_1);
 
     raw_0 = mod(y, 36000);
 
@@ -66,16 +70,16 @@ void TC5_Handler() {
         ITerm = -ITerm_max;
       }
 
-      omega = (y - y_1);
 
-      DTerm = (pLPFa * DTerm -  (pLPFb * int_Kd * omega)) / 1000;
+#if defined(use_PIV)
+      DTerm = (pLPFa * DTerm - (pLPFb * int_Kd * omega)) / 1000;
+#elif defined(use_PID)
+      DTerm = (pLPFa * DTerm + (pLPFb * int_Kd * (e_0 - e_1))) / 1000;
+#endif
 
 
-      // PID loop                                     +    feedforward term
-      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (omega_target - omega))) / 1000;
-
-      // moment of inertia
-      u = u + (J * omega_dot_target ^ 2);
+      // PID loop                                     +    feedforward term                 +    moment of inertia
+      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) ) / 1000;
 
       u = (uLPFa * u_1 + uLPFb * u) / 1000;
 
@@ -121,6 +125,21 @@ void TC5_Handler() {
     r_1 = r;
     target_raw_1 = target_raw; //letztes target
     omega_target_1 = omega_target;
+
+    // step respone active
+    if (response) {
+      print_counter += 1;
+
+      // print target and current angle every fifth loop
+      if (print_counter >= 5) {
+
+        SerialUSB.print(r); //print target position
+        SerialUSB.print(',');
+        SerialUSB.println(y); // print current position
+
+        print_counter = 0;
+      }
+    }
 
 
     if (abs(e_0) < 10) {

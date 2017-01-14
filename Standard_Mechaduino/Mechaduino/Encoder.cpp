@@ -51,6 +51,7 @@ int readAngle(int last_angle, int last_raw) {
     else {
       temp_angle[i] = last_angle  + raw_diff;
     }
+    delayMicroseconds(3);
 
   }
 

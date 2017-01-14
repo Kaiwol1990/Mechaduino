@@ -306,7 +306,7 @@ void parameterEdit(String arg) {
   parameterQuery();
 }
 
-
+/*
 void step_response(String arg) {
 
   SerialUSB.print(step_response_header);
@@ -387,7 +387,97 @@ void step_response(String arg) {
     SerialUSB.println("time out");
   }
 }
+*/
+void step_response(String arg) {
 
+  SerialUSB.print(step_response_header);
+
+  int current_position = y;
+  int response_steps = 0;
+  int last_step_target = step_target;
+
+  bool ended = false;
+
+  unsigned long start_millis;
+  start_millis = millis();
+  int time_out = 5000;
+
+  if (arg == "") {
+    // no argument was send!
+
+    while (ended == false) {
+
+      if (timed_out(start_millis, time_out)) return;
+
+      while (SerialUSB.available() > 0) {
+        char incomming = SerialUSB.read();
+        if (incomming != '\n' && incomming != '\r') {
+
+          arg = String(arg  + incomming);
+
+          SerialUSB.print(incomming);
+        }
+        else {
+          ended = true;
+        }
+      }
+    }
+
+  }
+  else {
+    ended = true;
+  }
+
+  SerialUSB.println();
+
+  if (ended) {
+    // get the first char and check if its numeric
+    char first = arg.charAt(0);
+    if (isDigit(first)) {
+
+      // get the steps for te step response
+      response_steps = arg.toInt();
+
+      bool last_enabled = enabled;
+      bool last_dir = dir;
+      dir = true;
+      enabled = true;
+
+      SerialUSB.println("Close Serial Monitor and open Tools>>Serial Plotter");
+      SerialUSB.println("You have 5 seconds...");
+
+      for (byte i = 1; i <= 5; i++) {
+        delay(1000);
+        SerialUSB.print(5 - i);
+        SerialUSB.println("...");
+      }
+
+      // set setp response flag to true to start the output
+      response = true;
+
+      //wait 300 ms to plot some values befor starting the step response
+      delay(100);
+
+      //set the target to the new value
+      step_target = step_target + response_steps;
+      //r = r + ((response_steps * stepangle) / 100);
+
+      // wait 1 second to get the response
+      delay(200);
+
+      // set setp response flag back to false to stop the output
+      response = false;
+
+      // set parameters back to the values before the response
+      enabled = last_enabled;
+      dir = last_dir;
+
+    }
+    else {
+      SerialUSB.println("invalid input!");
+    }
+  }
+}
 
 void get_max_frequency() {
   disableTC5Interrupts();

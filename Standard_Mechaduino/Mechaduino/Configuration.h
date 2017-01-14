@@ -14,42 +14,26 @@
 
 
 //---- inertia ----
-#define J 100
+#define J 1.2
 
 
 //---- PID Frequenz -----
 #define FPID 10000  // frequency of the PID loop change only if you know what you're doing
 
 
-/*
+// 1000 mA
 //---- PID Values -----
-#define Kp 0.63600
-#define Ki 0.01040
-#define Kd 13.4570
-*/
-
-//working classic PID
-//---- PID Values -----
-#define Kp 1.47900
-#define Ki 0.04400
-#define Kd 12.33200
-
+#define Kp 1.48300
+#define Ki 0.04600
+#define Kd 12.03300
 
 
 //---- friction compensation ----
-#define Kfr 15
+#define Kfr 10
 
 
 //---- velocity feedforward----
 #define Kvff 10
-
-/*
-  // some overshoot
-  //---- PID Values -----
-  #define Kp 0.6303
-  #define Ki 0.01240
-  #define Kd 30.552
-*/
 
 
 //---- break frequency in hertz for DTerm----
@@ -57,11 +41,11 @@
 
 
 //---- break frequency in hertz for the effort----
-#define uLPF 500
+#define uLPF 800
 
 
 //---- break frequency in hertz for position----
-#define positionLPF 1000
+#define positionLPF 800
 
 
 //---- RAS constant in ms----
@@ -95,8 +79,8 @@
 #define language 1
 
 
-//---- PI or PID
-//#define use_PI
+//---- PIV or PID
 #define use_PID
+//#define use_PIV
 
 #endif

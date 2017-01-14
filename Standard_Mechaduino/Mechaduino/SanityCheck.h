@@ -30,8 +30,18 @@
 #endif
 
 #if (language!=1) && (language!=2)
-#line 50 "Configuration.h"
+#line 87 "Configuration.h"
 #error "Oops!  No valid language selected"
+#endif
+
+#if defined(use_PID) && defined(use_PIV)
+#line 92 "Configuration.h"
+#error "please use only one controll type"
+#endif
+
+#if !defined(use_PID) && !defined(use_PIV)
+#line 92 "Configuration.h"
+#error "please define one controll type"
 #endif
 
 
