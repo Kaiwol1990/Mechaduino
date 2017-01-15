@@ -12,11 +12,6 @@
 #include "Encoder.h"
 #include "lookup_table.h"
 
-int a0 = 0.046131689679824825 * 1000;
-int a1 = 0.09226337935964965 * 1000;
-int a2 =  0.046131689679824825 * 1000;
-int b1 = -1.3072818432709727 * 1000;
-int b2 = 0.49180860199027215 * 1000;
 
 void TC5_Handler() {
   // gets called with PID frequency
@@ -52,7 +47,6 @@ void TC5_Handler() {
     }
 
     omega_target =  (target_raw - target_raw_1); //target angular velocity
-    //omega_target =  (r - r_1); //target angular velocity
 
     omega_dot_target =  (omega_target - omega_target_1); //target angular acceleration
 
@@ -77,6 +71,8 @@ void TC5_Handler() {
       }
 
 
+
+
 #if defined(use_PIV)
       DTerm = (pLPFa * DTerm - (pLPFb * int_Kd * omega)) / 1000;
 #elif defined(use_PID)
@@ -86,6 +82,7 @@ void TC5_Handler() {
 
       // PID loop                                     +    feedforward term                 +    moment of inertia
       u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
+
 
       // friction compensation
       if (abs(omega_target) > 0) {

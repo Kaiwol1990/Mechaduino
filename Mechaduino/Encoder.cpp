@@ -8,13 +8,13 @@ int readEncoder() {
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
   SPI.transfer(0xFF);
-  SPI.transfer(0xFF);
+  SPI.transfer(0xFE);
 
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
   byte hibyte = SPI.transfer(0xFF);
-  byte lobyte = SPI.transfer(0xFF);
+  byte lobyte = SPI.transfer(0xFE);
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 
   return (((hibyte << 8) | lobyte) & 0B0011111111111111);
@@ -28,14 +28,14 @@ int readAngle(int last_angle, int last_raw) {
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
   SPI.transfer(0xFF);
-  SPI.transfer(0xFF);
+  SPI.transfer(0xFE);
 
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 
   for (byte i = 0; i < samples; i++) {
     REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
     byte hibyte = SPI.transfer(0xFF);
-    byte lobyte = SPI.transfer(0xFF);
+    byte lobyte = SPI.transfer(0xFE);
     REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 
     int raw = pgm_read_word_near(lookup + (((hibyte << 8) | lobyte) & 0B0011111111111111));
@@ -51,7 +51,7 @@ int readAngle(int last_angle, int last_raw) {
     else {
       temp_angle[i] = last_angle  + raw_diff;
     }
-    delayMicroseconds(3);
+    //delayMicroseconds(3);
 
   }
 

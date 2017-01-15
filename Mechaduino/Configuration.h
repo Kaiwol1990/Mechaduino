@@ -59,13 +59,13 @@
 //---------------------------------------------------------------------------------------------------------------
 
 //---- PID Values -----
-#define Kp 1.17100
-#define Ki 0.03300
-#define Kd 10.39000
+#define Kp 1.32200
+#define Ki 0.03700
+#define Kd 11.89600
 
 
 //---- friction compensation ----
-#define Kfr 109.11000
+#define Kfr 107.77100
 
 
 //---- velocity feedforward----

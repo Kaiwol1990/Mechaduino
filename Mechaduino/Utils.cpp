@@ -359,6 +359,8 @@ void antiCoggingCal() {
   }
   SerialUSB.println("|");
 
+  int_Kfr = 1000 * (u_cogging / max_count);
+
   enabled = last_enabled;
   anticogging = false;
 
