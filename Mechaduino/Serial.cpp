@@ -20,7 +20,7 @@ void serialCheck() {
   String Command = "";
   String argument = "";
 
-  if (read_serialcommand(5000, &Command, &argument)) {
+  if (read_serialcommand(1, &Command, &argument)) {
     if (Command.indexOf(calibrate_command) == 0 && Command.length() == calibrate_command.length()) {
       calibration();
     }
@@ -44,6 +44,8 @@ void serialCheck() {
     }
     else if (Command.indexOf(autotune_command) == 0 && Command.length() == autotune_command.length()) {
       PID_autotune();
+      antiCoggingCal();
+      parameterQuery();
     }
     else if (Command.indexOf(diagnostics_command) == 0 && Command.length() == diagnostics_command.length()) {
       readEncoderDiagnostics();
@@ -124,7 +126,6 @@ void Serial_menu() {
   SerialUSB.println(autotune_command + " - " + autotune_menu);
   SerialUSB.println(looptime_command + " - " + looptime_menu);
   SerialUSB.println(noise_command + " - " + noise_menu);
-  SerialUSB.println(anticogging_command  + " - " + anticogging_menu);
 }
 
 
@@ -191,8 +192,8 @@ void readangle() {
 
 
 void parameterQuery() {
-  SerialUSB.println(parameter_header);
-
+  
+  SerialUSB.println("//---- PID Values -----");
   SerialUSB.print("#define Kp ");
   SerialUSB.println(int_Kp / 1000.0, 5);
 
@@ -201,6 +202,20 @@ void parameterQuery() {
 
   SerialUSB.print("#define Kd ");
   SerialUSB.println(int_Kd / 1000.0, 5);
+
+  SerialUSB.println();
+  SerialUSB.println();
+  
+  SerialUSB.println("//---- friction compensation ----");
+  SerialUSB.print("#define Kfr ");
+  SerialUSB.println(int_Kfr / 1000.0, 5);
+
+  SerialUSB.println();
+  SerialUSB.println();
+  
+  SerialUSB.println("//---- velocity feedforward----");
+  SerialUSB.print("#define Kvff ");
+  SerialUSB.println(int_Kvff / 1000.0, 5);
 }
 
 
@@ -306,88 +321,7 @@ void parameterEdit(String arg) {
   parameterQuery();
 }
 
-/*
-void step_response(String arg) {
 
-  SerialUSB.print(step_response_header);
-
-  int current_position = y;
-  int response_steps = 0;
-  int last_step_target = step_target;
-
-  bool ended = false;
-
-  unsigned long start_millis;
-  start_millis = millis();
-  int time_out = 5000;
-
-  if (arg == "") {
-    // no argument was send!
-
-    while (ended == false && millis() < start_millis + time_out) {
-
-      while (SerialUSB.available() > 0) {
-        char incomming = SerialUSB.read();
-        if (incomming != '\n' && incomming != '\r') {
-
-          arg = String(arg  + incomming);
-
-          SerialUSB.print(incomming);
-        }
-        else {
-          ended = true;
-        }
-      }
-    }
-
-  }
-  else {
-    ended = true;
-    SerialUSB.print(arg);
-  }
-
-  SerialUSB.println();
-
-  if (ended) {
-    // get the first char and check if its numeric
-    char first = arg.charAt(0);
-    if (isDigit(first)) {
-
-      bool last_enabled = enabled;
-      dir = true;
-      enabled = true;
-
-      response_steps = arg.toInt();
-      start_millis = millis();
-      int timeframe = start_millis + 1000;
-      int new_step_target = last_step_target + response_steps;
-
-      while (millis() < timeframe) { //half a second
-
-        SerialUSB.print(millis() - start_millis);
-        SerialUSB.print(',');
-        SerialUSB.print(r); //print target position
-        SerialUSB.print(", ");
-        SerialUSB.println(y); // print current position
-
-        if (millis() > start_millis + 300) {
-          step_target = new_step_target;
-        }
-      }
-      step_target = last_step_target;
-      delay(1000);
-      enabled = last_enabled;
-
-    }
-    else {
-      SerialUSB.println("invalid input!");
-    }
-  }
-  else {
-    SerialUSB.println("time out");
-  }
-}
-*/
 void step_response(String arg) {
 
   SerialUSB.print(step_response_header);
@@ -456,14 +390,15 @@ void step_response(String arg) {
       response = true;
 
       //wait 300 ms to plot some values befor starting the step response
-      delay(100);
+      int time_step = (1000*500)/FPID;
+      delay(time_step);
 
       //set the target to the new value
       step_target = step_target + response_steps;
       //r = r + ((response_steps * stepangle) / 100);
 
       // wait 1 second to get the response
-      delay(200);
+      delay(2*time_step);
 
       // set setp response flag back to false to stop the output
       response = false;

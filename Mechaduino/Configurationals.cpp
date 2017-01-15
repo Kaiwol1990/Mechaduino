@@ -15,5 +15,7 @@ const int counts_per_revolution = 16384;                              // encoder
 const int stepangle = ((100 * 36000.0 / (steps_per_revolution * microstepping))); // angle of one step as int
 const int PA = ((36000 / steps_per_revolution));                        // angle of one fullstep
 
+const int max_e = (36000 * error_led_value) / mm_rev;             // max error to turn the led off in mm
+
 
 

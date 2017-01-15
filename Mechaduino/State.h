@@ -36,6 +36,8 @@ extern volatile int int_Kd;
 
 extern volatile int int_Kvff;
 
+extern volatile int int_Kfr;
+
 extern volatile int int_J;
 
 extern volatile int step_target;        // target as step gets incremented if an step is received

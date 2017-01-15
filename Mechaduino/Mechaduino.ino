@@ -97,7 +97,6 @@ void setup() {
 
   SerialUSB.println();
   SerialUSB.print(":>");
-
 }
 
 
@@ -110,11 +109,10 @@ void loop()
 {
   serialCheck();
 
-  //SerialUSB.print(micros());
-  //SerialUSB.print(',');
+  //SerialUSB.println((r-y)/10.0);
+  //SerialUSB.println(u_filtered);
   //SerialUSB.println(y);
-  //SerialUSB.println((r - y) / 10.0);
-  //SerialUSB.println(u/1.0);
+  //SerialUSB.println(u);
   //SerialUSB.println(r);
   //SerialUSB.println(step_target);
 }

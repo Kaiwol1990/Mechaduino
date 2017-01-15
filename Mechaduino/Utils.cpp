@@ -316,33 +316,55 @@ void disableTC5Interrupts() {
 }
 
 
+
 void antiCoggingCal() {
+
+  bool last_enabled = enabled;
+
   anticogging = true;
   enabled = true;
-  SerialUSB.println(" -----------------BEGIN ANTICOGGING CALIBRATION!----------------");
+
+  float u_cogging = 0;
+
+  int max_count =  (16384 / 4);
+
+  int prozent = ((max_count / 50) + 0.5) + 1;
+
+  SerialUSB.println("//---- Calculating friciton ----");
+  SerialUSB.println("0%      20%       40%       60%        80%       100%");
+  SerialUSB.println("|--------------------------------------------------|");
+  SerialUSB.print("|");
+
   r = pgm_read_word_near(lookup + 1);
-  //r = lookup_angle(1);
-  delay(1000);
 
+  delay(2000);
 
-  for (int i = 1; i < 657; i++) {
-    r = pgm_read_word_near(lookup + i);
-    SerialUSB.print(r, DEC);
-    SerialUSB.print(" , ");
-    delay(100);
-    SerialUSB.println(u, DEC);
+  for (int i = 0; i < max_count; i++) {
+    r = pgm_read_word_near(lookup + i + 1);
+
+    //delay to measure the
+    delay(10);
+
+    float sum = 0;
+    for (int k = 0; k < 50; k++) {
+      sum = sum + u;
+    }
+
+    u_cogging = u_cogging + (sum / 50.0);
+
+    if (i % prozent == 0) {
+      SerialUSB.print("-");
+    }
+
   }
-  SerialUSB.println(" -----------------REVERSE!----------------");
+  SerialUSB.println("|");
 
-  for (int i = 656; i > 0; i--) {
-    r = pgm_read_word_near(lookup + i);
-    SerialUSB.print(r, DEC);
-    SerialUSB.print(" , ");
-    delay(100);
-    SerialUSB.println(u, DEC);
-  }
-  SerialUSB.println(" -----------------DONE!----------------");
+  enabled = last_enabled;
   anticogging = false;
+
+  SerialUSB.println();
+  SerialUSB.println();
+
 }
 
 void PID_autotune() {
@@ -351,6 +373,9 @@ void PID_autotune() {
 
   int loops = 0;
   int outputStep = (10 * uMAX) / 10;
+  int frequency = 20000;
+  int dt = (1000000 / frequency);
+  int scan_dt = dt - 2;
 
   float temp_Kp = 0;
   float temp_Ki = 0;
@@ -452,7 +477,7 @@ void PID_autotune() {
       if (canceled()) return;
 
       now = micros();
-      if (now > last_time + 48) {
+      if (now > last_time + scan_dt) {
 
         y = readAngle(y_1, raw_1);
         raw_0 = mod(y, 36000);
@@ -560,7 +585,7 @@ void PID_autotune() {
       i = i + 1;
     }
 
-    float frequency = (1000000.0 / 50.0) / period;
+    float frequency = (1000000.0 / (float)(dt)) / period;
     double Tu = 1.0 / frequency;
 
     SerialUSB.print("|   ");
@@ -584,7 +609,7 @@ void PID_autotune() {
     }
 
     // calculating lookback points
-    int nLookBack = ((1000000 * Tu) / 50) / 4;
+    int nLookBack = ((1000000 * Tu) / dt) / 4;
     if (nLookBack >= 99) {
       nLookBack = 99;
     }
@@ -692,7 +717,6 @@ void PID_autotune() {
 
   SerialUSB.println("|-----------------------------------------------------------------|");
   SerialUSB.println();
-  SerialUSB.println("Building Average!");
   SerialUSB.println();
 
   int_Kp = (((temp_Kp / loops)) + 0.5);

@@ -12,6 +12,12 @@
 #include "Encoder.h"
 #include "lookup_table.h"
 
+int a0 = 0.046131689679824825 * 1000;
+int a1 = 0.09226337935964965 * 1000;
+int a2 =  0.046131689679824825 * 1000;
+int b1 = -1.3072818432709727 * 1000;
+int b2 = 0.49180860199027215 * 1000;
+
 void TC5_Handler() {
   // gets called with PID frequency
   static int ITerm;
@@ -79,16 +85,16 @@ void TC5_Handler() {
 
 
       // PID loop                                     +    feedforward term                 +    moment of inertia
-      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) ) / 1000;
-
-      u = (uLPFa * u_1 + uLPFb * u) / 1000;
-
+      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
 
       // friction compensation
       if (abs(omega_target) > 0) {
-        u = u + (omega_target / abs(omega_target)) * Kfr;
-        //u = u + (e_0 / abs(e_0)) * Kfr;
+        u = u + (omega_target / abs(omega_target)) * int_Kfr;
       }
+
+      u = u / 1000;
+
+      u = (uLPFa * u_1 + uLPFb * u) / 1000;
 
 
     }
@@ -121,7 +127,9 @@ void TC5_Handler() {
     raw_1 = raw_0;
     e_1 = e_0;
     y_1 = y;
+
     u_1 = u;
+
     r_1 = r;
     target_raw_1 = target_raw; //letztes target
     omega_target_1 = omega_target;
@@ -133,8 +141,6 @@ void TC5_Handler() {
       // print target and current angle every fifth loop
       if (print_counter >= 5) {
 
-        SerialUSB.print(r); //print target position
-        SerialUSB.print(',');
         SerialUSB.println(y); // print current position
 
         print_counter = 0;
@@ -142,7 +148,7 @@ void TC5_Handler() {
     }
 
 
-    if (abs(e_0) < 10) {
+    if (abs(e_0) < max_e) {
       REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
     }
     else {

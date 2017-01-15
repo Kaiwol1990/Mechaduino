@@ -19,15 +19,6 @@
 #error "Oops!  Make sure you have 'Arduino Zero (Native USB Port)' selected from the 'Tools -> Boards' menu."
 #endif
 
-#if defined(MECHADUINO_HARDWARE) && defined(NZS_HARDWARE)
-#line 5 "Configuration.h"
-#error "Oops!  Please define only one hardware!"
-#endif
-
-#if !defined(MECHADUINO_HARDWARE) && !defined(NZS_HARDWARE)
-#line 5 "Configuration.h"
-#error "Oops!  Please define your hardware!"
-#endif
 
 #if (language!=1) && (language!=2)
 #line 87 "Configuration.h"
