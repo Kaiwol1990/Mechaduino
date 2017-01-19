@@ -70,11 +70,13 @@ void calibration() {
   int encoderReading = 0;
   int lastencoderReading = 0;
 
-  int avg = 500;         //how many readings to average
+  int avg = 100;         //how many readings to average
 
   int iStart = 0;
   int jStart = 0;
   int stepNo = 0;
+
+  int readings[3][steps_per_revolution];
 
   int fullStepReadings[steps_per_revolution];
   int ticks = 0;
@@ -82,67 +84,89 @@ void calibration() {
   float lookupAngle = 0.0;
   float angle_per_step = 360.0 / steps_per_revolution;
 
+
+  encoderReading = readEncoder();
+
+
   dir = true;
-  output(0, 255);
 
-  for (int reading = 0; reading < avg; reading++) {
-    lastencoderReading += readEncoder();
-    delayMicroseconds(1);
-  }
-  lastencoderReading = lastencoderReading / avg;
-
-  oneStep();
-  oneStep();
   oneStep();
 
   delay(500);
 
-  for (int reading = 0; reading < avg; reading++) {
-    encoderReading += readEncoder();
-    delayMicroseconds(1);
-  }
-  encoderReading = encoderReading / avg;
-
-  if ((encoderReading - lastencoderReading) < 0)
+  if ((readEncoder - lastencoderReading) < 0)
   {
     SerialUSB.println("Wired backwards");
     enableTC5Interrupts();
     return;
   }
 
+  dir = false;
 
-  SerialUSB.println("Calibrating single steps");
-  SerialUSB.println("0%      20%       40%       60%        80%       100%");
-  SerialUSB.println("|--------------------------------------------------|");
-  SerialUSB.print("|");
+  oneStep();
 
-  // step to every single fullstep position and read the Encoder
+
   step_target = 0;
 
-  for (int x = 0; x < steps_per_revolution; x++) {
 
-    if (canceled()) return;
+  SerialUSB.println("Calibrating single steps");
+  SerialUSB.println("|---+----+----+----+----+----+----+----+----+----|");
+  int counter = 0;
 
-    delay(100);
+  for (int k = 0; k < 3; k++) {
+    dir = true;
+    // step to every single fullstep position and read the Encoder
 
-    encoderReading = 0;
 
-    for (int reading = 0; reading < avg; reading++) {
-      encoderReading += readEncoder();
-      delayMicroseconds(1);
+    for (int x = 0; x < steps_per_revolution; x++) {
+
+      if (canceled()) return;
+      counter = x;
+
+      delay(100);
+
+      encoderReading = 0;
+
+      for (int reading = 0; reading < avg; reading++) {
+        encoderReading += readEncoder();
+        delayMicroseconds(100);
+      }
+
+      readings[k][x] =  encoderReading / avg;
+
+      if (( (50 * x) % steps_per_revolution) == 0) {
+        SerialUSB.print(".");
+      }
+
+      oneStep();
     }
-    fullStepReadings[x] = encoderReading / avg;
 
-    oneStep();
+    dir = false;
 
-    if (((50 * x) % steps_per_revolution) == 0) {
-      SerialUSB.print("-");
+    for (int x = counter; x >= 0; x--) {
+      delay(2);
+      oneStep();
     }
+    
+    delay(500);
+
+    SerialUSB.print( " cycle ");
+    SerialUSB.print(k + 1);
+    SerialUSB.print( "/3 complete");
+    SerialUSB.println();
+
   }
 
-  SerialUSB.println("|");
+  output(0, 0);
+
+  for (int x = 0; x < steps_per_revolution; x++) {
+    fullStepReadings[x] = ((readings[0][x] + readings[1][x] + readings[2][x]) / 3) + 0.5;
+  }
+
   SerialUSB.println();
+
   // end fullsteps
+
 
 
   // interpolate between the fullsteps
@@ -247,21 +271,30 @@ void calibration() {
   SerialUSB.println("};");
   SerialUSB.println();
 
-  parameterQuery();
+
+  // parameterQuery();
 
   enableTC5Interrupts();
 }
 
 
 void oneStep() {
+  static int steps;
+
   if (dir == 0) {
-    step_target += PA;
+    steps += 1;
+    step_target += microstepping;
   }
   else {
-    step_target -= PA;
+    steps -= 1;
+    step_target -= microstepping;
   }
 
-  output(step_target, 255);
+  int target_raw = (step_target * stepangle) / 100;
+  int raw_0 = mod(target_raw, 36000);
+  output(raw_0 , uMAX / 2);
+
+  //output(steps * PA , uMAX / 4);
 }
 
 int mod(int xMod, int mMod) {
@@ -321,6 +354,8 @@ void antiCoggingCal() {
 
   bool last_enabled = enabled;
 
+  step_target = 0;
+
   anticogging = true;
   enabled = true;
 
@@ -331,9 +366,7 @@ void antiCoggingCal() {
   int prozent = ((max_count / 50) + 0.5) + 1;
 
   SerialUSB.println("//---- Calculating friciton ----");
-  SerialUSB.println("0%      20%       40%       60%        80%       100%");
-  SerialUSB.println("|--------------------------------------------------|");
-  SerialUSB.print("|");
+  SerialUSB.println("|---+----+----+----+----+----+----+----+----+----|");
 
   r = pgm_read_word_near(lookup + 1);
 
@@ -353,11 +386,11 @@ void antiCoggingCal() {
     u_cogging = u_cogging + (sum / 50.0);
 
     if (i % prozent == 0) {
-      SerialUSB.print("-");
+      SerialUSB.print(".");
     }
 
   }
-  SerialUSB.println("|");
+  SerialUSB.println("");
 
   int_Kfr = 1000 * (u_cogging / max_count);
 
