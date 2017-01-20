@@ -192,7 +192,7 @@ void readangle() {
 
 
 void parameterQuery() {
-  
+
   SerialUSB.println("//---- PID Values -----");
   SerialUSB.print("#define Kp ");
   SerialUSB.println(int_Kp / 1000.0, 5);
@@ -205,14 +205,14 @@ void parameterQuery() {
 
   SerialUSB.println();
   SerialUSB.println();
-  
+
   SerialUSB.println("//---- friction compensation ----");
   SerialUSB.print("#define Kfr ");
   SerialUSB.println(int_Kfr / 1000.0, 5);
 
   SerialUSB.println();
   SerialUSB.println();
-  
+
   SerialUSB.println("//---- velocity feedforward----");
   SerialUSB.print("#define Kvff ");
   SerialUSB.println(int_Kvff / 1000.0, 5);
@@ -385,20 +385,20 @@ void step_response(String arg) {
         SerialUSB.print(5 - i);
         SerialUSB.println("...");
       }
+      int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
+      int big_time_step = 2 * small_time_step;
 
       // set setp response flag to true to start the output
       response = true;
 
       //wait 300 ms to plot some values befor starting the step response
-      int time_step = (1000*500)/FPID;
-      delay(time_step);
+      delay(small_time_step);
 
       //set the target to the new value
       step_target = step_target + response_steps;
-      //r = r + ((response_steps * stepangle) / 100);
 
       // wait 1 second to get the response
-      delay(2*time_step);
+      delay(big_time_step);
 
       // set setp response flag back to false to stop the output
       response = false;

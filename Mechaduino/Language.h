@@ -164,4 +164,7 @@ const String PROGMEM anticogging_command = "cogging";
 
 
 #endif
+
+const String PROGMEM procent_bar = "|---+----+----+----+----+----+----+----+----+----|";
+
 #endif

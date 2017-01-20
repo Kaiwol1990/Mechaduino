@@ -91,8 +91,8 @@ void calibration() {
   dir = true;
 
   oneStep();
-
-  delay(500);
+  delay(100);
+  oneStep();
 
   if ((readEncoder - lastencoderReading) < 0)
   {
@@ -104,26 +104,29 @@ void calibration() {
   dir = false;
 
   oneStep();
+  delay(100);
+  oneStep();
+  delay(500);
 
 
   step_target = 0;
 
 
   SerialUSB.println("Calibrating single steps");
-  SerialUSB.println("|---+----+----+----+----+----+----+----+----+----|");
+  SerialUSB.println(procent_bar);
   int counter = 0;
+  int count = (3 * steps_per_revolution) / 50;
+  dir = true;
 
   for (int k = 0; k < 3; k++) {
-    dir = true;
+
     // step to every single fullstep position and read the Encoder
-
-
     for (int x = 0; x < steps_per_revolution; x++) {
 
       if (canceled()) return;
-      counter = x;
+      counter += 1;
 
-      delay(100);
+      delay(50);
 
       encoderReading = 0;
 
@@ -134,27 +137,19 @@ void calibration() {
 
       readings[k][x] =  encoderReading / avg;
 
-      if (( (50 * x) % steps_per_revolution) == 0) {
+      if (counter == count) {
+        counter = 0;
         SerialUSB.print(".");
       }
-
       oneStep();
     }
+  }
 
-    dir = false;
+  dir = false;
 
-    for (int x = counter; x >= 0; x--) {
-      delay(2);
-      oneStep();
-    }
-    
-    delay(500);
-
-    SerialUSB.print( " cycle ");
-    SerialUSB.print(k + 1);
-    SerialUSB.print( "/3 complete");
-    SerialUSB.println();
-
+  for (int x = 3 * steps_per_revolution; x >= 0; x--) {
+    delay(2);
+    oneStep();
   }
 
   output(0, 0);
@@ -164,9 +159,8 @@ void calibration() {
   }
 
   SerialUSB.println();
-
+  SerialUSB.println();
   // end fullsteps
-
 
 
   // interpolate between the fullsteps
@@ -269,10 +263,6 @@ void calibration() {
   }
   SerialUSB.println();
   SerialUSB.println("};");
-  SerialUSB.println();
-
-
-  // parameterQuery();
 
   enableTC5Interrupts();
 }
@@ -366,7 +356,7 @@ void antiCoggingCal() {
   int prozent = ((max_count / 50) + 0.5) + 1;
 
   SerialUSB.println("//---- Calculating friciton ----");
-  SerialUSB.println("|---+----+----+----+----+----+----+----+----+----|");
+  SerialUSB.println(procent_bar);
 
   r = pgm_read_word_near(lookup + 1);
 
