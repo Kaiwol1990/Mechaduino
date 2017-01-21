@@ -112,7 +112,7 @@ void calibration() {
   step_target = 0;
 
 
-  SerialUSB.println("Calibrating single steps");
+  SerialUSB.println("Calibrating fullsteps");
   SerialUSB.println(procent_bar);
   int counter = 0;
   int count = (3 * steps_per_revolution) / 50;
@@ -147,12 +147,24 @@ void calibration() {
 
   dir = false;
 
-  for (int x = 3 * steps_per_revolution; x >= 0; x--) {
+  counter = 0;
+  SerialUSB.println();
+  SerialUSB.println();
+  SerialUSB.println("going back to zero point");
+  SerialUSB.println(procent_bar);
+
+  for (int x = 3 * steps_per_revolution; x > 0; x--) {
+    counter += 1;
+    if (counter == count) {
+      counter = 0;
+      SerialUSB.print(".");
+    }
     delay(2);
     oneStep();
   }
 
   output(0, 0);
+
 
   for (int x = 0; x < steps_per_revolution; x++) {
     fullStepReadings[x] = ((readings[0][x] + readings[1][x] + readings[2][x]) / 3) + 0.5;
@@ -160,7 +172,47 @@ void calibration() {
 
   SerialUSB.println();
   SerialUSB.println();
+  SerialUSB.println("checking calibration table");
+  SerialUSB.println(procent_bar);
   // end fullsteps
+
+
+  // step every fullstep again an check error
+  dir = true;
+
+  int max_error = 0;
+  int error = 0;
+
+  for (int x = 0; x < steps_per_revolution; x++) {
+    if (canceled()) return;
+
+    delay(50);
+    encoderReading = 0;
+
+    for (int reading = 0; reading < avg; reading++) {
+      encoderReading += readEncoder();
+      delayMicroseconds(100);
+    }
+
+    error = abs((encoderReading / avg) - fullStepReadings[x]);
+
+    if (error > max_error) {
+      max_error = error;
+    }
+
+    if (x % (steps_per_revolution / 50) == 0) {
+      SerialUSB.print(".");
+    }
+
+    oneStep();
+  }
+
+  SerialUSB.println();
+  SerialUSB.print("max error = ");
+  SerialUSB.print(((float)((100.0 * (float)max_error) / (float)counts_per_revolution)));
+  SerialUSB.println("%");
+  SerialUSB.println("should be lower than 0.5%");
+  SerialUSB.println();
 
 
   // interpolate between the fullsteps
@@ -283,8 +335,6 @@ void oneStep() {
   int target_raw = (step_target * stepangle) / 100;
   int raw_0 = mod(target_raw, 36000);
   output(raw_0 , uMAX / 2);
-
-  //output(steps * PA , uMAX / 4);
 }
 
 int mod(int xMod, int mMod) {
@@ -344,11 +394,6 @@ void antiCoggingCal() {
 
   bool last_enabled = enabled;
 
-  step_target = 0;
-
-  anticogging = true;
-  enabled = true;
-
   float u_cogging = 0;
 
   int max_count =  (16384 / 4);
@@ -358,15 +403,15 @@ void antiCoggingCal() {
   SerialUSB.println("//---- Calculating friciton ----");
   SerialUSB.println(procent_bar);
 
-  r = pgm_read_word_near(lookup + 1);
+  step_target = ( (100 * y) / stepangle);
 
-  delay(2000);
+  enabled = true;
 
   for (int i = 0; i < max_count; i++) {
-    r = pgm_read_word_near(lookup + i + 1);
 
-    //delay to measure the
-    delay(10);
+    step_target = step_target + 1;
+
+    delay(15);
 
     float sum = 0;
     for (int k = 0; k < 50; k++) {
@@ -385,7 +430,6 @@ void antiCoggingCal() {
   int_Kfr = 1000 * (u_cogging / max_count);
 
   enabled = last_enabled;
-  anticogging = false;
 
   SerialUSB.println();
   SerialUSB.println();
@@ -747,7 +791,6 @@ void PID_autotune() {
   int_Kp = (((temp_Kp / loops)) + 0.5);
   int_Ki = (((temp_Ki / loops)) + 0.5);
   int_Kd = (((temp_Kd / loops)) + 0.5);
-  ITerm_max = (uMAX * 1000) / (3 * int_Ki);
 
 #if defined(use_PI)
   //---- PD Gains ----

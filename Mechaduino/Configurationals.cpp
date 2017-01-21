@@ -7,7 +7,6 @@
 const float rSense = 0.150;                           // resistor value
 const int uMAX = ((1024.0 * iMAX * 10 * rSense) / (1000 * 3.3)); // max voltage for the vref pins
 const int phase_multiplier = ((10 * steps_per_revolution / 4) / 100);
-int ITerm_max = (uMAX / (4 * Ki));
 
 
 //---- Step settings -----

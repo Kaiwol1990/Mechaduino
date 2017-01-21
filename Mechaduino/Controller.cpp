@@ -42,9 +42,7 @@ void TC5_Handler() {
 
     target_raw = (step_target * stepangle) / 100;
 
-    if (!anticogging) {
-      r = (RASa * r_1 + RASb * target_raw) / 1000;
-    }
+    r = (RASa * r_1 + RASb * target_raw) / 1000;
 
     omega_target =  (target_raw - target_raw_1); //target angular velocity
 
@@ -60,17 +58,14 @@ void TC5_Handler() {
 
       e_0 = r - y;
 
+      ITerm = ITerm + (int_Ki * e_0);
 
-      ITerm = ITerm + e_0;
-
-      if (ITerm > ITerm_max) {
-        ITerm = ITerm_max;
+      if (ITerm > 150000) {
+        ITerm = 150000;
       }
-      else if (ITerm < -ITerm_max) {
-        ITerm = -ITerm_max;
+      else if (ITerm < -150000) {
+        ITerm = -150000;
       }
-
-
 
 
 #if defined(use_PIV)
@@ -80,8 +75,8 @@ void TC5_Handler() {
 #endif
 
 
-      // PID loop                                     +    feedforward term                 +    moment of inertia
-      u = ( (int_Kp * e_0) + (int_Ki * ITerm) + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
+      // PID loop                          +    feedforward term                 +    moment of inertia
+      u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
 
 
       // friction compensation
@@ -136,7 +131,7 @@ void TC5_Handler() {
       print_counter += 1;
 
       // print target and current angle every fifth loop
-      if (print_counter >= 5) {
+      if (print_counter >= 4) {
 
         SerialUSB.println(y); // print current position
 

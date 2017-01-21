@@ -223,7 +223,7 @@ void parameterEdit(String arg) {
   bool received_1 = false;
   bool received_2 = false;
   unsigned long start_millis = millis();
-  int time_out = 5000;
+  int time_out = 10000;
 
   SerialUSB.println(editparam_header);
   SerialUSB.println(cancle_header);
@@ -237,7 +237,13 @@ void parameterEdit(String arg) {
   SerialUSB.print("d ----- Kd = ");
   SerialUSB.println(int_Kd / 1000.0);
 
-  while (!received_1)  {
+  SerialUSB.print("v ----- Kvff = ");
+  SerialUSB.println(int_Kvff / 1000.0);
+
+  SerialUSB.print("f ----- Kfr = ");
+  SerialUSB.println(int_Kfr / 1000.0);
+
+  while (1) {
 
     if (timed_out(start_millis, time_out)) return;
 
@@ -245,77 +251,101 @@ void parameterEdit(String arg) {
 
     char inChar2 = (char)SerialUSB.read();
 
+    SerialUSB.read();
+
     switch (inChar2) {
-      case 'p':
-        {
+      case 'p': {
+          start_millis = millis();
           SerialUSB.print("enter new Kp = ");
-          while (millis() < start_millis + (2 * time_out)) {
-            delay(100);
-            if (SerialUSB.available()) {
-              if (SerialUSB.peek() == '\r') {
-                char dump = SerialUSB.read();
-              }
-              else {
-                float temp_Kp = SerialUSB.parseFloat();
-                SerialUSB.println(temp_Kp);
 
-                int_Kp = 1000 * temp_Kp;
-                received_2 = true;
-              }
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(250);
+
+            if (SerialUSB.available()) {
+              float temp_Kp = SerialUSB.parseFloat();
+              SerialUSB.println(temp_Kp);
+
+              int_Kp = 1000 * temp_Kp;
+              return;
             }
+
           }
-          received_1 = true;
         }
         break;
-      case 'i':
-        {
+      case 'i': {
+          start_millis = millis();
           SerialUSB.print("enter new Ki = ");
-          while (millis() < start_millis + (2 * time_out)) {
-            delay(100);
-            if (SerialUSB.available()) {
-              if (SerialUSB.peek() == '\r') {
-                char dump = SerialUSB.read();
-              }
-              else {
-                float temp_Ki = 0.0;
-                temp_Ki = SerialUSB.parseFloat();
-                SerialUSB.println(temp_Ki);
 
-                int_Ki = 1000 * temp_Ki;
-                ITerm_max = (uMAX * 1000) / (3 * int_Ki);
-                received_2 = true;
-              }
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(250);
+
+            if (SerialUSB.available()) {
+              float temp_Ki = SerialUSB.parseFloat();
+              SerialUSB.println(temp_Ki);
+
+              int_Ki = 1000 * temp_Ki;
+              return;
             }
           }
-          received_1 = true;
         }
         break;
-      case 'd':
-        {
+      case 'd': {
+          start_millis = millis();
           SerialUSB.print("enter new Kd = ");
-          while (millis() < start_millis + (2 * time_out)) {
-            delay(100);
-            if (SerialUSB.available()) {
-              if (SerialUSB.peek() == '\r') {
-                char dump = SerialUSB.read();
-              }
-              else {
-                float temp_Kd = SerialUSB.parseFloat();
-                SerialUSB.println(temp_Kd);
 
-                int_Kd = 1000 * temp_Kd;
-                received_2 = true;
-              }
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(250);
+
+            if (SerialUSB.available()) {
+              float temp_Kd = SerialUSB.parseFloat();
+              SerialUSB.println(temp_Kd);
+
+              int_Kd = 1000 * temp_Kd;
+              return;
             }
           }
-          received_1 = true;
+        }
+        break;
+      case 'v': {
+          start_millis = millis();
+          SerialUSB.print("enter new Kvff = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(250);
+
+            if (SerialUSB.available()) {
+              float temp_Kvff = SerialUSB.parseFloat();
+              SerialUSB.println(temp_Kvff);
+
+              int_Kvff = 1000 * temp_Kvff;
+              return;
+            }
+          }
+        }
+        break;
+      case 'f': {
+          start_millis = millis();
+          SerialUSB.print("enter new Kfr = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(250);
+
+            if (SerialUSB.available()) {
+              float temp_Kfr = SerialUSB.parseFloat();
+              SerialUSB.println(temp_Kfr);
+
+              int_Kfr = 1000 * temp_Kfr;
+              return;
+            }
+          }
         }
         break;
     }
-  }
-  if (!received_2) {
-    SerialUSB.println("timed out!");
-    return;
   }
 
   parameterQuery();

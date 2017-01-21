@@ -65,12 +65,11 @@
 
 
 //---- friction compensation ----
-#define Kfr 111.81900
+#define Kfr 115.63400
 
 
 //---- velocity feedforward----
 #define Kvff 10.00000
-
 
 
 

@@ -4,7 +4,6 @@
 
 //----current settings-----
 extern const int uMAX;    // max voltage for the vref pins
-extern int ITerm_max;
 extern const int phase_multiplier;
 
 

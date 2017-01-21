@@ -15,8 +15,6 @@ extern volatile bool response;    // flag for step response
 
 extern volatile bool frequency_test;       // flag for frequency test
 
-extern volatile bool anticogging; 
-
 extern const int pLPFa;
 extern const int pLPFb;
 
