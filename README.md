@@ -13,6 +13,10 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - changed the PWM resolution from 8 bit to 10 bit
 - Processing script to display the step resonse
 - PID autotuning
+- Regressive Auto Spline (RAS)
+- feedforward term 
+- friction compensation term 
+- moment of inertia compensation term
 
 
 License
