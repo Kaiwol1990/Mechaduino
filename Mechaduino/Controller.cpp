@@ -44,7 +44,8 @@ void TC5_Handler() {
 
     r = (RASa * r_1 + RASb * target_raw) / 1000;
 
-    omega_target =  (target_raw - target_raw_1); //target angular velocity
+    omega_target = (target_raw - target_raw_1); //target angular velocity
+    //omega_target = (r - r_1); //target angular velocity
 
     omega_dot_target =  (omega_target - omega_target_1); //target angular acceleration
 
@@ -83,6 +84,7 @@ void TC5_Handler() {
       if (abs(omega_target) > 0) {
         u = u + (omega_target / abs(omega_target)) * int_Kfr;
       }
+
 
       u = u / 1000;
 
@@ -125,6 +127,18 @@ void TC5_Handler() {
     r_1 = r;
     target_raw_1 = target_raw; //letztes target
     omega_target_1 = omega_target;
+
+    /*
+        print_counter += 1;
+
+        // print target and current angle every fifth loop
+        if (print_counter >= 4) {
+
+          SerialUSB.println(omega_target);
+          print_counter = 0;
+        }
+
+    */
 
     // step respone active
     if (response) {
