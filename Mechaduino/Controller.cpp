@@ -44,8 +44,8 @@ void TC5_Handler() {
 
     r = (RASa * r_1 + RASb * target_raw) / 1000;
 
-    omega_target = (target_raw - target_raw_1); //target angular velocity
-    //omega_target = (r - r_1); //target angular velocity
+    //omega_target = (target_raw - target_raw_1); //target angular velocity
+    omega_target = (r - r_1); //target angular velocity
 
     omega_dot_target =  (omega_target - omega_target_1); //target angular acceleration
 
@@ -57,7 +57,7 @@ void TC5_Handler() {
 
     if (enabled) {
 
-      e_0 = r - y;
+      e_0 = (r - y);
 
       ITerm = ITerm + (int_Ki * e_0);
 
@@ -81,7 +81,7 @@ void TC5_Handler() {
 
 
       // friction compensation
-      if (abs(omega_target) > 0) {
+      if (abs(omega_target) > 1) {
         u = u + (omega_target / abs(omega_target)) * int_Kfr;
       }
 
