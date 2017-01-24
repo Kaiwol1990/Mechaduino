@@ -82,7 +82,9 @@ void TC5_Handler() {
 
       // friction compensation
       if (abs(omega_target) > 1) {
-        u = u + (omega_target / abs(omega_target)) * int_Kfr;
+        //u = u + (omega_target / abs(omega_target)) * int_Kfr;
+        u = u + sign(omega_target) * int_Kfr;
+
       }
 
 
@@ -99,6 +101,7 @@ void TC5_Handler() {
       ITerm = 0;
     }
 
+    int phase_advanced = (PA / 2) + abs(omega_target) * 3;
 
 
     if (u > 0) {
@@ -107,7 +110,8 @@ void TC5_Handler() {
         u = uMAX;
       }
 
-      output(-(raw_0 + PA), abs(u));
+      //output(-(raw_0 + PA), abs(u));
+      output(-(raw_0 + phase_advanced), abs(u));
     }
     else {
 
@@ -115,8 +119,10 @@ void TC5_Handler() {
         u = -uMAX;
       }
 
-      output(-(raw_0 - PA), abs(u));
+      //output(-(raw_0 - PA), abs(u));
+      output(-(raw_0 - phase_advanced), abs(u));
     }
+
 
     raw_1 = raw_0;
     e_1 = e_0;

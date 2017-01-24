@@ -423,7 +423,7 @@ void step_response(String arg) {
         SerialUSB.println("...");
       }
       int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
-      int big_time_step = 2 * small_time_step;
+      int big_time_step = (2.5 * small_time_step);
 
       // set setp response flag to true to start the output
       response = true;

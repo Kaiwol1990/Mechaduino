@@ -875,3 +875,8 @@ bool timed_out(unsigned long now, int time_out) {
 
 }
 
+
+int sign(int input) {
+  return (input / abs(input));
+}
+

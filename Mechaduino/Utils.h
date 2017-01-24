@@ -33,5 +33,7 @@ bool canceled();
 
 bool timed_out(unsigned long now, int time_out);
 
+extern int sign(int input);
+
 #endif
 
