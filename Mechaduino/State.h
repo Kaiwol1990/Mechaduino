@@ -4,8 +4,8 @@
 #define __STATE_H__
 
 //---- interrupt vars ----
-extern volatile int r;            //target angle
-extern volatile int y;           //current angle
+extern volatile long long r;            //target angle
+extern volatile long long y;           //current angle
 
 extern volatile int u;            // control effort
 
@@ -14,18 +14,6 @@ extern volatile bool enabled;     // flag for  enabled setting
 extern volatile bool response;    // flag for step response
 
 extern volatile bool frequency_test;       // flag for frequency test
-
-extern const int pLPFa;
-extern const int pLPFb;
-
-extern const int positionLPFa;
-extern const int positionLPFb;
-
-extern const int uLPFa;
-extern const int uLPFb;
-
-extern const int RASa;
-extern const int RASb;
 
 //---- PID Gains ----
 extern volatile int int_Kp;

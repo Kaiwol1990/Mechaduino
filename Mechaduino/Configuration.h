@@ -59,17 +59,17 @@
 //---------------------------------------------------------------------------------------------------------------
 
 //---- PID Values -----
-#define Kp 1.29700
-#define Ki 0.03600
-#define Kd 11.59400
+#define Kp 1.22900
+#define Ki 0.03300
+#define Kd 11.30900
 
 
 //---- friction compensation ----
-#define Kfr 115.63400
+#define Kfr 55.72400
 
 
 //---- velocity feedforward----
-#define Kvff 10.00000
+#define Kvff 15.00000
 
 
 
@@ -89,7 +89,7 @@
 
 
 //---- break frequency in hertz for the effort----
-#define uLPF 800
+#define uLPF 380
 
 
 //---- break frequency in hertz for position----

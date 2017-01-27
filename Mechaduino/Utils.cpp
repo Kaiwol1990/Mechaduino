@@ -167,7 +167,7 @@ void calibration() {
 
 
   for (int x = 0; x < steps_per_revolution; x++) {
-    fullStepReadings[x] = ((readings[0][x] + readings[1][x] + readings[2][x]) / 3) + 0.5;
+    fullStepReadings[x] = ((readings[0][x] + readings[1][x] + readings[2][x]) / 3.0) + 0.5;
   }
 
   SerialUSB.println();
@@ -427,7 +427,7 @@ void antiCoggingCal() {
   }
   SerialUSB.println("");
 
-  int_Kfr = 1000 * (u_cogging / max_count);
+  int_Kfr = 1000 * ((u_cogging / 2) / max_count);
 
   enabled = last_enabled;
 
@@ -873,5 +873,10 @@ bool timed_out(unsigned long now, int time_out) {
     return false;
   }
 
+}
+
+
+int sign(int input) {
+  return (input / abs(input));
 }
 

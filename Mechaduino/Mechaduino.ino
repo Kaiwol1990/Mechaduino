@@ -44,6 +44,8 @@ void setup() {
 
   SerialUSB.begin(baudrate);
 
+  delay(500);
+
   setupPins();
   setupSPI();
   setupTCInterrupts();
@@ -74,7 +76,7 @@ void setup() {
     i++;
   }
 
-  step_target = ((y + 5) / stepangle);
+  step_target = ((y) / stepangle);
 
 #ifdef USE_ENABLE_PIN
   enaInterrupt();
@@ -83,6 +85,8 @@ void setup() {
 #endif
 
   dirInterrupt();
+
+  delay(100);
 
   enableTC5Interrupts(); // get the filter going and ge samples for 1 second
 

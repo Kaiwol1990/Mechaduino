@@ -243,7 +243,10 @@ void parameterEdit(String arg) {
   SerialUSB.print("f ----- Kfr = ");
   SerialUSB.println(int_Kfr / 1000.0);
 
+  SerialUSB.read();
+
   while (1) {
+    delay(10);
 
     if (timed_out(start_millis, time_out)) return;
 
@@ -251,16 +254,16 @@ void parameterEdit(String arg) {
 
     char inChar2 = (char)SerialUSB.read();
 
-    SerialUSB.read();
 
     switch (inChar2) {
       case 'p': {
+          SerialUSB.read();
           start_millis = millis();
           SerialUSB.print("enter new Kp = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
-            delay(250);
+            delay(10);
 
             if (SerialUSB.available()) {
               float temp_Kp = SerialUSB.parseFloat();
@@ -274,12 +277,13 @@ void parameterEdit(String arg) {
         }
         break;
       case 'i': {
+          SerialUSB.read();
           start_millis = millis();
           SerialUSB.print("enter new Ki = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
-            delay(250);
+            delay(10);
 
             if (SerialUSB.available()) {
               float temp_Ki = SerialUSB.parseFloat();
@@ -292,12 +296,13 @@ void parameterEdit(String arg) {
         }
         break;
       case 'd': {
+          SerialUSB.read();
           start_millis = millis();
           SerialUSB.print("enter new Kd = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
-            delay(250);
+            delay(10);
 
             if (SerialUSB.available()) {
               float temp_Kd = SerialUSB.parseFloat();
@@ -310,12 +315,13 @@ void parameterEdit(String arg) {
         }
         break;
       case 'v': {
+          SerialUSB.read();
           start_millis = millis();
           SerialUSB.print("enter new Kvff = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
-            delay(250);
+            delay(10);
 
             if (SerialUSB.available()) {
               float temp_Kvff = SerialUSB.parseFloat();
@@ -328,12 +334,13 @@ void parameterEdit(String arg) {
         }
         break;
       case 'f': {
+          SerialUSB.read();
           start_millis = millis();
           SerialUSB.print("enter new Kfr = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
-            delay(250);
+            delay(10);
 
             if (SerialUSB.available()) {
               float temp_Kfr = SerialUSB.parseFloat();
@@ -416,7 +423,7 @@ void step_response(String arg) {
         SerialUSB.println("...");
       }
       int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
-      int big_time_step = 2 * small_time_step;
+      int big_time_step = (2.5 * small_time_step);
 
       // set setp response flag to true to start the output
       response = true;
