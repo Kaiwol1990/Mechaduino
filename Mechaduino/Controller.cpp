@@ -37,11 +37,11 @@ void TC5_Handler() {
 
   int e_0;               // current error term
   static int e_1;               // last error term
-  static int y_1;
-  static int r_1;
+  static long long y_1;
+  static long long r_1;
 
-  int target_raw;
-  static int target_raw_1;
+  long long target_raw;
+  static long long target_raw_1;
   int omega;
   int omega_target;
   static int omega_target_1;
