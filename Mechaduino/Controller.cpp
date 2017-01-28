@@ -92,7 +92,7 @@ void TC5_Handler() {
       }
 
 
-      u = u / 100;
+      u = u / 1000;
 
       u = (uLPFa * u_1 + uLPFb * u) / 100;
 
