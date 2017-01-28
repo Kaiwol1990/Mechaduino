@@ -13,14 +13,14 @@
 #include "lookup_table.h"
 
 
-const int uLPFa = ((1000 * exp(uLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int uLPFb = ((1000 - uLPFa) + 0.5);
+const int uLPFa = ((100 * exp(uLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int uLPFb = ((100 - uLPFa) + 0.5);
 
-const int RASa = ((1000 * exp((1000 / RAS) * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int RASb = ((1000 - RASa) + 0.5);
+const int RASa = ((100 * exp((1000 / RAS) * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int RASb = ((100 - RASa) + 0.5);
 
-const int pLPFa = ((1000 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int pLPFb = ((1000 - pLPFa) + 0.5);
+const int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int pLPFb = ((100 - pLPFa) + 0.5);
 
 
 
@@ -37,11 +37,11 @@ void TC5_Handler() {
 
   int e_0;               // current error term
   static int e_1;               // last error term
-  static long long y_1;
-  static long long r_1;
+  static long y_1;
+  static long r_1;
 
-  long long target_raw;
-  static long long target_raw_1;
+  long target_raw;
+  static long target_raw_1;
   int omega;
   int omega_target;
   static int omega_target_1;
@@ -53,7 +53,7 @@ void TC5_Handler() {
 
     target_raw = (step_target * stepangle) / 100;
 
-    r = (RASa * r_1 + RASb * target_raw) / 1000;
+    r = (RASa * r_1 + RASb * target_raw) / 100;
 
     omega_target = (r - r_1); //target angular velocity
 
@@ -79,7 +79,7 @@ void TC5_Handler() {
       }
 
 
-      DTerm = (pLPFa * DTerm + (pLPFb * int_Kd * (e_0 - e_1))) / 1000;
+      DTerm = (pLPFa * DTerm + (pLPFb * int_Kd * (e_0 - e_1))) / 100;
 
 
       // PID loop                          +    feedforward term                 +    moment of inertia
@@ -92,9 +92,9 @@ void TC5_Handler() {
       }
 
 
-      u = u / 1000;
+      u = u / 100;
 
-      u = (uLPFa * u_1 + uLPFb * u) / 1000;
+      u = (uLPFa * u_1 + uLPFb * u) / 100;
 
 
     }

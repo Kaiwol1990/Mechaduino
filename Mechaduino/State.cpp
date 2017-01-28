@@ -6,8 +6,8 @@
 
 
 //---- interrupt vars ----
-volatile long long r = 0;                //target angle
-volatile long long y = 0;                //current angle
+volatile long r = 0;                //target angle
+volatile long y = 0;                //current angle
 
 volatile int u = 0;                 // control effort
 

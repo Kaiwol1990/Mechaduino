@@ -4,8 +4,8 @@
 #define __STATE_H__
 
 //---- interrupt vars ----
-extern volatile long long r;            //target angle
-extern volatile long long y;           //current angle
+extern volatile long r;            //target angle
+extern volatile long y;           //current angle
 
 extern volatile int u;            // control effort
 
