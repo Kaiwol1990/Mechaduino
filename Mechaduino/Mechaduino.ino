@@ -46,6 +46,7 @@ void setup() {
 
   delay(500);
 
+
   setupPins();
   setupSPI();
   setupTCInterrupts();

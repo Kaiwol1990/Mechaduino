@@ -9,7 +9,7 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - deleted all modes other then position 
 - changed all float to integer operations
 - added some filtering to the coil current setting
-- changed the frequency of the PID loop to 15-20 kHz
+- changed the frequency of the PID loop to 10 kHz
 - changed the PWM resolution from 8 bit to 10 bit
 - Processing script to display the step resonse
 - PID autotuning

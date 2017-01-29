@@ -150,7 +150,9 @@ void calibration() {
 
 
   for (int x = 0; x < steps_per_revolution; x++) {
+
     fullStepReadings[x] = (((readings[0][x] + readings[1][x] + readings[2][x]) / 3.0) + 0.5);
+
   }
 
   SerialUSB.println();

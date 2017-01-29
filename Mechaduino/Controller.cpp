@@ -88,7 +88,10 @@ void TC5_Handler() {
 
       // friction compensation
       if (abs(omega_target) > 1) {
+
         u = u + sign(omega_target) * int_Kfr;
+
+
       }
 
 

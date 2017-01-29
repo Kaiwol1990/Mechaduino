@@ -53,7 +53,7 @@ int readAngle(int last_angle, int last_raw) {
     temp_angle = last_angle  + raw_diff;
   }
 
-
   return ((last_angle * positionLPFa) + (temp_angle  * positionLPFb)) / 100;
+
 
 }
