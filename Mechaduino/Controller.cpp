@@ -13,6 +13,17 @@
 #include "lookup_table.h"
 
 
+const int uLPFa = ((100 * exp(uLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int uLPFb = ((100 - uLPFa) + 0.5);
+
+const int RASa = ((100 * exp((1000 / RAS) * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int RASb = ((100 - RASa) + 0.5);
+
+const int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int pLPFb = ((100 - pLPFa) + 0.5);
+
+
+
 void TC5_Handler() {
   // gets called with PID frequency
   static int ITerm;
@@ -26,11 +37,11 @@ void TC5_Handler() {
 
   int e_0;               // current error term
   static int e_1;               // last error term
-  static int y_1;
-  static int r_1;
+  static long y_1;
+  static long r_1;
 
-  int target_raw;
-  static int target_raw_1;
+  long target_raw;
+  static long target_raw_1;
   int omega;
   int omega_target;
   static int omega_target_1;
@@ -42,9 +53,8 @@ void TC5_Handler() {
 
     target_raw = (step_target * stepangle) / 100;
 
-    r = (RASa * r_1 + RASb * target_raw) / 1000;
+    r = (RASa * r_1 + RASb * target_raw) / 100;
 
-    //omega_target = (target_raw - target_raw_1); //target angular velocity
     omega_target = (r - r_1); //target angular velocity
 
     omega_dot_target =  (omega_target - omega_target_1); //target angular acceleration
@@ -69,11 +79,7 @@ void TC5_Handler() {
       }
 
 
-#if defined(use_PIV)
-      DTerm = (pLPFa * DTerm - (pLPFb * int_Kd * omega)) / 1000;
-#elif defined(use_PID)
-      DTerm = (pLPFa * DTerm + (pLPFb * int_Kd * (e_0 - e_1))) / 1000;
-#endif
+      DTerm = (pLPFa * DTerm + (pLPFb * int_Kd * (e_0 - e_1))) / 100;
 
 
       // PID loop                          +    feedforward term                 +    moment of inertia
@@ -82,15 +88,16 @@ void TC5_Handler() {
 
       // friction compensation
       if (abs(omega_target) > 1) {
-        //u = u + (omega_target / abs(omega_target)) * int_Kfr;
+
         u = u + sign(omega_target) * int_Kfr;
+
 
       }
 
 
       u = u / 1000;
 
-      u = (uLPFa * u_1 + uLPFb * u) / 1000;
+      u = (uLPFa * u_1 + uLPFb * u) / 100;
 
 
     }
@@ -153,7 +160,7 @@ void TC5_Handler() {
       // print target and current angle every fifth loop
       if (print_counter >= 4) {
 
-        SerialUSB.println(y); // print current position
+        SerialUSB.println((int)y); // print current position
 
         print_counter = 0;
       }

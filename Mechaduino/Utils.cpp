@@ -87,7 +87,6 @@ void calibration() {
 
   encoderReading = readEncoder();
 
-
   dir = true;
 
   oneStep();
@@ -126,7 +125,7 @@ void calibration() {
       if (canceled()) return;
       counter += 1;
 
-      delay(50);
+      delay(100);
 
       encoderReading = 0;
 
@@ -135,7 +134,7 @@ void calibration() {
         delayMicroseconds(100);
       }
 
-      readings[k][x] =  encoderReading / avg;
+      readings[k][x] =  (encoderReading / avg);
 
       if (counter == count) {
         counter = 0;
@@ -145,29 +144,15 @@ void calibration() {
     }
   }
 
-  dir = false;
-
-  counter = 0;
-  SerialUSB.println();
-  SerialUSB.println();
-  SerialUSB.println("going back to zero point");
-  SerialUSB.println(procent_bar);
-
-  for (int x = 3 * steps_per_revolution; x > 0; x--) {
-    counter += 1;
-    if (counter == count) {
-      counter = 0;
-      SerialUSB.print(".");
-    }
-    delay(2);
-    oneStep();
-  }
+  step_target = 0;
 
   output(0, 0);
 
 
   for (int x = 0; x < steps_per_revolution; x++) {
-    fullStepReadings[x] = ((readings[0][x] + readings[1][x] + readings[2][x]) / 3.0) + 0.5;
+
+    fullStepReadings[x] = (((readings[0][x] + readings[1][x] + readings[2][x]) / 3.0) + 0.5);
+
   }
 
   SerialUSB.println();
@@ -179,7 +164,6 @@ void calibration() {
 
   // step every fullstep again an check error
   dir = true;
-
   int max_error = 0;
   int error = 0;
 
@@ -214,6 +198,19 @@ void calibration() {
   SerialUSB.println("should be lower than 0.5%");
   SerialUSB.println();
 
+  SerialUSB.println();
+  
+  SerialUSB.println("//Fullstep measurements : ");
+  SerialUSB.print("//Fullstep[] = {");
+
+
+  for (int x = 0; x < steps_per_revolution; x++) {
+    SerialUSB.print(fullStepReadings[x]);
+    SerialUSB.print(", ");
+  }
+  SerialUSB.println();
+  SerialUSB.println("};");
+  
 
   // interpolate between the fullsteps
   for (int i = 0; i < steps_per_revolution; i++) {
@@ -315,6 +312,7 @@ void calibration() {
   }
   SerialUSB.println();
   SerialUSB.println("};");
+
 
   enableTC5Interrupts();
 }
