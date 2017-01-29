@@ -214,114 +214,114 @@ void calibration() {
   SerialUSB.println("should be lower than 0.5%");
   SerialUSB.println();
 
-
-  for (int x = 0; x < steps_per_revolution; x++) {
+  /*
+    for (int x = 0; x < steps_per_revolution; x++) {
     SerialUSB.println(fullStepReadings[x]);
+    }
+  */
+
+
+  // interpolate between the fullsteps
+  for (int i = 0; i < steps_per_revolution; i++) {
+    ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
+    if (ticks < -15000) {
+      ticks += counts_per_revolution;
+    }
+    else if (ticks > 15000) {
+      ticks -= counts_per_revolution;
+    }
+
+    if (ticks > 1) {
+      for (int j = 0; j < ticks; j++) {
+        stepNo = (mod(fullStepReadings[i] + j, counts_per_revolution));
+        if (stepNo == 0) {
+          iStart = i;
+          jStart = j;
+        }
+      }
+    }
+
+    if (ticks < 1) {
+      for (int j = -ticks; j > 0; j--) {
+        stepNo = (mod(fullStepReadings[steps_per_revolution - 1 - i] + j, counts_per_revolution));
+        if (stepNo == 0) {
+          iStart = i;
+          jStart = j;
+        }
+
+      }
+    }
   }
 
-  /*
 
-    // interpolate between the fullsteps
-    for (int i = 0; i < steps_per_revolution; i++) {
-      ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
-      if (ticks < -15000) {
-        ticks += counts_per_revolution;
-      }
-      else if (ticks > 15000) {
-        ticks -= counts_per_revolution;
+  SerialUSB.print("const PROGMEM int lookup[] = {");
+
+  for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
+    ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
+
+    if (ticks < -15000) {
+      ticks += counts_per_revolution;
+
+    }
+    else if (ticks > 15000) {
+      ticks -= counts_per_revolution;
+    }
+
+    if (ticks > 1) {
+
+      if (i == iStart) {
+        for (int j = jStart; j < ticks; j++) {
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
+          SerialUSB.print(" , ");
+        }
       }
 
-      if (ticks > 1) {
+      else if (i == (iStart + steps_per_revolution)) {
+        for (int j = 0; j < jStart; j++) {
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
+          SerialUSB.print(" , ");
+        }
+      }
+      else {
         for (int j = 0; j < ticks; j++) {
-          stepNo = (mod(fullStepReadings[i] + j, counts_per_revolution));
-          if (stepNo == 0) {
-            iStart = i;
-            jStart = j;
-          }
+          lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
+          SerialUSB.print(" , ");
         }
       }
 
-      if (ticks < 1) {
-        for (int j = -ticks; j > 0; j--) {
-          stepNo = (mod(fullStepReadings[steps_per_revolution - 1 - i] + j, counts_per_revolution));
-          if (stepNo == 0) {
-            iStart = i;
-            jStart = j;
-          }
-
-        }
-      }
     }
 
-
-    SerialUSB.print("const PROGMEM int lookup[] = {");
-
-    for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
-      ticks = fullStepReadings[mod((i + 1), steps_per_revolution)] - fullStepReadings[mod((i), steps_per_revolution)];
-
-      if (ticks < -15000) {
-        ticks += counts_per_revolution;
-
+    else if (ticks < 1) {
+      if (i == iStart) {
+        for (int j = - ticks; j > (jStart); j--) {
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
+          SerialUSB.print(" , ");
+        }
       }
-      else if (ticks > 15000) {
-        ticks -= counts_per_revolution;
+      else if (i == iStart + steps_per_revolution) {
+        for (int j = jStart; j > 0; j--) {
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
+          SerialUSB.print(" , ");
+        }
       }
-
-      if (ticks > 1) {
-
-        if (i == iStart) {
-          for (int j = jStart; j < ticks; j++) {
-            lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-            SerialUSB.print(lookupAngle, 0);
-            SerialUSB.print(" , ");
-          }
+      else {
+        for (int j = - ticks; j > 0; j--) {
+          lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
+          SerialUSB.print(lookupAngle, 0);
+          SerialUSB.print(" , ");
         }
-
-        else if (i == (iStart + steps_per_revolution)) {
-          for (int j = 0; j < jStart; j++) {
-            lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-            SerialUSB.print(lookupAngle, 0);
-            SerialUSB.print(" , ");
-          }
-        }
-        else {
-          for (int j = 0; j < ticks; j++) {
-            lookupAngle = 0.1 * mod(1000 * ((angle_per_step * i) + ((angle_per_step * j ) / float(ticks))), 360000.0);
-            SerialUSB.print(lookupAngle, 0);
-            SerialUSB.print(" , ");
-          }
-        }
-
       }
 
-      else if (ticks < 1) {
-        if (i == iStart) {
-          for (int j = - ticks; j > (jStart); j--) {
-            lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-            SerialUSB.print(lookupAngle, 0);
-            SerialUSB.print(" , ");
-          }
-        }
-        else if (i == iStart + steps_per_revolution) {
-          for (int j = jStart; j > 0; j--) {
-            lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-            SerialUSB.print(lookupAngle, 0);
-            SerialUSB.print(" , ");
-          }
-        }
-        else {
-          for (int j = - ticks; j > 0; j--) {
-            lookupAngle = 0.1 * mod(1000 * (angle_per_step * (i) + (angle_per_step * ((ticks + j)) / float(ticks))), 360000.0);
-            SerialUSB.print(lookupAngle, 0);
-            SerialUSB.print(" , ");
-          }
-        }
-
-      }
     }
-    SerialUSB.println();
-    SerialUSB.println("};");
-  */
+  }
+  SerialUSB.println();
+  SerialUSB.println("};");
+
 
   enableTC5Interrupts();
 }
