@@ -31,11 +31,6 @@
 #define error_led_value 0.05      // max error in mm, if the error gets bigger the led turns off
 
 
-//---- PIV or PID
-#define use_PID
-//#define use_PIV
-
-
 //---- motor parameters ----
 // max moment in Nm
 #define M_max 0.59

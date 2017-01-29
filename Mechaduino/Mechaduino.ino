@@ -114,7 +114,7 @@ void loop()
   serialCheck();
 
   //SerialUSB.println((r-y));
-  //SerialUSB.println(u_filtered);
+  //SerialUSB.println(u);
   //SerialUSB.println(y);
   //SerialUSB.println(u);
   //SerialUSB.println(r);
