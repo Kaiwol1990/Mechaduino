@@ -9,7 +9,7 @@
 
 
 
-//---------------------------------------------- Hardware Secition ----------------------------------------------
+//---------------------------------------------- Hardware Section ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
 //----current settings-----
@@ -20,10 +20,6 @@
 #define USE_ENABLE_PIN    //flag for enable pin
 
 
-//---- Invert direction ----
-//#define INVERT          //uncomment this to invert your motor direction
-
-
 //---- Step settings -----
 #define microstepping 16          // microstepping setting for step input
 #define steps_per_revolution 200  // fullsteps for 360 degrees
@@ -31,26 +27,32 @@
 #define error_led_value 0.05      // max error in mm, if the error gets bigger the led turns off
 
 
-//---- motor parameters ----
+//---- mass of the load in grams ----
+// mass of the load in g
+// can be set to 0 if not known
+#define m_load 300
+
+
+//---- Invert direction ----
+//#define INVERT          //uncomment this to invert your motor direction
+
+
+//------------------------------------------------ Motor Section ------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------
 // max moment in Nm
 #define M_max 0.59
 
-// current for max moment in mA
-#define A_max 2000
+// rated current for max moment in mA
+#define I_rated 2000
 
-
-//---- inertia ----
+// rotor inertia
 // rotor inertia in gcm^2
-#define J 82
-
-// mass of the load in grams
-#define mass_load 300 
+#define J_rotor 82
 
 
 
 
-
-//---------------------------------------------- Controller Secition ----------------------------------------------
+//---------------------------------------------- Controller Section ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
 //---- PID Values -----
@@ -68,7 +70,7 @@
 
 
 
-//----------------------------------------------- Signal Secition -----------------------------------------------
+//----------------------------------------------- Signal Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
 //---- Baudrate -----

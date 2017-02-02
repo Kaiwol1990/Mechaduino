@@ -27,19 +27,22 @@ volatile int int_Kfr = Kfr * 1000;
 
 
 // calculated from F = m*a
-// calculating the moment from the Force with M = F * r 
+// calculating the moment from the Force with M = F * r
 // r = mm_rev / (2*Pi)
-// calculating omega_dot from a 
+// calculating omega_dot from a
 // a = omega_dot * mm/rad  --> mm/rad = mm_rev /2
+// or J_load = 1/4 * m_load * D_pulley^4
+// D in cm
+float D_pulley = (mm_rev/(10*3.14159283));
+float J_load = ((m_load * D_pulley * D_pulley)/4.0);
 
-int J_load = (mass_load * mm_rev ^ 2) / (10 * 10 * 4 * 3.14159283);
 
-// calculating the necessary current 
-// u = M / (Nm/mA) 
+// calculating the necessary current
+// u = M / (Nm/mA)
 // u = M * mA_M_max / M_max
 // 10000000 to fit the units
 // 1000 to get a int from the float
-volatile int int_J = 1000 * (((J + J_load) * A_max) / (10000000 * M_max));
+volatile int int_J = 1000 * (((J_rotor + J_load) * I_rated) / (10000000 * M_max));
 
 // variable for the target in steps
 volatile int step_target = 0;      // target as step gets incremented if an step is received
