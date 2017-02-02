@@ -92,7 +92,7 @@
 
 
 //---- RAS constant in ms----
-#define RAS 5
+#define RAS 1
 
 
 
