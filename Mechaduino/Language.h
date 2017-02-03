@@ -166,20 +166,7 @@ const String PROGMEM anticogging_command = "cogging";
 #endif
 
 const String PROGMEM procent_bar = "|---+----+----+----+----+----+----+----+----+----|";
-/*
-const String PROGMEM bootscreen_1   = "###############################################################################################";
-const String PROGMEM bootscreen_2   = "#   __  __   ______    _____   _    _              _____    _    _   _____   _   _    ____    #";
-const String PROGMEM bootscreen_3   = "#  |  \\/  | |  ____|  / ____| | |  | |     /\\     |  __ \\  | |  | | |_   _| | \\ | |  / __ \\   #";
-const String PROGMEM bootscreen_4   = "#  | \\  / | | |__    | |      | |__| |    /  \\    | |  | | | |  | |   | |   |  \\| | | |  | |  #";
-const String PROGMEM bootscreen_5   = "#  | |\\/| | |  __|   | |      |  __  |   / /\\ \\   | |  | | | |  | |   | |   | . ` | | |  | |  #";
-const String PROGMEM bootscreen_6   = "#  | |  | | | |____  | |____  | |  | |  / ____ \\  | |__| | | |__| |  _| |_  | |\\  | | |__| |  #";
-const String PROGMEM bootscreen_7   = "#  |_|  |_| |______|  \\_____| |_|  |_| /_/    \\_\\ |_____/   \\____/  |_____| |_| \\_|  \\____/   #";
-const String PROGMEM bootscreen_8   = "#                                                                                             #";
-const String PROGMEM bootscreen_9   = "#  open-source industrial servo motor                                  written by Kai Wolter  #";
-const String PROGMEM bootscreen_10  = "###############################################################################################";
-const String PROGMEM bootscreen_11  = "   compiling Date - ";
-const String PROGMEM bootscreen_12  = "                                        Firmware-Version: ";
-*/
+
 
 const String PROGMEM bootscreen_1   = "###################################################################################";
 const String PROGMEM bootscreen_2   = "#                                                                                 #";
@@ -190,7 +177,7 @@ const String PROGMEM bootscreen_6   = "#  ##   ##  ##     ##  ##  ##  ##  ##  ##
 const String PROGMEM bootscreen_7   = "#  ##   ##  ######  ####   ##  ##  ##  ##  #####    ####   ######  ##  ##   ####  #";
 const String PROGMEM bootscreen_8   = "#                                                                                 #";
 const String PROGMEM bootscreen_9   = "###################################################################################";
-const String PROGMEM bootscreen_10  = "   open-source industrial servo motor                      written by Kai Wolter   ";
+const String PROGMEM bootscreen_10  = "  open-source industrial servo motor by Tropical Labs       written by Kai Wolter   ";
 
 
 #endif
