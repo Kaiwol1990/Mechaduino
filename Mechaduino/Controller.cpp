@@ -71,6 +71,8 @@ void TC5_Handler() {
 
       ITerm = ITerm + (int_Ki * e_0);
 
+      // vielleicht mal 100 die Grenzen
+
       if (ITerm > 150000) {
         ITerm = 150000;
       }
@@ -83,7 +85,9 @@ void TC5_Handler() {
 
 
       // PID loop                          +    feedforward term                 +    moment of inertia
-      u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
+    //u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
+    //u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target * omega_dot_target) );
+      u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target) );
 
 
       // friction compensation

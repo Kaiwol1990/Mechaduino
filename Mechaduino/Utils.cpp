@@ -108,7 +108,6 @@ void calibration() {
   int count = (3 * steps_per_revolution) / 50;
   dir = true;
 
-  //int readings[steps_per_revolution];
   int readings[3][steps_per_revolution];
   for (int k = 0; k < 3; k++) {
 
@@ -147,7 +146,7 @@ void calibration() {
 
   int perfect[steps_per_revolution];
   for ( int i = 0; i < steps_per_revolution; i++) {
-    perfect[i] = ((i * 4 * 16384) / 200);
+    perfect[i] = ((i * 65536) / 200);
   }
 
   SerialUSB.println();
@@ -155,7 +154,7 @@ void calibration() {
 
 
   // find max value in full step readings and index
-  float minimum = 4 * 16384;
+  float minimum = 65536;
   int idx = 0;
   for ( int i = 0; i < steps_per_revolution; i++) {
     if (fullStepReadings_raw[i] < minimum) {
@@ -183,12 +182,33 @@ void calibration() {
     error_raw[i] =  (float)(perfect[i]) - (float)(fullStepReadings[i]);
   }
 
-  float gausian[31] = {0.000888058511381200, 0.00158610663008152, 0.00272176986137680, 0.00448743986440246, 0.00710843674842711, 0.0108187674516528, 0.0158201169212244, 0.0222264351509086, 0.0300025492494709, 0.0389112087983103, 0.0484863518426015, 0.0580487023003957, 0.0667719013138084, 0.0737943634766382, 0.0783575520685465, 0.0799404796215474, 0.0783575520685465, 0.0737943634766382, 0.0667719013138084, 0.0580487023003957, 0.0484863518426015, 0.0389112087983103, 0.0300025492494709, 0.0222264351509086, 0.0158201169212244, 0.0108187674516528, 0.00710843674842711, 0.00448743986440246, 0.00272176986137680, 0.00158610663008152, 0.000888058511381200};
+  //float gausian[31] = {0.000888058511381200, 0.00158610663008152, 0.00272176986137680, 0.00448743986440246, 0.00710843674842711, 0.0108187674516528, 0.0158201169212244, 0.0222264351509086, 0.0300025492494709, 0.0389112087983103, 0.0484863518426015, 0.0580487023003957, 0.0667719013138084, 0.0737943634766382, 0.0783575520685465, 0.0799404796215474, 0.0783575520685465, 0.0737943634766382, 0.0667719013138084, 0.0580487023003957, 0.0484863518426015, 0.0389112087983103, 0.0300025492494709, 0.0222264351509086, 0.0158201169212244, 0.0108187674516528, 0.00710843674842711, 0.00448743986440246, 0.00272176986137680, 0.00158610663008152, 0.000888058511381200};
+
+
+  float gausian[31];
+  counter = 0;
+  float m;
+  for (int i = -15; i <= 15; i++) {
+    gausian[counter] = exp(-0.5 * ((float)i * (float)i) / (25.0));
+    //gausian[counter] = pow(-0.5 * ((float)i * (float)i) / (25.0), 2.71828182846);
+    m = m + gausian[counter];
+    counter = counter + 1;
+  }
+  for (int i = 0; i < 31; i++) {
+    gausian[i] =  gausian[i] / m;
+  }
+
+  SerialUSB.println();
+  for (int i = 0; i < 31; i++) {
+    SerialUSB.print(gausian[i]);
+    SerialUSB.print(" , ");
+  }
+  SerialUSB.println();
+  SerialUSB.println();
 
 
   // smooth the fullstep readings with a ring buffer
   float error[steps_per_revolution];
-  float m;
   counter = 0;
   for ( int i = 0; i < steps_per_revolution; i++) {
     m = 0;
@@ -290,14 +310,14 @@ void calibration() {
     ticks[i] = x[high] - x[low];
 
     if (ticks[i] < 0) {
-      ticks[i] += (4 * 16384);
+      ticks[i] += 65536;
     }
     else if (ticks[i] > 15000) {
-      ticks[i] -= (4 * 16384);
+      ticks[i] -= 65536;
     }
 
     for (int j = 0; j < ticks[i]; j++) {
-      stepNo = (mod(x[i] + j, 4 * 16384));
+      stepNo = (mod(x[i] + j, 65536));
       if (stepNo == 0) {
         iStart = i;
         jStart = j;
@@ -956,6 +976,7 @@ void boot() {
   delay(1000);
   SerialUSB.print("setup controller:");
 
+  // get the filter going and ge samples for 1 second
   int i = 0;
   int raw_0 = (pgm_read_word_near(lookup + readEncoder()));
   int raw_1 = raw_0;
@@ -996,10 +1017,21 @@ void boot() {
   dirInterrupt();
   SerialUSB.println(" OK");
 
+
+  SerialUSB.print("checking lookup table:");
+  bool error = check_lookup(false);
+  if (error) {
+    SerialUSB.println(" ERROR! The lookup table has some failure! send \" check \" to get further informations!");
+  }
+  else {
+    SerialUSB.println(" OK");
+  }
+
+
   delay(100);
 
   SerialUSB.print("enable controller:");
-  enableTC5Interrupts(); // get the filter going and ge samples for 1 second
+  enableTC5Interrupts();
   SerialUSB.println(" OK");
   SerialUSB.println("");
 
@@ -1014,18 +1046,103 @@ void boot() {
   SerialUSB.println(bootscreen_8);
   SerialUSB.println(bootscreen_9);
   SerialUSB.println(bootscreen_10);
-  
+
   SerialUSB.print("   compiling date: ");
   SerialUSB.println(__DATE__);
-  
+
   SerialUSB.print("   firmware-version: ");
   SerialUSB.println(firmware_version);
-  
+
   SerialUSB.print("   identifier: ");
   SerialUSB.println(identifier);
   SerialUSB.println("");
 
 
   delay(500);
+}
+
+bool check_lookup(bool output) {
+
+  if (output) {
+    SerialUSB.println("//---- checking lookup table ----");
+    SerialUSB.println("");
+  }
+
+  int minimal = 36000;
+  int maximal = 0;
+  int max_dx = 0;
+  int dx = 0;
+
+  int last_temp = pgm_read_word_near(lookup + 16383);
+  // int temp = 0;
+  bool error = false;
+
+
+  for (int i = 0; i < 16384; i++) {
+    int temp = pgm_read_word_near(lookup + i);
+
+    if (temp < minimal) {
+      minimal = temp;
+    }
+    else if (temp > maximal) {
+      maximal = temp;
+    }
+
+    dx = temp - last_temp;
+
+    if (dx < -18000) {
+      dx = dx + 36000;
+    }
+
+    if (dx > max_dx) {
+      max_dx = dx;
+    }
+
+    last_temp = temp;
+  }
+
+  if (minimal > 3) {
+    if (output) {
+      SerialUSB.println("minimal value to high");
+    }
+    error = true;
+  }
+
+  if (minimal < 0) {
+    if (output) {
+      SerialUSB.println("minimal value to low");
+    }
+    error = true;
+  }
+
+  if (maximal > 36000) {
+    if (output) {
+      SerialUSB.println("maximal value to high");
+    }
+    error = true;
+  }
+
+  if (maximal < 35995) {
+    if (output) {
+      SerialUSB.println("maximal value to low");
+    }
+    error = true;
+  }
+
+  if (max_dx > 5) {
+    if (output) {
+      SerialUSB.println("step between elements to high");
+    }
+    error = true;
+  }
+
+  if (max_dx < 1) {
+    if (output) {
+      SerialUSB.println("step between elements to low");
+    }
+    error = true;
+  }
+
+  return error;
 }
 

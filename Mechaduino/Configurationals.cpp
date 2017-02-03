@@ -10,7 +10,7 @@ const int phase_multiplier = ((10 * steps_per_revolution / 4) / 100);
 
 
 //---- Step settings -----
-const int counts_per_revolution = 16384;                              // encoder counts for 360 degrees
+//const int counts_per_revolution = 16384;                              // encoder counts for 360 degrees
 const int stepangle = ((100 * 36000.0 / (steps_per_revolution * microstepping))); // angle of one step as int
 const int PA = ((36000 / steps_per_revolution));                        // angle of one fullstep
 

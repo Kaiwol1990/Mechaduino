@@ -1,40 +1,51 @@
 #ifndef __CONFIGURATION_H__
 #define __CONFIGURATION_H__
 
-//---- Firmwareversion
-#define firmware_version "0.2"
 
-//---- Identifier -----
-#define identifier "Y"   // string to identify the mechaduino with the Serial monitor
+//-------------------------------------------------- Identifier -------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------
+
+// string to identify the mechaduino with the Serial monitor
+#define identifier "Y"
+
 
 
 
 //---------------------------------------------- Hardware Section ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-//----current settings-----
-#define  iMAX 1000 // max current per coil 2000 mA for A4954 driver should be lower (thermal conditions)
+// max current per coil 2000 mA for A4954 driver should be lower (thermal conditions)
+#define  iMAX 1000
 
 
-//---- Enable Pins -----
-#define USE_ENABLE_PIN    //flag for enable pin
+//uncomment this if you want to use a enable pin
+#define USE_ENABLE_PIN
 
 
-//---- Step settings -----
-#define microstepping 16          // microstepping setting for step input
-#define steps_per_revolution 200  // fullsteps for 360 degrees
-#define mm_rev 32                 // mm per revolution
-#define error_led_value 0.05      // max error in mm, if the error gets bigger the led turns off
+// microstepping setting for step input
+#define microstepping 16
 
 
-//---- mass of the load in grams ----
-// mass of the load in g
-// can be set to 0 if not known
+// fullsteps for 360 degrees
+#define steps_per_revolution 200
+
+
+// mm per revolution
+#define mm_rev 32
+
+
+// max error in mm, if the error gets bigger the led turns off
+#define error_led_value 0.05
+
+
+// mass of the load in g, can be set to 0 if not known
 #define m_load 300
 
 
-//---- Invert direction ----
-//#define INVERT          //uncomment this to invert your motor direction
+//uncomment this to invert your motor direction
+//#define INVERT
+
+
 
 
 //------------------------------------------------ Motor Section ------------------------------------------------
@@ -70,31 +81,32 @@
 
 
 
+
 //----------------------------------------------- Signal Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-//---- Baudrate -----
-#define baudrate 250000   // baudrate speed bit/s
+// baudrate speed bit/s
+#define baudrate 250000
 
 
-//---- PID Frequenz -----
-#define FPID 10000  // frequency of the PID loop change only if you know what you're doing
+// frequency of the PID loop change only if you know what you're doing
+#define FPID 10000
 
 
-//---- break frequency in hertz for DTerm----
+// break frequency in hertz for DTerm
 #define pLPF 250
 
 
-//---- break frequency in hertz for the effort----
-#define uLPF 380
+// break frequency in hertz for the effort
+#define uLPF 1000
 
 
-//---- break frequency in hertz for position----
+// break frequency in hertz for position
 #define positionLPF 800
 
 
-//---- RAS constant in ms----
-#define RAS 5
+// RAS constant in ms
+#define RAS 1
 
 
 
@@ -104,5 +116,6 @@
 // 1 = english
 // 2 = german
 #define language 1
+
 
 #endif

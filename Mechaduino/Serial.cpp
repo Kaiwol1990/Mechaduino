@@ -20,7 +20,7 @@ void serialCheck() {
   String Command = "";
   String argument = "";
 
-  if (read_serialcommand(1, &Command, &argument)) {
+  if (read_serialcommand(500, &Command, &argument)) {
     if (Command.indexOf(calibrate_command) == 0 && Command.length() == calibrate_command.length()) {
       calibration();
     }
@@ -70,6 +70,9 @@ void serialCheck() {
     }
     else if (Command.indexOf(anticogging_command) == 0 && Command.length() == anticogging_command.length()) {
       antiCoggingCal();
+    }
+    else if (Command.indexOf(check_lookup_command) == 0 && Command.length() == check_lookup_command.length()) {
+      check_lookup(true);
     }
     else {
       SerialUSB.println("unknown command send 'help'");
@@ -126,6 +129,7 @@ void Serial_menu() {
   SerialUSB.println(autotune_command + " - " + autotune_menu);
   SerialUSB.println(looptime_command + " - " + looptime_menu);
   SerialUSB.println(noise_command + " - " + noise_menu);
+  SerialUSB.println(check_lookup_command + " - " + check_lookup_menu);
 }
 
 
@@ -730,11 +734,10 @@ int measure_setpoint() {
 
 bool read_serialcommand(int timeout, String *command, String *argument) {
   static String Input = "";
-  unsigned long start_millis;
-  start_millis = millis();
+  unsigned long start_time= micros();
   bool ended = false;
 
-  while (ended == false && millis() < start_millis + timeout) {
+  while (ended == false && micros() < start_time + timeout) {
 
     while (SerialUSB.available() > 0) {
       char incomming = SerialUSB.read();

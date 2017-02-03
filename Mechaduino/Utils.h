@@ -37,5 +37,7 @@ extern int sign(int input);
 
 extern void boot();
 
+bool check_lookup(bool output);
+
 #endif
 

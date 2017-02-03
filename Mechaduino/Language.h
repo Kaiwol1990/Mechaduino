@@ -80,6 +80,10 @@ const String PROGMEM noise_command  = "noise";
 const String PROGMEM noise_menu = "measures the noise of the encoder";
 const String PROGMEM noise_header = "//---- Measuring noise ----";
 
+const String PROGMEM check_lookup_command = "check";
+const String PROGMEM check_lookup_menu = "check the lookup table";
+const String PROGMEM check_lookup_header = "//---- checking lookup table ----";
+
 const String PROGMEM anticogging_command = "cogging";
 
 
@@ -159,6 +163,10 @@ const String PROGMEM looptime_header = "//---- Frequenz ---- \n\r Der Motor soll
 const String PROGMEM noise_command  = "noise";
 const String PROGMEM noise_menu = "misst das Rauschen des Sensors";
 const String PROGMEM noise_header = "//---- Rauschen ----";
+
+const String PROGMEM check_lookup_command = "check";
+const String PROGMEM check_lookup_menu = "überprüft die lookup table";
+const String PROGMEM check_lookup_header = "//---- überprüfe lookup table ----";
 
 const String PROGMEM anticogging_command = "cogging";
 
