@@ -1132,24 +1132,6 @@ bool check_lookup(bool output) {
     error = true;
   }
 
-
-  float gausian[31];
-  int counter = 0;
-  float m;
-  for (int i = -15; i <= 15; i++) {
-    gausian[counter] = exp(-0.5 * ((float)i * (float)i) / (25.0));
-    //gausian[counter] = pow(-0.5 * ((float)i * (float)i) / (25.0), 2.71828182846);
-    m = m + gausian[counter];
-    counter = counter + 1;
-  }
-  for (int i = 0; i < 31; i++) {
-    gausian[i] =  gausian[i] / m;
-  }
-
-  if (output && !error) {
-    SerialUSB.println("Looks good!");
-  }
-
   return error;
 }
 
