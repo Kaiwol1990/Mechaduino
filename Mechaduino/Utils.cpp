@@ -1132,6 +1132,20 @@ bool check_lookup(bool output) {
     error = true;
   }
 
+
+  if (output && !error) {
+    SerialUSB.print("delta value: ");
+    SerialUSB.println(max_dx);
+    
+    SerialUSB.print("minimal value: ");
+    SerialUSB.println(minimal);
+    
+    SerialUSB.print("maximal value: ");
+    SerialUSB.println(maximal);
+    
+    SerialUSB.println("Looks good!");
+  }
+
   return error;
 }
 
