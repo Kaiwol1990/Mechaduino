@@ -98,7 +98,7 @@
 
 
 // break frequency in hertz for the effort
-#define uLPF 1000
+#define uLPF 600
 
 
 // break frequency in hertz for position
