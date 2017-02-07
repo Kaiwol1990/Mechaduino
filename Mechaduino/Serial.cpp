@@ -734,7 +734,7 @@ int measure_setpoint() {
 
 bool read_serialcommand(int timeout, String *command, String *argument) {
   static String Input = "";
-  unsigned long start_time= micros();
+  unsigned long start_time = micros();
   bool ended = false;
 
   while (ended == false && micros() < start_time + timeout) {

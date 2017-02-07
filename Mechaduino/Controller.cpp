@@ -65,13 +65,13 @@ void TC5_Handler() {
 
     raw_0 = mod(y, 36000);
 
+    uint8_t omega_target_abs = abs(omega_target);
+
     if (enabled) {
 
       e_0 = (r - y);
 
       ITerm = ITerm + (int_Ki * e_0);
-
-      // vielleicht mal 100 die Grenzen
 
       if (ITerm > 150000) {
         ITerm = 150000;
@@ -85,14 +85,15 @@ void TC5_Handler() {
 
 
       // PID loop                          +    feedforward term                 +    moment of inertia
-    //u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
-    //u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target * omega_dot_target) );
       u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target) );
 
 
       // friction compensation
-      if (abs(omega_target) > 1) {
-        u = u + sign(omega_target) * int_Kfr;
+      if (omega_target > 4) {
+        u = u + int_Kfr;
+      }
+      else if (omega_target < -4) {
+        u = u - int_Kfr;
       }
 
 
@@ -109,17 +110,19 @@ void TC5_Handler() {
       ITerm = 0;
     }
 
-    int phase_advanced = (PA / 2) + abs(omega_target) * 3;
 
+    uint8_t phase_advanced = PA;
+    if (omega_target >= 30) {
+      phase_advanced = PA + omega_target_abs;
+    }
 
-    if (u > 0) {
+    if (u >= 0) {
 
       if (u > uMAX) {
         u = uMAX;
       }
 
-      //output(-(raw_0 + PA), abs(u));
-      output(-(raw_0 + phase_advanced), abs(u));
+      output(-(raw_0 + phase_advanced), u);
     }
     else {
 
@@ -127,8 +130,7 @@ void TC5_Handler() {
         u = -uMAX;
       }
 
-      //output(-(raw_0 - PA), abs(u));
-      output(-(raw_0 - phase_advanced), abs(u));
+      output(-(raw_0 - phase_advanced), -u);
     }
 
 

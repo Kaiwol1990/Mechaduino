@@ -397,9 +397,12 @@ void oneStep() {
   output(raw_0 , uMAX / 2);
 }
 
+
+
 int mod(int xMod, int mMod) {
   return (xMod % mMod + mMod) % mMod;
 }
+
 
 
 void setupTCInterrupts() {
@@ -935,13 +938,12 @@ bool timed_out(unsigned long now, int time_out) {
 
 
 int sign(int input) {
-  if (abs(input) > input) {
+  if (input < 0) {
     return -1;
   }
   else {
     return 1;
   }
-  //return (input / abs(input));
 }
 
 void boot() {
@@ -1136,13 +1138,13 @@ bool check_lookup(bool output) {
   if (output && !error) {
     SerialUSB.print("delta value: ");
     SerialUSB.println(max_dx);
-    
+
     SerialUSB.print("minimal value: ");
     SerialUSB.println(minimal);
-    
+
     SerialUSB.print("maximal value: ");
     SerialUSB.println(maximal);
-    
+
     SerialUSB.println("Looks good!");
   }
 

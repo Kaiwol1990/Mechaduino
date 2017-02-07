@@ -40,14 +40,14 @@
 //////////////////////////////////////
 
 void setup() {
-  
+
   boot();
-  
+
   Serial_menu();
-  
+
   SerialUSB.println();
-  SerialUSB.print(":>"); 
-  
+  SerialUSB.print(":>");
+
 }
 
 
