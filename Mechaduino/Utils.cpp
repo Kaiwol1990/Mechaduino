@@ -966,6 +966,8 @@ void boot() {
 
   delay(1000);
   SerialUSB.print("setup controller:");
+  
+  /*
 
   // get the filter going and ge samples for 1 second
   int i = 0;
@@ -1002,7 +1004,23 @@ void boot() {
   enabled = true;
 #endif
   SerialUSB.println(" OK");
-
+  */
+  
+  SerialUSB.print("enable controller:");
+  enabled = false;
+  enableTC5Interrupts();
+  SerialUSB.println(" OK");
+  
+  delay(500);
+  
+  SerialUSB.print("setup enable pin:");
+#ifdef USE_ENABLE_PIN
+  enaInterrupt();
+#else
+  enabled = true;
+#endif
+  SerialUSB.println(" OK");
+  
 
   SerialUSB.print("setup direction pin:");
   dirInterrupt();
@@ -1018,13 +1036,14 @@ void boot() {
     SerialUSB.println(" OK");
   }
 
-
+/*
   delay(100);
 
   SerialUSB.print("enable controller:");
   enableTC5Interrupts();
   SerialUSB.println(" OK");
   SerialUSB.println("");
+  */
 
 
   SerialUSB.println(bootscreen_1);
