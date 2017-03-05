@@ -28,6 +28,8 @@ void TC5_Handler() {
   // gets called with PID frequency
   static int ITerm;
   static int DTerm;
+  static int pa_ITerm;
+  static int pa_DTerm;
   static int u_1;
 
   int raw_0;            // current measured angle
@@ -48,6 +50,9 @@ void TC5_Handler() {
   int omega_dot_target;
 
   static int print_counter;
+
+
+  //static int  phase_advanced;
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
@@ -111,28 +116,41 @@ void TC5_Handler() {
     }
 
 
-    uint8_t phase_advanced = PA;
-    if (omega_target >= 30) {
-      phase_advanced = PA + omega_target_abs;
+    //int phase_advanced = ( e_0 + (15 * omega_target) / 10);
+
+    pa_ITerm = pa_ITerm + (int_pa_Ki * e_0);
+
+    if (pa_ITerm > 150000) {
+      pa_ITerm = 150000;
+    }
+    else if (pa_ITerm < -150000) {
+      pa_ITerm = -150000;
     }
 
-    if (u >= 0) {
 
-      if (u > uMAX) {
-        u = uMAX;
-      }
+    pa_DTerm = (pLPFa * pa_DTerm + (pLPFb * int_pa_Kd * (e_0 - e_1))) / 100;
 
-      output(-(raw_0 + phase_advanced), u);
+    int phase_advanced = ((e_0 * int_pa_Kp) + pa_ITerm + pa_DTerm) / 1000 + (15 * omega_target) / 10;
+
+    if (phase_advanced >= PA) {
+      phase_advanced = PA;
     }
-    else {
-
-      if (u < -uMAX) {
-        u = -uMAX;
-      }
-
-      output(-(raw_0 - phase_advanced), -u);
+    else if (phase_advanced <= -PA) {
+      phase_advanced = -PA;
     }
 
+    int electric_angle = -(raw_0 + phase_advanced);
+
+
+    if (u > uMAX) {
+      u = uMAX;
+    }
+    else if (u < -uMAX) {
+      u = -uMAX;
+    }
+
+
+    output(electric_angle, abs(u));
 
     raw_1 = raw_0;
     e_1 = e_0;
@@ -144,17 +162,17 @@ void TC5_Handler() {
     target_raw_1 = target_raw; //letztes target
     omega_target_1 = omega_target;
 
-    /*
-        print_counter += 1;
 
-        // print target and current angle every fifth loop
-        if (print_counter >= 4) {
+    print_counter += 1;
+/*
+    // print target and current angle every fifth loop
+    if (print_counter >= 4) {
 
-          SerialUSB.println(omega_target);
-          print_counter = 0;
-        }
+      SerialUSB.println(phase_advanced);
+      print_counter = 0;
+    }
+*/
 
-    */
 
     // step respone active
     if (response) {

@@ -66,19 +66,25 @@
 //---------------------------------------------- Controller Section ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-//---- PID Values -----
-#define Kp 1.22900
-#define Ki 0.03300
-#define Kd 11.30900
+
+//---- PID Values current control -----
+#define Kp 1.39700
+#define Ki 0.05200
+#define Kd 9.44600
+
+
+//---- PID Values phase advanced-----
+#define pa_Kp 0.55400
+#define pa_Ki 0.02100
+#define pa_Kd 3.65700
 
 
 //---- friction compensation ----
-#define Kfr 55.72400
+#define Kfr 49.89400
 
 
 //---- velocity feedforward----
 #define Kvff 15.00000
-
 
 
 
@@ -90,7 +96,7 @@
 
 
 // frequency of the PID loop change only if you know what you're doing
-#define FPID 10000
+#define FPID 8000
 
 
 // break frequency in hertz for DTerm

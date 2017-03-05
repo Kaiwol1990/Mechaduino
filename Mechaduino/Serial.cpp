@@ -44,8 +44,15 @@ void serialCheck() {
     }
     else if (Command.indexOf(autotune_command) == 0 && Command.length() == autotune_command.length()) {
       PID_autotune();
+      while (SerialUSB.available()) {
+        char dump = SerialUSB.read();
+      }
+      PID_autotune_phase();
       antiCoggingCal();
       parameterQuery();
+    }
+    else if (Command.indexOf(autotune_pa_command) == 0 && Command.length() == autotune_pa_command.length()) {
+      PID_autotune_phase();
     }
     else if (Command.indexOf(diagnostics_command) == 0 && Command.length() == diagnostics_command.length()) {
       readEncoderDiagnostics();
@@ -197,7 +204,7 @@ void readangle() {
 
 void parameterQuery() {
 
-  SerialUSB.println("//---- PID Values -----");
+  SerialUSB.println("//---- PID Values current control -----");
   SerialUSB.print("#define Kp ");
   SerialUSB.println(int_Kp / 1000.0, 5);
 
@@ -206,6 +213,19 @@ void parameterQuery() {
 
   SerialUSB.print("#define Kd ");
   SerialUSB.println(int_Kd / 1000.0, 5);
+
+  SerialUSB.println();
+  SerialUSB.println();
+
+  SerialUSB.println("//---- PID Values phase advanced-----");
+  SerialUSB.print("#define pa_Kp ");
+  SerialUSB.println(int_pa_Kp / 1000.0, 5);
+
+  SerialUSB.print("#define pa_Ki ");
+  SerialUSB.println(int_pa_Ki / 1000.0, 5);
+
+  SerialUSB.print("#define pa_Kd ");
+  SerialUSB.println(int_pa_Kd / 1000.0, 5);
 
   SerialUSB.println();
   SerialUSB.println();

@@ -22,6 +22,11 @@ volatile int int_Kvff = Kvff * 1000;
 volatile int int_Kfr = Kfr * 1000;
 
 
+volatile int int_pa_Kp = pa_Kp * 1000;
+volatile int int_pa_Ki = pa_Ki * 1000;
+volatile int int_pa_Kd = pa_Kd * 1000;
+
+
 // calculated from F = m*a
 // calculating the moment from the Force with M = F * r
 // r = mm_rev / (2*Pi)

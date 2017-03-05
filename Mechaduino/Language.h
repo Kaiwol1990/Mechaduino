@@ -68,7 +68,11 @@ const String PROGMEM set_header = "//---- Setpoint ---- \n\r new setpoint = ";
 
 const String PROGMEM autotune_command  = "autotune";
 const String PROGMEM autotune_menu = "PID autotune";
-const String PROGMEM autotune_header = "//---- Autotuning the PID controller --- \n\r Enter number of tuning cycles";
+const String PROGMEM autotune_header = "//---- Autotuning the current PID controller --- \n\r Enter number of tuning cycles";
+
+const String PROGMEM autotune_pa_command  = "autotune_pa";
+const String PROGMEM autotune_pa_menu = "PID autotune phase advanced";
+const String PROGMEM autotune_pa_header = "//---- Autotuning the phase advanced PID controller --- \n\r Enter number of tuning cycles";
 
 
 const String PROGMEM looptime_command  = "loop";
