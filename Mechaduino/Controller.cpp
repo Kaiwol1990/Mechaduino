@@ -49,7 +49,8 @@ void TC5_Handler() {
   static int omega_target_1;
   int omega_dot_target;
 
-  static int print_counter;
+  static byte print_counter;
+  static byte stream_counter;
 
 
   //static int  phase_advanced;
@@ -129,6 +130,7 @@ void TC5_Handler() {
 
 
     pa_DTerm = (pLPFa * pa_DTerm + (pLPFb * int_pa_Kd * (e_0 - e_1))) / 100;
+    //pa_DTerm = int_pa_Kd * (e_0 - e_1);
 
     int phase_advanced = ((e_0 * int_pa_Kp) + pa_ITerm + pa_DTerm) / 1000 + (15 * omega_target) / 10;
 
@@ -162,28 +164,49 @@ void TC5_Handler() {
     target_raw_1 = target_raw; //letztes target
     omega_target_1 = omega_target;
 
+    if (streaming) {
+      stream_counter += 1;
 
-    print_counter += 1;
-/*
-    // print target and current angle every fifth loop
-    if (print_counter >= 4) {
-
-      SerialUSB.println(phase_advanced);
-      print_counter = 0;
+      switch (stream_counter) {
+        case 1:
+          SerialUSB.print(y); // print current position
+          SerialUSB.print(",");
+          break;
+        case 2:
+          SerialUSB.print(target_raw); // print target position
+          SerialUSB.print(",");
+          break;
+        case 3:
+          SerialUSB.print(u); // print effort
+          SerialUSB.print(",");
+          break;
+        case 4:
+          SerialUSB.print(electric_angle); // print electric_angle
+          SerialUSB.println();
+          stream_counter = 0;
+          break;
+      }
     }
-*/
 
 
     // step respone active
     if (response) {
       print_counter += 1;
-
-      // print target and current angle every fifth loop
-      if (print_counter >= 4) {
-
-        SerialUSB.println((int)y); // print current position
-
-        print_counter = 0;
+      
+      switch (print_counter) {
+        case 1:
+          SerialUSB.print(y); // print current position
+          SerialUSB.print(",");
+          break;
+        case 2:
+          SerialUSB.print(r); // print target position
+          SerialUSB.print(",");
+          break;
+        case 3:
+          SerialUSB.print(target_raw); // print target position
+          SerialUSB.println();
+          print_counter = 0;
+          break;
       }
     }
 

@@ -81,6 +81,16 @@ void serialCheck() {
     else if (Command.indexOf(check_lookup_command) == 0 && Command.length() == check_lookup_command.length()) {
       check_lookup(true);
     }
+    else if (Command.indexOf(stream_command) == 0 && Command.length() == stream_command.length()) {
+      response = false;
+      if (streaming) {
+        streaming = false;
+      }
+      else {
+        streaming = true;
+      }
+
+    }
     else {
       SerialUSB.println("unknown command send 'help'");
     }

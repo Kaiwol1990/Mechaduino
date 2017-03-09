@@ -91,6 +91,9 @@ const String PROGMEM check_lookup_header = "//---- checking lookup table ----";
 const String PROGMEM anticogging_command = "cogging";
 
 
+const String PROGMEM stream_command = "stream";
+
+
 #elif (language==2)
 const String PROGMEM cancle_header = "c druecken zum abbrechen";
 
@@ -173,6 +176,8 @@ const String PROGMEM check_lookup_menu = "überprüft die lookup table";
 const String PROGMEM check_lookup_header = "//---- überprüfe lookup table ----";
 
 const String PROGMEM anticogging_command = "cogging";
+
+const String PROGMEM stream_command = "stream";
 
 
 #endif

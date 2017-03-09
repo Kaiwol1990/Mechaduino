@@ -13,6 +13,7 @@ volatile bool dir = true;             // flag for dir setting
 volatile bool enabled = true;         // flag for enabled setting
 volatile bool response = false;       // flag for step response
 volatile bool frequency_test = false; // flag for frequency test
+volatile bool streaming = false;	  // flag for data streaming
 
 volatile int int_Kp = Kp * 1000;
 volatile int int_Ki = Ki * 1000;

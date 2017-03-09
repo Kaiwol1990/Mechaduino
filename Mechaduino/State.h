@@ -14,6 +14,7 @@ extern volatile bool enabled;     // flag for  enabled setting
 extern volatile bool response;    // flag for step response
 
 extern volatile bool frequency_test;       // flag for frequency test
+extern volatile bool streaming;	  		// flag for data streaming
 
 //---- PID Gains ----
 extern volatile int int_Kp;
