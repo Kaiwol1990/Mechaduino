@@ -70,11 +70,6 @@ const String PROGMEM autotune_command  = "autotune";
 const String PROGMEM autotune_menu = "PID autotune";
 const String PROGMEM autotune_header = "//---- Autotuning the current PID controller --- \n\r Enter number of tuning cycles";
 
-const String PROGMEM autotune_pa_command  = "autotune_pa";
-const String PROGMEM autotune_pa_menu = "PID autotune phase advanced";
-const String PROGMEM autotune_pa_header = "//---- Autotuning the phase advanced PID controller --- \n\r Enter number of tuning cycles";
-
-
 const String PROGMEM looptime_command  = "loop";
 const String PROGMEM looptime_menu = "calculates the maximal loopfrequency";
 const String PROGMEM looptime_header = "//---- Calibrating loop time ---- \n\r make sure the motor is moving!";
@@ -91,8 +86,8 @@ const String PROGMEM check_lookup_header = "//---- checking lookup table ----";
 const String PROGMEM anticogging_command = "cogging";
 
 
-const String PROGMEM stream_command = "stream";
-
+const String PROGMEM stream_start_command = "start_stream";
+const String PROGMEM stream_stop_command = "stop_stream";
 
 #elif (language==2)
 const String PROGMEM cancle_header = "c druecken zum abbrechen";
@@ -177,8 +172,8 @@ const String PROGMEM check_lookup_header = "//---- überprüfe lookup table ----
 
 const String PROGMEM anticogging_command = "cogging";
 
-const String PROGMEM stream_command = "stream";
-
+const String PROGMEM stream_start_command = "start_stream";
+const String PROGMEM stream_stop_command = "stop_stream";
 
 #endif
 

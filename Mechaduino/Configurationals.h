@@ -18,5 +18,6 @@ extern const int PA;                    // angle of one fullstepstep
 
 extern const int max_e;                 // max error to turn the led off in mm
 
+extern char step_add;
 
 #endif

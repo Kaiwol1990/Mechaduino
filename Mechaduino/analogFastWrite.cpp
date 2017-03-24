@@ -1,9 +1,9 @@
 #include "Arduino.h"
 #include "wiring_private.h"
 
-static int _readResolution = 10;
-static int _ADCResolution = 10;
-static int _writeResolution = 10;
+static int _readResolution = 9;
+static int _ADCResolution = 9;
+static int _writeResolution = 9;
 
 // Wait for synchronization of registers between the clock domains
 static __inline__ void syncADC() __attribute__((always_inline, unused));
@@ -86,7 +86,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
 
   if ((attr & PIN_ATTR_PWM) == PIN_ATTR_PWM)
   {
-    value = mapResolution(value, _writeResolution, 10);
+    value = mapResolution(value, _writeResolution, 9);
 
     uint32_t tcNum = GetTCNumber(pinDesc.ulPWMChannel);
     uint8_t tcChannel = GetTCChannelNumber(pinDesc.ulPWMChannel);
@@ -157,7 +157,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         TCCx->CC[tcChannel].reg = (uint32_t) value;
         syncTCC(TCCx);
         // Set PER to maximum counter value (resolution : 0x3FF)
-        TCCx->PER.reg = 0x3FF;
+        TCCx->PER.reg = 0X200;//0x3FF;
         syncTCC(TCCx);
         // Enable TCCx
         TCCx->CTRLA.bit.ENABLE = 1;

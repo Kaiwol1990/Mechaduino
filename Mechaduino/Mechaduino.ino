@@ -46,7 +46,7 @@ void setup() {
   Serial_menu();
 
   SerialUSB.println();
-  SerialUSB.print(":>");
+  SerialUSB.println(":>");
 
 }
 
@@ -59,11 +59,6 @@ void setup() {
 void loop()
 {
   serialCheck();
+  Streaming();
 
-  //SerialUSB.println((r-y));
-  //SerialUSB.println(u_filtered);
-  //SerialUSB.println(y);
-  //SerialUSB.println(u);
-  //SerialUSB.println(r);
-  //SerialUSB.println(step_target);
 }
