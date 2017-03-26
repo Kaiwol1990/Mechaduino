@@ -63,9 +63,9 @@ namespace Mechaduino___GUI.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap background_2 {
+        internal static System.Drawing.Bitmap anglePlotBackgroundPicture {
             get {
-                object obj = ResourceManager.GetObject("background_2", resourceCulture);
+                object obj = ResourceManager.GetObject("anglePlotBackgroundPicture", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

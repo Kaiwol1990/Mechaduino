@@ -6,8 +6,8 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Threading;
-
-
+using System.IO;
+using System.Windows.Forms.DataVisualization.Charting;
 
 
 namespace Mechaduino
@@ -22,8 +22,8 @@ namespace Mechaduino
         double[] yValues = new double[500];
         double[] rValues = new double[500];
         double[] eValues = new double[500];
-        
 
+        
         int y = 0;
         int r = 0;
         int e = 0;
@@ -42,9 +42,12 @@ namespace Mechaduino
 
         bool wasOpen = false;
         bool changing_size = false;
+        bool savetoCSV = false;
+        String CSVFileName = "";
 
-        double min = Double.MaxValue;
-        double max = Double.MinValue;
+       
+        
+        
 
 
 
@@ -53,9 +56,7 @@ namespace Mechaduino
             InitializeComponent();
         }
 
-
-   
-
+        
         
 
         private void Form1_Load(object sender, EventArgs e)
@@ -69,6 +70,10 @@ namespace Mechaduino
 
             ((Control)this.tabPlots).Enabled = false;
             ((Control)this.tabParameter).Enabled = false;
+
+
+            saveFileDialog1.Filter = "CSV File|*.csv|Text File|*.txt";
+            saveFileDialog1.Title = "Save as CSV File";
 
             Thread.Sleep(300);
             
@@ -92,6 +97,10 @@ namespace Mechaduino
             anglePlot.ChartAreas[0].AxisY.MajorTickMark.Enabled = false;
             anglePlot.ChartAreas[0].AxisX.MinorTickMark.Enabled = false;
             anglePlot.ChartAreas[0].AxisY.MinorTickMark.Enabled = false;
+            var backImage = new NamedImage("bgImg", Mechaduino___GUI.Properties.Resources.anglePlotBackgroundPicture);
+            anglePlot.Images.Add(backImage);
+            anglePlot.BackImage = "bgImg";
+
 
 
             // current plot
@@ -194,6 +203,11 @@ namespace Mechaduino
                                 }
 
                                 Torque = Math.Abs((Pa * u * 240) / (180 * uMax));
+
+                                if (savetoCSV)
+                                {
+                                    File.AppendAllText(CSVFileName, value);
+                                }
                             }
                             catch{
                             }
@@ -558,21 +572,7 @@ namespace Mechaduino
 
 
         }
-
-        private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
-        {
-            e.Cancel = !((Control)e.TabPage).Enabled;
-
-            if (tabControl1.SelectedIndex == 0)
-            {
-                //Debug.Print("test");
-                //txtReceived.AppendText(" ");
-                //txtReceived.Select(txtReceived.Text.Length - 1, 1);
-                //txtReceived.ScrollToCaret();
-            } 
-
-        }
-
+        
 
 
         private void serial_box_DropDown(object sender, EventArgs e)
@@ -629,7 +629,6 @@ namespace Mechaduino
             if (serialPort1.IsOpen)
             {
                 string cmd = Convert.ToString(((Convert.ToDouble(r) + (angle * 100.0)) / 100.0), System.Globalization.CultureInfo.InvariantCulture);
-                //Debug.Print((r / 100.0) + " " + cmd);
                 serialPort1.Write("set " + cmd + "\n");
             }
 
@@ -650,18 +649,49 @@ namespace Mechaduino
         {
             if (serialPort1.IsOpen)
             {
-                serialPort1.WriteLine("disable \n");
-                Thread.Sleep(50);
-                serialPort1.WriteLine("enable \n");
+                if (enabled==1)
+                {
+                    serialPort1.WriteLine("disable \n");
+                    Thread.Sleep(50);
+                    serialPort1.WriteLine("enable \n");
+                }
             }
 
         }
 
         private void btnGetpoint_Click(object sender, EventArgs e)
         {
-            //string cmd = Convert.ToString(Convert.ToDouble(txtSetpoint.Text), System.Globalization.CultureInfo.InvariantCulture);
             txtSetpoint.Text=Convert.ToString(r/100.0);
 
+        }
+
+        private void btnJump_Click(object sender, EventArgs e)
+        {
+            string cmd = Convert.ToString((Convert.ToDouble(r) + 100*Convert.ToDouble(txtJump.Text))/100.0, System.Globalization.CultureInfo.InvariantCulture);
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.Write("set " + cmd + "\n");
+            }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!savetoCSV)
+            {
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    CSVFileName = saveFileDialog1.FileName;
+                    savetoCSV = true;
+                    Debug.Print(CSVFileName);
+                    File.WriteAllText(CSVFileName, "");
+                    File.AppendAllText(CSVFileName, "streaming,position,target,error,effort,electrical_angle,enabled \n");
+                }
+            }
+            else
+            {
+                checkBox1.Checked = false;
+                savetoCSV = false;
+            }
         }
     }
 
