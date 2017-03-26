@@ -10,12 +10,8 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - changed all float to integer operations
 - added some filtering to the coil current setting
 - changed the frequency of the PID loop to 10 kHz
-- changed the PWM resolution from 8 bit to 10 bit
-- Processing script to display the step resonse
+- changed the PWM resolution from 8 bit to 9 bit
 - PID autotuning
-- Regressive Auto Spline (RAS)
-- feedforward term 
-- friction compensation term 
 - moment of inertia compensation term
 
 
