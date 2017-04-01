@@ -16,7 +16,7 @@
 
 
 void setupSPI() {
-  SPISettings settingsA(10000000, MSBFIRST, SPI_MODE1);             ///400000, MSBFIRST, SPI_MODE1);
+  SPISettings settingsA(10000000, MSBFIRST, SPI_MODE1);
 
   SPI.begin();    //AS5047D SPI uses mode=1 (CPOL=0, CPHA=1)
   delay(1000);
@@ -26,39 +26,42 @@ void setupSPI() {
 
 void stepInterrupt() {
   if (dir) {
-    step_target += 1;
+    step_target += step_add;
   }
   else {
-    step_target -= 1;
+    step_target -= step_add;
   }
 }
 
 
 void dirInterrupt() {
-#if !defined(INVERT)
-  if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
-    dir = false;
+  if (!INVERT) {
+    if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
+      dir = false;
+    }
+    else {
+      dir = true;
+    }
   }
   else {
-    dir = true;
+    if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
+      dir = true;
+    }
+    else {
+      dir = false;
+    }
   }
-#else
-  if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
-    dir = true;
-  }
-  else {
-    dir = false;
-  }
-#endif
 }
 
 
 void enaInterrupt() {
-  if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
-    enabled = false;
-  }
-  else {
-    enabled = true;
+  if (USE_ENABLE_PIN) {
+    if (REG_PORT_IN0 & PORT_PA14) { // check if ena_pin is HIGH
+      enabled = false;
+    }
+    else {
+      enabled = true;
+    }
   }
 }
 
@@ -187,7 +190,6 @@ void calibration() {
   float m;
   for (int i = -15; i <= 15; i++) {
     gausian[counter] = exp(-0.5 * ((float)i * (float)i) / (25.0));
-    //gausian[counter] = pow(-0.5 * ((float)i * (float)i) / (25.0), 2.71828182846);
     m = m + gausian[counter];
     counter = counter + 1;
   }
@@ -380,16 +382,16 @@ void calibration() {
 }
 
 
+
+
+
 void oneStep() {
-  static int steps;
 
   if (dir == 0) {
-    steps += 1;
-    step_target += microstepping;
+    step_target += 512;
   }
   else {
-    steps -= 1;
-    step_target -= microstepping;
+    step_target -= 512;
   }
 
   int target_raw = (step_target * stepangle) / 100;
@@ -399,9 +401,13 @@ void oneStep() {
 
 
 
+
+
 int mod(int xMod, int mMod) {
   return (xMod % mMod + mMod) % mMod;
 }
+
+
 
 
 
@@ -490,14 +496,18 @@ void antiCoggingCal() {
   }
   SerialUSB.println("");
 
-  int_Kfr = 1000 * ((u_cogging / 2) / max_count);
+  //int_Kfr = 1000 * ((u_cogging / 2) / max_count);
 
   enabled = last_enabled;
 
   SerialUSB.println();
   SerialUSB.println();
-
 }
+
+
+
+
+
 
 void PID_autotune() {
 
@@ -518,12 +528,11 @@ void PID_autotune() {
   unsigned long now = millis();
   int k = 1;
 
-  
+
   SerialUSB.println(autotune_header);
-  //SerialUSB.println("//---- Autotuning the PID controller ---");
   SerialUSB.println(cancle_header);
-  //SerialUSB.println("Enter number of tuning cycles!");
   SerialUSB.print("Cycles = ");
+
 
   while (!received) {
     if (canceled()) return;
@@ -636,14 +645,15 @@ void PID_autotune() {
           u = outputStep;
         }
 
+
         if (u > 0) {
-          output(-raw_0 - PA, abs(u));
+          output(-raw_0 - (PA ), abs(u));
         }
         else {
-          output(-raw_0 + PA, abs(u));
+          output(-raw_0 + (PA ), abs(u));
         }
 
-        // wait 1 second to get stable oscilations
+        // wait half a second to get stable oscilations
         if (millis() > start_millis) {
           points[counter] = y;
           counter++;
@@ -652,7 +662,7 @@ void PID_autotune() {
       }
     }
 
-    output(-raw_0 - PA, 0);
+    output(-raw_0, 0);
 
 
     //smoothing the measured data
@@ -738,7 +748,7 @@ void PID_autotune() {
       SerialUSB.println();
       SerialUSB.println("Autotune failed, frequency not in usable range!");
       SerialUSB.println();
-      SerialUSB.print(":> ");
+      SerialUSB.println(":> ");
       return;
     }
 
@@ -856,375 +866,13 @@ void PID_autotune() {
   int_Kp = (((temp_Kp / loops)) + 0.5);
   int_Ki = (((temp_Ki / loops)) + 0.5);
   int_Kd = (((temp_Kd / loops)) + 0.5);
+  Kp = int_Kp/1000.0;
+  Ki = int_Ki/1000.0;
+  Kd = int_Kd/1000.0;
 
 
   enableTC5Interrupts();
 }
-
-
-
-
-
-
-
-
-
-
-void PID_autotune_phase() {
-
-  disableTC5Interrupts();
-
-  int loops = 0;
-  int outputStep = PA;
-  int frequency = 20000;
-  int dt = (1000000 / frequency);
-  int scan_dt = dt - 2;
-
-  float temp_Kp = 0;
-  float temp_Ki = 0;
-  float temp_Kd = 0;
-
-  bool received = false;
-  bool debug = false;
-  unsigned long now = millis();
-  int k = 1;
-  
-  SerialUSB.println(autotune_pa_header);
-  //SerialUSB.println("//---- Autotuning the PID controller ---");
-  SerialUSB.println(cancle_header);
-  //SerialUSB.println("Enter number of tuning cycles!");
-  SerialUSB.print("Cycles = ");
-
-  while (!received) {
-    if (canceled()) return;
-
-    if (timed_out(now, 5000)) return;
-
-    if (SerialUSB.available()) {
-
-      if (SerialUSB.peek() == 'd') {
-        SerialUSB.println("");
-        SerialUSB.println("debug mode!");
-        debug = true;
-      }
-
-      loops = SerialUSB.parseInt();
-
-      SerialUSB.println(loops);
-      SerialUSB.println("");
-
-      received = true;
-    }
-  }
-
-  SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
-
-
-  // start autotune
-  while (k <= loops) {
-
-    SerialUSB.println("|-----------------------------------------------------------------|");
-    SerialUSB.print("|   ");
-    SerialUSB.print(k);
-    if (k >= 10) {
-      SerialUSB.print(" ");
-    }
-    else {
-      SerialUSB.print("  ");
-    }
-
-    delay(200);
-
-    // measure current setpoint
-    int setpoint = measure_setpoint() + 0.5;
-
-    // measure the noise from the controller
-    int noiseBand = (measure_noise(false) / 2) + 0.5;
-
-    SerialUSB.print("|   ");
-    SerialUSB.print(noiseBand);
-    if (noiseBand >= 10) {
-      SerialUSB.print("  ");
-    }
-    else {
-      SerialUSB.print("   ");
-    }
-
-    int raw_0 = mod(y, 36000);
-    int raw_1 = raw_0;
-    int y_1 = y;
-
-    int points[1124] = {0};
-    float smoothed[1124] = {0};
-
-#define filterSamples   5
-    int sensSmoothArray1 [filterSamples];
-
-    int peakType = 0;
-    int peakCount = 0;
-    bool justchanged = false;
-    int absMax = setpoint;
-    int absMin = setpoint;
-
-    unsigned long last_time = 0;
-
-    bool isMax = true;
-    bool isMin = true;
-
-    int counter = 0;
-    unsigned long start_millis = millis() + 500;
-
-    // start the oscilations and measure the behavior every 50 microsseconds
-    while (counter < 1124) {
-
-      // canceling call if something goes wrong
-      if (canceled()) return;
-
-      now = micros();
-      if (now > last_time + scan_dt) {
-
-        y = readAngle(y_1, raw_1);
-        raw_0 = mod(y, 36000);
-
-        last_time = now;
-        y_1 = y;
-        raw_1 = raw_0;
-
-
-        if (y > absMax) {
-          absMax = y;
-        }
-        if (y < absMin) {
-          absMin = y;
-        }
-
-        // oscillate the output base on the input's relation to the setpoint
-        if (y > setpoint + noiseBand) {
-          output(-raw_0 + PA, abs(uMAX));
-        }
-        else if (y < setpoint - noiseBand) {
-          output(-raw_0 - PA, abs(uMAX));
-        }
-
-
-        // wait 1 second to get stable oscilations
-        if (millis() > start_millis) {
-          points[counter] = y;
-          counter++;
-        }
-
-      }
-    }
-
-    output(-raw_0, 0);
-
-
-    //smoothing the measured data
-    for (int i = 0; i <= 1124; i++) {
-      smoothed[i] = digitalSmooth(points[i], sensSmoothArray1);
-    }
-
-
-    for (int i = 0; i < 1024; i++) {
-      points[i] = points[i + 50];
-      smoothed[i] = smoothed[i + 50];
-    }
-
-    // building mean of the position data
-    int sum = 0;
-    for (int i = 0; i < 1024; i++) {
-      sum = sum + smoothed[i];
-    }
-    sum = sum / 1024.0;
-
-    for (int i = 0; i < 1024; i++) {
-      smoothed[i] = smoothed[i] - sum;
-      points[i] = points[i] - sum;
-    }
-
-    if (debug) {
-      for (int i = 0; i < 1024; i++) {
-        SerialUSB.print(points[i]);
-        SerialUSB.print(',');
-        SerialUSB.println(smoothed[i]);
-      }
-    }
-
-    // searching the main frequency
-    int len = 1024;
-    int thresh = 0;
-    int sum_old = 0;
-    char pd_state = 0;
-    int period = 0;
-    int i = 0;
-
-    while (i < len - 1 && pd_state < 3) {
-      sum_old = sum;
-      sum = 0;
-
-      for (int k = 1; k < len - i; k++) {
-        sum = sum + (points[k]) * (points[k + i]);
-      }
-
-      if (pd_state == 2 && (sum - sum_old) <= 0) {
-        period = i;
-        pd_state = 3;
-      }
-
-      if (pd_state == 1 && (sum > thresh) && (sum - sum_old) > 0) {
-        pd_state = 2;
-      }
-
-      if (!i) {
-        thresh = sum * 0.5;
-        pd_state = 1;
-      }
-
-      i = i + 1;
-    }
-
-    float frequency = (1000000.0 / (float)(dt)) / period;
-    double Tu = 1.0 / frequency;
-
-    SerialUSB.print("|   ");
-    SerialUSB.print(frequency, 1);
-    if (frequency >= 100.0) {
-      SerialUSB.print("   ");
-    }
-    else if (frequency >= 1000.0) {
-      SerialUSB.print("  ");
-    }
-    else {
-      SerialUSB.print("    ");
-    }
-
-    if (frequency < 40.0 || frequency > 9950.0) {
-      SerialUSB.println();
-      SerialUSB.println("Autotune failed, frequency not in usable range!");
-      SerialUSB.println();
-      SerialUSB.print(":> ");
-      return;
-    }
-
-    // calculating lookback points
-    int nLookBack = ((1000000 * Tu) / dt) / 4;
-    if (nLookBack >= 99) {
-      nLookBack = 99;
-    }
-    SerialUSB.print("|   ");
-    SerialUSB.print(nLookBack);
-    SerialUSB.print("     ");
-
-
-    // searching the min and max in data
-    int peaks[20] = {0};
-    int lastInputs[101] = {0};
-    int refVal = 0;
-
-    for (int i = 0; i < 1024; i++) {
-      refVal = smoothed[i];
-
-      if (refVal > absMax) {
-        absMax = refVal;
-      }
-      if (refVal < absMin) {
-        absMin = refVal;
-      }
-      isMax = true;
-      isMin = true;
-
-      for (int i = nLookBack - 1; i >= 0; i--) {
-        int val = lastInputs[i];
-
-        if (isMax == 1) {
-          isMax = refVal > val;
-        }
-
-        if (isMin == 1) {
-          isMin = refVal < val;
-        }
-
-        lastInputs[i + 1] = lastInputs[i];
-      }
-      lastInputs[0] = refVal;
-
-      if (isMax) {
-        if (peakType == 0) {
-          peakType = 1;
-        }
-        if (peakType == -1)
-        {
-          peakType = 1;
-          justchanged = true;
-        }
-        peaks[peakCount] = refVal;
-
-      }
-      else if (isMin) {
-
-        if (peakType == 0) {
-          peakType = -1;
-        }
-
-        if (peakType == 1) {
-          peakType = -1;
-          peakCount++;
-          justchanged = true;
-        }
-      }
-    }
-
-
-
-    //Amplitude of the oscilation
-    float A = 0;
-    for (int j = 1; j <= peakCount - 1; j++) {
-      A = A + peaks[j];
-    }
-    A = A / (peakCount - 1);
-
-    // calculating PID settings
-    float Ku = 4 * 2 * outputStep * 1000 / (PI * 2 * A);
-
-    if (k == 1) {
-      temp_Kp = (0.6 * Ku);
-      temp_Ki = ((1.2 * Ku) / (Tu * FPID));
-      temp_Kd = ((0.6 * Ku * Tu * FPID) / 8);
-    }
-    else {
-      temp_Kp = temp_Kp + (0.6 * Ku);
-      temp_Ki = temp_Ki + ((1.2 * Ku) / (Tu * FPID));
-      temp_Kd = temp_Kd + ((0.6 * Ku * Tu * FPID) / 8);
-    }
-
-    SerialUSB.print("| ");
-    SerialUSB.print((0.6 * Ku) / 1000.0, 4);
-    SerialUSB.print(" | ");
-    SerialUSB.print(((1.2 * Ku) / (Tu * FPID)) / 1000.0, 4);
-    SerialUSB.print(" | ");
-    SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8) / 1000.0, 4);
-    SerialUSB.print(" |");
-
-    SerialUSB.println("");
-    delay(500);
-    k++;
-  }
-
-
-  // we are finished
-
-  SerialUSB.println("|-----------------------------------------------------------------|");
-  SerialUSB.println();
-  SerialUSB.println();
-
-  int_pa_Kp = (((temp_Kp / loops)) + 0.5);
-  int_pa_Ki = (((temp_Ki / loops)) + 0.5);
-  int_pa_Kd = (((temp_Kd / loops)) + 0.5);
-
-
-  enableTC5Interrupts();
-}
-
 
 
 
@@ -1271,6 +919,9 @@ int digitalSmooth(int rawIn, int *sensSmoothArray) {    // "int *sensSmoothArray
   return total / k;    // divide by number of samples
 }
 
+
+
+
 bool canceled() {
   if (SerialUSB.peek() == 'c') {
     SerialUSB.read();
@@ -1287,6 +938,8 @@ bool canceled() {
 }
 
 
+
+
 bool timed_out(unsigned long now, int time_out) {
   if (millis() > now + time_out) {
     SerialUSB.println("");
@@ -1300,6 +953,7 @@ bool timed_out(unsigned long now, int time_out) {
 }
 
 
+
 int sign(int input) {
   if (input < 0) {
     return -1;
@@ -1308,6 +962,8 @@ int sign(int input) {
     return 1;
   }
 }
+
+
 
 void boot() {
   SerialUSB.begin(baudrate);
@@ -1329,21 +985,21 @@ void boot() {
 
   delay(1000);
   SerialUSB.print("setup controller:");
-
-
-  SerialUSB.print("enable controller:");
   enabled = false;
   enableTC5Interrupts();
   SerialUSB.println(" OK");
 
-  delay(500);
 
-  SerialUSB.print("setup enable pin:");
-#ifdef USE_ENABLE_PIN
-  enaInterrupt();
-#else
-  enabled = true;
-#endif
+  delay(200);
+  SerialUSB.print("enable controller:");
+
+  if (USE_ENABLE_PIN) {
+    SerialUSB.print("setup enable pin:");
+    enaInterrupt();
+  }
+  else {
+    enabled = true;
+  }
   SerialUSB.println(" OK");
 
 
@@ -1360,15 +1016,6 @@ void boot() {
   else {
     SerialUSB.println(" OK");
   }
-
-  /*
-    delay(100);
-
-    SerialUSB.print("enable controller:");
-    enableTC5Interrupts();
-    SerialUSB.println(" OK");
-    SerialUSB.println("");
-  */
 
 
   SerialUSB.println(bootscreen_1);
@@ -1393,7 +1040,7 @@ void boot() {
   SerialUSB.println("");
 
 
-  delay(500);
+  delay(50);
 }
 
 bool check_lookup(bool output) {

@@ -38,4 +38,6 @@ bool split_command(String *Input_pointer, String *first_substring, String *secon
 
 void Streaming();
 
+void send_param();
+
 #endif

@@ -3,10 +3,11 @@
 #include "lookup_table.h"
 #include "State.h"
 #include "Configuration.h"
+#include "Configurationals.h"
 
 
-const int encoderLPFa = ((100 * exp(encoderLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int encoderLPFb = ((100 - encoderLPFa) + 0.5);
+int encoderLPFa = ((100 * exp(encoderLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int encoderLPFb = ((100 - encoderLPFa) + 0.5);
 
 int readEncoder() {
 

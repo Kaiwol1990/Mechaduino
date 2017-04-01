@@ -27,8 +27,6 @@ void antiCoggingCal();
 
 void PID_autotune();
 
-void PID_autotune_phase();
-
 extern int digitalSmooth(int rawIn, int *sensSmoothArray);
 
 bool canceled();

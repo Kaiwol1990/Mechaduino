@@ -20,10 +20,7 @@
 #endif
 
 
-#if (language!=1) && (language!=2)
-#line 87 "Configuration.h"
-#error "Oops!  No valid language selected"
-#endif
+
 
 #if (m_load == 0)
 #warning "The mass of the load is set to 0 inertia compensation will not work for the load!"

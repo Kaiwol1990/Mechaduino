@@ -1,7 +1,6 @@
 //Contains TC5 Controller definition
 //The main control loop is executed by the TC5 timer interrupt:
 
-//#include <SPI.h>
 #include "State.h"
 #include "Utils.h"
 
@@ -14,10 +13,8 @@
 
 
 
-const int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int pLPFb = ((100 - pLPFa) + 0.5);
-
-const int ITerm_max = uMAX * 1000;
+int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int pLPFb = ((100 - pLPFa) + 0.5);
 
 
 
@@ -102,9 +99,6 @@ void TC5_Handler() {
     }
 
 
-
-
-
     if (u > uMAX) {
       u = uMAX;
     }
@@ -114,6 +108,7 @@ void TC5_Handler() {
 
 
     electric_angle = -(raw_0 + phase_advanced);
+
     output(electric_angle, abs(u));
 
 

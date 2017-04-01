@@ -24,7 +24,7 @@ extern volatile int int_Ki;
 extern volatile int int_Kd;
 
 
-extern const int int_J;
+extern int int_J;
 
 extern volatile int step_target;        // target as step gets incremented if an step is received
 
