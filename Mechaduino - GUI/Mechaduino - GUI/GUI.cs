@@ -23,7 +23,11 @@ namespace Mechaduino
         double[] rValues = new double[500];
         double[] eValues = new double[500];
 
-        
+        double omeaga = 0;
+        double last_y = 0;
+
+
+
         int y = 0;
         int r = 0;
         int e = 0;
@@ -32,7 +36,7 @@ namespace Mechaduino
         int enabled = 0;
 
         int raw =0;
-        const int uMax = 233;
+        int uMax = 233;
         int Pa = 0;
         int Torque = 0;
 
@@ -97,6 +101,7 @@ namespace Mechaduino
             anglePlot.ChartAreas[0].AxisY.MajorTickMark.Enabled = false;
             anglePlot.ChartAreas[0].AxisX.MinorTickMark.Enabled = false;
             anglePlot.ChartAreas[0].AxisY.MinorTickMark.Enabled = false;
+
             var backImage = new NamedImage("bgImg", Mechaduino___GUI.Properties.Resources.anglePlotBackgroundPicture);
             anglePlot.Images.Add(backImage);
             anglePlot.BackImage = "bgImg";
@@ -172,58 +177,55 @@ namespace Mechaduino
                 // ... safe to update GUI in here ...
                 if (!String.IsNullOrEmpty(value))
                 {
-                    String[] substrings = value.Split(',');
+                    String[] substrings = value.Split(';');
 
                     if (substrings.Length == 7)
                     {
                         streaming = Convert.ToInt16(substrings[0]);
 
-                        if (streaming == 1)
+                        //Data Stream is received here
+                        last_y = y;
+                        y = Convert.ToInt32(substrings[1]);
+                        r = Convert.ToInt32(substrings[2]);
+                        e = Convert.ToInt32(substrings[3]);
+                        u = Convert.ToInt32(substrings[4]);
+                        electrical_angle = Math.Abs(Convert.ToInt32(substrings[5]));
+                        enabled = Convert.ToInt16(substrings[6]);
+
+                        raw = mod(y, 36000);
+
+                        Pa = electrical_angle - raw;
+                        if (Pa > 500)
                         {
-                            try
-                            {
-                                //Data Stream is received here
-                                y = Convert.ToInt32(substrings[1]);
-                                r = Convert.ToInt32(substrings[2]);
-                                e = Convert.ToInt32(substrings[3]);
-                                u = Convert.ToInt32(substrings[4]);
-                                electrical_angle = Math.Abs(Convert.ToInt32(substrings[5]));
-                                enabled = Convert.ToInt16(substrings[6]);
-
-                                raw = mod(y, 36000);
-
-                                Pa = electrical_angle - raw;
-                                if (Pa > 500)
-                                {
-                                    Pa = Pa - 36000;
-                                }
-                                else if (Pa < -500)
-                                {
-                                    Pa = Pa + 36000;
-                                }
-
-                                Torque = Math.Abs((Pa * u * 240) / (180 * uMax));
-
-                                if (savetoCSV)
-                                {
-                                    File.AppendAllText(CSVFileName, value);
-                                }
-                            }
-                            catch{
-                            }
-
-                            if (!changing_size)
-                            {
-                                // update line plots
-                                uValues[wrap_pointer] = Convert.ToInt32((u * 1000 * 3.3) / (512 * 10 * 0.15));
-                                yValues[wrap_pointer] = (y / 100.0);
-                                rValues[wrap_pointer] = (r / 100.0);
-                                eValues[wrap_pointer] = (e / 100.0);
-
-                                wrap_pointer += 1;
-                                wrap_pointer = wrap_pointer % (yValues.Length - 1);
-                            }
+                            Pa = Pa - 36000;
                         }
+                        else if (Pa < -500)
+                        {
+                            Pa = Pa + 36000;
+                        }
+
+                        Torque = Math.Abs((Pa * u * 240) / (180 * uMax));
+
+
+                        if (savetoCSV)
+                        {
+                            File.AppendAllText(CSVFileName, value);
+                        }
+
+                        if (!changing_size)
+                        {
+                            // update line plots
+                            uValues[wrap_pointer] = Convert.ToInt32((u * 1000 * 3.3) / (512 * 10 * 0.15));
+                            yValues[wrap_pointer] = (y / 100.0);
+                            rValues[wrap_pointer] = (r / 100.0);
+                            eValues[wrap_pointer] = (e / 100.0);
+
+                            omeaga = Math.Round((((y / 100.0) - (last_y / 100.0)) * 100.0), 3);
+
+                            wrap_pointer += 1;
+                            wrap_pointer = wrap_pointer % (yValues.Length - 1);
+                        }
+
                         else
                         {
                             foreach (var substring in substrings)
@@ -231,6 +233,41 @@ namespace Mechaduino
                                 txtReceived.AppendText(substring + "\n");
                                 txtReceived.ScrollToCaret();
                             }
+                        }
+                    }
+                    else if (substrings.Length == 17)
+                    {
+                        txtIdentifier.Text = substrings[0];
+                        txtFullstep.Text = substrings[1];
+                        txtMicrostep.Text = substrings[2];
+                        txtCurrent.Text = substrings[3];
+                        txtMaxM.Text = substrings[4];
+                        txtMaxI.Text = substrings[5];
+                        uMax = Convert.ToInt32((Convert.ToInt32(substrings[5]) * 0.15 * 10.0 * 512.0) / (1000.0 * 3.3));
+                        txtRotorJ.Text = substrings[6];
+                        txtloadMass.Text = substrings[7];
+                        txtKp.Text = substrings[8];
+                        txtKi.Text = substrings[9];
+                        txtKd.Text = substrings[10];
+                        txtPLPF.Text = substrings[11];
+                        txtEncoderLPF.Text = substrings[12];
+                        txtmmRev.Text = substrings[13];
+                        txtMaxE.Text = substrings[14];
+                        if (Convert.ToInt16(substrings[15]) == 1)
+                        {
+                            checkEnable.Checked = true;
+                        }
+                        else
+                        {
+                            checkEnable.Checked = false;
+                        }
+                        if (Convert.ToInt16(substrings[16]) == 1)
+                        {
+                            checkInvert.Checked = true;
+                        }
+                        else
+                        {
+                            checkInvert.Checked = false;
                         }
                     }
                     else
@@ -413,6 +450,8 @@ namespace Mechaduino
                     serialPort1.WriteLine("stop_stream \n");
                     serialPort1.DiscardInBuffer();
                     Thread.Sleep(10);
+                    serialPort1.WriteLine("load_param\n");
+                    Thread.Sleep(10);
                     serialPort1.WriteLine("help \n");
                     txtReceived.Clear();
                 }
@@ -505,6 +544,8 @@ namespace Mechaduino
                 pltPosition.Series[0].Points.Clear();
                 pltPosition.Series[1].Points.Clear();
                 pltError.Series[0].Points.Clear();
+
+                txtOmega.Text = Convert.ToString(omeaga);
 
                 for (int i = 0; i < yValues.Length - 1; i++)
                 {
@@ -684,7 +725,7 @@ namespace Mechaduino
                     savetoCSV = true;
                     Debug.Print(CSVFileName);
                     File.WriteAllText(CSVFileName, "");
-                    File.AppendAllText(CSVFileName, "streaming,position,target,error,effort,electrical_angle,enabled \n");
+                    File.AppendAllText(CSVFileName, "streaming;position;target;error;effort;electrical_angle;enabled \n");
                 }
             }
             else
@@ -693,6 +734,503 @@ namespace Mechaduino
                 savetoCSV = false;
             }
         }
+
+        private void btnAutotuneRun_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                Thread.Sleep(10);
+                serialPort1.WriteLine("autotune\n");
+                Thread.Sleep(10);
+                int cycles = Convert.ToInt32(txtAutotuneCycles.Text, System.Globalization.CultureInfo.InvariantCulture);
+                String cmd = Convert.ToString(cycles, System.Globalization.CultureInfo.InvariantCulture);
+                serialPort1.Write(cmd + "\n");
+                serialPort1.Write(" \n");
+                //Thread.Sleep(cycles*1500);
+                serialPort1.Write(" \n");
+                serialPort1.Write("load_param\n");
+            }
+        }
+
+        private void btnRunCalibration_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                String cmd = "calibrate";
+                serialPort1.Write(cmd + "\n");
+            }
+        }
+
+        private void btnSendAll_Click(object sender, EventArgs e)
+        {
+
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    String cmd = "";
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("a\n");
+                    Thread.Sleep(10);
+                    String identifier = (txtIdentifier.Text);
+                    cmd = Convert.ToString(identifier, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("n\n");
+                    Thread.Sleep(10);
+                    int steps_per_revolution = Convert.ToInt32(txtFullstep.Text);
+                    cmd = Convert.ToString(steps_per_revolution, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("m\n");
+                    Thread.Sleep(10);
+                    int microstepping = Convert.ToInt32(txtMicrostep.Text);
+                    cmd = Convert.ToString(microstepping, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("r\n");
+                    Thread.Sleep(10);
+                    int iMax = Convert.ToInt32(txtCurrent.Text);
+                    cmd = Convert.ToString(iMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("e\n");
+                    Thread.Sleep(10);
+                    double max_e = Convert.ToDouble(txtMaxE.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("f\n");
+                    Thread.Sleep(10);
+                    double mMax = Convert.ToDouble(txtMaxM.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(mMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("g\n");
+                    Thread.Sleep(10);
+                    int i_rated = Convert.ToInt32(txtMaxI.Text);
+                    cmd = Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("h\n");
+                    Thread.Sleep(10);
+                    int m_load = Convert.ToInt32(txtloadMass.Text);
+                    cmd = Convert.ToString(m_load, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("j\n");
+                    Thread.Sleep(10);
+                    int j_rotor = Convert.ToInt32(txtRotorJ.Text);
+                    cmd = Convert.ToString(j_rotor, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("p\n");
+                    Thread.Sleep(10);
+                    double Kp = Convert.ToDouble(txtKp.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kp, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("i\n");
+                    Thread.Sleep(10);
+                    double Ki = Convert.ToDouble(txtKi.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Ki, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("d\n");
+                    Thread.Sleep(10);
+                    double Kd = Convert.ToDouble(txtKd.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("k\n");
+                    Thread.Sleep(10);
+                    int pLPF = Convert.ToInt32(txtPLPF.Text);
+                    cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("l\n");
+                    Thread.Sleep(10);
+                    int encoderLPF = Convert.ToInt32(txtEncoderLPF.Text);
+                    cmd = Convert.ToString(encoderLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("b\n");
+                    Thread.Sleep(10);
+                    int mm_rev = Convert.ToInt32(txtmmRev.Text);
+                    cmd = Convert.ToString(mm_rev, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("o\n");
+                    Thread.Sleep(10);
+                    int enable = Convert.ToInt32(checkEnable.Checked);
+                    cmd = Convert.ToString(enable, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("q\n");
+                    Thread.Sleep(10);
+                    int invert = Convert.ToInt32(checkInvert.Checked);
+                    cmd = Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+
+        private void btnLoad_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.Write("load_param\n");
+            }
+        }
+
+
+
+
+
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+
+
+
+        private void btnSendIdentifier_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    String cmd = "";
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("a\n");
+                    Thread.Sleep(10);
+                    String identifier = (txtIdentifier.Text);
+                    cmd = Convert.ToString(identifier, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+
+        private void btnSendStepSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("n\n");
+                    Thread.Sleep(10);
+                    int steps_per_revolution = Convert.ToInt32(txtFullstep.Text);
+                    String cmd = Convert.ToString(steps_per_revolution, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("m\n");
+                    Thread.Sleep(10);
+                    int microstepping = Convert.ToInt32(txtMicrostep.Text);
+                    cmd = Convert.ToString(microstepping, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+        private void btnSendMotorSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("r\n");
+                    Thread.Sleep(10);
+                    int iMax = Convert.ToInt32(txtCurrent.Text);
+                    String cmd = Convert.ToString(iMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("f\n");
+                    Thread.Sleep(10);
+                    double mMax = Convert.ToDouble(txtMaxM.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(mMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("g\n");
+                    Thread.Sleep(10);
+                    int i_rated = Convert.ToInt32(txtMaxI.Text);
+                    cmd = Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+        private void btnSendPins_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("o\n");
+                    Thread.Sleep(10);
+                    int enable = Convert.ToInt32(checkEnable.Checked);
+                    String cmd = Convert.ToString(enable, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("q\n");
+                    Thread.Sleep(10);
+                    int invert = Convert.ToInt32(checkInvert.Checked);
+                    cmd = Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+
+        private void btnSendKinematics_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("h\n");
+                    Thread.Sleep(10);
+                    int m_load = Convert.ToInt32(txtloadMass.Text);
+                    String cmd = Convert.ToString(m_load, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("j\n");
+                    Thread.Sleep(10);
+                    int j_rotor = Convert.ToInt32(txtRotorJ.Text);
+                    cmd = Convert.ToString(j_rotor, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.Write("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.Write("e\n");
+                    Thread.Sleep(10);
+                    double max_e = Convert.ToDouble(txtMaxE.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("b\n");
+                    Thread.Sleep(10);
+                    int mm_rev = Convert.ToInt32(txtmmRev.Text);
+                    cmd = Convert.ToString(mm_rev, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+        private void btnSendControllerSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("p\n");
+                    Thread.Sleep(10);
+                    double Kp = Convert.ToDouble(txtKp.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    String cmd = Convert.ToString(Kp, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("i\n");
+                    Thread.Sleep(10);
+                    double Ki = Convert.ToDouble(txtKi.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Ki, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("d\n");
+                    Thread.Sleep(10);
+                    double Kd = Convert.ToDouble(txtKd.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+        private void btnSendFilterSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("k\n");
+                    Thread.Sleep(10);
+                    int pLPF = Convert.ToInt32(txtPLPF.Text);
+                    String cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("l\n");
+                    Thread.Sleep(10);
+                    int encoderLPF = Convert.ToInt32(txtEncoderLPF.Text);
+                    cmd = Convert.ToString(encoderLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
     }
 
 
