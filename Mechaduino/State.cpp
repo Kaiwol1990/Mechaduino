@@ -33,7 +33,7 @@ volatile int int_Kd = Kd * 1000;
 // r = mm_rev / (2*Pi)
 // calculating omega_dot from a
 // a = omega_dot * mm/rad  --> mm/rad = mm_rev /2
-// or J_load = 1/4 * m_load * D_pulley^4
+// or J_load = 1/4 * m_load * D_pulley^2
 // D in cm
 float D_pulley = (mm_rev / (10 * 3.14159283));
 float J_load = ((m_load * D_pulley * D_pulley) / 4.0);

@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------------------------------------
 
 // string to identify the mechaduino with the Serial monitor
-char identifier = 'Y';
+char identifier = 'X';
 
 
 
@@ -13,7 +13,7 @@ char identifier = 'Y';
 //---------------------------------------------------------------------------------------------------------------
 
 // max current per coil 2000 mA for A4954 driver should be lower (thermal conditions)
-int iMAX = 1000;
+int iMAX = 1300;
 
 
 //uncomment this if you want to use a enable pin
@@ -62,9 +62,9 @@ int J_rotor = 82;
 
 //---- PID Values current control -----
 
-float Kp =0.80600;
-float Ki =0.02500;
-float Kd =6.45800;
+float Kp =1.14400;
+float Ki =0.04200;
+float Kd =7.86600;
 
 
 //----------------------------------------------- Signal Section -----------------------------------------------

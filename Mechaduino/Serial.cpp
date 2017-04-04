@@ -34,7 +34,7 @@ void serialCheck() {
       parameterEdit(argument);
     }
     else if (Command.indexOf(step_response_command) == 0 && Command.length() == step_response_command.length()) {
-      step_response(argument);
+      step_response();
     }
     else if (Command.indexOf(help_command) == 0 && Command.length() == help_command.length()) {
       Serial_menu();
@@ -240,13 +240,13 @@ void parameterQuery() {
   SerialUSB.println(J_rotor);
 
   SerialUSB.print("Kp = ");
-  SerialUSB.println(int_Kp / 1000.0);
+  SerialUSB.println(int_Kp / 1000.0, 5);
 
   SerialUSB.print("Ki = ");
-  SerialUSB.println(int_Ki / 1000.0);
+  SerialUSB.println(int_Ki / 1000.0, 5);
 
   SerialUSB.print("Kd = ");
-  SerialUSB.println(int_Kd / 1000.0);
+  SerialUSB.println(int_Kd / 1000.0, 5);
 
   SerialUSB.print("pLPF = ");
   SerialUSB.println(pLPF);
@@ -323,7 +323,7 @@ void parameterEdit(String arg) {
     SerialUSB.print("q ----- INVERT = ");
     SerialUSB.println(INVERT);
   }
-  
+
   SerialUSB.read();
 
 
@@ -701,7 +701,7 @@ void parameterEdit(String arg) {
 }
 
 
-void step_response(String arg) {
+void step_response() {
 
   SerialUSB.print(step_response_header);
 
@@ -713,116 +713,96 @@ void step_response(String arg) {
 
   unsigned long start_millis;
   start_millis = millis();
-  int time_out = 5000;
+  //int time_out = 5000;
 
-  if (arg == "") {
-    // no argument was send!
+  // get the steps for te step response
+  delay(2000);
+  response_steps = SerialUSB.parseInt();//arg.toFloat();
 
-    while (ended == false) {
+  if (response_steps != 0) {
 
-      if (timed_out(start_millis, time_out)) return;
+    SerialUSB.println(response_steps);
 
-      while (SerialUSB.available() > 0) {
-        char incomming = SerialUSB.read();
-        if (incomming != '\n' && incomming != '\r') {
+    bool last_enabled = enabled;
+    bool last_dir = dir;
+    dir = true;
+    enabled = true;
 
-          arg = String(arg  + incomming);
-
-          SerialUSB.print(incomming);
+    SerialUSB.println("Close Serial Monitor and open Tools>>Serial Plotter");
+    SerialUSB.println("You have 5 seconds...");
+    /*
+        for (byte i = 1; i <= 5; i++) {
+          delay(1000);
+          SerialUSB.print(5 - i);
+          SerialUSB.println("...");
         }
-        else {
-          ended = true;
-        }
+    */
+    int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
+    int big_time_step = (2.5 * small_time_step);
+
+    int answer[1000];
+    int target[1000];
+
+    for (int i = 0; i < 1000; i++) {
+      answer[i] = y;
+      target[i] = r;
+    }
+
+    int counter = 0;
+
+    //wait 200 ms to plot some values befor starting the step response
+    unsigned int start_time = millis();
+    unsigned int current_time = start_time;
+    unsigned int next_time = start_time;
+
+    while (current_time < 200 + start_time) {
+      current_time = millis();
+      if (current_time >= next_time) {
+        next_time = current_time + 1;
+        answer[counter] = y;
+        target[counter] = r;
+        counter += 1;
       }
     }
 
+
+    //set the target to the new value
+    step_target = step_target + (response_steps * step_add);
+
+
+    // wait 1 second to get the response
+    while (current_time < 990 + start_time) {
+      current_time = millis();
+      if (current_time >= next_time) {
+        next_time = current_time + 1;
+        answer[counter] = y;
+        target[counter] = r;
+        counter += 1;
+      }
+    }
+
+    while (counter < 999) {
+      answer[counter] = answer[counter - 1];
+      target[counter] = target[counter - 1];
+      counter += 1;
+    }
+    answer[counter] = answer[counter - 1];
+    target[counter] = target[counter - 1];
+
+
+
+    for (int i = 0; i < counter; i++) {
+      SerialUSB.print(answer[i]);
+      SerialUSB.print(';');
+      SerialUSB.println(target[i]);
+
+    }
+    // set parameters back to the values before the response
+    enabled = last_enabled;
+    dir = last_dir;
   }
   else {
-    ended = true;
-  }
-
-  SerialUSB.println();
-
-  if (ended) {
-    // get the first char and check if its numeric
-    char first = arg.charAt(0);
-    if (isDigit(first)) {
-
-      // get the steps for te step response
-      response_steps = arg.toInt();
-
-      bool last_enabled = enabled;
-      bool last_dir = dir;
-      dir = true;
-      enabled = true;
-
-      SerialUSB.println("Close Serial Monitor and open Tools>>Serial Plotter");
-      SerialUSB.println("You have 5 seconds...");
-
-      for (byte i = 1; i <= 5; i++) {
-        delay(1000);
-        SerialUSB.print(5 - i);
-        SerialUSB.println("...");
-      }
-      int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
-      int big_time_step = (2.5 * small_time_step);
-
-      int answer[1000];
-      int target[1000];
-
-      for (int i = 0; i < 1000; i++) {
-        answer[i] = y;
-        target[i] = r;
-      }
-
-      int counter = 0;
-
-      //wait 200 ms to plot some values befor starting the step response
-      unsigned int start_time = millis();
-      unsigned int current_time = start_time;
-      unsigned int next_time = start_time;
-
-      while (current_time < 200 + start_time) {
-        current_time = millis();
-        if (current_time >= next_time) {
-          next_time = current_time + 1;
-          answer[counter] = y;
-          target[counter] = r;
-          counter += 1;
-        }
-      }
-
-
-      //set the target to the new value
-      step_target = step_target + response_steps;
-
-
-      // wait 1 second to get the response
-      while (current_time < 650 + start_time) {
-        current_time = millis();
-        if (current_time >= next_time) {
-          next_time = current_time + 1;
-          answer[counter] = y;
-          target[counter] = r;
-          counter += 1;
-        }
-      }
-
-      for (int i = 0; i < counter - 1; i++) {
-        SerialUSB.print(answer[i]);
-        SerialUSB.print(',');
-        SerialUSB.println(target[i]);
-
-      }
-
-      // set parameters back to the values before the response
-      enabled = last_enabled;
-      dir = last_dir;
-
-    }
-    else {
-      SerialUSB.println("invalid input!");
-    }
+    SerialUSB.println("invalid input!");
   }
 }
 
@@ -1217,11 +1197,11 @@ void send_param() {
   SerialUSB.write(';');
   SerialUSB.print(m_load);
   SerialUSB.write(';');
-  SerialUSB.print(Kp);
+  SerialUSB.print(Kp, 5);
   SerialUSB.write(';');
-  SerialUSB.print(Ki);
+  SerialUSB.print(Ki, 5);
   SerialUSB.write(';');
-  SerialUSB.print(Kd);
+  SerialUSB.print(Kd, 5);
   SerialUSB.write(';');
   SerialUSB.print(pLPF);
   SerialUSB.write(';');

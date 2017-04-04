@@ -123,46 +123,36 @@
   <metadata name="panelEnabled.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="panelEnabled.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <metadata name="panelGreen.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
   <metadata name="panelGreen.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <data name="label23.Text" xml:space="preserve">
-    <value>This will run the calibration routine of the Mechaduino. The Motor will step
-trough every fullstep 3 times and records the encoder readings. It will run 
-trough all steps one more time to check the readings. At the end it will post 
-the lookuptable that needs to copied to the lookup_table.cpp file.
+    <value>This will run the calibration routine of the Mechaduino. The Motor will step trough every fullstep 
+3 times and records the encoder readings. It will run trough all steps one more time to check the 
+readings. At the end it will post the lookuptable that needs to copied to the lookup_table.cpp file.
 </value>
   </data>
   <data name="label30.Text" xml:space="preserve">
-    <value>These are the cutoff frequencys for the first order lowpass filters of the 
-Mechaduino.
-The Encoder LPF filter will only be used if the motor is commanded to hold 
-its position.
+    <value>These are the cutoff frequencys for the first order lowpass filters of the Mechaduino.
+The Encoder LPF filter will only be used if the motor is commanded to hold its position.
 The D-Term LPF will be active all the time.</value>
   </data>
   <data name="label27.Text" xml:space="preserve">
-    <value>Here you can find the extra pin settings. If "Use anble Pin" is ticked the motor 
-will only be enabled qith the defined pin in board.h (pin D3 as default).
+    <value>Here you can find the extra pin settings. If "Use anble Pin" is ticked the motor can only be 
+enabled trough the defined pin in board.h (pin D3 as default).
 If "Invert Direction" is ticked the interpretation of the direction pin state will 
 be switched.</value>
   </data>
   <data name="label26.Text" xml:space="preserve">
-    <value>Here are the motor settings collected. The rated torque and rated current are 
-specific for your motor. The rated current is the current the motor deliveres 
-the rated torque.
+    <value>Here are the motor settings collected. The rated torque and rated current are specific for 
+your motor. 
+The rated current is the current the motor deliveres the rated torque.
 The current is the maximal current the Mechaduino will deliver to the motor.</value>
   </data>
   <data name="label25.Text" xml:space="preserve">
-    <value>This settings are depending on the motor you're using. The Fullsteps are 
-usualy 200 or 400.
-Microstepping is a interpolation between these Fullsteps. Microstepping must 
-be between 1 and 512 and a power of 2 aswell.</value>
+    <value>This settings are depending on the motor you're using. The Fullsteps are usualy 200 or 400.
+Microstepping is a interpolation between these Fullsteps. Microstepping must be between 
+1 and 256 and a power of 2 aswell.</value>
   </data>
   <metadata name="timerCheck.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>126, 17</value>

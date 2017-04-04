@@ -25,6 +25,8 @@ void TC5_Handler() {
   static int_fast32_t ITerm;
   static int_fast32_t DTerm;
 
+  static int_fast32_t u_sim;
+
   int_fast16_t raw_0;            // current measured angle
   static int_fast16_t raw_1;     // last measured angle
 
@@ -38,7 +40,11 @@ void TC5_Handler() {
 
   int_fast16_t omega_target;           // target angle velocity
   static int_fast16_t omega_target_1;  // last target angle velocity
-  int_fast16_t omega_dot_target;       // derivation of the target angle velocity
+  int_fast16_t omega_dot_target;       // derivation of the target angle
+
+  static int_fast32_t target_buffer[150];
+  static int_fast16_t pointer;
+  static int_fast32_t sum;
 
 
 
@@ -47,7 +53,18 @@ void TC5_Handler() {
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
-    r = (step_target * stepangle) / 100;
+    sum = sum - target_buffer[pointer];
+    target_buffer[pointer] = ((step_target * stepangle)/100);
+
+    sum = sum + target_buffer[pointer];
+
+    pointer = pointer + 1;
+    pointer = mod(pointer, 150);
+
+    r = sum / (150);
+
+
+    //r = (step_target * stepangle) / 100;
 
     omega_target = (r - r_1); //target angular velocity
 
@@ -78,6 +95,7 @@ void TC5_Handler() {
       // PID loop                         +    moment of inertia
       u = ((int_Kp * e_0) + ITerm + DTerm + (int_J * omega_dot_target)) / 1000;
 
+
     }
     else {
       step_target = ( (100 * y) / stepangle);
@@ -86,8 +104,6 @@ void TC5_Handler() {
       ITerm = 0;
     }
 
-    //int phase_advanced = e_0 + omega_target;
-    //int_fast16_t phase_advanced = e_0 + omega_target;
 
     int_fast16_t phase_advanced = ((sign(u) * PA) / 4) + e_0 + (omega_target);
 

@@ -29,23 +29,28 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title3 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GUI));
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series10 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title5 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series11 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series12 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title6 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GUI));
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabConnection = new System.Windows.Forms.TabPage();
@@ -62,6 +67,7 @@
             this.groupBox12 = new System.Windows.Forms.GroupBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.btnDirac = new System.Windows.Forms.Button();
             this.btnJump = new System.Windows.Forms.Button();
             this.txtJump = new System.Windows.Forms.TextBox();
             this.btnGetpoint = new System.Windows.Forms.Button();
@@ -110,6 +116,8 @@
             this.btnSendAll = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.groupBox19 = new System.Windows.Forms.GroupBox();
+            this.label44 = new System.Windows.Forms.Label();
+            this.label45 = new System.Windows.Forms.Label();
             this.btnSendFilterSettings = new System.Windows.Forms.Button();
             this.label30 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
@@ -117,6 +125,9 @@
             this.label18 = new System.Windows.Forms.Label();
             this.txtEncoderLPF = new System.Windows.Forms.TextBox();
             this.groupBox18 = new System.Windows.Forms.GroupBox();
+            this.label43 = new System.Windows.Forms.Label();
+            this.label42 = new System.Windows.Forms.Label();
+            this.label41 = new System.Windows.Forms.Label();
             this.btnSendControllerSettings = new System.Windows.Forms.Button();
             this.label29 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
@@ -131,6 +142,10 @@
             this.checkInvert = new System.Windows.Forms.CheckBox();
             this.checkEnable = new System.Windows.Forms.CheckBox();
             this.groupBox16 = new System.Windows.Forms.GroupBox();
+            this.label40 = new System.Windows.Forms.Label();
+            this.label39 = new System.Windows.Forms.Label();
+            this.label38 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
             this.btnSendKinematics = new System.Windows.Forms.Button();
             this.label28 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
@@ -142,6 +157,9 @@
             this.label13 = new System.Windows.Forms.Label();
             this.txtRotorJ = new System.Windows.Forms.TextBox();
             this.groupBox14 = new System.Windows.Forms.GroupBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.label34 = new System.Windows.Forms.Label();
             this.btnSendMotorSettings = new System.Windows.Forms.Button();
             this.label26 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
@@ -151,6 +169,8 @@
             this.label9 = new System.Windows.Forms.Label();
             this.txtCurrent = new System.Windows.Forms.TextBox();
             this.groupBox13 = new System.Windows.Forms.GroupBox();
+            this.label33 = new System.Windows.Forms.Label();
+            this.label32 = new System.Windows.Forms.Label();
             this.btnSendStepSettings = new System.Windows.Forms.Button();
             this.label25 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -158,6 +178,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.txtFullstep = new System.Windows.Forms.TextBox();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.label31 = new System.Windows.Forms.Label();
             this.btnSendIdentifier = new System.Windows.Forms.Button();
             this.label24 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -167,21 +188,23 @@
             this.timerPlot = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.label22 = new System.Windows.Forms.Label();
-            this.label31 = new System.Windows.Forms.Label();
-            this.label32 = new System.Windows.Forms.Label();
-            this.label33 = new System.Windows.Forms.Label();
-            this.label34 = new System.Windows.Forms.Label();
-            this.label35 = new System.Windows.Forms.Label();
-            this.label36 = new System.Windows.Forms.Label();
-            this.label37 = new System.Windows.Forms.Label();
-            this.label38 = new System.Windows.Forms.Label();
-            this.label39 = new System.Windows.Forms.Label();
-            this.label40 = new System.Windows.Forms.Label();
-            this.label41 = new System.Windows.Forms.Label();
-            this.label42 = new System.Windows.Forms.Label();
-            this.label43 = new System.Windows.Forms.Label();
-            this.label44 = new System.Windows.Forms.Label();
-            this.label45 = new System.Windows.Forms.Label();
+            this.btnmp100 = new System.Windows.Forms.Button();
+            this.btnmp10 = new System.Windows.Forms.Button();
+            this.btnmp1 = new System.Windows.Forms.Button();
+            this.btnmn100 = new System.Windows.Forms.Button();
+            this.btnmn10 = new System.Windows.Forms.Button();
+            this.btnmn1 = new System.Windows.Forms.Button();
+            this.label46 = new System.Windows.Forms.Label();
+            this.tabResponse = new System.Windows.Forms.TabPage();
+            this.groupBox15 = new System.Windows.Forms.GroupBox();
+            this.label47 = new System.Windows.Forms.Label();
+            this.btnStepResponse = new System.Windows.Forms.Button();
+            this.label49 = new System.Windows.Forms.Label();
+            this.label50 = new System.Windows.Forms.Label();
+            this.txtStepResponse = new System.Windows.Forms.TextBox();
+            this.groupBox20 = new System.Windows.Forms.GroupBox();
+            this.pltresponse = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.btnresetzoom = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabConnection.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -210,6 +233,10 @@
             this.groupBox14.SuspendLayout();
             this.groupBox13.SuspendLayout();
             this.groupBox11.SuspendLayout();
+            this.tabResponse.SuspendLayout();
+            this.groupBox15.SuspendLayout();
+            this.groupBox20.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pltresponse)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -217,12 +244,13 @@
             this.tabControl1.Controls.Add(this.tabConnection);
             this.tabControl1.Controls.Add(this.tabPlots);
             this.tabControl1.Controls.Add(this.tabParameter);
+            this.tabControl1.Controls.Add(this.tabResponse);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(5);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(829, 734);
+            this.tabControl1.Size = new System.Drawing.Size(959, 734);
             this.tabControl1.TabIndex = 6;
             // 
             // tabConnection
@@ -234,7 +262,7 @@
             this.tabConnection.Margin = new System.Windows.Forms.Padding(2);
             this.tabConnection.Name = "tabConnection";
             this.tabConnection.Padding = new System.Windows.Forms.Padding(2);
-            this.tabConnection.Size = new System.Drawing.Size(821, 708);
+            this.tabConnection.Size = new System.Drawing.Size(951, 708);
             this.tabConnection.TabIndex = 0;
             this.tabConnection.Text = "Connection";
             this.tabConnection.UseVisualStyleBackColor = true;
@@ -246,14 +274,14 @@
             this.groupBox8.Controls.Add(this.txtReceived);
             this.groupBox8.Location = new System.Drawing.Point(9, 126);
             this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Size = new System.Drawing.Size(796, 495);
+            this.groupBox8.Size = new System.Drawing.Size(934, 495);
             this.groupBox8.TabIndex = 19;
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Serial Communication";
             // 
             // btnSend
             // 
-            this.btnSend.Location = new System.Drawing.Point(711, 466);
+            this.btnSend.Location = new System.Drawing.Point(849, 469);
             this.btnSend.Margin = new System.Windows.Forms.Padding(2);
             this.btnSend.Name = "btnSend";
             this.btnSend.Size = new System.Drawing.Size(80, 21);
@@ -267,7 +295,7 @@
             this.txtSend.Location = new System.Drawing.Point(15, 441);
             this.txtSend.Margin = new System.Windows.Forms.Padding(2);
             this.txtSend.Name = "txtSend";
-            this.txtSend.Size = new System.Drawing.Size(776, 20);
+            this.txtSend.Size = new System.Drawing.Size(914, 20);
             this.txtSend.TabIndex = 16;
             // 
             // txtReceived
@@ -278,7 +306,7 @@
             this.txtReceived.Multiline = true;
             this.txtReceived.Name = "txtReceived";
             this.txtReceived.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtReceived.Size = new System.Drawing.Size(777, 416);
+            this.txtReceived.Size = new System.Drawing.Size(915, 416);
             this.txtReceived.TabIndex = 13;
             // 
             // groupBox7
@@ -286,7 +314,7 @@
             this.groupBox7.Controls.Add(this.txtConsole);
             this.groupBox7.Location = new System.Drawing.Point(9, 62);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(796, 58);
+            this.groupBox7.Size = new System.Drawing.Size(934, 58);
             this.groupBox7.TabIndex = 18;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Console";
@@ -297,7 +325,7 @@
             this.txtConsole.Location = new System.Drawing.Point(14, 18);
             this.txtConsole.Margin = new System.Windows.Forms.Padding(2);
             this.txtConsole.Name = "txtConsole";
-            this.txtConsole.Size = new System.Drawing.Size(777, 23);
+            this.txtConsole.Size = new System.Drawing.Size(915, 23);
             this.txtConsole.TabIndex = 12;
             this.txtConsole.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -348,9 +376,9 @@
             this.tabPlots.Location = new System.Drawing.Point(4, 22);
             this.tabPlots.Margin = new System.Windows.Forms.Padding(2);
             this.tabPlots.Name = "tabPlots";
-            this.tabPlots.Size = new System.Drawing.Size(821, 708);
+            this.tabPlots.Size = new System.Drawing.Size(951, 708);
             this.tabPlots.TabIndex = 2;
-            this.tabPlots.Text = "Control";
+            this.tabPlots.Text = "Stream";
             this.tabPlots.UseVisualStyleBackColor = true;
             // 
             // groupBox12
@@ -375,6 +403,14 @@
             // 
             // groupBox10
             // 
+            this.groupBox10.Controls.Add(this.label46);
+            this.groupBox10.Controls.Add(this.btnmp100);
+            this.groupBox10.Controls.Add(this.btnmp10);
+            this.groupBox10.Controls.Add(this.btnmp1);
+            this.groupBox10.Controls.Add(this.btnmn100);
+            this.groupBox10.Controls.Add(this.btnmn10);
+            this.groupBox10.Controls.Add(this.btnmn1);
+            this.groupBox10.Controls.Add(this.btnDirac);
             this.groupBox10.Controls.Add(this.btnJump);
             this.groupBox10.Controls.Add(this.txtJump);
             this.groupBox10.Controls.Add(this.btnGetpoint);
@@ -391,14 +427,24 @@
             this.groupBox10.Controls.Add(this.btnn1);
             this.groupBox10.Location = new System.Drawing.Point(553, 55);
             this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Size = new System.Drawing.Size(260, 223);
+            this.groupBox10.Size = new System.Drawing.Size(390, 223);
             this.groupBox10.TabIndex = 26;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Move";
             // 
+            // btnDirac
+            // 
+            this.btnDirac.Location = new System.Drawing.Point(281, 155);
+            this.btnDirac.Name = "btnDirac";
+            this.btnDirac.Size = new System.Drawing.Size(100, 20);
+            this.btnDirac.TabIndex = 19;
+            this.btnDirac.Text = "Dirac";
+            this.btnDirac.UseVisualStyleBackColor = true;
+            this.btnDirac.Click += new System.EventHandler(this.btnDirac_Click);
+            // 
             // btnJump
             // 
-            this.btnJump.Location = new System.Drawing.Point(147, 135);
+            this.btnJump.Location = new System.Drawing.Point(282, 124);
             this.btnJump.Name = "btnJump";
             this.btnJump.Size = new System.Drawing.Size(100, 20);
             this.btnJump.TabIndex = 18;
@@ -408,7 +454,7 @@
             // 
             // txtJump
             // 
-            this.txtJump.Location = new System.Drawing.Point(147, 111);
+            this.txtJump.Location = new System.Drawing.Point(282, 100);
             this.txtJump.Name = "txtJump";
             this.txtJump.Size = new System.Drawing.Size(100, 20);
             this.txtJump.TabIndex = 17;
@@ -417,7 +463,7 @@
             // 
             // btnGetpoint
             // 
-            this.btnGetpoint.Location = new System.Drawing.Point(148, 65);
+            this.btnGetpoint.Location = new System.Drawing.Point(283, 65);
             this.btnGetpoint.Name = "btnGetpoint";
             this.btnGetpoint.Size = new System.Drawing.Size(100, 20);
             this.btnGetpoint.TabIndex = 16;
@@ -447,7 +493,7 @@
             // 
             // btnResetSetpoint
             // 
-            this.btnResetSetpoint.Location = new System.Drawing.Point(147, 190);
+            this.btnResetSetpoint.Location = new System.Drawing.Point(282, 190);
             this.btnResetSetpoint.Name = "btnResetSetpoint";
             this.btnResetSetpoint.Size = new System.Drawing.Size(100, 20);
             this.btnResetSetpoint.TabIndex = 13;
@@ -457,7 +503,7 @@
             // 
             // btnSetpoint
             // 
-            this.btnSetpoint.Location = new System.Drawing.Point(147, 40);
+            this.btnSetpoint.Location = new System.Drawing.Point(282, 40);
             this.btnSetpoint.Name = "btnSetpoint";
             this.btnSetpoint.Size = new System.Drawing.Size(100, 20);
             this.btnSetpoint.TabIndex = 11;
@@ -467,7 +513,7 @@
             // 
             // txtSetpoint
             // 
-            this.txtSetpoint.Location = new System.Drawing.Point(147, 16);
+            this.txtSetpoint.Location = new System.Drawing.Point(282, 16);
             this.txtSetpoint.Name = "txtSetpoint";
             this.txtSetpoint.Size = new System.Drawing.Size(100, 20);
             this.txtSetpoint.TabIndex = 10;
@@ -658,7 +704,7 @@
             this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox3.Size = new System.Drawing.Size(261, 40);
+            this.groupBox3.Size = new System.Drawing.Size(390, 40);
             this.groupBox3.TabIndex = 22;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Control";
@@ -706,21 +752,21 @@
             this.anglePlot.BackSecondaryColor = System.Drawing.Color.Transparent;
             this.anglePlot.BorderlineColor = System.Drawing.Color.Transparent;
             this.anglePlot.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
-            chartArea5.BackColor = System.Drawing.Color.Transparent;
-            chartArea5.Name = "ChartArea1";
-            this.anglePlot.ChartAreas.Add(chartArea5);
+            chartArea1.BackColor = System.Drawing.Color.Transparent;
+            chartArea1.Name = "ChartArea1";
+            this.anglePlot.ChartAreas.Add(chartArea1);
             this.anglePlot.Cursor = System.Windows.Forms.Cursors.No;
             this.anglePlot.Location = new System.Drawing.Point(9, 19);
             this.anglePlot.Margin = new System.Windows.Forms.Padding(2);
             this.anglePlot.Name = "anglePlot";
-            series7.ChartArea = "ChartArea1";
-            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series7.Name = "Series1";
-            series8.ChartArea = "ChartArea1";
-            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series8.Name = "Series2";
-            this.anglePlot.Series.Add(series7);
-            this.anglePlot.Series.Add(series8);
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series1.Name = "Series1";
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Name = "Series2";
+            this.anglePlot.Series.Add(series1);
+            this.anglePlot.Series.Add(series2);
             this.anglePlot.Size = new System.Drawing.Size(232, 244);
             this.anglePlot.TabIndex = 17;
             this.anglePlot.Text = "chart1";
@@ -735,7 +781,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(809, 410);
+            this.groupBox1.Size = new System.Drawing.Size(938, 410);
             this.groupBox1.TabIndex = 20;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Live plots";
@@ -743,28 +789,28 @@
             // pltCurrent
             // 
             this.pltCurrent.BorderlineColor = System.Drawing.Color.Black;
-            chartArea6.Name = "ChartArea1";
-            this.pltCurrent.ChartAreas.Add(chartArea6);
-            legend4.Name = "Legend1";
-            this.pltCurrent.Legends.Add(legend4);
+            chartArea2.Name = "ChartArea1";
+            this.pltCurrent.ChartAreas.Add(chartArea2);
+            legend1.Name = "Legend1";
+            this.pltCurrent.Legends.Add(legend1);
             this.pltCurrent.Location = new System.Drawing.Point(9, 308);
             this.pltCurrent.Margin = new System.Windows.Forms.Padding(2);
             this.pltCurrent.Name = "pltCurrent";
-            series9.ChartArea = "ChartArea1";
-            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series9.Legend = "Legend1";
-            series9.Name = "Current";
-            this.pltCurrent.Series.Add(series9);
-            this.pltCurrent.Size = new System.Drawing.Size(787, 100);
+            series3.ChartArea = "ChartArea1";
+            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series3.Legend = "Legend1";
+            series3.Name = "Current";
+            this.pltCurrent.Series.Add(series3);
+            this.pltCurrent.Size = new System.Drawing.Size(920, 100);
             this.pltCurrent.TabIndex = 23;
             this.pltCurrent.Text = "chart1";
-            title4.Name = "Title1";
-            title4.Text = "Current [mA]";
-            this.pltCurrent.Titles.Add(title4);
+            title1.Name = "Title1";
+            title1.Text = "Current [mA]";
+            this.pltCurrent.Titles.Add(title1);
             // 
             // txtOmega
             // 
-            this.txtOmega.Location = new System.Drawing.Point(695, 17);
+            this.txtOmega.Location = new System.Drawing.Point(833, 18);
             this.txtOmega.Name = "txtOmega";
             this.txtOmega.Size = new System.Drawing.Size(100, 20);
             this.txtOmega.TabIndex = 26;
@@ -774,51 +820,51 @@
             // pltError
             // 
             this.pltError.BorderlineColor = System.Drawing.Color.Black;
-            chartArea7.Name = "ChartArea1";
-            this.pltError.ChartAreas.Add(chartArea7);
-            legend5.Name = "Legend1";
-            this.pltError.Legends.Add(legend5);
+            chartArea3.Name = "ChartArea1";
+            this.pltError.ChartAreas.Add(chartArea3);
+            legend2.Name = "Legend1";
+            this.pltError.Legends.Add(legend2);
             this.pltError.Location = new System.Drawing.Point(8, 204);
             this.pltError.Margin = new System.Windows.Forms.Padding(2);
             this.pltError.Name = "pltError";
-            series10.ChartArea = "ChartArea1";
-            series10.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series10.Legend = "Legend1";
-            series10.Name = "Error";
-            this.pltError.Series.Add(series10);
-            this.pltError.Size = new System.Drawing.Size(786, 100);
+            series4.ChartArea = "ChartArea1";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series4.Legend = "Legend1";
+            series4.Name = "Error";
+            this.pltError.Series.Add(series4);
+            this.pltError.Size = new System.Drawing.Size(921, 100);
             this.pltError.TabIndex = 25;
             this.pltError.Text = "chart1";
-            title5.Name = "Title1";
-            title5.Text = "Error [deg]";
-            this.pltError.Titles.Add(title5);
+            title2.Name = "Title1";
+            title2.Text = "Error [deg]";
+            this.pltError.Titles.Add(title2);
             // 
             // pltPosition
             // 
             this.pltPosition.BorderlineColor = System.Drawing.Color.Black;
-            chartArea8.Name = "ChartArea1";
-            this.pltPosition.ChartAreas.Add(chartArea8);
-            legend6.Name = "Legend1";
-            this.pltPosition.Legends.Add(legend6);
+            chartArea4.Name = "ChartArea1";
+            this.pltPosition.ChartAreas.Add(chartArea4);
+            legend3.Name = "Legend1";
+            this.pltPosition.Legends.Add(legend3);
             this.pltPosition.Location = new System.Drawing.Point(8, 20);
             this.pltPosition.Margin = new System.Windows.Forms.Padding(2);
             this.pltPosition.Name = "pltPosition";
-            series11.ChartArea = "ChartArea1";
-            series11.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series11.Legend = "Legend1";
-            series11.Name = "Position";
-            series12.ChartArea = "ChartArea1";
-            series12.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series12.Legend = "Legend1";
-            series12.Name = "Target";
-            this.pltPosition.Series.Add(series11);
-            this.pltPosition.Series.Add(series12);
-            this.pltPosition.Size = new System.Drawing.Size(787, 180);
+            series5.ChartArea = "ChartArea1";
+            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series5.Legend = "Legend1";
+            series5.Name = "Position";
+            series6.ChartArea = "ChartArea1";
+            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series6.Legend = "Legend1";
+            series6.Name = "Target";
+            this.pltPosition.Series.Add(series5);
+            this.pltPosition.Series.Add(series6);
+            this.pltPosition.Size = new System.Drawing.Size(921, 180);
             this.pltPosition.TabIndex = 24;
             this.pltPosition.Text = "chart1";
-            title6.Name = "Title1";
-            title6.Text = "Angles [deg]";
-            this.pltPosition.Titles.Add(title6);
+            title3.Name = "Title1";
+            title3.Text = "Angles [deg]";
+            this.pltPosition.Titles.Add(title3);
             // 
             // tabParameter
             // 
@@ -837,7 +883,7 @@
             this.tabParameter.Location = new System.Drawing.Point(4, 22);
             this.tabParameter.Margin = new System.Windows.Forms.Padding(2);
             this.tabParameter.Name = "tabParameter";
-            this.tabParameter.Size = new System.Drawing.Size(821, 708);
+            this.tabParameter.Size = new System.Drawing.Size(951, 708);
             this.tabParameter.TabIndex = 3;
             this.tabParameter.Text = "Paramter";
             this.tabParameter.UseVisualStyleBackColor = true;
@@ -846,16 +892,16 @@
             // 
             this.groupBox22.Controls.Add(this.btnRunCalibration);
             this.groupBox22.Controls.Add(this.label23);
-            this.groupBox22.Location = new System.Drawing.Point(414, 591);
+            this.groupBox22.Location = new System.Drawing.Point(479, 591);
             this.groupBox22.Name = "groupBox22";
-            this.groupBox22.Size = new System.Drawing.Size(400, 114);
+            this.groupBox22.Size = new System.Drawing.Size(465, 114);
             this.groupBox22.TabIndex = 18;
             this.groupBox22.TabStop = false;
             this.groupBox22.Text = "Calibration";
             // 
             // btnRunCalibration
             // 
-            this.btnRunCalibration.Location = new System.Drawing.Point(319, 85);
+            this.btnRunCalibration.Location = new System.Drawing.Point(389, 85);
             this.btnRunCalibration.Name = "btnRunCalibration";
             this.btnRunCalibration.Size = new System.Drawing.Size(75, 23);
             this.btnRunCalibration.TabIndex = 11;
@@ -868,7 +914,7 @@
             this.label23.AutoSize = true;
             this.label23.Location = new System.Drawing.Point(6, 16);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(359, 52);
+            this.label23.Size = new System.Drawing.Size(460, 39);
             this.label23.TabIndex = 8;
             this.label23.Text = resources.GetString("label23.Text");
             // 
@@ -880,14 +926,14 @@
             this.groupBox21.Controls.Add(this.label21);
             this.groupBox21.Location = new System.Drawing.Point(8, 591);
             this.groupBox21.Name = "groupBox21";
-            this.groupBox21.Size = new System.Drawing.Size(400, 114);
+            this.groupBox21.Size = new System.Drawing.Size(465, 114);
             this.groupBox21.TabIndex = 17;
             this.groupBox21.TabStop = false;
             this.groupBox21.Text = "PID Autotune";
             // 
             // btnAutotuneRun
             // 
-            this.btnAutotuneRun.Location = new System.Drawing.Point(319, 85);
+            this.btnAutotuneRun.Location = new System.Drawing.Point(384, 85);
             this.btnAutotuneRun.Name = "btnAutotuneRun";
             this.btnAutotuneRun.Size = new System.Drawing.Size(75, 23);
             this.btnAutotuneRun.TabIndex = 11;
@@ -918,15 +964,15 @@
             this.label21.AutoSize = true;
             this.label21.Location = new System.Drawing.Point(6, 16);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(375, 39);
+            this.label21.Size = new System.Drawing.Size(424, 26);
             this.label21.TabIndex = 8;
-            this.label21.Text = "Tunes the PID Controller of the Meachaduino. Insert the number of cycles and\r\nkli" +
-    "ck run. The Autotune will run the number of cycles and average the \r\ncalculated " +
-    "parameters.\r\n";
+            this.label21.Text = "Tunes the PID Controller of the Meachaduino. Insert the number of cycles and klic" +
+    "k run. \r\nThe Autotune will run the number of cycles and average the calculated p" +
+    "arameters.\r\n";
             // 
             // btnSendAll
             // 
-            this.btnSendAll.Location = new System.Drawing.Point(657, 538);
+            this.btnSendAll.Location = new System.Drawing.Point(781, 538);
             this.btnSendAll.Name = "btnSendAll";
             this.btnSendAll.Size = new System.Drawing.Size(75, 23);
             this.btnSendAll.TabIndex = 16;
@@ -936,7 +982,7 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(738, 538);
+            this.btnSave.Location = new System.Drawing.Point(862, 538);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 15;
@@ -954,17 +1000,35 @@
             this.groupBox19.Controls.Add(this.txtPLPF);
             this.groupBox19.Controls.Add(this.label18);
             this.groupBox19.Controls.Add(this.txtEncoderLPF);
-            this.groupBox19.Location = new System.Drawing.Point(414, 317);
+            this.groupBox19.Location = new System.Drawing.Point(479, 314);
             this.groupBox19.Name = "groupBox19";
-            this.groupBox19.Size = new System.Drawing.Size(400, 156);
+            this.groupBox19.Size = new System.Drawing.Size(465, 156);
             this.groupBox19.TabIndex = 14;
             this.groupBox19.TabStop = false;
             this.groupBox19.Text = "Filter settings";
             // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(194, 135);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(46, 13);
+            this.label44.TabIndex = 18;
+            this.label44.Text = "[Integer]";
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(194, 107);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(46, 13);
+            this.label45.TabIndex = 17;
+            this.label45.Text = "[Integer]";
+            // 
             // btnSendFilterSettings
             // 
             this.btnSendFilterSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendFilterSettings.Location = new System.Drawing.Point(319, 127);
+            this.btnSendFilterSettings.Location = new System.Drawing.Point(384, 127);
             this.btnSendFilterSettings.Name = "btnSendFilterSettings";
             this.btnSendFilterSettings.Size = new System.Drawing.Size(75, 23);
             this.btnSendFilterSettings.TabIndex = 12;
@@ -977,7 +1041,7 @@
             this.label30.AutoSize = true;
             this.label30.Location = new System.Drawing.Point(6, 16);
             this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(357, 65);
+            this.label30.Size = new System.Drawing.Size(409, 39);
             this.label30.TabIndex = 11;
             this.label30.Text = resources.GetString("label30.Text");
             // 
@@ -1028,17 +1092,44 @@
             this.groupBox18.Controls.Add(this.txtKi);
             this.groupBox18.Controls.Add(this.label15);
             this.groupBox18.Controls.Add(this.txtKp);
-            this.groupBox18.Location = new System.Drawing.Point(414, 171);
+            this.groupBox18.Location = new System.Drawing.Point(478, 168);
             this.groupBox18.Name = "groupBox18";
-            this.groupBox18.Size = new System.Drawing.Size(400, 146);
+            this.groupBox18.Size = new System.Drawing.Size(465, 146);
             this.groupBox18.TabIndex = 13;
             this.groupBox18.TabStop = false;
             this.groupBox18.Text = "Controller settings";
             // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(194, 120);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(33, 13);
+            this.label43.TabIndex = 21;
+            this.label43.Text = "[float]";
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(194, 94);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(33, 13);
+            this.label42.TabIndex = 20;
+            this.label42.Text = "[float]";
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(194, 68);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(33, 13);
+            this.label41.TabIndex = 19;
+            this.label41.Text = "[float]";
+            // 
             // btnSendControllerSettings
             // 
             this.btnSendControllerSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendControllerSettings.Location = new System.Drawing.Point(319, 115);
+            this.btnSendControllerSettings.Location = new System.Drawing.Point(384, 115);
             this.btnSendControllerSettings.Name = "btnSendControllerSettings";
             this.btnSendControllerSettings.Size = new System.Drawing.Size(75, 23);
             this.btnSendControllerSettings.TabIndex = 14;
@@ -1115,7 +1206,7 @@
             this.groupBox17.Controls.Add(this.checkEnable);
             this.groupBox17.Location = new System.Drawing.Point(8, 436);
             this.groupBox17.Name = "groupBox17";
-            this.groupBox17.Size = new System.Drawing.Size(400, 125);
+            this.groupBox17.Size = new System.Drawing.Size(465, 125);
             this.groupBox17.TabIndex = 11;
             this.groupBox17.TabStop = false;
             this.groupBox17.Text = "Pins";
@@ -1123,7 +1214,7 @@
             // btnSendPins
             // 
             this.btnSendPins.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendPins.Location = new System.Drawing.Point(319, 96);
+            this.btnSendPins.Location = new System.Drawing.Point(384, 96);
             this.btnSendPins.Name = "btnSendPins";
             this.btnSendPins.Size = new System.Drawing.Size(75, 23);
             this.btnSendPins.TabIndex = 17;
@@ -1137,7 +1228,7 @@
             this.label27.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label27.Location = new System.Drawing.Point(6, 16);
             this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(374, 52);
+            this.label27.Size = new System.Drawing.Size(432, 52);
             this.label27.TabIndex = 16;
             this.label27.Text = resources.GetString("label27.Text");
             this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1178,17 +1269,53 @@
             this.groupBox16.Controls.Add(this.txtloadMass);
             this.groupBox16.Controls.Add(this.label13);
             this.groupBox16.Controls.Add(this.txtRotorJ);
-            this.groupBox16.Location = new System.Drawing.Point(414, 3);
+            this.groupBox16.Location = new System.Drawing.Point(479, 0);
             this.groupBox16.Name = "groupBox16";
-            this.groupBox16.Size = new System.Drawing.Size(400, 162);
+            this.groupBox16.Size = new System.Drawing.Size(465, 162);
             this.groupBox16.TabIndex = 12;
             this.groupBox16.TabStop = false;
             this.groupBox16.Text = "Kinematics";
             // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(194, 136);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(29, 13);
+            this.label40.TabIndex = 21;
+            this.label40.Text = "[mm]";
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(194, 113);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(29, 13);
+            this.label39.TabIndex = 20;
+            this.label39.Text = "[mm]";
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(194, 87);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(19, 13);
+            this.label38.TabIndex = 19;
+            this.label38.Text = "[g]";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(194, 61);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(45, 13);
+            this.label37.TabIndex = 18;
+            this.label37.Text = "[gcm^2]";
+            // 
             // btnSendKinematics
             // 
             this.btnSendKinematics.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendKinematics.Location = new System.Drawing.Point(319, 133);
+            this.btnSendKinematics.Location = new System.Drawing.Point(384, 133);
             this.btnSendKinematics.Name = "btnSendKinematics";
             this.btnSendKinematics.Size = new System.Drawing.Size(75, 23);
             this.btnSendKinematics.TabIndex = 16;
@@ -1289,15 +1416,42 @@
             this.groupBox14.Controls.Add(this.txtCurrent);
             this.groupBox14.Location = new System.Drawing.Point(8, 249);
             this.groupBox14.Name = "groupBox14";
-            this.groupBox14.Size = new System.Drawing.Size(400, 181);
+            this.groupBox14.Size = new System.Drawing.Size(465, 181);
             this.groupBox14.TabIndex = 10;
             this.groupBox14.TabStop = false;
             this.groupBox14.Text = "Motor settings";
             // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(194, 158);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(28, 13);
+            this.label36.TabIndex = 19;
+            this.label36.Text = "[mA]";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(193, 132);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(29, 13);
+            this.label35.TabIndex = 18;
+            this.label35.Text = "[Nm]";
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(193, 104);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(28, 13);
+            this.label34.TabIndex = 17;
+            this.label34.Text = "[mA]";
+            // 
             // btnSendMotorSettings
             // 
             this.btnSendMotorSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendMotorSettings.Location = new System.Drawing.Point(319, 152);
+            this.btnSendMotorSettings.Location = new System.Drawing.Point(384, 152);
             this.btnSendMotorSettings.Name = "btnSendMotorSettings";
             this.btnSendMotorSettings.Size = new System.Drawing.Size(75, 23);
             this.btnSendMotorSettings.TabIndex = 16;
@@ -1310,7 +1464,7 @@
             this.label26.AutoSize = true;
             this.label26.Location = new System.Drawing.Point(6, 16);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(370, 52);
+            this.label26.Size = new System.Drawing.Size(424, 52);
             this.label26.TabIndex = 15;
             this.label26.Text = resources.GetString("label26.Text");
             // 
@@ -1377,15 +1531,33 @@
             this.groupBox13.Controls.Add(this.txtFullstep);
             this.groupBox13.Location = new System.Drawing.Point(8, 97);
             this.groupBox13.Name = "groupBox13";
-            this.groupBox13.Size = new System.Drawing.Size(400, 146);
+            this.groupBox13.Size = new System.Drawing.Size(465, 146);
             this.groupBox13.TabIndex = 7;
             this.groupBox13.TabStop = false;
             this.groupBox13.Text = "Step settings";
             // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(194, 123);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(46, 13);
+            this.label33.TabIndex = 16;
+            this.label33.Text = "[Integer]";
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(194, 97);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(46, 13);
+            this.label32.TabIndex = 15;
+            this.label32.Text = "[Integer]";
+            // 
             // btnSendStepSettings
             // 
             this.btnSendStepSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendStepSettings.Location = new System.Drawing.Point(319, 117);
+            this.btnSendStepSettings.Location = new System.Drawing.Point(384, 117);
             this.btnSendStepSettings.Name = "btnSendStepSettings";
             this.btnSendStepSettings.Size = new System.Drawing.Size(75, 23);
             this.btnSendStepSettings.TabIndex = 13;
@@ -1398,7 +1570,7 @@
             this.label25.AutoSize = true;
             this.label25.Location = new System.Drawing.Point(6, 16);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(369, 52);
+            this.label25.Size = new System.Drawing.Size(435, 39);
             this.label25.TabIndex = 11;
             this.label25.Text = resources.GetString("label25.Text");
             // 
@@ -1445,15 +1617,24 @@
             this.groupBox11.Controls.Add(this.txtIdentifier);
             this.groupBox11.Location = new System.Drawing.Point(8, 3);
             this.groupBox11.Name = "groupBox11";
-            this.groupBox11.Size = new System.Drawing.Size(400, 88);
+            this.groupBox11.Size = new System.Drawing.Size(465, 88);
             this.groupBox11.TabIndex = 3;
             this.groupBox11.TabStop = false;
             this.groupBox11.Text = "Identifier";
             // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(194, 65);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(34, 13);
+            this.label31.TabIndex = 14;
+            this.label31.Text = "[char]";
+            // 
             // btnSendIdentifier
             // 
             this.btnSendIdentifier.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendIdentifier.Location = new System.Drawing.Point(319, 59);
+            this.btnSendIdentifier.Location = new System.Drawing.Point(384, 59);
             this.btnSendIdentifier.Name = "btnSendIdentifier";
             this.btnSendIdentifier.Size = new System.Drawing.Size(75, 23);
             this.btnSendIdentifier.TabIndex = 13;
@@ -1490,7 +1671,7 @@
             // 
             // btnLoad
             // 
-            this.btnLoad.Location = new System.Drawing.Point(576, 538);
+            this.btnLoad.Location = new System.Drawing.Point(700, 538);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 0;
@@ -1519,140 +1700,195 @@
             this.label22.TabIndex = 7;
             this.label22.Text = "Mechaduino GUI v0.1";
             // 
-            // label31
+            // btnmp100
             // 
-            this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(194, 65);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(34, 13);
-            this.label31.TabIndex = 14;
-            this.label31.Text = "[char]";
+            this.btnmp100.Location = new System.Drawing.Point(145, 14);
+            this.btnmp100.Name = "btnmp100";
+            this.btnmp100.Size = new System.Drawing.Size(100, 20);
+            this.btnmp100.TabIndex = 25;
+            this.btnmp100.Text = "+100";
+            this.btnmp100.UseVisualStyleBackColor = true;
+            this.btnmp100.Click += new System.EventHandler(this.btnmp100_Click);
             // 
-            // label32
+            // btnmp10
             // 
-            this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(194, 97);
-            this.label32.Name = "label32";
-            this.label32.Size = new System.Drawing.Size(46, 13);
-            this.label32.TabIndex = 15;
-            this.label32.Text = "[Integer]";
+            this.btnmp10.Location = new System.Drawing.Point(155, 39);
+            this.btnmp10.Name = "btnmp10";
+            this.btnmp10.Size = new System.Drawing.Size(80, 20);
+            this.btnmp10.TabIndex = 24;
+            this.btnmp10.Text = "+ 10";
+            this.btnmp10.UseVisualStyleBackColor = true;
+            this.btnmp10.Click += new System.EventHandler(this.btnmp10_Click);
             // 
-            // label33
+            // btnmp1
             // 
-            this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(194, 123);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(46, 13);
-            this.label33.TabIndex = 16;
-            this.label33.Text = "[Integer]";
+            this.btnmp1.Location = new System.Drawing.Point(165, 64);
+            this.btnmp1.Name = "btnmp1";
+            this.btnmp1.Size = new System.Drawing.Size(60, 20);
+            this.btnmp1.TabIndex = 23;
+            this.btnmp1.Text = "+ 1";
+            this.btnmp1.UseVisualStyleBackColor = true;
+            this.btnmp1.Click += new System.EventHandler(this.btnmp1_Click);
             // 
-            // label34
+            // btnmn100
             // 
-            this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(193, 104);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(28, 13);
-            this.label34.TabIndex = 17;
-            this.label34.Text = "[mA]";
+            this.btnmn100.Location = new System.Drawing.Point(145, 189);
+            this.btnmn100.Name = "btnmn100";
+            this.btnmn100.Size = new System.Drawing.Size(100, 20);
+            this.btnmn100.TabIndex = 22;
+            this.btnmn100.Text = "-100";
+            this.btnmn100.UseVisualStyleBackColor = true;
+            this.btnmn100.Click += new System.EventHandler(this.btnmn100_Click);
             // 
-            // label35
+            // btnmn10
             // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(193, 132);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(29, 13);
-            this.label35.TabIndex = 18;
-            this.label35.Text = "[Nm]";
+            this.btnmn10.Location = new System.Drawing.Point(155, 164);
+            this.btnmn10.Name = "btnmn10";
+            this.btnmn10.Size = new System.Drawing.Size(80, 20);
+            this.btnmn10.TabIndex = 21;
+            this.btnmn10.Text = "- 10";
+            this.btnmn10.UseVisualStyleBackColor = true;
+            this.btnmn10.Click += new System.EventHandler(this.btnmn10_Click);
             // 
-            // label36
+            // btnmn1
             // 
-            this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(194, 158);
-            this.label36.Name = "label36";
-            this.label36.Size = new System.Drawing.Size(28, 13);
-            this.label36.TabIndex = 19;
-            this.label36.Text = "[mA]";
+            this.btnmn1.Location = new System.Drawing.Point(165, 139);
+            this.btnmn1.Name = "btnmn1";
+            this.btnmn1.Size = new System.Drawing.Size(60, 20);
+            this.btnmn1.TabIndex = 20;
+            this.btnmn1.Text = "- 1";
+            this.btnmn1.UseVisualStyleBackColor = true;
+            this.btnmn1.Click += new System.EventHandler(this.btnmn1_Click);
             // 
-            // label37
+            // label46
             // 
-            this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(194, 61);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(45, 13);
-            this.label37.TabIndex = 18;
-            this.label37.Text = "[gcm^2]";
+            this.label46.AutoSize = true;
+            this.label46.Location = new System.Drawing.Point(167, 103);
+            this.label46.Name = "label46";
+            this.label46.Size = new System.Drawing.Size(58, 13);
+            this.label46.TabIndex = 26;
+            this.label46.Text = "Microsteps";
+            this.label46.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // label38
+            // tabResponse
             // 
-            this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(194, 87);
-            this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(19, 13);
-            this.label38.TabIndex = 19;
-            this.label38.Text = "[g]";
+            this.tabResponse.Controls.Add(this.groupBox20);
+            this.tabResponse.Controls.Add(this.groupBox15);
+            this.tabResponse.Location = new System.Drawing.Point(4, 22);
+            this.tabResponse.Name = "tabResponse";
+            this.tabResponse.Padding = new System.Windows.Forms.Padding(3);
+            this.tabResponse.Size = new System.Drawing.Size(951, 708);
+            this.tabResponse.TabIndex = 4;
+            this.tabResponse.Text = "Step Response";
+            this.tabResponse.UseVisualStyleBackColor = true;
             // 
-            // label39
+            // groupBox15
             // 
-            this.label39.AutoSize = true;
-            this.label39.Location = new System.Drawing.Point(194, 113);
-            this.label39.Name = "label39";
-            this.label39.Size = new System.Drawing.Size(29, 13);
-            this.label39.TabIndex = 20;
-            this.label39.Text = "[mm]";
+            this.groupBox15.Controls.Add(this.label47);
+            this.groupBox15.Controls.Add(this.btnStepResponse);
+            this.groupBox15.Controls.Add(this.label49);
+            this.groupBox15.Controls.Add(this.label50);
+            this.groupBox15.Controls.Add(this.txtStepResponse);
+            this.groupBox15.Location = new System.Drawing.Point(8, 6);
+            this.groupBox15.Name = "groupBox15";
+            this.groupBox15.Size = new System.Drawing.Size(935, 75);
+            this.groupBox15.TabIndex = 15;
+            this.groupBox15.TabStop = false;
+            this.groupBox15.Text = "Step Response";
             // 
-            // label40
+            // label47
             // 
-            this.label40.AutoSize = true;
-            this.label40.Location = new System.Drawing.Point(194, 136);
-            this.label40.Name = "label40";
-            this.label40.Size = new System.Drawing.Size(29, 13);
-            this.label40.TabIndex = 21;
-            this.label40.Text = "[mm]";
+            this.label47.AutoSize = true;
+            this.label47.Location = new System.Drawing.Point(194, 47);
+            this.label47.Name = "label47";
+            this.label47.Size = new System.Drawing.Size(46, 13);
+            this.label47.TabIndex = 18;
+            this.label47.Text = "[Integer]";
             // 
-            // label41
+            // btnStepResponse
             // 
-            this.label41.AutoSize = true;
-            this.label41.Location = new System.Drawing.Point(194, 68);
-            this.label41.Name = "label41";
-            this.label41.Size = new System.Drawing.Size(33, 13);
-            this.label41.TabIndex = 19;
-            this.label41.Text = "[float]";
+            this.btnStepResponse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnStepResponse.Location = new System.Drawing.Point(854, 46);
+            this.btnStepResponse.Name = "btnStepResponse";
+            this.btnStepResponse.Size = new System.Drawing.Size(75, 23);
+            this.btnStepResponse.TabIndex = 12;
+            this.btnStepResponse.Text = "Send";
+            this.btnStepResponse.UseVisualStyleBackColor = true;
+            this.btnStepResponse.Click += new System.EventHandler(this.btnStepResponse_Click);
             // 
-            // label42
+            // label49
             // 
-            this.label42.AutoSize = true;
-            this.label42.Location = new System.Drawing.Point(194, 94);
-            this.label42.Name = "label42";
-            this.label42.Size = new System.Drawing.Size(33, 13);
-            this.label42.TabIndex = 20;
-            this.label42.Text = "[float]";
+            this.label49.AutoSize = true;
+            this.label49.Location = new System.Drawing.Point(6, 16);
+            this.label49.Name = "label49";
+            this.label49.Size = new System.Drawing.Size(707, 13);
+            this.label49.TabIndex = 11;
+            this.label49.Text = "Enter the Number of steps you want to take for the step response. The Mechaduino " +
+    "will jump these steps and will send the collected data afterwards.\r\n";
             // 
-            // label43
+            // label50
             // 
-            this.label43.AutoSize = true;
-            this.label43.Location = new System.Drawing.Point(194, 120);
-            this.label43.Name = "label43";
-            this.label43.Size = new System.Drawing.Size(33, 13);
-            this.label43.TabIndex = 21;
-            this.label43.Text = "[float]";
+            this.label50.AutoSize = true;
+            this.label50.Location = new System.Drawing.Point(6, 45);
+            this.label50.Name = "label50";
+            this.label50.Size = new System.Drawing.Size(37, 13);
+            this.label50.TabIndex = 10;
+            this.label50.Text = "Steps:";
             // 
-            // label44
+            // txtStepResponse
             // 
-            this.label44.AutoSize = true;
-            this.label44.Location = new System.Drawing.Point(194, 135);
-            this.label44.Name = "label44";
-            this.label44.Size = new System.Drawing.Size(46, 13);
-            this.label44.TabIndex = 18;
-            this.label44.Text = "[Integer]";
+            this.txtStepResponse.Location = new System.Drawing.Point(88, 42);
+            this.txtStepResponse.Name = "txtStepResponse";
+            this.txtStepResponse.Size = new System.Drawing.Size(100, 20);
+            this.txtStepResponse.TabIndex = 9;
+            this.txtStepResponse.Text = "900";
+            this.txtStepResponse.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
-            // label45
+            // groupBox20
             // 
-            this.label45.AutoSize = true;
-            this.label45.Location = new System.Drawing.Point(194, 107);
-            this.label45.Name = "label45";
-            this.label45.Size = new System.Drawing.Size(46, 13);
-            this.label45.TabIndex = 17;
-            this.label45.Text = "[Integer]";
+            this.groupBox20.Controls.Add(this.btnresetzoom);
+            this.groupBox20.Controls.Add(this.pltresponse);
+            this.groupBox20.Location = new System.Drawing.Point(8, 87);
+            this.groupBox20.Name = "groupBox20";
+            this.groupBox20.Size = new System.Drawing.Size(935, 615);
+            this.groupBox20.TabIndex = 16;
+            this.groupBox20.TabStop = false;
+            this.groupBox20.Text = "Plot";
+            // 
+            // pltresponse
+            // 
+            chartArea5.Name = "ChartArea1";
+            this.pltresponse.ChartAreas.Add(chartArea5);
+            legend4.Name = "Legend1";
+            this.pltresponse.Legends.Add(legend4);
+            this.pltresponse.Location = new System.Drawing.Point(9, 19);
+            this.pltresponse.Name = "pltresponse";
+            series7.ChartArea = "ChartArea1";
+            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series7.Legend = "Legend1";
+            series7.Name = "Position";
+            series8.ChartArea = "ChartArea1";
+            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series8.Legend = "Legend1";
+            series8.Name = "Target";
+            this.pltresponse.Series.Add(series7);
+            this.pltresponse.Series.Add(series8);
+            this.pltresponse.Size = new System.Drawing.Size(920, 590);
+            this.pltresponse.TabIndex = 0;
+            title4.Name = "Step response date";
+            title4.Text = "Step response date [deg]";
+            this.pltresponse.Titles.Add(title4);
+            // 
+            // btnresetzoom
+            // 
+            this.btnresetzoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnresetzoom.Location = new System.Drawing.Point(854, 586);
+            this.btnresetzoom.Name = "btnresetzoom";
+            this.btnresetzoom.Size = new System.Drawing.Size(75, 23);
+            this.btnresetzoom.TabIndex = 13;
+            this.btnresetzoom.Text = "Reset Zoom";
+            this.btnresetzoom.UseVisualStyleBackColor = true;
+            this.btnresetzoom.Click += new System.EventHandler(this.btnresetzoom_Click);
             // 
             // GUI
             // 
@@ -1660,7 +1896,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(829, 761);
+            this.ClientSize = new System.Drawing.Size(959, 761);
             this.Controls.Add(this.label22);
             this.Controls.Add(this.tabControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -1712,6 +1948,11 @@
             this.groupBox13.PerformLayout();
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
+            this.tabResponse.ResumeLayout(false);
+            this.groupBox15.ResumeLayout(false);
+            this.groupBox15.PerformLayout();
+            this.groupBox20.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pltresponse)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1854,6 +2095,24 @@
         private System.Windows.Forms.Label label33;
         private System.Windows.Forms.Label label32;
         private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Button btnDirac;
+        private System.Windows.Forms.Label label46;
+        private System.Windows.Forms.Button btnmp100;
+        private System.Windows.Forms.Button btnmp10;
+        private System.Windows.Forms.Button btnmp1;
+        private System.Windows.Forms.Button btnmn100;
+        private System.Windows.Forms.Button btnmn10;
+        private System.Windows.Forms.Button btnmn1;
+        private System.Windows.Forms.TabPage tabResponse;
+        private System.Windows.Forms.GroupBox groupBox20;
+        private System.Windows.Forms.DataVisualization.Charting.Chart pltresponse;
+        private System.Windows.Forms.GroupBox groupBox15;
+        private System.Windows.Forms.Label label47;
+        private System.Windows.Forms.Button btnStepResponse;
+        private System.Windows.Forms.Label label49;
+        private System.Windows.Forms.Label label50;
+        private System.Windows.Forms.TextBox txtStepResponse;
+        private System.Windows.Forms.Button btnresetzoom;
     }
 }
 

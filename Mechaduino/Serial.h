@@ -22,7 +22,7 @@ void parameterQuery();
 
 void parameterEdit(String arg = "");
 
-void step_response(String arg = "");
+void step_response();
 
 void get_max_frequency();
 

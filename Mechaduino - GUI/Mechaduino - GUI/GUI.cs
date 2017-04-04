@@ -23,6 +23,9 @@ namespace Mechaduino
         double[] rValues = new double[500];
         double[] eValues = new double[500];
 
+        int[] response_position = new int[1000];
+        int[] response_target = new int[1000];
+
         double omeaga = 0;
         double last_y = 0;
 
@@ -42,6 +45,8 @@ namespace Mechaduino
 
         int wrap_pointer = 0;
 
+        int response_counter = 0;
+
         int streaming = 0;
 
         bool wasOpen = false;
@@ -49,9 +54,13 @@ namespace Mechaduino
         bool savetoCSV = false;
         String CSVFileName = "";
 
-       
-        
-        
+        bool response_income = false;
+        int response_command_Length = 0;
+
+        int k = 0;
+
+
+
 
 
 
@@ -74,6 +83,7 @@ namespace Mechaduino
 
             ((Control)this.tabPlots).Enabled = false;
             ((Control)this.tabParameter).Enabled = false;
+            ((Control)this.tabResponse).Enabled = false;
 
 
             saveFileDialog1.Filter = "CSV File|*.csv|Text File|*.txt";
@@ -140,6 +150,26 @@ namespace Mechaduino
             pltError.ChartAreas[0].AxisY.MinorGrid.Enabled = false;
             pltError.ChartAreas[0].AxisX.MajorTickMark.Enabled = false;
             pltError.ChartAreas[0].AxisX.MinorTickMark.Enabled = false;
+
+
+
+            // response plot
+            pltresponse.ChartAreas[0].CursorX.IsUserEnabled = Enabled;
+            pltresponse.ChartAreas[0].CursorX.IsUserSelectionEnabled = Enabled;
+            pltresponse.ChartAreas[0].CursorX.Interval = 0;
+            pltresponse.ChartAreas[0].AxisX.ScaleView.Zoomable = Enabled;
+            pltresponse.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
+            pltresponse.ChartAreas[0].AxisX.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
+            pltresponse.ChartAreas[0].AxisX.ScaleView.SmallScrollMinSize = 0;
+
+            pltresponse.ChartAreas[0].CursorY.IsUserEnabled = Enabled;
+            pltresponse.ChartAreas[0].CursorY.IsUserSelectionEnabled = Enabled;
+            pltresponse.ChartAreas[0].CursorY.Interval = 0;
+            pltresponse.ChartAreas[0].AxisY.ScaleView.Zoomable = Enabled;
+            pltresponse.ChartAreas[0].AxisY.ScrollBar.IsPositionedInside = true;
+            pltresponse.ChartAreas[0].AxisY.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
+            pltresponse.ChartAreas[0].AxisY.ScaleView.SmallScrollMinSize = 0;
+            pltresponse.Series[1].Color = Color.Red;
         }
 
 
@@ -179,7 +209,20 @@ namespace Mechaduino
                 {
                     String[] substrings = value.Split(';');
 
-                    if (substrings.Length == 7)
+                    if (substrings.Length == 2)
+                    {
+                        response_position[response_command_Length] = Convert.ToInt32(substrings[0]);
+                        response_target[response_command_Length] = Convert.ToInt32(substrings[1]);
+
+                        response_command_Length = response_command_Length + 1;
+                        if (response_command_Length >= 990)
+                        {
+                            response_income = true;
+                        }
+
+
+                    }
+                    else if (substrings.Length == 7)
                     {
                         streaming = Convert.ToInt16(substrings[0]);
 
@@ -223,7 +266,7 @@ namespace Mechaduino
                             omeaga = Math.Round((((y / 100.0) - (last_y / 100.0)) * 100.0), 3);
 
                             wrap_pointer += 1;
-                            wrap_pointer = wrap_pointer % (yValues.Length - 1);
+                            wrap_pointer = wrap_pointer % yValues.Length;
                         }
 
                         else
@@ -286,7 +329,7 @@ namespace Mechaduino
 
 
 
-        private void changeYScala(object chart)
+        private void changeYScala(object chart,double percent)
         {
             double temp_max = Double.MinValue;
             double temp_min = Double.MaxValue;
@@ -306,6 +349,22 @@ namespace Mechaduino
                         temp_max = Math.Max(temp_max, dp.YValues[0]);
                     }
                 }
+            }
+            if (temp_min < 0)
+            {
+                temp_min = temp_min * (1.0+(percent/100));
+            }
+            else
+            {
+                temp_min = temp_min * (1.0 - (percent / 100));
+            }
+            if (temp_max < 0)
+            {
+                temp_max = temp_max * (1.0 - (percent / 100));
+            }
+            else
+            {
+                temp_max = temp_max * (1.0 + (percent / 100));
             }
 
 
@@ -412,6 +471,7 @@ namespace Mechaduino
 
                 ((Control)this.tabPlots).Enabled = false;
                 ((Control)this.tabParameter).Enabled = false;
+                ((Control)this.tabResponse).Enabled = false;
             }
             else
             {
@@ -435,6 +495,7 @@ namespace Mechaduino
                 {
                     ((Control)this.tabPlots).Enabled = true;
                     ((Control)this.tabParameter).Enabled = true;
+                    ((Control)this.tabResponse).Enabled = true;
                     serialPort1.WriteLine("\n");
                     Thread.Sleep(100);
 
@@ -547,10 +608,10 @@ namespace Mechaduino
 
                 txtOmega.Text = Convert.ToString(omeaga);
 
-                for (int i = 0; i < yValues.Length - 1; i++)
+                for (int i = 0; i <= yValues.Length - 1; i++)
                 {
                     int pointer = wrap_pointer + i;
-                    pointer = pointer % (yValues.Length - 1);
+                    pointer = pointer % yValues.Length;
 
                     pltCurrent.Series[0].Points.AddY(uValues[pointer]);
                     pltPosition.Series[0].Points.AddY(yValues[pointer]);
@@ -559,13 +620,27 @@ namespace Mechaduino
                 }
 
                 // Update y axis scaling 
-                changeYScala(pltCurrent);
-                changeYScala(pltPosition);
-                changeYScala(pltError);
+                changeYScala(pltCurrent,5);
+                changeYScala(pltPosition,0.5);
+                changeYScala(pltError,5);
 
                 // update bar plots
                 panelTorque.Height = 240 - Torque;
+            }
 
+            if (response_income)
+            {
+                response_income = false;
+                pltresponse.Series[0].Points.Clear();
+                pltresponse.Series[1].Points.Clear();
+
+                for (int j = 0; j <= response_command_Length - 1; j++)
+                {
+                    pltresponse.Series[0].Points.AddY(response_position[j]/100.0);
+                    pltresponse.Series[1].Points.AddY(response_target[j]/100.0);
+                }
+                response_command_Length = 0;
+                changeYScala(pltresponse,0.2);
             }
         }
 
@@ -746,7 +821,6 @@ namespace Mechaduino
                 String cmd = Convert.ToString(cycles, System.Globalization.CultureInfo.InvariantCulture);
                 serialPort1.Write(cmd + "\n");
                 serialPort1.Write(" \n");
-                //Thread.Sleep(cycles*1500);
                 serialPort1.Write(" \n");
                 serialPort1.Write("load_param\n");
             }
@@ -1226,11 +1300,74 @@ namespace Mechaduino
             }
         }
 
+        private void btnDirac_Click(object sender, EventArgs e)
+        {
+            double setpoint = Convert.ToDouble(r);
+            double high = (setpoint + 10000)/100;
+            double low = (setpoint) /100;
+            string cmd_jump = Convert.ToString(high, System.Globalization.CultureInfo.InvariantCulture);
+            string cmd_jump_back = Convert.ToString(low, System.Globalization.CultureInfo.InvariantCulture);
+ 
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.Write("set " + cmd_jump + " \n");
+                serialPort1.Write(" \n");
+                Thread.Sleep(1);
+                serialPort1.Write("set " + cmd_jump_back + " \n");
+            }
 
+        }
 
+        private void btnmp100_Click(object sender, EventArgs e)
+        {
+            setpoint(100*1.8/Convert.ToInt32(txtMicrostep.Text));
+        }
 
+        private void btnmp10_Click(object sender, EventArgs e)
+        {
+            setpoint(10*1.8 / Convert.ToInt32(txtMicrostep.Text));
+        }
 
+        private void btnmp1_Click(object sender, EventArgs e)
+        {
+            setpoint(1.8 / Convert.ToInt32(txtMicrostep.Text));
+        }
 
+        private void btnmn1_Click(object sender, EventArgs e)
+        {
+            setpoint(-1.8 / Convert.ToInt32(txtMicrostep.Text));
+        }
+
+        private void btnmn10_Click(object sender, EventArgs e)
+        {
+            setpoint(-10*1.8 / Convert.ToInt32(txtMicrostep.Text));
+        }
+
+        private void btnmn100_Click(object sender, EventArgs e)
+        {
+            setpoint(-100*1.8 / Convert.ToInt32(txtMicrostep.Text));
+        }
+
+        private void btnStepResponse_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+
+                int steps = Convert.ToInt32(txtStepResponse.Text);
+                string cmd_response = Convert.ToString(steps, System.Globalization.CultureInfo.InvariantCulture);
+                serialPort1.Write("stop_stream \n");
+                Thread.Sleep(100);
+                serialPort1.Write("response \n");
+                Thread.Sleep(100);
+                serialPort1.Write(cmd_response + "\n");
+            }
+        }
+
+        private void btnresetzoom_Click(object sender, EventArgs e)
+        {
+            pltresponse.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
+            pltresponse.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
+        }
     }
 
 
