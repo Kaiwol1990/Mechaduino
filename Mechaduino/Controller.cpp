@@ -42,7 +42,7 @@ void TC5_Handler() {
   static int_fast16_t omega_target_1;  // last target angle velocity
   int_fast16_t omega_dot_target;       // derivation of the target angle
 
-  static int_fast32_t target_buffer[150];
+  static int_fast32_t target_buffer[50];
   static int_fast16_t pointer;
   static int_fast32_t sum;
 
@@ -52,19 +52,19 @@ void TC5_Handler() {
   //----- Calculations -----
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
-
+/*
     sum = sum - target_buffer[pointer];
-    target_buffer[pointer] = ((step_target * stepangle)/100);
+    target_buffer[pointer] = step_target * stepangle;
 
     sum = sum + target_buffer[pointer];
 
     pointer = pointer + 1;
-    pointer = mod(pointer, 150);
+    pointer = mod(pointer, 50);
 
-    r = sum / (150);
+    r = sum / 50;
 
-
-    //r = (step_target * stepangle) / 100;
+*/
+    r = step_target * stepangle;
 
     omega_target = (r - r_1); //target angular velocity
 
@@ -98,7 +98,7 @@ void TC5_Handler() {
 
     }
     else {
-      step_target = ( (100 * y) / stepangle);
+      step_target = y / stepangle;
       e_0 = 0;
       u = 0;
       ITerm = 0;

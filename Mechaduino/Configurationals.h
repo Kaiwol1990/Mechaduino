@@ -13,7 +13,7 @@ extern int phase_multiplier;
 
 //---- Step settings -----
 //extern const int counts_per_revolution; // encoder counts for 360 degrees
-extern int stepangle;             // angle of one step as int
+extern float stepangle;             // angle of one step as int
 extern int PA;                    // angle of one fullstepstep
 
 

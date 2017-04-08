@@ -36,6 +36,9 @@ void serialCheck() {
     else if (Command.indexOf(step_response_command) == 0 && Command.length() == step_response_command.length()) {
       step_response();
     }
+    else if (Command.indexOf(dirac_command) == 0 && Command.length() == dirac_command.length()) {
+      dirac();
+    }
     else if (Command.indexOf(help_command) == 0 && Command.length() == help_command.length()) {
       Serial_menu();
     }
@@ -193,7 +196,7 @@ void setpoint(String arg) {
 
       new_angle = arg.toFloat();
 
-      step_target = ( (new_angle * 10000.0) / (float)stepangle) + 0.5 ;
+      step_target = ( (new_angle * 100.0) / stepangle) + 0.5 ;
     }
     else {
       SerialUSB.println(" no valid input!");
@@ -709,14 +712,12 @@ void step_response() {
   int response_steps = 0;
   int last_step_target = step_target;
 
-  bool ended = false;
 
   unsigned long start_millis;
   start_millis = millis();
-  //int time_out = 5000;
 
   // get the steps for te step response
-  delay(2000);
+  delay(10);
   response_steps = SerialUSB.parseInt();//arg.toFloat();
 
   if (response_steps != 0) {
@@ -728,26 +729,17 @@ void step_response() {
     dir = true;
     enabled = true;
 
-    SerialUSB.println("Close Serial Monitor and open Tools>>Serial Plotter");
-    SerialUSB.println("You have 5 seconds...");
-    /*
-        for (byte i = 1; i <= 5; i++) {
-          delay(1000);
-          SerialUSB.print(5 - i);
-          SerialUSB.println("...");
-        }
-    */
     int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
     int big_time_step = (2.5 * small_time_step);
 
     int answer[1000];
     int target[1000];
-
+/*
     for (int i = 0; i < 1000; i++) {
       answer[i] = y;
       target[i] = r;
     }
-
+*/
     int counter = 0;
 
     //wait 200 ms to plot some values befor starting the step response
@@ -805,6 +797,104 @@ void step_response() {
     SerialUSB.println("invalid input!");
   }
 }
+
+
+void dirac() {
+
+  SerialUSB.print(dirac_header);
+
+  int current_position = y;
+  int response_steps = 0;
+  int last_step_target = step_target;
+
+
+  unsigned long start_millis;
+  start_millis = millis();
+
+  response_steps = 1000;//SerialUSB.parseInt();//arg.toFloat();
+
+  bool last_enabled = enabled;
+  bool last_dir = dir;
+  dir = true;
+  enabled = true;
+
+  int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
+  int big_time_step = (2.5 * small_time_step);
+
+  int answer[1000];
+  int target[1000];
+/*
+  for (int i = 0; i < 1000; i++) {
+    answer[i] = y;
+    target[i] = r;
+  }
+*/
+  int counter = 0;
+
+  //wait 200 ms to plot some values befor starting the step response
+  unsigned int start_time = millis();
+  unsigned int current_time = start_time;
+  unsigned int next_time = start_time;
+
+  while (current_time < 200 + start_time) {
+    current_time = millis();
+    if (current_time >= next_time) {
+      next_time = current_time + 1;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
+  }
+
+
+  //set the target to the new value
+  step_target = step_target + (response_steps * step_add);
+
+  while (current_time < 201 + start_time) {
+    current_time = millis();
+    if (current_time >= next_time) {
+      next_time = current_time + 1;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
+  }
+
+  step_target = last_step_target;
+
+
+  // wait 1 second to get the response
+  while (current_time < 990 + start_time) {
+    current_time = millis();
+    if (current_time >= next_time) {
+      next_time = current_time + 1;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
+  }
+
+  while (counter < 999) {
+    answer[counter] = answer[counter - 1];
+    target[counter] = target[counter - 1];
+    counter += 1;
+  }
+  answer[counter] = answer[counter - 1];
+  target[counter] = target[counter - 1];
+
+
+
+  for (int i = 0; i < counter; i++) {
+    SerialUSB.print(answer[i]);
+    SerialUSB.print(';');
+    SerialUSB.println(target[i]);
+
+  }
+  // set parameters back to the values before the response
+  enabled = last_enabled;
+  dir = last_dir;
+}
+
 
 void get_max_frequency() {
   disableTC5Interrupts();

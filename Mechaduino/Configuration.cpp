@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------------------------------------
 
 // string to identify the mechaduino with the Serial monitor
-char identifier = 'X';
+char identifier = 'Y';
 
 
 
@@ -20,7 +20,7 @@ int iMAX = 1300;
 int USE_ENABLE_PIN = 1;
 
 // microstepping setting for step input
-int microstepping = 16;
+int microstepping = 32;
 
 // fullsteps for 360 degrees
 int steps_per_revolution = 200;
@@ -62,9 +62,10 @@ int J_rotor = 82;
 
 //---- PID Values current control -----
 
-float Kp =1.14400;
-float Ki =0.04200;
-float Kd =7.86600;
+float Kp = 1.02200;
+float Ki = 0.03600;
+float Kd = 7.24200;
+
 
 
 //----------------------------------------------- Signal Section -----------------------------------------------

@@ -48,7 +48,10 @@ const String PROGMEM reset_header = "//---- reseting ---- \n\r Please re-open th
 
 const String PROGMEM step_response_command  = "response";
 const String PROGMEM step_response_menu = "generates a step response";
-const String PROGMEM step_response_header = "//---- Step response ---- \n\r Number of steps = ";
+const String PROGMEM step_response_header = "//---- Step response ---- \n Number of steps = ";
+
+const String PROGMEM dirac_command  = "dirac";
+const String PROGMEM dirac_header = "//---- Dirac delta function ---- \n";
 
 
 const String PROGMEM help_command  = "help";

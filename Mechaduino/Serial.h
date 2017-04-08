@@ -24,6 +24,8 @@ void parameterEdit(String arg = "");
 
 void step_response();
 
+void dirac();
+
 void get_max_frequency();
 
 void readEncoderDiagnostics(); //check encoder diagnostics registers

@@ -45,9 +45,6 @@ void setup() {
 
   Serial_menu();
 
-  SerialUSB.println();
-  SerialUSB.println(":>");
-
 }
 
 

@@ -1368,6 +1368,16 @@ namespace Mechaduino
             pltresponse.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
             pltresponse.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
         }
+
+        private void btnDirac_Click_1(object sender, EventArgs e)
+        {
+
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.Write("dirac \n");
+            }
+
+        }
     }
 
 

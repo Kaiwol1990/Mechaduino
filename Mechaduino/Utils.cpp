@@ -388,13 +388,13 @@ void calibration() {
 void oneStep() {
 
   if (dir == 0) {
-    step_target += 512;
+    step_target += 1024;
   }
   else {
-    step_target -= 512;
+    step_target -= 1024;
   }
 
-  int target_raw = (step_target * stepangle) / 100;
+  int target_raw = step_target * stepangle;
   int raw_0 = mod(target_raw, 36000);
   output(raw_0 , uMAX / 2);
 }
@@ -472,7 +472,7 @@ void antiCoggingCal() {
   SerialUSB.println("//---- Calculating friciton ----");
   SerialUSB.println(procent_bar);
 
-  step_target = ( (100 * y) / stepangle);
+  step_target = ( y / stepangle);
 
   enabled = true;
 
