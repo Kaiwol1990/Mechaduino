@@ -38,21 +38,8 @@ static void setupPins() {
   attachInterrupt(step_pin, stepInterrupt, RISING);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
-#ifdef USE_ENABLE_PIN
   pinMode(ena_pin, INPUT_PULLUP);
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
-#endif
-
-#ifdef NZS_HARDWARE
-  pinMode(PIN_SW1, INPUT_PULLUP);
-  pinMode(PIN_SW3, INPUT_PULLUP);
-  pinMode(PIN_SW4, INPUT_PULLUP);
-  pinMode(PIN_AS5047D_PWR, OUTPUT);
-  pinMode(PIN_YELLOW_LED, OUTPUT);
-
-  digitalWrite(PIN_YELLOW_LED, HIGH);
-  digitalWrite(PIN_AS5047D_PWR, LOW); //turn AS5047D on
-#endif
 
   digitalWriteDirect(IN_4, LOW);
   digitalWriteDirect(IN_3, LOW);

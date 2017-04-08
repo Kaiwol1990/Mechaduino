@@ -35,5 +35,9 @@ bool timed_out(unsigned long now, int time_out);
 
 extern int sign(int input);
 
+extern void boot();
+
+bool check_lookup(bool output);
+
 #endif
 

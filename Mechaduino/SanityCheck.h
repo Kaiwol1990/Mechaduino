@@ -20,10 +20,6 @@
 #endif
 
 
-#if (language!=1) && (language!=2)
-#line 87 "Configuration.h"
-#error "Oops!  No valid language selected"
-#endif
 
 
 #endif //SANITYCHECK_H

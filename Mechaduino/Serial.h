@@ -22,7 +22,9 @@ void parameterQuery();
 
 void parameterEdit(String arg = "");
 
-void step_response(String arg = "");
+void step_response();
+
+void dirac();
 
 void get_max_frequency();
 
@@ -35,5 +37,9 @@ int measure_setpoint();
 bool read_serialcommand(int timeout, String *command, String *argument);
 
 bool split_command(String *Input_pointer, String *first_substring, String *second_substring);
+
+void Streaming();
+
+void send_param();
 
 #endif

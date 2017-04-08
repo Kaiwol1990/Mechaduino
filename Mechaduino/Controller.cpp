@@ -1,7 +1,6 @@
 //Contains TC5 Controller definition
 //The main control loop is executed by the TC5 timer interrupt:
 
-//#include <SPI.h>
 #include "State.h"
 #include "Utils.h"
 
@@ -13,47 +12,59 @@
 #include "lookup_table.h"
 
 
-const int uLPFa = ((100 * exp(uLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int uLPFb = ((100 - uLPFa) + 0.5);
 
-const int RASa = ((100 * exp((1000 / RAS) * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int RASb = ((100 - RASa) + 0.5);
-
-const int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int pLPFb = ((100 - pLPFa) + 0.5);
+int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int pLPFb = ((100 - pLPFa) + 0.5);
 
 
 
 void TC5_Handler() {
   // gets called with PID frequency
-  static int ITerm;
-  static int DTerm;
-  static int u_1;
 
-  int raw_0;            // current measured angle
-  static int raw_1;     // last measured angle
-  int raw_diff;         // diff of both
+  //----- Variables -----
+  static int_fast32_t ITerm;
+  static int_fast32_t DTerm;
+
+  static int_fast32_t u_sim;
+
+  int_fast16_t raw_0;            // current measured angle
+  static int_fast16_t raw_1;     // last measured angle
+
+  int_fast32_t e_0;               // current error term
+  static int_fast32_t e_1;        // last error term
+  static int_fast32_t y_1;        // last wrapped angle
+  static int_fast32_t r_1;        // last target
+
+  static int_fast16_t last_phase_advanced;
 
 
-  int e_0;               // current error term
-  static int e_1;               // last error term
-  static long y_1;
-  static long r_1;
+  int_fast16_t omega_target;           // target angle velocity
+  static int_fast16_t omega_target_1;  // last target angle velocity
+  int_fast16_t omega_dot_target;       // derivation of the target angle
 
-  long target_raw;
-  static long target_raw_1;
-  int omega;
-  int omega_target;
-  static int omega_target_1;
-  int omega_dot_target;
+  static int_fast32_t target_buffer[50];
+  static int_fast16_t pointer;
+  static int_fast32_t sum;
 
-  static int print_counter;
+
+
+
+  //----- Calculations -----
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
+/*
+    sum = sum - target_buffer[pointer];
+    target_buffer[pointer] = step_target * stepangle;
 
-    target_raw = (step_target * stepangle) / 100;
+    sum = sum + target_buffer[pointer];
 
-    r = (RASa * r_1 + RASb * target_raw) / 100;
+    pointer = pointer + 1;
+    pointer = mod(pointer, 50);
+
+    r = sum / 50;
+
+*/
+    r = step_target * stepangle;
 
     omega_target = (r - r_1); //target angular velocity
 
@@ -61,9 +72,9 @@ void TC5_Handler() {
 
     y = readAngle(y_1, raw_1);
 
-    omega = (y - y_1);
-
     raw_0 = mod(y, 36000);
+
+
 
     if (enabled) {
 
@@ -71,100 +82,60 @@ void TC5_Handler() {
 
       ITerm = ITerm + (int_Ki * e_0);
 
-      if (ITerm > 150000) {
-        ITerm = 150000;
-      }
-      else if (ITerm < -150000) {
-        ITerm = -150000;
-      }
 
+      if (ITerm > ITerm_max) {
+        ITerm = ITerm_max;
+      }
+      else if (ITerm < -ITerm_max) {
+        ITerm = -ITerm_max;
+      }
 
       DTerm = (pLPFa * DTerm + (pLPFb * int_Kd * (e_0 - e_1))) / 100;
 
-
-      // PID loop                          +    feedforward term                 +    moment of inertia
-      u = ( (int_Kp * e_0) + ITerm + DTerm + (int_Kvff * (omega_target - omega)) + (int_J * omega_dot_target ^ 2) );
-
-
-      // friction compensation
-      if (abs(omega_target) > 1) {
-
-        u = u + sign(omega_target) * int_Kfr;
-
-
-      }
-
-
-      u = u / 1000;
-
-      u = (uLPFa * u_1 + uLPFb * u) / 100;
+      // PID loop                         +    moment of inertia
+      u = ((int_Kp * e_0) + ITerm + DTerm + (int_J * omega_dot_target)) / 1000;
 
 
     }
     else {
-      step_target = ( (100 * y) / stepangle);
+      step_target = y / stepangle;
       e_0 = 0;
       u = 0;
       ITerm = 0;
     }
 
-    int phase_advanced = (PA / 2) + abs(omega_target) * 3;
 
+    int_fast16_t phase_advanced = ((sign(u) * PA) / 4) + e_0 + (omega_target);
 
-    if (u > 0) {
-
-      if (u > uMAX) {
-        u = uMAX;
-      }
-
-      //output(-(raw_0 + PA), abs(u));
-      output(-(raw_0 + phase_advanced), abs(u));
+    if (phase_advanced >= PA) {
+      phase_advanced = PA;
     }
-    else {
-
-      if (u < -uMAX) {
-        u = -uMAX;
-      }
-
-      //output(-(raw_0 - PA), abs(u));
-      output(-(raw_0 - phase_advanced), abs(u));
+    else if (phase_advanced <= -PA) {
+      phase_advanced = -PA;
     }
+
+
+    if (u > uMAX) {
+      u = uMAX;
+    }
+    else if (u < -uMAX) {
+      u = -uMAX;
+    }
+
+
+    electric_angle = -(raw_0 + phase_advanced);
+
+    output(electric_angle, abs(u));
 
 
     raw_1 = raw_0;
     e_1 = e_0;
     y_1 = y;
 
-    u_1 = u;
 
     r_1 = r;
-    target_raw_1 = target_raw; //letztes target
     omega_target_1 = omega_target;
 
-    /*
-        print_counter += 1;
-
-        // print target and current angle every fifth loop
-        if (print_counter >= 4) {
-
-          SerialUSB.println(omega_target);
-          print_counter = 0;
-        }
-
-    */
-
-    // step respone active
-    if (response) {
-      print_counter += 1;
-
-      // print target and current angle every fifth loop
-      if (print_counter >= 4) {
-
-        SerialUSB.println((int)y); // print current position
-
-        print_counter = 0;
-      }
-    }
 
 
     if (abs(e_0) < max_e) {
@@ -173,6 +144,7 @@ void TC5_Handler() {
     else {
       REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
     }
+
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }
