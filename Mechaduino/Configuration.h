@@ -1,4 +1,3 @@
-
 #ifndef __CONFIGURATION_H__
 #define __CONFIGURATION_H__
 
@@ -89,7 +88,3 @@ extern int pLPF;
 extern int encoderLPF;
 
 #endif
-
-
-
-
