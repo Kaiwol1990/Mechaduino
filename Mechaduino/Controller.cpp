@@ -18,6 +18,23 @@ int pLPFb = ((100 - pLPFa) + 0.5);
 
 
 
+
+float  Tmax = 0.1;
+float zr = exp(-(1.0 / (FPID * Tmax)));
+float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
+
+float a = -(1 / J) * (1.0 / FPID);
+
+int theta = (10000 * exp(a)) + 0.5;
+int h = (10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))))) + 0.5;
+
+int r_k = (1000 * ((theta - zr) / h)) + 0.5;
+int v  = (1000 * ((1.0 - zr) / h)) + 0.5;
+
+
+const int_fast16_t from_i_to_u = ((100.0 * ((512.0 * 10.0 * rSense) / (1000.0 * 3.3))) + 0.5);
+
+
 void TC5_Handler() {
   // gets called with PID frequency
 
@@ -25,7 +42,7 @@ void TC5_Handler() {
   static int_fast32_t ITerm;
   static int_fast32_t DTerm;
 
-  static int_fast32_t u_sim;
+  static int_fast32_t ITerm_omega;
 
   int_fast16_t raw_0;            // current measured angle
   static int_fast16_t raw_1;     // last measured angle
@@ -34,54 +51,45 @@ void TC5_Handler() {
   static int_fast32_t e_1;        // last error term
   static int_fast32_t y_1;        // last wrapped angle
   static int_fast32_t r_1;        // last target
+  static int_fast32_t e_omega;        // last target
 
-  static int_fast16_t last_phase_advanced;
+
+  int_fast16_t omega_target;    // target angle velocity
+  // int_fast16_t omega;           // angle velocity
+
+  int_fast16_t phase_advanced;
 
 
-  int_fast16_t omega_target;           // target angle velocity
-  static int_fast16_t omega_target_1;  // last target angle velocity
-  int_fast16_t omega_dot_target;       // derivation of the target angle
-
-  static int_fast32_t target_buffer[50];
-  static int_fast16_t pointer;
-  static int_fast32_t sum;
-
+  static int_fast32_t x_k;
 
 
 
   //----- Calculations -----
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
-/*
-    sum = sum - target_buffer[pointer];
-    target_buffer[pointer] = step_target * stepangle;
 
-    sum = sum + target_buffer[pointer];
-
-    pointer = pointer + 1;
-    pointer = mod(pointer, 50);
-
-    r = sum / 50;
-
-*/
     r = step_target * stepangle;
 
     omega_target = (r - r_1); //target angular velocity
-
-    omega_dot_target =  (omega_target - omega_target_1); //target angular acceleration
 
     y = readAngle(y_1, raw_1);
 
     raw_0 = mod(y, 36000);
 
-
+    //omega = (y - y_1);
 
     if (enabled) {
 
       e_0 = (r - y);
 
-      ITerm = ITerm + (int_Ki * e_0);
+      //state controller for omega
+      int_fast32_t u_omega = (((v * omega_target) - (r_k * x_k)) * from_i_to_u) / 100000;
 
+
+
+      // PID loop
+      ITerm = ITerm + (int_Ki * e_0);
+      DTerm = ((pLPFa * DTerm) + (pLPFb * int_Kd * (e_0 - e_1))) / 100;
 
       if (ITerm > ITerm_max) {
         ITerm = ITerm_max;
@@ -90,28 +98,39 @@ void TC5_Handler() {
         ITerm = -ITerm_max;
       }
 
-      DTerm = (pLPFa * DTerm + (pLPFb * int_Kd * (e_0 - e_1))) / 100;
-
-      // PID loop                         +    moment of inertia
-      u = ((int_Kp * e_0) + ITerm + DTerm + (int_J * omega_dot_target)) / 1000;
+      int_fast32_t u_pid = ((int_Kp * e_0) + ITerm + DTerm) / 1000;
 
 
+      // correct the needed current
+      u = (u_pid + u_omega);
+
+      
     }
     else {
       step_target = y / stepangle;
       e_0 = 0;
       u = 0;
       ITerm = 0;
+      ITerm_omega = 0;
+      e_omega = 0;
     }
 
 
-    int_fast16_t phase_advanced = ((sign(u) * PA) / 4) + e_0 + (omega_target);
 
-    if (phase_advanced >= PA) {
-      phase_advanced = PA;
+
+    if (abs(omega_target) != 0) {
+      phase_advanced = sign(u) * PA;
     }
-    else if (phase_advanced <= -PA) {
-      phase_advanced = -PA;
+    else {
+      phase_advanced = ((sign(u) * PA) / 4 ) + e_0;
+
+      if (phase_advanced >= PA) {
+        phase_advanced = PA;
+      }
+      else if (phase_advanced <= -PA) {
+        phase_advanced = -PA;
+      }
+
     }
 
 
@@ -128,14 +147,14 @@ void TC5_Handler() {
     output(electric_angle, abs(u));
 
 
+
+    // calculate the future omega value for the state controller
+    x_k = ((theta * x_k) + (h * u)) / 10000;
+
     raw_1 = raw_0;
     e_1 = e_0;
     y_1 = y;
-
-
     r_1 = r;
-    omega_target_1 = omega_target;
-
 
 
     if (abs(e_0) < max_e) {

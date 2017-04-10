@@ -29,4 +29,10 @@ extern int encoderLPFb;
 
 extern int ITerm_max ;
 
+extern int theta;
+extern int h;
+
+extern int r_k;
+extern int v;
+
 #endif

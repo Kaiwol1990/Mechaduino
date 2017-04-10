@@ -23,8 +23,11 @@ extern volatile int int_Kp;
 extern volatile int int_Ki;
 extern volatile int int_Kd;
 
+extern float D_pulley;
+extern float J_load;
 
 extern int int_J;
+
 
 extern volatile int step_target;        // target as step gets incremented if an step is received
 

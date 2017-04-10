@@ -20,7 +20,7 @@ int iMAX = 1300;
 int USE_ENABLE_PIN = 1;
 
 // microstepping setting for step input
-int microstepping = 32;
+int microstepping = 64;
 
 // fullsteps for 360 degrees
 int steps_per_revolution = 200;
@@ -62,25 +62,18 @@ int J_rotor = 82;
 
 //---- PID Values current control -----
 
-float Kp = 1.02200;
-float Ki = 0.03600;
-float Kd = 7.24200;
+float Kp = 0.99700;
+float Ki = 0.03300*2;
+float Kd = 7.45400/2;
 
 
 
 //----------------------------------------------- Signal Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
-// baudrate speed bit/s
-#define baudrate 250000
-
-
-// frequency of the PID loop change only if you know what you're doing
-#define FPID 10000
-
 
 // break frequency in hertz for DTerm
-int pLPF = 1000;
+int pLPF = 400;
 
 
 

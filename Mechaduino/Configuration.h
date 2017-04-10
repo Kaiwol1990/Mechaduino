@@ -75,9 +75,8 @@ extern float Kd;
 // baudrate speed bit/s
 #define baudrate 250000
 
-
 // frequency of the PID loop change only if you know what you're doing
-#define FPID 10000
+#define FPID 5000
 
 
 // break frequency in hertz for DTerm

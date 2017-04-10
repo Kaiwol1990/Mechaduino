@@ -513,6 +513,18 @@ void parameterEdit(String arg) {
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
               int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
+              float Tmax = 0.1;
+              float zr = exp(-(1.0 / (FPID * Tmax)));
+              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
+
+              float a = -(1 / J) * (1.0 / FPID);
+
+              int theta = 10000 * exp(a);
+              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
+
+              int r_k = 1000 * ((theta - zr) / h);
+              int v  = 1000 * ((1.0 - zr) / h);
+
               return;
             }
           }
@@ -535,6 +547,18 @@ void parameterEdit(String arg) {
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
               int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+
+              float Tmax = 0.1;
+              float zr = exp(-(1.0 / (FPID * Tmax)));
+              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
+
+              float a = -(1 / J) * (1.0 / FPID);
+
+              int theta = 10000 * exp(a);
+              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
+
+              int r_k = 1000 * ((theta - zr) / h);
+              int v  = 1000 * ((1.0 - zr) / h);
 
               return;
             }
@@ -559,6 +583,18 @@ void parameterEdit(String arg) {
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
               int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
+              float Tmax = 0.1;
+              float zr = exp(-(1.0 / (FPID * Tmax)));
+              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
+
+              float a = -(1 / J) * (1.0 / FPID);
+
+              int theta = 10000 * exp(a);
+              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
+
+              int r_k = 1000 * ((theta - zr) / h);
+              int v  = 1000 * ((1.0 - zr) / h);
+
               return;
             }
           }
@@ -582,6 +618,18 @@ void parameterEdit(String arg) {
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
               int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
+              float Tmax = 0.1;
+              float zr = exp(-(1.0 / (FPID * Tmax)));
+              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
+
+              float a = -(1 / J) * (1.0 / FPID);
+
+              int theta = 10000 * exp(a);
+              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
+
+              int r_k = 1000 * ((theta - zr) / h);
+              int v  = 1000 * ((1.0 - zr) / h);
+
               return;
             }
           }
@@ -599,8 +647,8 @@ void parameterEdit(String arg) {
               pLPF = SerialUSB.parseInt();
               SerialUSB.println(pLPF);
 
-              pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              pLPFb = ((100 - pLPFa) + 0.5);
+              int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              int pLPFb = ((100 - pLPFa) + 0.5);
 
               return;
             }
@@ -620,8 +668,8 @@ void parameterEdit(String arg) {
               encoderLPF = SerialUSB.parseInt();
               SerialUSB.println(encoderLPF);
 
-              encoderLPFa = ((100 * exp(encoderLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              encoderLPFb = ((100 - encoderLPFa) + 0.5);
+              int encoderLPFa = ((100 * exp(encoderLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              int encoderLPFb = ((100 - encoderLPFa) + 0.5);
 
               return;
             }
@@ -646,6 +694,18 @@ void parameterEdit(String arg) {
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
               int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+
+              float Tmax = 0.1;
+              float zr = exp(-(1.0 / (FPID * Tmax)));
+              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
+
+              float a = -(1 / J) * (1.0 / FPID);
+
+              int theta = 10000 * exp(a);
+              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
+
+              int r_k = 1000 * ((theta - zr) / h);
+              int v  = 1000 * ((1.0 - zr) / h);
 
               return;
             }
@@ -734,12 +794,12 @@ void step_response() {
 
     int answer[1000];
     int target[1000];
-/*
-    for (int i = 0; i < 1000; i++) {
-      answer[i] = y;
-      target[i] = r;
-    }
-*/
+    /*
+        for (int i = 0; i < 1000; i++) {
+          answer[i] = y;
+          target[i] = r;
+        }
+    */
     int counter = 0;
 
     //wait 200 ms to plot some values befor starting the step response
@@ -823,12 +883,12 @@ void dirac() {
 
   int answer[1000];
   int target[1000];
-/*
-  for (int i = 0; i < 1000; i++) {
-    answer[i] = y;
-    target[i] = r;
-  }
-*/
+  /*
+    for (int i = 0; i < 1000; i++) {
+      answer[i] = y;
+      target[i] = r;
+    }
+  */
   int counter = 0;
 
   //wait 200 ms to plot some values befor starting the step response

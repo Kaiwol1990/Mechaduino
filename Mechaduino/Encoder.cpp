@@ -60,7 +60,7 @@ int readAngle(int last_angle, int last_raw) {
     temp_angle = last_angle  + raw_diff;
   }
 
-  if (abs(last_angle - temp_angle) > 15) {
+  if (abs(last_angle - temp_angle) > 7) {
     return temp_angle;
   }
   else {

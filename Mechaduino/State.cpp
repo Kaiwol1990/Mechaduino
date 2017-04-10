@@ -52,8 +52,6 @@ float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
 int int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
 
-
-
 // variable for the target in steps
 volatile int step_target = 0;      // target as step gets incremented if an step is received
 
