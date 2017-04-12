@@ -42,7 +42,6 @@ void TC5_Handler() {
   static int_fast32_t ITerm;
   static int_fast32_t DTerm;
 
-  static int_fast32_t ITerm_omega;
 
   int_fast16_t raw_0;            // current measured angle
   static int_fast16_t raw_1;     // last measured angle
@@ -50,47 +49,52 @@ void TC5_Handler() {
   int_fast32_t e_0;               // current error term
   static int_fast32_t e_1;        // last error term
   static int_fast32_t y_1;        // last wrapped angle
-  static int_fast32_t r_1;        // last target
-  static int_fast32_t e_omega;        // last target
+  static int_fast32_t r_1;        // target 1 loop ago
 
 
   int_fast16_t omega_target;    // target angle velocity
-  // int_fast16_t omega;           // angle velocity
 
   int_fast16_t phase_advanced;
 
-
   static int_fast32_t x_k;
 
-
+  int_fast32_t u_omega;
+  int_fast32_t u_pid;
 
   //----- Calculations -----
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
 
-    r = step_target * stepangle;
+    // calculate the current target from the received steps and the angle per step (+0.5 for fixed point arithmetics)
+    r = (step_target * stepangle) + 0.5;
 
-    omega_target = (r - r_1); //target angular velocity
+    // target angular velocity buffered over two sample times
+    omega_target = (r - r_1) + 0.5;
 
+    // read the current wrapped angle
     y = readAngle(y_1, raw_1);
 
+    // calculate the curren shaft angle
     raw_0 = mod(y, 36000);
 
-    //omega = (y - y_1);
 
+
+    // start the calculations only if the motor is enabled
     if (enabled) {
 
-      e_0 = (r - y);
-
-      //state controller for omega
-      int_fast32_t u_omega = (((v * omega_target) - (r_k * x_k)) * from_i_to_u) / 100000;
-
+      // state controller for omega
+      u_omega = (((v * omega_target) - (r_k * x_k)) * from_i_to_u) / 100000;
 
 
       // PID loop
+      // calculate the error
+      e_0 = (r_1 - y);
+
+      // calculate the I- and DTerm
       ITerm = ITerm + (int_Ki * e_0);
       DTerm = ((pLPFa * DTerm) + (pLPFb * int_Kd * (e_0 - e_1))) / 100;
 
+      // constrain the ITerm
       if (ITerm > ITerm_max) {
         ITerm = ITerm_max;
       }
@@ -98,26 +102,33 @@ void TC5_Handler() {
         ITerm = -ITerm_max;
       }
 
-      int_fast32_t u_pid = ((int_Kp * e_0) + ITerm + DTerm) / 1000;
+      u_pid = ((int_Kp * e_0) + ITerm + DTerm) / 1000;
 
 
-      // correct the needed current
+      // calculate the effort
       u = (u_pid + u_omega);
 
-      
     }
     else {
       step_target = y / stepangle;
       e_0 = 0;
       u = 0;
       ITerm = 0;
-      ITerm_omega = 0;
-      e_omega = 0;
     }
 
 
+    // constrain the effort to the user spedified maximum
+    if (u > uMAX) {
+      u = uMAX;
+    }
+    else if (u < -uMAX) {
+      u = -uMAX;
+    }
 
 
+    // calculate the phase advance term
+    // when the motor is commanded to hold its position the term will be calculate from the posiition error and a small amount of the PA Term
+    // when the motor is commanded to move the term will be set to it's maximum -> PA
     if (abs(omega_target) != 0) {
       phase_advanced = sign(u) * PA;
     }
@@ -134,16 +145,11 @@ void TC5_Handler() {
     }
 
 
-    if (u > uMAX) {
-      u = uMAX;
-    }
-    else if (u < -uMAX) {
-      u = -uMAX;
-    }
-
-
+    // calculate the electrical angle for the motor coils
     electric_angle = -(raw_0 + phase_advanced);
 
+
+    // write the output
     output(electric_angle, abs(u));
 
 
@@ -151,12 +157,14 @@ void TC5_Handler() {
     // calculate the future omega value for the state controller
     x_k = ((theta * x_k) + (h * u)) / 10000;
 
+
+    // buffer the variables for the next loop
     raw_1 = raw_0;
     e_1 = e_0;
     y_1 = y;
     r_1 = r;
 
-
+    //wrtie the max error led high or low
     if (abs(e_0) < max_e) {
       REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
     }

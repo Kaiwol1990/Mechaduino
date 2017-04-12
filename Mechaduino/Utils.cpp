@@ -866,9 +866,9 @@ void PID_autotune() {
   int_Kp = (((temp_Kp / loops)) + 0.5);
   int_Ki = (((temp_Ki / loops)) + 0.5);
   int_Kd = (((temp_Kd / loops)) + 0.5);
-  Kp = int_Kp/1000.0;
-  Ki = int_Ki/1000.0;
-  Kd = int_Kd/1000.0;
+  Kp = int_Kp / 1000.0;
+  Ki = int_Ki / 1000.0;
+  Kd = int_Kd / 1000.0;
 
 
   enableTC5Interrupts();

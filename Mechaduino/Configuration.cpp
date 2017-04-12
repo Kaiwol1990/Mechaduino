@@ -27,13 +27,13 @@ int steps_per_revolution = 200;
 
 
 // mm per revolution
-int mm_rev  =32;
+int mm_rev  = 32;
 
 // max error in mm, if the error gets bigger the led turns off
 float error_led_value = 0.05;
 
 // mass of the load in g, can be set to 0 if not known
-int m_load  =300;
+int m_load  = 300;
 
 
 //uncomment this to invert your motor direction
@@ -62,9 +62,9 @@ int J_rotor = 82;
 
 //---- PID Values current control -----
 
-float Kp = 0.99700;
-float Ki = 0.03300*2;
-float Kd = 7.45400/2;
+float Kp = 0.95600;
+float Ki = 0.06400;
+float Kd = 3.59800;
 
 
 
