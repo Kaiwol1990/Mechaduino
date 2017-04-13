@@ -44,7 +44,6 @@ void setup() {
   boot();
 
   Serial_menu();
-
 }
 
 

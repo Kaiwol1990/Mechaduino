@@ -19,7 +19,5 @@ int max_e = (36000 * error_led_value) / mm_rev;             // max error to turn
 
 int step_add = 1024 / microstepping;
 
-
-
-int ITerm_max = uMAX * 1000;
+int32_t ITerm_max = uMAX * 1000;
 

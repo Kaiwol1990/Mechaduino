@@ -4,7 +4,7 @@
 #include <avr/pgmspace.h>
 
 //---- Lookup -----
-extern const int_fast16_t lookup[] PROGMEM; // lookup table for the encoder reading
+extern const unsigned int lookup[] PROGMEM; // lookup table for the encoder reading
 
 
 #endif

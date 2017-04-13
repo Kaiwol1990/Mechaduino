@@ -2,7 +2,9 @@
 
 #ifndef __STATE_H__
 #define __STATE_H__
+#include <stdint.h>
 
+#include <SPI.h>
 //---- interrupt vars ----
 extern volatile long r;            //target angle
 extern volatile long y;           //current angle
@@ -23,12 +25,20 @@ extern volatile int int_Kp;
 extern volatile int int_Ki;
 extern volatile int int_Kd;
 
-extern float D_pulley;
-extern float J_load;
+extern volatile int int_Kvff;
+extern volatile int int_Kff;
 
-extern int int_J;
-
+extern volatile int int_J;
 
 extern volatile int step_target;        // target as step gets incremented if an step is received
+
+
+
+//---- filter section ----
+extern int D_Term_LPFa; // z = e^st pole mapping
+extern int D_Term_LPFb;
+
+extern int Encoder_LPFa; // z = e^st pole mapping
+extern int Encoder_LPFb;
 
 #endif

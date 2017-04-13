@@ -251,11 +251,11 @@ void parameterQuery() {
   SerialUSB.print("Kd = ");
   SerialUSB.println(int_Kd / 1000.0, 5);
 
-  SerialUSB.print("pLPF = ");
-  SerialUSB.println(pLPF);
+  SerialUSB.print("D_Term_LPF = ");
+  SerialUSB.println(D_Term_LPF);
 
-  SerialUSB.print("encoderLPF = ");
-  SerialUSB.println(encoderLPF);
+  SerialUSB.print("Encoder_LPF = ");
+  SerialUSB.println(Encoder_LPF);
 
   SerialUSB.print("mm_rev = ");
   SerialUSB.println(mm_rev);
@@ -265,6 +265,12 @@ void parameterQuery() {
 
   SerialUSB.print("INVERT = ");
   SerialUSB.println(INVERT);
+
+  SerialUSB.print("Kff = ");
+  SerialUSB.println(int_Kff / 1000.0, 5);
+
+  SerialUSB.print("Kvff = ");
+  SerialUSB.println(int_Kvff / 1000.0, 5);
 }
 
 
@@ -311,11 +317,11 @@ void parameterEdit(String arg) {
     SerialUSB.print("d ----- Kd = ");
     SerialUSB.println(int_Kd / 1000.0);
 
-    SerialUSB.print("k ----- pLPF = ");
-    SerialUSB.println(pLPF);
+    SerialUSB.print("k ----- D_Term_LPF = ");
+    SerialUSB.println(D_Term_LPF);
 
-    SerialUSB.print("l ----- encoderLPF = ");
-    SerialUSB.println(encoderLPF);
+    SerialUSB.print("l ----- Encoder_LPF = ");
+    SerialUSB.println(Encoder_LPF);
 
     SerialUSB.print("b ----- mm_rev = ");
     SerialUSB.println(mm_rev);
@@ -354,7 +360,7 @@ void parameterEdit(String arg) {
               Kp = SerialUSB.parseFloat();
               SerialUSB.println(Kp);
 
-              int_Kp = 1000 * Kp;
+              int_Kp = (1024 * Kp) + 0.5;
               return;
             }
 
@@ -374,7 +380,7 @@ void parameterEdit(String arg) {
               Ki = SerialUSB.parseFloat();
               SerialUSB.println(Ki);
 
-              int_Ki = 1000 * Ki;
+              int_Ki = (1024 * Ki) + 0.5;
               return;
             }
           }
@@ -393,7 +399,7 @@ void parameterEdit(String arg) {
               Kd = SerialUSB.parseFloat();
               SerialUSB.println(Kd);
 
-              int_Kd = 1000 * Kd;
+              int_Kd = (1024 * Kd) + 0.5;
               return;
             }
           }
@@ -447,7 +453,17 @@ void parameterEdit(String arg) {
             delay(10);
 
             if (SerialUSB.available()) {
-              microstepping = SerialUSB.parseInt();
+              int temp_microstepping = pow(2, (floor(log2(SerialUSB.parseInt()) + 0.5)));
+
+              if (temp_microstepping > 256) {
+                SerialUSB.println();
+                SerialUSB.println("Error microstepping can't be higher than 256!");
+                SerialUSB.print("microstepping =");
+              }
+              else {
+                microstepping = temp_microstepping;
+              }
+
               SerialUSB.println(microstepping);
               step_add = 512 / microstepping;;
 
@@ -469,7 +485,7 @@ void parameterEdit(String arg) {
               iMAX = SerialUSB.parseInt();
               SerialUSB.println(iMAX);
               uMAX = ((512.0 * iMAX * 10 * rSense) / (1000 * 3.3));
-              ITerm_max = uMAX * 1000;
+              ITerm_max = (uMAX * 1024)+0.5;
 
               return;
             }
@@ -511,19 +527,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-              float Tmax = 0.1;
-              float zr = exp(-(1.0 / (FPID * Tmax)));
-              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
-
-              float a = -(1 / J) * (1.0 / FPID);
-
-              int theta = 10000 * exp(a);
-              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
-
-              int r_k = 1000 * ((theta - zr) / h);
-              int v  = 1000 * ((1.0 - zr) / h);
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -546,19 +550,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-              float Tmax = 0.1;
-              float zr = exp(-(1.0 / (FPID * Tmax)));
-              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
-
-              float a = -(1 / J) * (1.0 / FPID);
-
-              int theta = 10000 * exp(a);
-              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
-
-              int r_k = 1000 * ((theta - zr) / h);
-              int v  = 1000 * ((1.0 - zr) / h);
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -581,19 +573,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-              float Tmax = 0.1;
-              float zr = exp(-(1.0 / (FPID * Tmax)));
-              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
-
-              float a = -(1 / J) * (1.0 / FPID);
-
-              int theta = 10000 * exp(a);
-              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
-
-              int r_k = 1000 * ((theta - zr) / h);
-              int v  = 1000 * ((1.0 - zr) / h);
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -616,19 +596,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-              float Tmax = 0.1;
-              float zr = exp(-(1.0 / (FPID * Tmax)));
-              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
-
-              float a = -(1 / J) * (1.0 / FPID);
-
-              int theta = 10000 * exp(a);
-              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
-
-              int r_k = 1000 * ((theta - zr) / h);
-              int v  = 1000 * ((1.0 - zr) / h);
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -637,18 +605,18 @@ void parameterEdit(String arg) {
       case 'k': {
           SerialUSB.read();
           start_millis = millis();
-          SerialUSB.print("enter new frequenzy for pLPF [Hz] = ");
+          SerialUSB.print("enter new frequenzy for D_Term_LPF [Hz] = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
             delay(10);
 
             if (SerialUSB.available()) {
-              pLPF = SerialUSB.parseInt();
-              SerialUSB.println(pLPF);
+              D_Term_LPF = SerialUSB.parseInt();
+              SerialUSB.println(D_Term_LPF);
 
-              int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              int pLPFb = ((100 - pLPFa) + 0.5);
+              D_Term_LPFa = ((128 * exp(D_Term_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              D_Term_LPFb = ((128 - D_Term_LPFa) + 0.5);
 
               return;
             }
@@ -658,18 +626,18 @@ void parameterEdit(String arg) {
       case 'l': {
           SerialUSB.read();
           start_millis = millis();
-          SerialUSB.print("enter new frequenzy for encoderLPF [Hz] = ");
+          SerialUSB.print("enter new frequenzy for Encoder_LPF [Hz] = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
             delay(10);
 
             if (SerialUSB.available()) {
-              encoderLPF = SerialUSB.parseInt();
-              SerialUSB.println(encoderLPF);
+              Encoder_LPF = SerialUSB.parseInt();
+              SerialUSB.println(Encoder_LPF);
 
-              int encoderLPFa = ((100 * exp(encoderLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              int encoderLPFb = ((100 - encoderLPFa) + 0.5);
+              Encoder_LPFa = ((128 * exp(Encoder_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              Encoder_LPFb = ((128 - Encoder_LPFa) + 0.5);
 
               return;
             }
@@ -693,19 +661,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-              float Tmax = 0.1;
-              float zr = exp(-(1.0 / (FPID * Tmax)));
-              float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
-
-              float a = -(1 / J) * (1.0 / FPID);
-
-              int theta = 10000 * exp(a);
-              int h = 10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))));
-
-              int r_k = 1000 * ((theta - zr) / h);
-              int v  = 1000 * ((1.0 - zr) / h);
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -752,6 +708,44 @@ void parameterEdit(String arg) {
 
               dirInterrupt();
 
+              return;
+            }
+          }
+        }
+        break;
+      case 's': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new friction feedforward setting [float] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              Kff = SerialUSB.parseFloat();
+              SerialUSB.println(Kff);
+
+              int_Kff = (1024 * Kff) + 0.5;
+              return;
+            }
+          }
+        }
+        break;
+      case 't': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new velocity feedforward setting [float] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              Kvff = SerialUSB.parseFloat();
+              SerialUSB.println(Kvff);
+
+              int_Kvff = (1024 * Kvff) + 0.5;
               return;
             }
           }
@@ -992,13 +986,6 @@ void get_max_frequency() {
     k++;
 
   }
-
-  frequency = 10 * (floor(( 0.99 * frequency) / 10));
-
-  SerialUSB.println("");
-  SerialUSB.print("define FPID ");
-  SerialUSB.print(frequency);
-  SerialUSB.println("  //Hz");
 
   enabled = last_enabled;
 
@@ -1353,9 +1340,9 @@ void send_param() {
   SerialUSB.write(';');
   SerialUSB.print(Kd, 5);
   SerialUSB.write(';');
-  SerialUSB.print(pLPF);
+  SerialUSB.print(D_Term_LPF);
   SerialUSB.write(';');
-  SerialUSB.print(encoderLPF);
+  SerialUSB.print(Encoder_LPF);
   SerialUSB.write(';');
   SerialUSB.print(mm_rev);
   SerialUSB.write(';');
@@ -1364,6 +1351,10 @@ void send_param() {
   SerialUSB.print(USE_ENABLE_PIN);
   SerialUSB.write(';');
   SerialUSB.print(INVERT);
+  SerialUSB.write(';');
+  SerialUSB.print(Kff);
+  SerialUSB.write(';');
+  SerialUSB.print(Kvff);
   SerialUSB.println();
 
 }

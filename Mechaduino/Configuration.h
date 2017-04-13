@@ -69,6 +69,10 @@ extern float Ki;
 extern float Kd;
 
 
+extern float Kvff;
+extern float Kff;
+
+
 //----------------------------------------------- Signal Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
@@ -80,12 +84,12 @@ extern float Kd;
 
 
 // break frequency in hertz for DTerm
-extern int pLPF;
+extern int D_Term_LPF;
 
 
 
 // break frequency in hertz for position
-extern int encoderLPF;
+extern int Encoder_LPF;
 
 #endif
 

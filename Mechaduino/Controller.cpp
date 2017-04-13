@@ -13,53 +13,28 @@
 
 
 
-int pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-int pLPFb = ((100 - pLPFa) + 0.5);
-
-
-
-
-float  Tmax = 0.1;
-float zr = exp(-(1.0 / (FPID * Tmax)));
-float J = (J_rotor + J_load) * (1 / (1000.0 * 100.0 * 100.0));
-
-float a = -(1 / J) * (1.0 / FPID);
-
-int theta = (10000 * exp(a)) + 0.5;
-int h = (10000 * (((1000 * M_max) / I_rated) * (1.0 - exp(-(1 / theta) * (1.0 / FPID))))) + 0.5;
-
-int r_k = (1000 * ((theta - zr) / h)) + 0.5;
-int v  = (1000 * ((1.0 - zr) / h)) + 0.5;
-
-
-const int_fast16_t from_i_to_u = ((100.0 * ((512.0 * 10.0 * rSense) / (1000.0 * 3.3))) + 0.5);
-
-
 void TC5_Handler() {
   // gets called with PID frequency
 
   //----- Variables -----
-  static int_fast32_t ITerm;
-  static int_fast32_t DTerm;
+  static int ITerm;
+  static int DTerm;
 
 
-  int_fast16_t raw_0;            // current measured angle
-  static int_fast16_t raw_1;     // last measured angle
+  int raw_0;            // current measured angle
+  static int raw_1;     // last measured angle
 
-  int_fast32_t e_0;               // current error term
-  static int_fast32_t e_1;        // last error term
-  static int_fast32_t y_1;        // last wrapped angle
-  static int_fast32_t r_1;        // target 1 loop ago
+  int e_0;               // current error term
+  static int e_1;        // last error term
+  static int y_1;        // last wrapped angle
+  static int r_1;        // target 1 loop ago
 
 
-  int_fast16_t omega_target;    // target angle velocity
+  int omega_target;    // target angle velocity
+  static int omega_target_1;
 
-  int_fast16_t phase_advanced;
+  int phase_advanced;
 
-  static int_fast32_t x_k;
-
-  int_fast32_t u_omega;
-  int_fast32_t u_pid;
 
   //----- Calculations -----
 
@@ -82,17 +57,14 @@ void TC5_Handler() {
     // start the calculations only if the motor is enabled
     if (enabled) {
 
-      // state controller for omega
-      u_omega = (((v * omega_target) - (r_k * x_k)) * from_i_to_u) / 100000;
-
-
-      // PID loop
+      // ----------- PID loop ----------
+      // -------------------------------
       // calculate the error
       e_0 = (r_1 - y);
 
       // calculate the I- and DTerm
       ITerm = ITerm + (int_Ki * e_0);
-      DTerm = ((pLPFa * DTerm) + (pLPFb * int_Kd * (e_0 - e_1))) / 100;
+      DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * int_Kd * (e_0 - e_1))) / 128;
 
       // constrain the ITerm
       if (ITerm > ITerm_max) {
@@ -102,11 +74,23 @@ void TC5_Handler() {
         ITerm = -ITerm_max;
       }
 
-      u_pid = ((int_Kp * e_0) + ITerm + DTerm) / 1000;
 
 
-      // calculate the effort
-      u = (u_pid + u_omega);
+      // ------ Add up the Effort ------
+      // -------------------------------
+      //         u-pid                         +         feedforward       +                 acceleration              +        friction
+
+      if (omega_target != 0) {
+        u = ( ((int_Kp * e_0) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) + (sign(omega_target) * int_Kff)  ) / 1024;
+      }
+      else {
+        u = ( ((int_Kp * e_0) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) +  0                              ) / 1024;
+
+      }
+
+
+
+
 
     }
     else {
@@ -154,15 +138,13 @@ void TC5_Handler() {
 
 
 
-    // calculate the future omega value for the state controller
-    x_k = ((theta * x_k) + (h * u)) / 10000;
-
 
     // buffer the variables for the next loop
     raw_1 = raw_0;
     e_1 = e_0;
     y_1 = y;
     r_1 = r;
+    omega_target_1 = omega_target;
 
     //wrtie the max error led high or low
     if (abs(e_0) < max_e) {

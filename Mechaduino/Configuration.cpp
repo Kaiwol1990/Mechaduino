@@ -67,18 +67,21 @@ float Ki = 0.06400;
 float Kd = 3.59800;
 
 
+float Kvff = 10.0;
+float Kff = 0.250;
+
 
 //----------------------------------------------- Signal Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
 
 // break frequency in hertz for DTerm
-int pLPF = 400;
+int D_Term_LPF = 800;
 
 
 
 // break frequency in hertz for position
-int encoderLPF = 400;
+int Encoder_LPF = 2000;
 
 
 

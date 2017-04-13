@@ -19,9 +19,13 @@ volatile bool frequency_test = false; // flag for frequency test
 volatile bool streaming = false;    // flag for data streaming
 
 
-volatile int int_Kp = Kp * 1000;
-volatile int int_Ki = Ki * 1000;
-volatile int int_Kd = Kd * 1000;
+volatile int int_Kp = (Kp * 1024) + 0.5;
+volatile int int_Ki = (Ki * 1024) + 0.5;
+volatile int int_Kd = (Kd * 1024) + 0.5;
+
+
+volatile int int_Kvff = (Kvff * 1024) + 0.5;
+volatile int int_Kff = (Kff * 1024) + 0.5;
 
 
 
@@ -49,11 +53,20 @@ float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
 
 
 // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-int int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+volatile int int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
 
 // variable for the target in steps
 volatile int step_target = 0;      // target as step gets incremented if an step is received
+
+
+
+//---- filter section ----
+int D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int D_Term_LPFb = ((128.0 - D_Term_LPFa) + 0.5);
+
+int Encoder_LPFa = ((128.0 * exp(Encoder_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int Encoder_LPFb = ((128.0 - Encoder_LPFa) + 0.5);
 
 
 
