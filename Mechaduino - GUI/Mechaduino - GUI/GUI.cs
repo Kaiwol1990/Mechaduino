@@ -59,8 +59,11 @@ namespace Mechaduino
 
         int k = 0;
 
+        bool Ramp;
 
 
+        int Counter = 0;
+        String value = "";
 
 
 
@@ -183,7 +186,8 @@ namespace Mechaduino
                 string InputData = serialPort1.ReadLine();
                 if (InputData != String.Empty)
                 {
-                    processValue(InputData);
+                   processValue(InputData);
+                    value = InputData;
                 }
                 else
                 {
@@ -194,6 +198,7 @@ namespace Mechaduino
             {
             }
         }
+
 
 
         private void processValue(string value)
@@ -248,13 +253,16 @@ namespace Mechaduino
                         }
 
                         Torque = Math.Abs((Pa * u * 240) / (180 * uMax));
-
+                        /*
 
                         if (savetoCSV)
                         {
-                            File.AppendAllText(CSVFileName, value);
+                            using (StreamWriter sw = File.AppendText(CSVFileName))
+                            {
+                                sw.Write(value);
+                            }
                         }
-
+                        */
                         if (!changing_size)
                         {
                             // update line plots
@@ -278,7 +286,7 @@ namespace Mechaduino
                             }
                         }
                     }
-                    else if (substrings.Length == 17)
+                    else if (substrings.Length == 19)
                     {
                         txtIdentifier.Text = substrings[0];
                         txtFullstep.Text = substrings[1];
@@ -312,6 +320,8 @@ namespace Mechaduino
                         {
                             checkInvert.Checked = false;
                         }
+                        txtKff.Text = substrings[17];
+                        txtKvff.Text = substrings[18];
                     }
                     else
                     {
@@ -350,22 +360,25 @@ namespace Mechaduino
                     }
                 }
             }
-            if (temp_min < 0)
+
+            double diff = temp_max - temp_min;
+
+            /*if (temp_min < 0)
             {
-                temp_min = temp_min * (1.0+(percent/100));
+            temp_min = temp_min + diff * (percent / 100);
             }
             else
-            {
-                temp_min = temp_min * (1.0 - (percent / 100));
-            }
-            if (temp_max < 0)
-            {
-                temp_max = temp_max * (1.0 - (percent / 100));
-            }
-            else
-            {
-                temp_max = temp_max * (1.0 + (percent / 100));
-            }
+            {*/
+                temp_min = temp_min - diff * (percent / 100);
+            /*}
+             if (temp_max < 0)
+             {
+                 temp_max = temp_max  - diff * (percent / 100);
+             }
+             else
+             {*/
+            temp_max = temp_max + diff * (percent / 100);
+            // }
 
 
             temp_min = Math.Floor(temp_min * 100) / 100.0;
@@ -621,7 +634,7 @@ namespace Mechaduino
 
                 // Update y axis scaling 
                 changeYScala(pltCurrent,5);
-                changeYScala(pltPosition,0.5);
+                changeYScala(pltPosition,5);
                 changeYScala(pltError,5);
 
                 // update bar plots
@@ -633,14 +646,26 @@ namespace Mechaduino
                 response_income = false;
                 pltresponse.Series[0].Points.Clear();
                 pltresponse.Series[1].Points.Clear();
+                
+                double start_position = 0;
+                double start_target = 0;
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position +response_position[j];
+                    start_target = start_target + response_target[j];
+                }
+                start_position = start_position / 50;
+                start_target = start_target / 50;
 
                 for (int j = 0; j <= response_command_Length - 1; j++)
                 {
-                    pltresponse.Series[0].Points.AddY(response_position[j]/100.0);
-                    pltresponse.Series[1].Points.AddY(response_target[j]/100.0);
+                    pltresponse.Series[0].Points.AddY((response_position[j]- start_position) / 100.0);
+                    pltresponse.Series[1].Points.AddY((response_target[j] - start_target) / 100.0);
                 }
+
                 response_command_Length = 0;
-                changeYScala(pltresponse,0.2);
+                changeYScala(pltresponse,5);
             }
         }
 
@@ -790,23 +815,27 @@ namespace Mechaduino
             }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        public void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (!savetoCSV)
             {
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     CSVFileName = saveFileDialog1.FileName;
-                    savetoCSV = true;
-                    Debug.Print(CSVFileName);
                     File.WriteAllText(CSVFileName, "");
-                    File.AppendAllText(CSVFileName, "streaming;position;target;error;effort;electrical_angle;enabled \n");
+                    File.AppendAllText(CSVFileName, "time;streaming;position;target;error;effort;electrical_angle;enabled \n");
+                    savetoCSV = true;
                 }
             }
             else
             {
                 checkBox1.Checked = false;
                 savetoCSV = false;
+                using (FileStream fs = new FileStream(CSVFileName, FileMode.Append, FileAccess.Write))
+                using (StreamWriter sw = new StreamWriter(fs))
+                {
+                    sw.Close();
+                }
             }
         }
 
@@ -995,6 +1024,24 @@ namespace Mechaduino
                     Thread.Sleep(10);
                     int invert = Convert.ToInt32(checkInvert.Checked);
                     cmd = Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("s\n");
+                    Thread.Sleep(10);
+                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("t\n");
+                    Thread.Sleep(10);
+                    double Kvff = Convert.ToDouble(txtKvff.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kvff, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
                 }
                 catch
@@ -1300,6 +1347,38 @@ namespace Mechaduino
             }
         }
 
+
+        private void btnSendFeedforward_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("s\n");
+                    Thread.Sleep(10);
+                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    String cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("t\n");
+                    Thread.Sleep(10);
+                    double Kvff = Convert.ToDouble(txtKvff.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kvff, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                }
+                catch
+                {
+                }
+            }
+
+        }
+
         private void btnDirac_Click(object sender, EventArgs e)
         {
             double setpoint = Convert.ToDouble(r);
@@ -1375,6 +1454,50 @@ namespace Mechaduino
             if (serialPort1.IsOpen)
             {
                 serialPort1.Write("dirac \n");
+            }
+
+        }
+
+        private void timerCSV_Tick(object sender, EventArgs e)
+        {
+
+
+            if (savetoCSV)
+            {
+                using (StreamWriter sw = File.AppendText(CSVFileName))
+                {
+                    sw.Write(value);
+                }
+            }
+        }
+
+        private void btnRamp_Click(object sender, EventArgs e)
+        {
+            Ramp = true;
+        }
+
+        private void timerRamp_Tick(object sender, EventArgs e)
+        {
+
+            if (Ramp)
+            {
+                Counter = Counter + 1;
+                
+                if (serialPort1.IsOpen)
+                {
+                    double step = Convert.ToDouble(txtRamp.Text)/100.0;
+                    double start = (Convert.ToDouble(r) / 100.0);
+                    string cmd = Convert.ToString(start + step, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write("set ");
+                    serialPort1.Write(cmd);
+                    serialPort1.Write("\n");
+                }
+            }
+
+            if (Counter == 100)
+            {
+                Ramp = false;
+                Counter = 0;
             }
 
         }
