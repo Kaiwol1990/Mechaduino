@@ -323,7 +323,7 @@ void calibration() {
   float lookupAngle;
   float tick;
 
-  SerialUSB.print("const PROGMEM int lookup[] = {");
+  SerialUSB.print("const PROGMEM unsigned int lookup[] = {");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
 

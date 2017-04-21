@@ -1355,6 +1355,10 @@ void send_param() {
   SerialUSB.print(Kff);
   SerialUSB.write(';');
   SerialUSB.print(Kvff);
+  SerialUSB.write(';');
+  SerialUSB.print(u_LPF);
+  SerialUSB.write(';');
+  SerialUSB.print(coil_LPF);
   SerialUSB.println();
 
 }

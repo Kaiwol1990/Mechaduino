@@ -41,4 +41,19 @@ extern int D_Term_LPFb;
 extern int Encoder_LPFa; // z = e^st pole mapping
 extern int Encoder_LPFb;
 
+extern int u_LPFa; // z = e^st pole mapping
+extern int u_LPFb;
+
+extern int coil_LPFa; // z = e^st pole mapping
+extern int coil_LPFb;
+/*
+extern int a_1;
+extern int a_2;
+extern int b_0;
+extern int b_1;
+extern int b_2;
+
+*/
+
+
 #endif

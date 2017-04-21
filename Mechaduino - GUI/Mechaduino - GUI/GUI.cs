@@ -92,6 +92,11 @@ namespace Mechaduino
             saveFileDialog1.Filter = "CSV File|*.csv|Text File|*.txt";
             saveFileDialog1.Title = "Save as CSV File";
 
+
+            saveFileDialogConfig.Filter = "Configuration File|*.cpp";
+            saveFileDialogConfig.Title = "Save as Configuration File";
+            saveFileDialogConfig.FileName = "Configuration.cpp";
+
             Thread.Sleep(300);
             
 
@@ -253,16 +258,8 @@ namespace Mechaduino
                         }
 
                         Torque = Math.Abs((Pa * u * 240) / (180 * uMax));
-                        /*
 
-                        if (savetoCSV)
-                        {
-                            using (StreamWriter sw = File.AppendText(CSVFileName))
-                            {
-                                sw.Write(value);
-                            }
-                        }
-                        */
+
                         if (!changing_size)
                         {
                             // update line plots
@@ -286,7 +283,7 @@ namespace Mechaduino
                             }
                         }
                     }
-                    else if (substrings.Length == 19)
+                    else if (substrings.Length == 21)
                     {
                         txtIdentifier.Text = substrings[0];
                         txtFullstep.Text = substrings[1];
@@ -322,6 +319,8 @@ namespace Mechaduino
                         }
                         txtKff.Text = substrings[17];
                         txtKvff.Text = substrings[18];
+                        txtuLPF.Text = substrings[19];
+                        txtcoilLPF.Text = substrings[20];
                     }
                     else
                     {
@@ -363,28 +362,11 @@ namespace Mechaduino
 
             double diff = temp_max - temp_min;
 
-            /*if (temp_min < 0)
-            {
-            temp_min = temp_min + diff * (percent / 100);
-            }
-            else
-            {*/
-                temp_min = temp_min - diff * (percent / 100);
-            /*}
-             if (temp_max < 0)
-             {
-                 temp_max = temp_max  - diff * (percent / 100);
-             }
-             else
-             {*/
+            temp_min = temp_min - diff * (percent / 100);
             temp_max = temp_max + diff * (percent / 100);
-            // }
-
-
+            
             temp_min = Math.Floor(temp_min * 100) / 100.0;
-            temp_max = Math.Ceiling(temp_max * 100) / 100.0;
-            
-            
+            temp_max = Math.Ceiling(temp_max * 100) / 100.0;          
 
             if (temp_min == temp_max)
             {
@@ -406,7 +388,6 @@ namespace Mechaduino
         {
             if (serialPort1.IsOpen)
             {
-                //Debug.Print(Convert.ToString(streaming));
                 if (streaming == 0)
                 {
                     serialPort1.DiscardInBuffer();
@@ -1064,14 +1045,148 @@ namespace Mechaduino
             }
         }
 
-
-
-
-
-
+        
         private void btnSave_Click(object sender, EventArgs e)
         {
-
+            if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
+            {
+                CSVFileName = saveFileDialogConfig.FileName;
+                File.WriteAllText(CSVFileName, "");
+                File.AppendAllText(CSVFileName, "#include \"Configuration.h\" \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "//-------------------------------------------------- Identifier ------------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "// char to identify the mechaduino with the Serial monitor \n");
+                File.AppendAllText(CSVFileName, "char identifier = '");
+                File.AppendAllText(CSVFileName, txtIdentifier.Text);
+                File.AppendAllText(CSVFileName, "'; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------- Hardware Section ---------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "// max current per coil 2000 mA for A4954 driver should be lower (thermal conditions) \n");
+                File.AppendAllText(CSVFileName, "int iMAX = ");
+                File.AppendAllText(CSVFileName, txtCurrent.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "//set to 1 if you want to use a enable pin \n");
+                if (checkEnable.Checked)
+                {
+                    File.AppendAllText(CSVFileName, "int USE_ENABLE_PIN = 1; \n");
+                }
+                else
+                {
+                    File.AppendAllText(CSVFileName, "int USE_ENABLE_PIN = 0; \n");
+                }
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// microstepping setting for step input \n");
+                File.AppendAllText(CSVFileName, "int microstepping = ");
+                File.AppendAllText(CSVFileName, txtMicrostep.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// fullsteps for 360 degrees \n");
+                File.AppendAllText(CSVFileName, "int steps_per_revolution = ");
+                File.AppendAllText(CSVFileName, txtFullstep.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// mm per revolution \n");
+                File.AppendAllText(CSVFileName, "int mm_rev  =");
+                File.AppendAllText(CSVFileName, txtmmRev.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// max error in mm, if the error gets bigger the led turns off \n");
+                File.AppendAllText(CSVFileName, "float error_led_value = ");
+                File.AppendAllText(CSVFileName, txtMaxE.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// mass of the load in g, can be set to 0 if not known \n");
+                File.AppendAllText(CSVFileName, "int m_load  = ");
+                File.AppendAllText(CSVFileName, txtloadMass.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "//set to 1 to invert your motor direction \n");
+                if (checkInvert.Checked)
+                {
+                    File.AppendAllText(CSVFileName, "int INVERT = 1; \n");
+                }
+                else
+                {
+                    File.AppendAllText(CSVFileName, "int INVERT = 0; \n");
+                }
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "//------------------------------------------------ Motor Section ------------------------------------------------ \n");
+                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "// max moment in Nm \n");
+                File.AppendAllText(CSVFileName, "float M_max = ");
+                File.AppendAllText(CSVFileName, txtMaxM.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// rated current for max moment in mA \n");
+                File.AppendAllText(CSVFileName, "int I_rated = ");
+                File.AppendAllText(CSVFileName, txtMaxI.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// rotor inertia in gcm^2 \n");
+                File.AppendAllText(CSVFileName, "int J_rotor = ");
+                File.AppendAllText(CSVFileName, txtRotorJ.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------- Controller Section ---------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "//---- PID Values current control ----- \n");
+                File.AppendAllText(CSVFileName, "//");
+                File.AppendAllText(CSVFileName, txtCurrent.Text);
+                File.AppendAllText(CSVFileName, " mA coil current \n");
+                File.AppendAllText(CSVFileName, "float Kp = ");
+                File.AppendAllText(CSVFileName, txtKp.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, "float Ki = ");
+                File.AppendAllText(CSVFileName, txtKi.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, "float Kd = ");
+                File.AppendAllText(CSVFileName, txtKd.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "float Kvff = ");
+                File.AppendAllText(CSVFileName, txtKvff.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, "float Kff = ");
+                File.AppendAllText(CSVFileName, txtKff.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "//----------------------------------------------- Filter  Section ----------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
+                File.AppendAllText(CSVFileName, "// break frequency in hertz for DTerm \n");
+                File.AppendAllText(CSVFileName, "int D_Term_LPF = ");
+                File.AppendAllText(CSVFileName, txtPLPF.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// break frequency in hertz for position \n");
+                File.AppendAllText(CSVFileName, "int Encoder_LPF = ");
+                File.AppendAllText(CSVFileName, txtEncoderLPF.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// break frequency in hertz for the effort filter \n");
+                File.AppendAllText(CSVFileName, "int u_LPF = ");
+                File.AppendAllText(CSVFileName, txtuLPF.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "// break frequency in hertz for coil current filter \n");
+                File.AppendAllText(CSVFileName, "int coil_LPF = ");
+                double clpf = Convert.ToDouble(txtcoilLPF.Text, System.Globalization.CultureInfo.InvariantCulture);
+                File.AppendAllText(CSVFileName, Convert.ToString(clpf));
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, " \n");
+            }
         }
 
 

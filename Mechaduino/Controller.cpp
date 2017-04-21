@@ -28,6 +28,11 @@ void TC5_Handler() {
   static int e_1;        // last error term
   static int y_1;        // last wrapped angle
   static int r_1;        // target 1 loop ago
+  static int u_1;
+  //static int u_2;
+  static int u_raw;
+  /*static int u_raw_1;
+    static int u_raw_2;*/
 
 
   int omega_target;    // target angle velocity
@@ -81,14 +86,17 @@ void TC5_Handler() {
       //         u-pid                         +         feedforward       +                 acceleration              +        friction
 
       if (omega_target != 0) {
-        u = ( ((int_Kp * e_0) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) + (sign(omega_target) * int_Kff)  ) / 1024;
+        u_raw = ( ((int_Kp * e_0) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) + (sign(omega_target) * int_Kff)  ) / 1024;
       }
       else {
-        u = ( ((int_Kp * e_0) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) +  0                              ) / 1024;
+        u_raw = ( ((int_Kp * e_0) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) +  0                              ) / 1024;
 
       }
 
+      u = ((u_LPFa * u_1) + (u_LPFb * u_raw)) / 128;
 
+      //biquad filter
+      //u = (b_0 * u_raw + b_1 * u_raw_1 + b_2 * u_raw_2 - a_1 * u_1 + a_2 * u_2) / 128;
 
 
 
@@ -144,6 +152,10 @@ void TC5_Handler() {
     e_1 = e_0;
     y_1 = y;
     r_1 = r;
+    u_1 = u;
+    /*u_2 = u_1;
+      u_raw_1 = u_raw;
+      u_raw_2 = u_raw_1;*/
     omega_target_1 = omega_target;
 
     //wrtie the max error led high or low
