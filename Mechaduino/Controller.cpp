@@ -94,6 +94,7 @@ void TC5_Handler() {
       }
 
       u = ((u_LPFa * u_1) + (u_LPFb * u_raw)) / 128;
+      // u =  u_raw;
 
       //biquad filter
       //u = (b_0 * u_raw + b_1 * u_raw_1 + b_2 * u_raw_2 - a_1 * u_1 + a_2 * u_2) / 128;

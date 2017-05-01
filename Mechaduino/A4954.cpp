@@ -27,7 +27,7 @@ void output(int theta, int effort) {
 
   int sin_coil_A = sin_lookup[angle];
   int sin_coil_B = cos_lookup[angle];
-  
+
   int v_coil_A = ((coil_LPFa * last_v_coil_A) + (coil_LPFb * ((effort * sin_coil_A) / 4096))) / 128;
   int v_coil_B = ((coil_LPFa * last_v_coil_B) + (coil_LPFb * ((effort * sin_coil_B) / 4096))) / 128;
   //int v_coil_A = (effort * sin_coil_A) / 4096;

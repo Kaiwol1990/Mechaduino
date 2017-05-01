@@ -257,6 +257,12 @@ void parameterQuery() {
   SerialUSB.print("Encoder_LPF = ");
   SerialUSB.println(Encoder_LPF);
 
+  SerialUSB.print("effort_LPF = ");
+  SerialUSB.println(u_LPF);
+
+  SerialUSB.print("coil_LPF = ");
+  SerialUSB.println(coil_LPF);
+
   SerialUSB.print("mm_rev = ");
   SerialUSB.println(mm_rev);
 
@@ -322,6 +328,12 @@ void parameterEdit(String arg) {
 
     SerialUSB.print("l ----- Encoder_LPF = ");
     SerialUSB.println(Encoder_LPF);
+
+    SerialUSB.print("x ----- u_LPF = ");
+    SerialUSB.println(u_LPF);
+
+    SerialUSB.print("x ----- coil_LPF = ");
+    SerialUSB.println(coil_LPF);
 
     SerialUSB.print("b ----- mm_rev = ");
     SerialUSB.println(mm_rev);
@@ -485,7 +497,7 @@ void parameterEdit(String arg) {
               iMAX = SerialUSB.parseInt();
               SerialUSB.println(iMAX);
               uMAX = ((512.0 * iMAX * 10 * rSense) / (1000 * 3.3));
-              ITerm_max = (uMAX * 1024)+0.5;
+              ITerm_max = (uMAX * 1024) + 0.5;
 
               return;
             }
@@ -615,8 +627,8 @@ void parameterEdit(String arg) {
               D_Term_LPF = SerialUSB.parseInt();
               SerialUSB.println(D_Term_LPF);
 
-              D_Term_LPFa = ((128 * exp(D_Term_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              D_Term_LPFb = ((128 - D_Term_LPFa) + 0.5);
+              D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              D_Term_LPFb = 128 - D_Term_LPFa;
 
               return;
             }
@@ -636,8 +648,50 @@ void parameterEdit(String arg) {
               Encoder_LPF = SerialUSB.parseInt();
               SerialUSB.println(Encoder_LPF);
 
-              Encoder_LPFa = ((128 * exp(Encoder_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              Encoder_LPFb = ((128 - Encoder_LPFa) + 0.5);
+              Encoder_LPFa = ((128.0 * exp(Encoder_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              Encoder_LPFb = 128 - Encoder_LPFa;
+
+              return;
+            }
+          }
+        }
+        break;
+      case 'x': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new frequenzy for u_LPF [Hz] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              u_LPF = SerialUSB.parseInt();
+              SerialUSB.println(u_LPF);
+
+              u_LPFa = ((128.0 * exp(u_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              u_LPFb = 128 - u_LPFa;
+
+              return;
+            }
+          }
+        }
+        break;
+      case 'y': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new frequenzy for coil_LPF [Hz] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              coil_LPF = SerialUSB.parseInt();
+              SerialUSB.println(coil_LPF);
+
+              coil_LPFa = ((128.0 * exp(coil_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              coil_LPFb = 128 - coil_LPFa;
 
               return;
             }

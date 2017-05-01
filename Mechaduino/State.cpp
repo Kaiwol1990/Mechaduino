@@ -63,16 +63,16 @@ volatile int step_target = 0;      // target as step gets incremented if an step
 
 //---- filter section ----
 int D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-int D_Term_LPFb = ((128.0 - D_Term_LPFa) + 0.5);
+int D_Term_LPFb = 128 - D_Term_LPFa;
 
 int Encoder_LPFa = ((128.0 * exp(Encoder_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-int Encoder_LPFb = ((128.0 - Encoder_LPFa) + 0.5);
+int Encoder_LPFb = 128 - Encoder_LPFa;
 
 int u_LPFa = ((128.0 * exp(u_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-int u_LPFb = ((128.0 - Encoder_LPFa) + 0.5);
+int u_LPFb = 128 - Encoder_LPFa;
 
 int coil_LPFa = ((128.0 * exp(coil_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-int coil_LPFb = ((128.0 - Encoder_LPFa) + 0.5);
+int coil_LPFb = 128 - Encoder_LPFa;
 
 /*
 // u filter as biquad

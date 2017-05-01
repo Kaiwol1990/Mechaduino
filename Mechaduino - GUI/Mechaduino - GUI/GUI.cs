@@ -1455,6 +1455,24 @@ namespace Mechaduino
                     int encoderLPF = Convert.ToInt32(txtEncoderLPF.Text);
                     cmd = Convert.ToString(encoderLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("x\n");
+                    Thread.Sleep(10);
+                    int uLPF = Convert.ToInt32(txtuLPF.Text);
+                    cmd = Convert.ToString(uLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("y\n");
+                    Thread.Sleep(10);
+                    int coilLPF = Convert.ToInt32(txtcoilLPF.Text);
+                    cmd = Convert.ToString(coilLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
                 }
                 catch
                 {
