@@ -25,8 +25,7 @@ namespace Mechaduino
 
         int[] response_position = new int[1000];
         int[] response_target = new int[1000];
-
-        double omeaga = 0;
+        
         double last_y = 0;
 
 
@@ -279,8 +278,7 @@ namespace Mechaduino
                             yValues[wrap_pointer] = (y / 100.0);
                             rValues[wrap_pointer] = (r / 100.0);
                             eValues[wrap_pointer] = (e / 100.0);
-
-                            omeaga = Math.Round((((y / 100.0) - (last_y / 100.0)) * 100.0), 3);
+                            
 
                             wrap_pointer += 1;
                             wrap_pointer = wrap_pointer % yValues.Length;
@@ -614,8 +612,7 @@ namespace Mechaduino
                 pltPosition.Series[0].Points.Clear();
                 pltPosition.Series[1].Points.Clear();
                 pltError.Series[0].Points.Clear();
-
-                txtOmega.Text = Convert.ToString(omeaga);
+                
 
                 for (int i = 0; i <= yValues.Length - 1; i++)
                 {
@@ -668,7 +665,7 @@ namespace Mechaduino
         private void btnSetTimeframe_Click(object sender, EventArgs e)
         {
             changing_size = true;
-            length = Convert.ToInt32(100*Convert.ToDouble(txtTimeframe.Text));
+            length = Convert.ToInt32(125*Convert.ToDouble(txtTimeframe.Text));
 
             if (length < 10)
             {

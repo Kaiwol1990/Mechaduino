@@ -1348,8 +1348,8 @@ void Streaming() {
     unsigned int current_time = millis();
 
     if (current_time >= next_time) {
-      //streaming with 100 Hz
-      next_time = current_time + 10;
+      //streaming with 250 Hz
+      next_time = current_time + 5;
 
       SerialUSB.print(streaming);         //print enable status
       SerialUSB.write(';');
