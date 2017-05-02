@@ -65,6 +65,9 @@ namespace Mechaduino
         int Counter = 0;
         String value = "";
 
+        String[] buffer = new String[100];
+        int buffer_counter = 0;
+
 
 
         public GUI()
@@ -261,6 +264,12 @@ namespace Mechaduino
                         }
 
                         Torque = Math.Abs((Pa * u * 240) / (180 * uMax));
+
+                        if (savetoCSV)
+                        {
+                            buffer[buffer_counter] = value;
+                            buffer_counter += 1;
+                        }
 
 
                         if (!changing_size)
@@ -813,7 +822,7 @@ namespace Mechaduino
                 {
                     CSVFileName = saveFileDialog1.FileName;
                     File.WriteAllText(CSVFileName, "");
-                    File.AppendAllText(CSVFileName, "time;streaming;position;target;error;effort;electrical_angle;enabled \n");
+                    File.AppendAllText(CSVFileName, "streaming;position;target;error;effort;electrical_angle;enabled \n");
                     savetoCSV = true;
                 }
             }
@@ -1608,7 +1617,12 @@ namespace Mechaduino
             {
                 using (StreamWriter sw = File.AppendText(CSVFileName))
                 {
-                    sw.Write(value);
+                    for (int i = 0; i < buffer_counter; i++)
+                    {
+                        sw.Write(buffer[i] + "\n");
+                    }
+                    buffer_counter = 0;
+                    //sw.Write(value);
                 }
             }
         }
