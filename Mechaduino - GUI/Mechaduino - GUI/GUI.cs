@@ -78,8 +78,11 @@ namespace Mechaduino
         private void Form1_Load(object sender, EventArgs e)
         {
             string[] ports = SerialPort.GetPortNames();
-            serial_box.Items.AddRange(ports);
-            serial_box.SelectedIndex = 0;
+            if (ports.Length > 0)
+            {
+                serial_box.Items.AddRange(ports);
+                serial_box.SelectedIndex = 0;
+            }
             btnOpen.Enabled = true;
             btnStream.Enabled = false;
             btnEnable.Enabled = false;
@@ -555,8 +558,11 @@ namespace Mechaduino
                     wasOpen = false;
                     string[] ports = SerialPort.GetPortNames();
                     serial_box.Items.Clear();
-                    serial_box.Items.AddRange(ports);
-                    serial_box.SelectedIndex = 0;
+                    if (ports.Length > 0)
+                    {
+                        serial_box.Items.AddRange(ports);
+                        serial_box.SelectedIndex = 0;
+                    }
                 }
             }
         }
@@ -701,8 +707,11 @@ namespace Mechaduino
         {
             string[] ports = SerialPort.GetPortNames();
             serial_box.Items.Clear();
-            serial_box.Items.AddRange(ports);
-            serial_box.SelectedIndex = 0;
+            if (ports.Length > 0)
+            {
+                serial_box.Items.AddRange(ports);
+                serial_box.SelectedIndex = 0;
+            }
         }
 
         private void btnp100_Click(object sender, EventArgs e)
