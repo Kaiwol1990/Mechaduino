@@ -16,3 +16,6 @@ D:\Dropbox\Drucker\Servo\Visual Studio\Mechaduino\Mechaduino - GUI\Mechaduino - 
 D:\Dropbox\Drucker\Servo\Visual Studio\Mechaduino\Mechaduino - GUI\Mechaduino - GUI\obj\Debug\Mechaduino.GUI.resources
 D:\Dropbox\Drucker\Servo\Visual Studio\Mechaduino\Mechaduino - GUI\Mechaduino - GUI\obj\Debug\Mechaduino___GUI.Properties.Resources.resources
 D:\Dropbox\Drucker\Servo\Visual Studio\Mechaduino\Mechaduino - GUI\Mechaduino - GUI\obj\Debug\Mechaduino - GUI.csproj.GenerateResource.Cache
+C:\Users\Wolter\Dropbox\Drucker\Servo\GitHUB\Mechaduino\Mechaduino - GUI\Mechaduino - GUI\bin\Debug\Mechaduino - GUI.exe.config
+C:\Users\Wolter\Dropbox\Drucker\Servo\GitHUB\Mechaduino\Mechaduino - GUI\Mechaduino - GUI\obj\Debug\Mechaduino - GUI.exe
+C:\Users\Wolter\Dropbox\Drucker\Servo\GitHUB\Mechaduino\Mechaduino - GUI\Mechaduino - GUI\obj\Debug\Mechaduino - GUI.pdb

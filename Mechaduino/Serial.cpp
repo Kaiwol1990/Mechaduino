@@ -818,92 +818,101 @@ void step_response() {
 
   int current_position = y;
   int response_steps = 0;
-  int last_step_target = step_target;
+  int frequency = 0;
+  const int last_step_target = step_target;
+  //int last_step_target = step_target;
 
+  unsigned const int time_out = 5000;
+  unsigned int start_millis = millis();
 
-  unsigned long start_millis;
-  start_millis = millis();
+  // get the number of steps for the step response
+  while (response_steps == 0) {
+    if (timed_out(start_millis, time_out)) return;
+    response_steps = SerialUSB.parseInt();
+  }
 
-  // get the steps for te step response
-  delay(10);
-  response_steps = SerialUSB.parseInt();//arg.toFloat();
+  SerialUSB.println(response_steps);
+  SerialUSB.print(" Sample rate = ");
 
-  if (response_steps != 0) {
+  // get the frequency for data recording
+  while (frequency == 0) {
+    if (timed_out(start_millis, time_out)) return;
+    frequency = SerialUSB.parseInt();
+  }
 
-    SerialUSB.println(response_steps);
+  if (frequency < 200) {
+    // limit the lower edge of the frequency to 200 Hz
+    frequency = 200;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" lower frequency limited to 200 Hz");
 
-    bool last_enabled = enabled;
-    bool last_dir = dir;
-    dir = true;
-    enabled = true;
-
-    int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
-    int big_time_step = (2.5 * small_time_step);
-
-    int answer[1000];
-    int target[1000];
-    /*
-        for (int i = 0; i < 1000; i++) {
-          answer[i] = y;
-          target[i] = r;
-        }
-    */
-    int counter = 0;
-
-    //wait 200 ms to plot some values befor starting the step response
-    unsigned int start_time = millis();
-    unsigned int current_time = start_time;
-    unsigned int next_time = start_time;
-
-    while (current_time < 200 + start_time) {
-      current_time = millis();
-      if (current_time >= next_time) {
-        next_time = current_time + 1;
-        answer[counter] = y;
-        target[counter] = r;
-        counter += 1;
-      }
-    }
-
-
-    //set the target to the new value
-    step_target = step_target + (response_steps * step_add);
-
-
-    // wait 1 second to get the response
-    while (current_time < 990 + start_time) {
-      current_time = millis();
-      if (current_time >= next_time) {
-        next_time = current_time + 1;
-        answer[counter] = y;
-        target[counter] = r;
-        counter += 1;
-      }
-    }
-
-    while (counter < 999) {
-      answer[counter] = answer[counter - 1];
-      target[counter] = target[counter - 1];
-      counter += 1;
-    }
-    answer[counter] = answer[counter - 1];
-    target[counter] = target[counter - 1];
-
-
-
-    for (int i = 0; i < counter; i++) {
-      SerialUSB.print(answer[i]);
-      SerialUSB.print(';');
-      SerialUSB.println(target[i]);
-
-    }
-    // set parameters back to the values before the response
-    enabled = last_enabled;
-    dir = last_dir;
+  }
+  else if (frequency > 10000) {
+    // limit the upper frequency to 10 kHz
+    frequency = 10000;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" upper frequency limited to 10 kHz");
   }
   else {
-    SerialUSB.println("invalid input!");
+    SerialUSB.println(frequency);
   }
+
+  bool last_enabled = enabled;
+  bool last_dir = dir;
+  dir = true;
+  enabled = true;
+
+
+  int answer[1500];
+  int target[1500];
+
+  int counter = 0;
+
+  unsigned int start_time = micros();
+  unsigned int current_time = start_time;
+  unsigned int next_time = start_time;
+
+  unsigned int dt = 1000000 / frequency;
+  unsigned int short_time = (100 * dt)+ start_time;
+  unsigned int long_time = (1490 * dt)+ start_time;
+
+  while (current_time < short_time) {
+    current_time = micros();
+    if (current_time >= next_time) {
+      next_time = current_time + dt;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
+  }
+
+  step_target = step_target + (response_steps * step_add);
+
+  while (current_time < long_time) {
+    current_time = micros();
+    if (current_time >= next_time) {
+      next_time = current_time + dt;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
+  }
+
+  while (counter < 1500) {
+    answer[counter] = answer[counter - 1];
+    target[counter] = target[counter - 1];
+    counter += 1;
+  }
+
+  for (int i = 0; i < 1500; i++) {
+    SerialUSB.print(answer[i]);
+    SerialUSB.print(';');
+    SerialUSB.println(target[i]);
+
+  }
+  // set parameters back to the values before the response
+  enabled = last_enabled;
+  dir = last_dir;
 }
 
 
@@ -913,55 +922,76 @@ void dirac() {
 
   int current_position = y;
   int response_steps = 0;
+  int frequency = 0;
   int last_step_target = step_target;
 
 
-  unsigned long start_millis;
-  start_millis = millis();
+  response_steps = 1000;
 
-  response_steps = 1000;//SerialUSB.parseInt();//arg.toFloat();
+  unsigned const int time_out = 5000;
+  unsigned int start_millis = millis();
+
+  SerialUSB.print(" Sample rate = ");
+
+  // get the frequency for data recording
+  while (frequency == 0) {
+    if (timed_out(start_millis, time_out)) return;
+    frequency = SerialUSB.parseInt();
+  }
+
+  if (frequency < 200) {
+    // limit the lower edge of the frequency to 200 Hz
+    frequency = 200;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" lower frequency limited to 200 Hz");
+
+  }
+  else if (frequency > 10000) {
+    // limit the upper frequency to 10 kHz
+    frequency = 10000;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" upper frequency limited to 10 kHz");
+  }
+  else {
+    SerialUSB.println(frequency);
+  }
 
   bool last_enabled = enabled;
   bool last_dir = dir;
   dir = true;
   enabled = true;
 
-  int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
-  int big_time_step = (2.5 * small_time_step);
-
-  int answer[1000];
-  int target[1000];
-  /*
-    for (int i = 0; i < 1000; i++) {
-      answer[i] = y;
-      target[i] = r;
-    }
-  */
+  int answer[1500];
+  int target[1500];
   int counter = 0;
 
-  //wait 200 ms to plot some values befor starting the step response
-  unsigned int start_time = millis();
+  unsigned int start_time = micros();
   unsigned int current_time = start_time;
   unsigned int next_time = start_time;
 
-  while (current_time < 200 + start_time) {
-    current_time = millis();
+
+  unsigned int dt = 1000000 / frequency;
+  unsigned int short_time = (100 * dt) + start_time;
+  unsigned int long_time = (1490 * dt) + start_time;
+  unsigned int short_time_2 = short_time + (2 * dt);
+
+
+  while (current_time < short_time) {
+    current_time = micros();
     if (current_time >= next_time) {
-      next_time = current_time + 1;
+      next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
       counter += 1;
     }
   }
 
+  step_target = last_step_target + (response_steps * step_add);
 
-  //set the target to the new value
-  step_target = step_target + (response_steps * step_add);
-
-  while (current_time < 201 + start_time) {
-    current_time = millis();
+  while (current_time < short_time_2) {
+    current_time = micros();
     if (current_time >= next_time) {
-      next_time = current_time + 1;
+      next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
       counter += 1;
@@ -970,29 +1000,24 @@ void dirac() {
 
   step_target = last_step_target;
 
-
-  // wait 1 second to get the response
-  while (current_time < 990 + start_time) {
-    current_time = millis();
+  while (current_time < long_time) {
+    current_time = micros();
     if (current_time >= next_time) {
-      next_time = current_time + 1;
+      next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
       counter += 1;
     }
   }
 
-  while (counter < 999) {
+  while (counter < 1500) {
     answer[counter] = answer[counter - 1];
     target[counter] = target[counter - 1];
     counter += 1;
   }
-  answer[counter] = answer[counter - 1];
-  target[counter] = target[counter - 1];
 
 
-
-  for (int i = 0; i < counter; i++) {
+  for (int i = 0; i < 1500; i++) {
     SerialUSB.print(answer[i]);
     SerialUSB.print(';');
     SerialUSB.println(target[i]);
@@ -1274,7 +1299,7 @@ int measure_setpoint() {
 
 
 
-bool read_serialcommand(int timeout, String *command, String *argument) {
+bool read_serialcommand(int timeout, String * command, String * argument) {
   static String Input = "";
   unsigned long start_time = micros();
   bool ended = false;
@@ -1314,7 +1339,7 @@ bool read_serialcommand(int timeout, String *command, String *argument) {
   }
 }
 
-bool split_command(String *Input_pointer, String *first_substring, String *second_substring) {
+bool split_command(String * Input_pointer, String * first_substring, String * second_substring) {
 
   // search for a whitespace as delimieter
   String Input = *Input_pointer;

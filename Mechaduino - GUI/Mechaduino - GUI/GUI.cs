@@ -23,8 +23,8 @@ namespace Mechaduino
         double[] rValues = new double[500];
         double[] eValues = new double[500];
 
-        int[] response_position = new int[1000];
-        int[] response_target = new int[1000];
+        int[] response_position = new int[1500];
+        int[] response_target = new int[1500];
         
         double last_y = 0;
 
@@ -88,7 +88,7 @@ namespace Mechaduino
             btnOpen.Enabled = true;
             btnStream.Enabled = false;
             btnEnable.Enabled = false;
-
+            
             ((Control)this.tabPlots).Enabled = false;
             ((Control)this.tabParameter).Enabled = false;
             ((Control)this.tabResponse).Enabled = false;
@@ -101,6 +101,8 @@ namespace Mechaduino
             saveFileDialogConfig.Filter = "Configuration File|*.cpp";
             saveFileDialogConfig.Title = "Save as Configuration File";
             saveFileDialogConfig.FileName = "Configuration.cpp";
+
+
 
             Thread.Sleep(300);
             
@@ -230,7 +232,7 @@ namespace Mechaduino
                         response_target[response_command_Length] = Convert.ToInt32(substrings[1]);
 
                         response_command_Length = response_command_Length + 1;
-                        if (response_command_Length >= 990)
+                        if (response_command_Length >= 1490)
                         {
                             response_income = true;
                         }
@@ -643,6 +645,9 @@ namespace Mechaduino
                 double start_position = 0;
                 double start_target = 0;
 
+                int frequency = Convert.ToInt32(txtfrequency.Text);
+                double dt = 1 / frequency;
+
                 for (int j = 0; j < 50; j++)
                 {
                     start_position = start_position +response_position[j];
@@ -651,10 +656,10 @@ namespace Mechaduino
                 start_position = start_position / 50;
                 start_target = start_target / 50;
 
-                for (int j = 0; j <= response_command_Length - 1; j++)
+                for (int j = 0; j < response_command_Length; j++)
                 {
-                    pltresponse.Series[0].Points.AddY((response_position[j]- start_position) / 100.0);
-                    pltresponse.Series[1].Points.AddY((response_target[j] - start_target) / 100.0);
+                    pltresponse.Series[0].Points.AddXY(j * dt, (response_position[j] - start_position) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_target) / 100.0);
                 }
 
                 response_command_Length = 0;
@@ -815,6 +820,7 @@ namespace Mechaduino
         {
             if (!savetoCSV)
             {
+                
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     CSVFileName = saveFileDialog1.FileName;
@@ -1579,14 +1585,24 @@ namespace Mechaduino
         {
             if (serialPort1.IsOpen)
             {
-
                 int steps = Convert.ToInt32(txtStepResponse.Text);
                 string cmd_response = Convert.ToString(steps, System.Globalization.CultureInfo.InvariantCulture);
+                int frequency = Convert.ToInt32(txtfrequency.Text);
+                string cmd_frequency = Convert.ToString(frequency, System.Globalization.CultureInfo.InvariantCulture);
+
+                saveFileDialog1.FileName = "step_response_" + cmd_frequency + "Hz";
+                saveFileDialog1.Title = "Save xtep response data";
+
+                pltresponse.Series[0].Points.Clear();
+                pltresponse.Series[1].Points.Clear();
+              
                 serialPort1.Write("stop_stream \n");
                 Thread.Sleep(100);
                 serialPort1.Write("response \n");
                 Thread.Sleep(100);
                 serialPort1.Write(cmd_response + "\n");
+                Thread.Sleep(100);
+                serialPort1.Write(cmd_frequency + "\n");
             }
         }
 
@@ -1599,9 +1615,21 @@ namespace Mechaduino
         private void btnDirac_Click_1(object sender, EventArgs e)
         {
 
+
             if (serialPort1.IsOpen)
             {
+                int frequency = Convert.ToInt32(txtfrequency.Text);
+                string cmd_frequency = Convert.ToString(frequency, System.Globalization.CultureInfo.InvariantCulture);
+
+                saveFileDialog1.FileName = "dirac_" + cmd_frequency + "Hz";
+                saveFileDialog1.Title = "Save dirac data";
+
+                pltresponse.Series[0].Points.Clear();
+                pltresponse.Series[1].Points.Clear();
+
                 serialPort1.Write("dirac \n");
+                Thread.Sleep(100);
+                serialPort1.Write(cmd_frequency + "\n");
             }
 
         }
@@ -1651,6 +1679,32 @@ namespace Mechaduino
             {
                 Ramp = false;
                 Counter = 0;
+            }
+
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+
+                CSVFileName = saveFileDialog1.FileName;
+                File.WriteAllText(CSVFileName, "");
+                File.AppendAllText(CSVFileName, "position;target\n");
+
+                using (FileStream fs = new FileStream(CSVFileName, FileMode.Append, FileAccess.Write))
+                using (StreamWriter sw = new StreamWriter(fs))
+
+                    if (response_position.Length > 0)
+                    {
+
+                        for (int i = 0; i < response_position.Length; i++)
+                        {
+                            sw.Write(Convert.ToString(response_position[i]) + ";" + Convert.ToString(response_target[i]) + "\n");
+                        }
+
+                    }
+
             }
 
         }
