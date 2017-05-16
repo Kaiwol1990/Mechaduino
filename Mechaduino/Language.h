@@ -75,7 +75,7 @@ const String PROGMEM autotune_header = "//---- Autotuning the current PID contro
 
 const String PROGMEM looptime_command  = "loop";
 const String PROGMEM looptime_menu = "calculates the maximal loopfrequency";
-const String PROGMEM looptime_header = "//---- Calibrating loop time ---- \n\r make sure the motor is moving!";
+const String PROGMEM looptime_header = "//---- Measuring loop time ---- \n\r make sure the motor is moving!";
 
 
 const String PROGMEM noise_command  = "noise";

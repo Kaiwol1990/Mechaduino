@@ -1,9 +1,9 @@
 #include "Arduino.h"
 #include "wiring_private.h"
 
-static int _readResolution = 9;
-static int _ADCResolution = 9;
-static int _writeResolution = 9;
+static uint_fast8_t _readResolution = 9;
+static uint_fast8_t _ADCResolution = 9;
+static uint_fast8_t _writeResolution = 9;
 
 // Wait for synchronization of registers between the clock domains
 static __inline__ void syncADC() __attribute__((always_inline, unused));
@@ -50,7 +50,7 @@ static inline uint32_t mapResolution(uint32_t value, uint32_t from, uint32_t to)
    Warning : On Arduino Zero board the input/output voltage for SAMD21G18 is 3.3 volts maximum
 */
 
-void digitalWriteDirect(int PIN, bool val) {
+void digitalWriteDirect(byte PIN, bool val) {
   if (val)  PORT->Group[g_APinDescription[PIN].ulPort].OUTSET.reg = (1ul << g_APinDescription[PIN].ulPin);
   else     PORT->Group[g_APinDescription[PIN].ulPort].OUTCLR.reg = (1ul << g_APinDescription[PIN].ulPin);
 }
@@ -110,7 +110,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         pinPeripheral(pin, PIO_TIMER_ALT);
       }
 
-      uint16_t GCLK_CLKCTRL_IDs[] = {
+      int GCLK_CLKCTRL_IDs[] = {
         GCLK_CLKCTRL_ID(GCM_TCC0_TCC1), // TCC0
         GCLK_CLKCTRL_ID(GCM_TCC0_TCC1), // TCC1
         GCLK_CLKCTRL_ID(GCM_TCC2_TC3),  // TCC2
@@ -120,7 +120,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         GCLK_CLKCTRL_ID(GCM_TC6_TC7),   // TC6
         GCLK_CLKCTRL_ID(GCM_TC6_TC7),   // TC7
       };
-      GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_IDs[tcNum]);
+      GCLK->CLKCTRL.reg = (int) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_IDs[tcNum]);
       while (GCLK->STATUS.bit.SYNCBUSY == 1);
 
       // Set PORT

@@ -1,3 +1,4 @@
+
 #ifndef __CONFIGURATION_H__
 #define __CONFIGURATION_H__
 
@@ -68,23 +69,37 @@ extern float Ki;
 extern float Kd;
 
 
-//----------------------------------------------- Signal Section -----------------------------------------------
+extern float Kvff;
+extern float Kff;
+
+
+//----------------------------------------------- Filter  Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
+// break frequency in hertz for DTerm
+extern int D_Term_LPF;
+
+// break frequency in hertz for position
+extern int Encoder_LPF;
+
+// break frequency in hertz for effort filter
+extern int u_LPF;
+
+// break frequency in hertz for coil current filter
+extern int coil_LPF;
+
+
+
+
+//----------------------------------------------- Internal Section ----------------------------------------------
+//------------------------------------------------- don't change ------------------------------------------------
 // baudrate speed bit/s
 #define baudrate 250000
 
-
 // frequency of the PID loop change only if you know what you're doing
-#define FPID 10000
-
-
-// break frequency in hertz for DTerm
-extern int pLPF;
-
-
-
-// break frequency in hertz for position
-extern int encoderLPF;
-
+#define FPID 5000
 #endif
+
+
+
+

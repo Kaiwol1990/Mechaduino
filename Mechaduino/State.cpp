@@ -19,9 +19,13 @@ volatile bool frequency_test = false; // flag for frequency test
 volatile bool streaming = false;    // flag for data streaming
 
 
-volatile int int_Kp = Kp * 1000;
-volatile int int_Ki = Ki * 1000;
-volatile int int_Kd = Kd * 1000;
+volatile int int_Kp = (Kp * 1024) + 0.5;
+volatile int int_Ki = (Ki * 1024) + 0.5;
+volatile int int_Kd = (Kd * 1024) + 0.5;
+
+
+volatile int int_Kvff = (Kvff * 1024) + 0.5;
+volatile int int_Kff = (Kff * 1024) + 0.5;
 
 
 
@@ -49,13 +53,51 @@ float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
 
 
 // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-int int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-
+volatile int int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
 
 // variable for the target in steps
 volatile int step_target = 0;      // target as step gets incremented if an step is received
+
+
+
+//---- filter section ----
+int D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int D_Term_LPFb = 128 - D_Term_LPFa;
+
+int Encoder_LPFa = ((128.0 * exp(Encoder_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int Encoder_LPFb = 128 - Encoder_LPFa;
+
+int u_LPFa = ((128.0 * exp(u_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int u_LPFb = 128 - Encoder_LPFa;
+
+int coil_LPFa = ((128.0 * exp(coil_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+int coil_LPFb = 128 - Encoder_LPFa;
+
+/*
+// u filter as biquad
+float A = pow(10, -1);
+float w = (2 * 3.141592 * u_LPF) / 5000;
+float Q = 0.71;
+float alpha = sin(w) / (Q * 2);
+
+float float_a_0 = 1 + alpha;
+float float_a_1 = (-2 * cos(w)) / float_a_0;
+float float_a_2 = (1 - alpha) / float_a_0;
+
+float float_b_0 = ((1 - cos(w)) / 2) / float_a_0;
+float float_b_1 = (1 - cos(w)) / float_a_0;
+float float_b_2 = (float_b_0) / float_a_0;
+
+int a_0 = (128 * float_a_0) + 0.5;
+int a_1 = (128 * float_a_1) + 0.5;
+int a_2 = (128 * float_a_2) + 0.5;
+int b_0 = (128 * float_b_0) + 0.5;
+int b_1 = (128 * float_b_1) + 0.5;
+int b_2 = (128 * float_b_2) + 0.5;
+
+*/
+
 
 
 

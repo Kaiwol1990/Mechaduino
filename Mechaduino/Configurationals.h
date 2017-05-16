@@ -1,5 +1,6 @@
 #ifndef __CONFIGURATIONALS_H__
 #define __CONFIGURATIONALS_H__
+#include <stdint.h>
 
 
 #define firmware_version "0.3"
@@ -27,6 +28,6 @@ extern int pLPFb;
 extern int encoderLPFa;
 extern int encoderLPFb;
 
-extern int ITerm_max ;
+extern int32_t ITerm_max ;
 
 #endif

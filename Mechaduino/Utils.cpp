@@ -323,7 +323,7 @@ void calibration() {
   float lookupAngle;
   float tick;
 
-  SerialUSB.print("const PROGMEM int lookup[] = {");
+  SerialUSB.print("const PROGMEM unsigned int lookup[] = {");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
 
@@ -415,7 +415,7 @@ void setupTCInterrupts() {
   const int overflow_TC_5 = (48000000 / FPID) - 1;
 
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
-  GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
+  GCLK->CLKCTRL.reg = (int) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
   while (GCLK->STATUS.bit.SYNCBUSY);
 
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TCx
@@ -866,9 +866,9 @@ void PID_autotune() {
   int_Kp = (((temp_Kp / loops)) + 0.5);
   int_Ki = (((temp_Ki / loops)) + 0.5);
   int_Kd = (((temp_Kd / loops)) + 0.5);
-  Kp = int_Kp/1000.0;
-  Ki = int_Ki/1000.0;
-  Kd = int_Kd/1000.0;
+  Kp = int_Kp / 1000.0;
+  Ki = int_Ki / 1000.0;
+  Kd = int_Kd / 1000.0;
 
 
   enableTC5Interrupts();

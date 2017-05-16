@@ -251,11 +251,17 @@ void parameterQuery() {
   SerialUSB.print("Kd = ");
   SerialUSB.println(int_Kd / 1000.0, 5);
 
-  SerialUSB.print("pLPF = ");
-  SerialUSB.println(pLPF);
+  SerialUSB.print("D_Term_LPF = ");
+  SerialUSB.println(D_Term_LPF);
 
-  SerialUSB.print("encoderLPF = ");
-  SerialUSB.println(encoderLPF);
+  SerialUSB.print("Encoder_LPF = ");
+  SerialUSB.println(Encoder_LPF);
+
+  SerialUSB.print("effort_LPF = ");
+  SerialUSB.println(u_LPF);
+
+  SerialUSB.print("coil_LPF = ");
+  SerialUSB.println(coil_LPF);
 
   SerialUSB.print("mm_rev = ");
   SerialUSB.println(mm_rev);
@@ -265,6 +271,12 @@ void parameterQuery() {
 
   SerialUSB.print("INVERT = ");
   SerialUSB.println(INVERT);
+
+  SerialUSB.print("Kff = ");
+  SerialUSB.println(int_Kff / 1000.0, 5);
+
+  SerialUSB.print("Kvff = ");
+  SerialUSB.println(int_Kvff / 1000.0, 5);
 }
 
 
@@ -311,11 +323,17 @@ void parameterEdit(String arg) {
     SerialUSB.print("d ----- Kd = ");
     SerialUSB.println(int_Kd / 1000.0);
 
-    SerialUSB.print("k ----- pLPF = ");
-    SerialUSB.println(pLPF);
+    SerialUSB.print("k ----- D_Term_LPF = ");
+    SerialUSB.println(D_Term_LPF);
 
-    SerialUSB.print("l ----- encoderLPF = ");
-    SerialUSB.println(encoderLPF);
+    SerialUSB.print("l ----- Encoder_LPF = ");
+    SerialUSB.println(Encoder_LPF);
+
+    SerialUSB.print("x ----- u_LPF = ");
+    SerialUSB.println(u_LPF);
+
+    SerialUSB.print("x ----- coil_LPF = ");
+    SerialUSB.println(coil_LPF);
 
     SerialUSB.print("b ----- mm_rev = ");
     SerialUSB.println(mm_rev);
@@ -354,7 +372,7 @@ void parameterEdit(String arg) {
               Kp = SerialUSB.parseFloat();
               SerialUSB.println(Kp);
 
-              int_Kp = 1000 * Kp;
+              int_Kp = (1024 * Kp) + 0.5;
               return;
             }
 
@@ -374,7 +392,7 @@ void parameterEdit(String arg) {
               Ki = SerialUSB.parseFloat();
               SerialUSB.println(Ki);
 
-              int_Ki = 1000 * Ki;
+              int_Ki = (1024 * Ki) + 0.5;
               return;
             }
           }
@@ -393,7 +411,7 @@ void parameterEdit(String arg) {
               Kd = SerialUSB.parseFloat();
               SerialUSB.println(Kd);
 
-              int_Kd = 1000 * Kd;
+              int_Kd = (1024 * Kd) + 0.5;
               return;
             }
           }
@@ -447,7 +465,17 @@ void parameterEdit(String arg) {
             delay(10);
 
             if (SerialUSB.available()) {
-              microstepping = SerialUSB.parseInt();
+              int temp_microstepping = pow(2, (floor(log2(SerialUSB.parseInt()) + 0.5)));
+
+              if (temp_microstepping > 256) {
+                SerialUSB.println();
+                SerialUSB.println("Error microstepping can't be higher than 256!");
+                SerialUSB.print("microstepping =");
+              }
+              else {
+                microstepping = temp_microstepping;
+              }
+
               SerialUSB.println(microstepping);
               step_add = 512 / microstepping;;
 
@@ -469,7 +497,7 @@ void parameterEdit(String arg) {
               iMAX = SerialUSB.parseInt();
               SerialUSB.println(iMAX);
               uMAX = ((512.0 * iMAX * 10 * rSense) / (1000 * 3.3));
-              ITerm_max = uMAX * 1000;
+              ITerm_max = (uMAX * 1024) + 0.5;
 
               return;
             }
@@ -511,7 +539,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -534,7 +562,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -557,7 +585,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -580,7 +608,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -589,18 +617,18 @@ void parameterEdit(String arg) {
       case 'k': {
           SerialUSB.read();
           start_millis = millis();
-          SerialUSB.print("enter new frequenzy for pLPF [Hz] = ");
+          SerialUSB.print("enter new frequenzy for D_Term_LPF [Hz] = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
             delay(10);
 
             if (SerialUSB.available()) {
-              pLPF = SerialUSB.parseInt();
-              SerialUSB.println(pLPF);
+              D_Term_LPF = SerialUSB.parseInt();
+              SerialUSB.println(D_Term_LPF);
 
-              pLPFa = ((100 * exp(pLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              pLPFb = ((100 - pLPFa) + 0.5);
+              D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              D_Term_LPFb = 128 - D_Term_LPFa;
 
               return;
             }
@@ -610,18 +638,60 @@ void parameterEdit(String arg) {
       case 'l': {
           SerialUSB.read();
           start_millis = millis();
-          SerialUSB.print("enter new frequenzy for encoderLPF [Hz] = ");
+          SerialUSB.print("enter new frequenzy for Encoder_LPF [Hz] = ");
 
           while (1) {
             if (timed_out(start_millis, time_out)) return;
             delay(10);
 
             if (SerialUSB.available()) {
-              encoderLPF = SerialUSB.parseInt();
-              SerialUSB.println(encoderLPF);
+              Encoder_LPF = SerialUSB.parseInt();
+              SerialUSB.println(Encoder_LPF);
 
-              encoderLPFa = ((100 * exp(encoderLPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              encoderLPFb = ((100 - encoderLPFa) + 0.5);
+              Encoder_LPFa = ((128.0 * exp(Encoder_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              Encoder_LPFb = 128 - Encoder_LPFa;
+
+              return;
+            }
+          }
+        }
+        break;
+      case 'x': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new frequenzy for u_LPF [Hz] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              u_LPF = SerialUSB.parseInt();
+              SerialUSB.println(u_LPF);
+
+              u_LPFa = ((128.0 * exp(u_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              u_LPFb = 128 - u_LPFa;
+
+              return;
+            }
+          }
+        }
+        break;
+      case 'y': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new frequenzy for coil_LPF [Hz] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              coil_LPF = SerialUSB.parseInt();
+              SerialUSB.println(coil_LPF);
+
+              coil_LPFa = ((128.0 * exp(coil_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+              coil_LPFb = 128 - coil_LPFa;
 
               return;
             }
@@ -645,7 +715,7 @@ void parameterEdit(String arg) {
               float D_pulley = (mm_rev / (10 * 3.14159283));
               float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
               // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1000.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
+              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -697,6 +767,44 @@ void parameterEdit(String arg) {
           }
         }
         break;
+      case 's': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new friction feedforward setting [float] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              Kff = SerialUSB.parseFloat();
+              SerialUSB.println(Kff);
+
+              int_Kff = (1024 * Kff) + 0.5;
+              return;
+            }
+          }
+        }
+        break;
+      case 't': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new velocity feedforward setting [float] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              Kvff = SerialUSB.parseFloat();
+              SerialUSB.println(Kvff);
+
+              int_Kvff = (1024 * Kvff) + 0.5;
+              return;
+            }
+          }
+        }
+        break;
     }
   }
 
@@ -710,92 +818,101 @@ void step_response() {
 
   int current_position = y;
   int response_steps = 0;
-  int last_step_target = step_target;
+  int frequency = 0;
+  const int last_step_target = step_target;
+  //int last_step_target = step_target;
 
+  unsigned const int time_out = 5000;
+  unsigned int start_millis = millis();
 
-  unsigned long start_millis;
-  start_millis = millis();
+  // get the number of steps for the step response
+  while (response_steps == 0) {
+    if (timed_out(start_millis, time_out)) return;
+    response_steps = SerialUSB.parseInt();
+  }
 
-  // get the steps for te step response
-  delay(10);
-  response_steps = SerialUSB.parseInt();//arg.toFloat();
+  SerialUSB.println(response_steps);
+  SerialUSB.print(" Sample rate = ");
 
-  if (response_steps != 0) {
+  // get the frequency for data recording
+  while (frequency == 0) {
+    if (timed_out(start_millis, time_out)) return;
+    frequency = SerialUSB.parseInt();
+  }
 
-    SerialUSB.println(response_steps);
+  if (frequency < 200) {
+    // limit the lower edge of the frequency to 200 Hz
+    frequency = 200;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" lower frequency limited to 200 Hz");
 
-    bool last_enabled = enabled;
-    bool last_dir = dir;
-    dir = true;
-    enabled = true;
-
-    int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
-    int big_time_step = (2.5 * small_time_step);
-
-    int answer[1000];
-    int target[1000];
-/*
-    for (int i = 0; i < 1000; i++) {
-      answer[i] = y;
-      target[i] = r;
-    }
-*/
-    int counter = 0;
-
-    //wait 200 ms to plot some values befor starting the step response
-    unsigned int start_time = millis();
-    unsigned int current_time = start_time;
-    unsigned int next_time = start_time;
-
-    while (current_time < 200 + start_time) {
-      current_time = millis();
-      if (current_time >= next_time) {
-        next_time = current_time + 1;
-        answer[counter] = y;
-        target[counter] = r;
-        counter += 1;
-      }
-    }
-
-
-    //set the target to the new value
-    step_target = step_target + (response_steps * step_add);
-
-
-    // wait 1 second to get the response
-    while (current_time < 990 + start_time) {
-      current_time = millis();
-      if (current_time >= next_time) {
-        next_time = current_time + 1;
-        answer[counter] = y;
-        target[counter] = r;
-        counter += 1;
-      }
-    }
-
-    while (counter < 999) {
-      answer[counter] = answer[counter - 1];
-      target[counter] = target[counter - 1];
-      counter += 1;
-    }
-    answer[counter] = answer[counter - 1];
-    target[counter] = target[counter - 1];
-
-
-
-    for (int i = 0; i < counter; i++) {
-      SerialUSB.print(answer[i]);
-      SerialUSB.print(';');
-      SerialUSB.println(target[i]);
-
-    }
-    // set parameters back to the values before the response
-    enabled = last_enabled;
-    dir = last_dir;
+  }
+  else if (frequency > 10000) {
+    // limit the upper frequency to 10 kHz
+    frequency = 10000;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" upper frequency limited to 10 kHz");
   }
   else {
-    SerialUSB.println("invalid input!");
+    SerialUSB.println(frequency);
   }
+
+  bool last_enabled = enabled;
+  bool last_dir = dir;
+  dir = true;
+  enabled = true;
+
+
+  int answer[1500];
+  int target[1500];
+
+  int counter = 0;
+
+  unsigned int start_time = micros();
+  unsigned int current_time = start_time;
+  unsigned int next_time = start_time;
+
+  unsigned int dt = 1000000 / frequency;
+  unsigned int short_time = (100 * dt)+ start_time;
+  unsigned int long_time = (1490 * dt)+ start_time;
+
+  while (current_time < short_time) {
+    current_time = micros();
+    if (current_time >= next_time) {
+      next_time = current_time + dt;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
+  }
+
+  step_target = step_target + (response_steps * step_add);
+
+  while (current_time < long_time) {
+    current_time = micros();
+    if (current_time >= next_time) {
+      next_time = current_time + dt;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
+  }
+
+  while (counter < 1500) {
+    answer[counter] = answer[counter - 1];
+    target[counter] = target[counter - 1];
+    counter += 1;
+  }
+
+  for (int i = 0; i < 1500; i++) {
+    SerialUSB.print(answer[i]);
+    SerialUSB.print(';');
+    SerialUSB.println(target[i]);
+
+  }
+  // set parameters back to the values before the response
+  enabled = last_enabled;
+  dir = last_dir;
 }
 
 
@@ -805,55 +922,76 @@ void dirac() {
 
   int current_position = y;
   int response_steps = 0;
+  int frequency = 0;
   int last_step_target = step_target;
 
 
-  unsigned long start_millis;
-  start_millis = millis();
+  response_steps = 1000;
 
-  response_steps = 1000;//SerialUSB.parseInt();//arg.toFloat();
+  unsigned const int time_out = 5000;
+  unsigned int start_millis = millis();
+
+  SerialUSB.print(" Sample rate = ");
+
+  // get the frequency for data recording
+  while (frequency == 0) {
+    if (timed_out(start_millis, time_out)) return;
+    frequency = SerialUSB.parseInt();
+  }
+
+  if (frequency < 200) {
+    // limit the lower edge of the frequency to 200 Hz
+    frequency = 200;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" lower frequency limited to 200 Hz");
+
+  }
+  else if (frequency > 10000) {
+    // limit the upper frequency to 10 kHz
+    frequency = 10000;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" upper frequency limited to 10 kHz");
+  }
+  else {
+    SerialUSB.println(frequency);
+  }
 
   bool last_enabled = enabled;
   bool last_dir = dir;
   dir = true;
   enabled = true;
 
-  int small_time_step = ((100 * 1000) / (FPID / 5)) + 0.5;
-  int big_time_step = (2.5 * small_time_step);
-
-  int answer[1000];
-  int target[1000];
-/*
-  for (int i = 0; i < 1000; i++) {
-    answer[i] = y;
-    target[i] = r;
-  }
-*/
+  int answer[1500];
+  int target[1500];
   int counter = 0;
 
-  //wait 200 ms to plot some values befor starting the step response
-  unsigned int start_time = millis();
+  unsigned int start_time = micros();
   unsigned int current_time = start_time;
   unsigned int next_time = start_time;
 
-  while (current_time < 200 + start_time) {
-    current_time = millis();
+
+  unsigned int dt = 1000000 / frequency;
+  unsigned int short_time = (100 * dt) + start_time;
+  unsigned int long_time = (1490 * dt) + start_time;
+  unsigned int short_time_2 = short_time + (2 * dt);
+
+
+  while (current_time < short_time) {
+    current_time = micros();
     if (current_time >= next_time) {
-      next_time = current_time + 1;
+      next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
       counter += 1;
     }
   }
 
+  step_target = last_step_target + (response_steps * step_add);
 
-  //set the target to the new value
-  step_target = step_target + (response_steps * step_add);
-
-  while (current_time < 201 + start_time) {
-    current_time = millis();
+  while (current_time < short_time_2) {
+    current_time = micros();
     if (current_time >= next_time) {
-      next_time = current_time + 1;
+      next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
       counter += 1;
@@ -862,29 +1000,24 @@ void dirac() {
 
   step_target = last_step_target;
 
-
-  // wait 1 second to get the response
-  while (current_time < 990 + start_time) {
-    current_time = millis();
+  while (current_time < long_time) {
+    current_time = micros();
     if (current_time >= next_time) {
-      next_time = current_time + 1;
+      next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
       counter += 1;
     }
   }
 
-  while (counter < 999) {
+  while (counter < 1500) {
     answer[counter] = answer[counter - 1];
     target[counter] = target[counter - 1];
     counter += 1;
   }
-  answer[counter] = answer[counter - 1];
-  target[counter] = target[counter - 1];
 
 
-
-  for (int i = 0; i < counter; i++) {
+  for (int i = 0; i < 1500; i++) {
     SerialUSB.print(answer[i]);
     SerialUSB.print(';');
     SerialUSB.println(target[i]);
@@ -932,13 +1065,6 @@ void get_max_frequency() {
     k++;
 
   }
-
-  frequency = 10 * (floor(( 0.99 * frequency) / 10));
-
-  SerialUSB.println("");
-  SerialUSB.print("define FPID ");
-  SerialUSB.print(frequency);
-  SerialUSB.println("  //Hz");
 
   enabled = last_enabled;
 
@@ -1173,7 +1299,7 @@ int measure_setpoint() {
 
 
 
-bool read_serialcommand(int timeout, String *command, String *argument) {
+bool read_serialcommand(int timeout, String * command, String * argument) {
   static String Input = "";
   unsigned long start_time = micros();
   bool ended = false;
@@ -1213,7 +1339,7 @@ bool read_serialcommand(int timeout, String *command, String *argument) {
   }
 }
 
-bool split_command(String *Input_pointer, String *first_substring, String *second_substring) {
+bool split_command(String * Input_pointer, String * first_substring, String * second_substring) {
 
   // search for a whitespace as delimieter
   String Input = *Input_pointer;
@@ -1247,8 +1373,8 @@ void Streaming() {
     unsigned int current_time = millis();
 
     if (current_time >= next_time) {
-      //streaming with 100 Hz
-      next_time = current_time + 10;
+      //streaming with 250 Hz
+      next_time = current_time + 4;
 
       SerialUSB.print(streaming);         //print enable status
       SerialUSB.write(';');
@@ -1293,9 +1419,9 @@ void send_param() {
   SerialUSB.write(';');
   SerialUSB.print(Kd, 5);
   SerialUSB.write(';');
-  SerialUSB.print(pLPF);
+  SerialUSB.print(D_Term_LPF);
   SerialUSB.write(';');
-  SerialUSB.print(encoderLPF);
+  SerialUSB.print(Encoder_LPF);
   SerialUSB.write(';');
   SerialUSB.print(mm_rev);
   SerialUSB.write(';');
@@ -1304,6 +1430,14 @@ void send_param() {
   SerialUSB.print(USE_ENABLE_PIN);
   SerialUSB.write(';');
   SerialUSB.print(INVERT);
+  SerialUSB.write(';');
+  SerialUSB.print(Kff);
+  SerialUSB.write(';');
+  SerialUSB.print(Kvff);
+  SerialUSB.write(';');
+  SerialUSB.print(u_LPF);
+  SerialUSB.write(';');
+  SerialUSB.print(coil_LPF);
   SerialUSB.println();
 
 }

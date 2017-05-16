@@ -1,4 +1,4 @@
- /*
+/*
   Mechaduino Firmware  --multi file branch
 
   SAM21D18 (Arduino Zero compatible), AS5047 encoder, A4954 driver
@@ -44,7 +44,6 @@ void setup() {
   boot();
 
   Serial_menu();
-
 }
 
 
