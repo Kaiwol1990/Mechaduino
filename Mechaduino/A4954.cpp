@@ -5,6 +5,7 @@
 #include "Configurationals.h"
 #include "analogFastWrite.h"
 #include "State.h"
+#include "lookup_table.h"
 
 #include <avr/pgmspace.h>
 
@@ -19,19 +20,15 @@ const int cos_lookup[] = {2896 , 2891 , 2886 , 2881 , 2876 , 2871 , 2866 , 2861 
 
 void output(int theta, int effort) {
 
-  static int last_v_coil_A;
-  static int last_v_coil_B;
 
   int angle = mod((phase_multiplier * theta) , 3600);
 
 
-  int sin_coil_A = sin_lookup[angle];
-  int sin_coil_B = cos_lookup[angle];
+  int sine = sin_lookup[angle];
+  int cosine = cos_lookup[angle];
 
-  int v_coil_A = ((coil_LPFa * last_v_coil_A) + (coil_LPFb * ((effort * sin_coil_A) / 4096))) / 128;
-  int v_coil_B = ((coil_LPFa * last_v_coil_B) + (coil_LPFb * ((effort * sin_coil_B) / 4096))) / 128;
-  //int v_coil_A = (effort * sin_coil_A) / 4096;
-  //int v_coil_B = (effort * sin_coil_B) / 4096;
+  int v_coil_A = ((abs(effort) * sine) ) / 4096;
+  int v_coil_B = ((abs(effort) * cosine) ) / 4096;
 
   analogFastWrite(VREF_1, abs(v_coil_A));
   analogFastWrite(VREF_2, abs(v_coil_B));
@@ -62,6 +59,4 @@ void output(int theta, int effort) {
     //REG_PORT_OUTSET0 = PORT_PA15;     //write IN_3 HIGH
   }
 
-  last_v_coil_B = v_coil_B;
-  last_v_coil_A = v_coil_A;
 }

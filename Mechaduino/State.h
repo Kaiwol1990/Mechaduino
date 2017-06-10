@@ -6,8 +6,10 @@
 
 #include <SPI.h>
 //---- interrupt vars ----
-extern volatile long r;            //target angle
-extern volatile long y;           //current angle
+extern volatile int r;            //target angle
+extern volatile int y;           //current angle
+extern volatile int raw_0;      //current shaft-angle
+extern volatile int error;      //error angle
 
 extern volatile int u;            // control effort
 
@@ -46,14 +48,7 @@ extern int u_LPFb;
 
 extern int coil_LPFa; // z = e^st pole mapping
 extern int coil_LPFb;
-/*
-extern int a_1;
-extern int a_2;
-extern int b_0;
-extern int b_1;
-extern int b_2;
 
-*/
 
 
 #endif

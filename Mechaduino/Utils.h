@@ -27,7 +27,7 @@ void antiCoggingCal();
 
 void PID_autotune();
 
-extern int digitalSmooth(int rawIn, int *sensSmoothArray);
+extern float digitalSmooth(int rawIn, int *sensSmoothArray);
 
 bool canceled();
 

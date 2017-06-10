@@ -5,8 +5,10 @@
 
 
 //---- interrupt vars ----
-volatile long r = 0;  //target angle
-volatile long y = 0;  //current angle
+volatile int r = 0;  //target angle
+volatile int y = 0;  //current angle
+volatile int raw_0 = 0;  //current shaft-angle
+volatile int error = 0;  //error angle
 
 volatile int u = 0;   // control effort
 
@@ -74,29 +76,7 @@ int u_LPFb = 128 - Encoder_LPFa;
 int coil_LPFa = ((128.0 * exp(coil_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
 int coil_LPFb = 128 - Encoder_LPFa;
 
-/*
-// u filter as biquad
-float A = pow(10, -1);
-float w = (2 * 3.141592 * u_LPF) / 5000;
-float Q = 0.71;
-float alpha = sin(w) / (Q * 2);
 
-float float_a_0 = 1 + alpha;
-float float_a_1 = (-2 * cos(w)) / float_a_0;
-float float_a_2 = (1 - alpha) / float_a_0;
-
-float float_b_0 = ((1 - cos(w)) / 2) / float_a_0;
-float float_b_1 = (1 - cos(w)) / float_a_0;
-float float_b_2 = (float_b_0) / float_a_0;
-
-int a_0 = (128 * float_a_0) + 0.5;
-int a_1 = (128 * float_a_1) + 0.5;
-int a_2 = (128 * float_a_2) + 0.5;
-int b_0 = (128 * float_b_0) + 0.5;
-int b_1 = (128 * float_b_1) + 0.5;
-int b_2 = (128 * float_b_2) + 0.5;
-
-*/
 
 
 

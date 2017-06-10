@@ -94,6 +94,9 @@ const String PROGMEM stream_stop_command = "stop_stream";
 
 const String PROGMEM load_param_command = "load_param";
 
+const String PROGMEM disableTC5 = "TC_off";
+const String PROGMEM enableTC5 = "TC_on";
+
 
 
 const String PROGMEM procent_bar = "|---+----+----+----+----+----+----+----+----+----|";

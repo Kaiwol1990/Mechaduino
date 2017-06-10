@@ -53,9 +53,9 @@ int J_rotor = 82;
 //--------------------------------------------------------------------------------------------------------------- 
 //---- PID Values current control ----- 
 //1500 mA coil current 
-float Kp = 1.17800; 
-float Ki = 0.08500; 
-float Kd = 4.07300; 
+float Kp = 1.10600; 
+float Ki = 0.04000; 
+float Kd = 4.70400; 
  
 float Kvff = 10.00; 
 float Kff = 0.25; 
@@ -65,10 +65,10 @@ float Kff = 0.25;
 //----------------------------------------------- Filter  Section ----------------------------------------------- 
 //--------------------------------------------------------------------------------------------------------------- 
 // break frequency in hertz for DTerm 
-int D_Term_LPF = 800; 
+int D_Term_LPF = 5000; 
  
 // break frequency in hertz for position 
-int Encoder_LPF = 2000; 
+int Encoder_LPF = 5000; 
  
 // break frequency in hertz for the effort filter 
 int u_LPF = 5000; 

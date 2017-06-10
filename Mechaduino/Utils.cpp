@@ -87,20 +87,14 @@ void calibration() {
   oneStep();
   delay(100);
   oneStep();
-
-  if ((readEncoder() - lastencoderReading) < 0)
-  {
-    SerialUSB.println("Wired backwards");
-    enableTC5Interrupts();
-    return;
-  }
-
-  dir = false;
-
-  oneStep();
-  delay(100);
-  oneStep();
-  delay(500);
+  /*
+    if ((readEncoder() - lastencoderReading) < 0)
+    {
+      SerialUSB.println("Wired backwards");
+      enableTC5Interrupts();
+      return;
+    }
+  */
 
 
   step_target = 0;
@@ -413,11 +407,13 @@ int mod(int xMod, int mMod) {
 
 void setupTCInterrupts() {
   const int overflow_TC_5 = (48000000 / FPID) - 1;
+  const int overflow_TC_4 = ((48000000 / (2 * FPID))) - 1;
 
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (int) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
   while (GCLK->STATUS.bit.SYNCBUSY);
 
+  // ----- TC5 with FPID-----
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TCx
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 
@@ -430,29 +426,56 @@ void setupTCInterrupts() {
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;   // Set perscaler
   WAIT_TC16_REGS_SYNC(TC5)
 
-
   TC5->COUNT16.CC[0].reg = overflow_TC_5;
   WAIT_TC16_REGS_SYNC(TC5)
-
 
   TC5->COUNT16.INTENSET.reg = 0;              // disable all interrupts
   TC5->COUNT16.INTENSET.bit.OVF = 1;          // enable overfollow
   TC5->COUNT16.INTENSET.bit.MC0 = 1;         // enable compare match to CC0
 
-  NVIC_SetPriority(TC5_IRQn, 1);
+  NVIC_SetPriority(TC5_IRQn, 2);
+
+
+  // ----- TC4 with FMEASURE-----
+  TC4->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TCx
+  WAIT_TC16_REGS_SYNC(TC4)                      // wait for sync
+
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_MODE_COUNT16;   // Set Timer counter Mode to 16 bits
+  WAIT_TC16_REGS_SYNC(TC4)
+
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ; // Set TC as normal Normal Frq
+  WAIT_TC16_REGS_SYNC(TC4)
+
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1;   // Set perscaler
+  WAIT_TC16_REGS_SYNC(TC4)
+
+  TC4->COUNT16.CC[0].reg = overflow_TC_4;
+  WAIT_TC16_REGS_SYNC(TC4)
+
+  TC4->COUNT16.INTENSET.reg = 0;              // disable all interrupts
+  TC4->COUNT16.INTENSET.bit.OVF = 1;          // enable overfollow
+  TC4->COUNT16.INTENSET.bit.MC0 = 1;         // enable compare match to CC0
+
+  NVIC_SetPriority(TC4_IRQn, 1);
+
 
   // Enable InterruptVector
   NVIC_EnableIRQ(TC5_IRQn);
+  NVIC_EnableIRQ(TC4_IRQn);
 }
 
 
 void enableTC5Interrupts() {
+  // ----- enables the main PID and measuring loop -----
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      //wait for sync
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC5
+  WAIT_TC16_REGS_SYNC(TC4)                      //wait for sync
 }
 
 
 void disableTC5Interrupts() {
+  // ----- disables the main PID loop -----
   TC5->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }
@@ -465,42 +488,46 @@ void antiCoggingCal() {
 
   float u_cogging = 0;
 
-  int max_count =  (16384 / 4);
+  int max_count =  16384;
 
   int prozent = ((max_count / 50) + 0.5) + 1;
 
   SerialUSB.println("//---- Calculating friciton ----");
-  SerialUSB.println(procent_bar);
 
   step_target = ( y / stepangle);
 
+  // stepangle = 36000/(steps_per_rev*1024)
+  // if steps_per_rev = 200
+  // stepangle = 0.001757 deg
+
+  SerialUSB.print("const unsigned int cogging_lookup[] = {");
+
   enabled = true;
 
-  for (int i = 0; i < max_count; i++) {
+  step_target = 0;
 
-    step_target = step_target + 1;
+  delay(100);
 
-    delay(15);
+  for (int i = 0; i < 36000; i++) {
+
+    step_target = i / stepangle;
+
+    delay(5);
 
     float sum = 0;
     for (int k = 0; k < 50; k++) {
       sum = sum + u;
     }
 
-    u_cogging = u_cogging + (sum / 50.0);
+    u_cogging = (sum / 50.0);
+    SerialUSB.print(u_cogging);
+    SerialUSB.print(',');
 
-    if (i % prozent == 0) {
-      SerialUSB.print(".");
-    }
 
   }
-  SerialUSB.println("");
-
-  //int_Kfr = 1000 * ((u_cogging / 2) / max_count);
 
   enabled = last_enabled;
-
-  SerialUSB.println();
+  SerialUSB.println("};");
   SerialUSB.println();
 }
 
@@ -514,8 +541,8 @@ void PID_autotune() {
   disableTC5Interrupts();
 
   int loops = 0;
-  int outputStep = (10 * uMAX) / 10;
-  int frequency = 20000;
+  int outputStep = uMAX;
+  int frequency =2* FPID;
   int dt = (1000000 / frequency);
   int scan_dt = dt - 2;
 
@@ -578,7 +605,7 @@ void PID_autotune() {
     int setpoint = measure_setpoint() + 0.5;
 
     // measure the noise from the controller
-    int noiseBand = (measure_noise(false) / 2) + 0.5;
+    int noiseBand = measure_noise(false);
 
     SerialUSB.print("|   ");
     SerialUSB.print(noiseBand);
@@ -588,15 +615,15 @@ void PID_autotune() {
     else {
       SerialUSB.print("   ");
     }
+    /*
+        int raw_0 = mod(y, 36000);
+        int raw_1 = raw_0;
+        int y_1 = y;*/
 
-    int raw_0 = mod(y, 36000);
-    int raw_1 = raw_0;
-    int y_1 = y;
-
-    int points[1124] = {0};
+    float points[1124] = {0};
     float smoothed[1124] = {0};
 
-#define filterSamples   5
+#define filterSamples   25
     int sensSmoothArray1 [filterSamples];
 
     int peakType = 0;
@@ -622,13 +649,6 @@ void PID_autotune() {
       now = micros();
       if (now > last_time + scan_dt) {
 
-        y = readAngle(y_1, raw_1);
-        raw_0 = mod(y, 36000);
-
-        last_time = now;
-        y_1 = y;
-        raw_1 = raw_0;
-
 
         if (y > absMax) {
           absMax = y;
@@ -647,10 +667,10 @@ void PID_autotune() {
 
 
         if (u > 0) {
-          output(-raw_0 - (PA ), abs(u));
+          output(-raw_0 - PA, u);
         }
         else {
-          output(-raw_0 + (PA ), abs(u));
+          output(-raw_0 + PA, u);
         }
 
         // wait half a second to get stable oscilations
@@ -744,7 +764,7 @@ void PID_autotune() {
       SerialUSB.print("    ");
     }
 
-    if (frequency < 40.0 || frequency > 9950.0) {
+    if (frequency < 2.0 || frequency > 9950.0) {
       SerialUSB.println();
       SerialUSB.println("Autotune failed, frequency not in usable range!");
       SerialUSB.println();
@@ -879,7 +899,7 @@ void PID_autotune() {
 
 
 
-int digitalSmooth(int rawIn, int *sensSmoothArray) {    // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
+float digitalSmooth(int rawIn, int *sensSmoothArray) {    // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
   int j, k, temp, top, bottom;
   long total;
   static int i;
@@ -916,7 +936,7 @@ int digitalSmooth(int rawIn, int *sensSmoothArray) {    // "int *sensSmoothArray
     k++;
   }
 
-  return total / k;    // divide by number of samples
+  return (float)total / (float)k;    // divide by number of samples
 }
 
 
@@ -974,11 +994,11 @@ void boot() {
   setupPins();
   SerialUSB.println(" OK");
 
-  SerialUSB.print("setup pins:");
+  SerialUSB.print("setup SPI:");
   setupSPI();
   SerialUSB.println(" OK");
 
-  SerialUSB.print("setup pins:");
+  SerialUSB.print("setup Interrupts:");
   setupTCInterrupts();
   SerialUSB.println(" OK");
 
@@ -989,9 +1009,7 @@ void boot() {
   enableTC5Interrupts();
   SerialUSB.println(" OK");
 
-
   delay(200);
-  SerialUSB.print("enable controller:");
 
   if (USE_ENABLE_PIN) {
     SerialUSB.print("setup enable pin:");

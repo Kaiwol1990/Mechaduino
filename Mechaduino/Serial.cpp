@@ -88,6 +88,12 @@ void serialCheck() {
     else if (Command.indexOf(load_param_command) == 0 && Command.length() == load_param_command.length()) {
       send_param();
     }
+    else if (Command.indexOf(disableTC5) == 0 && Command.length() == disableTC5.length()) {
+      disableTC5Interrupts();
+    }
+    else if (Command.indexOf(enableTC5) == 0 && Command.length() == enableTC5.length()) {
+      enableTC5Interrupts();
+    }
     else {
       SerialUSB.println("unknown command send 'help'");
     }
@@ -873,8 +879,9 @@ void step_response() {
   unsigned int next_time = start_time;
 
   unsigned int dt = 1000000 / frequency;
-  unsigned int short_time = (100 * dt)+ start_time;
-  unsigned int long_time = (1490 * dt)+ start_time;
+  unsigned int short_time = (100 * dt) + start_time;
+  unsigned int long_time = (1490 * dt) + start_time;
+  SerialUSB.println(frequency);
 
   while (current_time < short_time) {
     current_time = micros();
@@ -1177,15 +1184,10 @@ int measure_noise(bool serialoutput) {
   int counter = 0;
   float points[500] = {0};
 
-
-  unsigned long times[500] = {0};
   unsigned long now = micros();
   unsigned long last_time = now;
   int dt = ((1000000.0 / FPID) - 1);
 
-  int y_1 = y;
-  int raw_0 = mod(y, 36000);
-  int raw_1 = raw_0;
 
   while (counter < 500) {
 
@@ -1194,13 +1196,7 @@ int measure_noise(bool serialoutput) {
     if (now > last_time + dt) {
       last_time = now;
 
-      y = readAngle(y_1, raw_1);
-
       points[counter] = y;
-      raw_0 = mod(y, 36000);
-
-      raw_1 = raw_0;
-      y_1 = y;
       counter++;
     }
 
@@ -1276,22 +1272,12 @@ int measure_noise(bool serialoutput) {
 }
 
 int measure_setpoint() {
-
   int setpoint = 0;
-  int raw_0 = mod(y, 36000);
-  int raw_1 = raw_0;
-  int y_1 = y;
 
   for (int i = 0; i < 1000; i++) {
-
-    y = readAngle(y_1, raw_1);
-    raw_0 = mod(y, 36000);
-
-    raw_1 = raw_0;
-    y_1 = y;
-
     setpoint = setpoint + y;
   }
+
   return setpoint / 1000.0;
 
 }
@@ -1382,7 +1368,7 @@ void Streaming() {
       SerialUSB.write(';');
       SerialUSB.print(r);               //print target position
       SerialUSB.write(';');
-      SerialUSB.print(r - y);           //print error
+      SerialUSB.print(error);           //print error
       SerialUSB.write(';');
       SerialUSB.print(u);               //print effort
       SerialUSB.write(';');

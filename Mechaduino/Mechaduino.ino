@@ -40,10 +40,12 @@
 //////////////////////////////////////
 
 void setup() {
-
   boot();
-
   Serial_menu();
+
+  SerialUSB.println(Encoder_LPFa);
+  SerialUSB.println(Encoder_LPFb);
+  
 }
 
 
