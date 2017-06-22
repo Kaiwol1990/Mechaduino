@@ -8,10 +8,10 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - menu entry for generating an step response
 - deleted all modes other then position 
 - changed all float to integer operations
-- added some filtering to the coil current setting
-- changed the frequency of the PID loop to 15-20 kHz
-- changed the PWM resolution from 8 bit to 10 bit
-- Processing script to display the step resonse
+- changed the frequency of the PID loop to 5 kHz
+- changed the PWM resolution from 8 bit to 9 bit
+- GUI to watch and calibrate the Mechaduino
+- state controller for velocity part gives smoother motion
 - PID autotuning
 
 
