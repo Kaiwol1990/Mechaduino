@@ -8,11 +8,11 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - menu entry for generating an step response
 - deleted all modes other then position 
 - changed all float to integer operations
-- added some filtering to the coil current setting
-- changed the frequency of the PID loop to 10 kHz
+- added some filtering to the effort and the Kd term
+- changed the frequency of the PID loop to 5 kHz
+- added an extra ISR to read the shaft angle that runs with two times the PID frequency (oversampling)
 - changed the PWM resolution from 8 bit to 9 bit
 - PID autotuning
-- moment of inertia compensation term
 
 
 License
