@@ -13,7 +13,7 @@ orginal code can be found under: https://github.com/jcchurch13/Mechaduino-Firmwa
 - changed the PWM resolution from 8 bit to 10 bit
 - Processing script to display the step resonse
 - PID autotuning
-
+- LED shows errors by different blinking patterns
 
 Changed some Parameters! 
 - The lookuptable is now in its own file (lookup_table.cpp)
