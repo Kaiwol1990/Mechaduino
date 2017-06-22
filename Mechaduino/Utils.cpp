@@ -96,6 +96,7 @@ void enaInterrupt() {
 void calibration() {
 
   disableTC5Interrupts();
+  disableTC4Interrupts();
 
   int avg = 100;
 
@@ -105,84 +106,131 @@ void calibration() {
 
 
   float encoderReading = 0;
-  int lastencoderReading = 0;
 
   encoderReading = readEncoder();
 
+
+
+  SerialUSB.println("searching zeropoint");
+  step_target = 0;
+  if (encoderReading < (16384 / steps_per_revolution)) {
+    dir = true;
+    while (readEncoder() < (16384 / steps_per_revolution)) {
+      oneStep();
+      delay(100);
+    }
+  }
+
+
   dir = true;
+  step_target = 0;
 
   oneStep();
   delay(100);
   oneStep();
-  /*
-    if ((readEncoder() - lastencoderReading) < 0)
-    {
-      SerialUSB.println("Wired backwards");
-      enableTC5Interrupts();
-      return;
-    }
-  */
 
+  if ((readEncoder() - encoderReading) < 0)
+  {
+    SerialUSB.println("Wired backwards");
+    enableTC5Interrupts();
+    return;
+  }
 
+  
+  dir = false;
+  step_target = 0;
+
+  oneStep();
+  delay(100);
+  oneStep();
+  dir = true;
   step_target = 0;
 
   SerialUSB.println("Calibrating fullsteps");
   SerialUSB.println(procent_bar);
   int counter = 0;
-  int count = (3 * steps_per_revolution) / 50;
+  int count = steps_per_revolution / 50;
   dir = true;
 
-  int readings[3][steps_per_revolution];
-  for (int k = 0; k < 3; k++) {
+  int readings[steps_per_revolution];
 
-    // step to every single fullstep position and read the Encoder
-    for (int i = 0; i < steps_per_revolution; i++) {
+  int temp_reading = 4 * readEncoder();
+  int last_reading = temp_reading;
 
-      if (canceled()) return;
-      counter += 1;
-
-      delay(100);
-
-      encoderReading = 0;
-
-      for (int reading = 0; reading < avg; reading++) {
-        encoderReading += readEncoder();
-        delayMicroseconds(100);
-      }
-
-      readings[k][i] =  (encoderReading / avg);
-
-      if (counter == count) {
-        counter = 0;
-        SerialUSB.print(".");
-      }
-      oneStep();
-    }
-  }
-
-  float fullStepReadings_raw[steps_per_revolution];
+  // step to every single fullstep position and read the Encoder
   for (int i = 0; i < steps_per_revolution; i++) {
-    fullStepReadings_raw[i] = (( 4 * (readings[0][i] + readings[1][i] + readings[2][i]) / 3.0) + 0.5);
+
+    if (canceled()) return;
+    counter += 1;
+
+    delay(100);
+
+    encoderReading = 0;
+
+    for (int k = 0; k < avg; k++) {
+
+      temp_reading = 4 * readEncoder();
+
+      if ((temp_reading - last_reading) <= -32768) {
+        temp_reading += 65536;
+      }
+      else if ((temp_reading - last_reading) >= 32768) {
+        temp_reading -= 65536;
+      }
+
+      encoderReading += temp_reading;
+
+      last_reading = temp_reading;
+
+      delayMicroseconds(100);
+    }
+
+
+    readings[i] =  (encoderReading / avg) + 0.5;
+
+    if (readings[i] > 65536) {
+      readings[i] = readings[i] - 65536;
+    }
+
+    if (i >= 1) {
+      if (abs(readings[i] - readings[i - 1]) < (65536 / (1.1 * steps_per_revolution))) {
+        SerialUSB.println("Motor is not moving -> abbort");
+        return;
+      }
+    }
+
+    if (counter == count) {
+      counter = 0;
+      SerialUSB.print(".");
+    }
+
+    oneStep();
   }
 
-  output(0, 0);
-  step_target = 0;
 
+  dir = false;
+  oneStep();
+  delay(100);
+  dir = true;
+
+  SerialUSB.println();
+  SerialUSB.println();
+
+
+  // generate a perfect lookup table
   int perfect[steps_per_revolution];
   for ( int i = 0; i < steps_per_revolution; i++) {
-    perfect[i] = ((i * 65536) / 200);
+    perfect[i] = ((i * 65536) / steps_per_revolution);
   }
 
-  SerialUSB.println();
-  SerialUSB.println();
 
 
-  // find max value in full step readings and index
+  // find min value in full step readings and its index
   float minimum = 65536;
   int idx = 0;
   for ( int i = 0; i < steps_per_revolution; i++) {
-    if (fullStepReadings_raw[i] < minimum) {
-      minimum = fullStepReadings_raw[i];
+    if (readings[i] < minimum) {
+      minimum = readings[i];
       idx = i;
     }
   }
@@ -195,9 +243,8 @@ void calibration() {
     if (counter >= steps_per_revolution) {
       counter = counter - steps_per_revolution;
     }
-    fullStepReadings[i] = fullStepReadings_raw[counter];
+    fullStepReadings[i] = readings[counter];
   }
-
 
 
   // calculate the error between the measured and perfect lookup
@@ -206,6 +253,9 @@ void calibration() {
     error_raw[i] =  (float)(perfect[i]) - (float)(fullStepReadings[i]);
   }
 
+
+  // generate a normal distribution curve
+  // needed to smooth the fullstep readings
   float gausian[31];
   counter = 0;
   float m;
@@ -219,7 +269,7 @@ void calibration() {
   }
 
 
-  // smooth the fullstep readings with a ring buffer
+  // smooth the fullstep readings with a ring buffer and the normal distribution
   float error[steps_per_revolution];
   counter = 0;
   for ( int i = 0; i < steps_per_revolution; i++) {
@@ -230,10 +280,10 @@ void calibration() {
 
     for (int j = lower; j < higher; j++) {
       if (j >= steps_per_revolution) {
-        m = m + error_raw[j - 200] * gausian[counter];
+        m = m + error_raw[j - steps_per_revolution] * gausian[counter];
       }
       else if (j < 0) {
-        m = m + error_raw[j + 200] * gausian[counter];
+        m = m + error_raw[j + steps_per_revolution] * gausian[counter];
       }
       else {
         m = m + error_raw[j] * gausian[counter];
@@ -267,21 +317,40 @@ void calibration() {
   counter = 0;
   count = (steps_per_revolution) / 50;
   float smoothed_error;
+
+
+  temp_reading = 4 * readEncoder();
+  last_reading = temp_reading;
   for (int i = 0; i < steps_per_revolution; i++) {
 
     if (canceled()) return;
     counter += 1;
 
-    delay(20);
+    delay(100);
 
     encoderReading = 0;
 
     for (int reading = 0; reading < avg; reading++) {
-      encoderReading += readEncoder();
+
+      temp_reading = 4 * readEncoder();
+      if ((temp_reading - last_reading) < -32768) {
+        temp_reading += 65536;
+      }
+      else if ((temp_reading - last_reading) > 32768) {
+        temp_reading -= 65536;
+      }
+      last_reading = temp_reading;
+
+      encoderReading += temp_reading;
+
       delayMicroseconds(100);
     }
 
-    float temp =  abs((4 * encoderReading / avg) - x[i]);
+    if ((encoderReading / avg) > 65536) {
+      encoderReading = encoderReading - (avg * 65536);
+    }
+
+    float temp =  abs((encoderReading / avg) - x[i]);
 
     if (temp > smoothed_error) {
       smoothed_error = temp;
@@ -293,6 +362,10 @@ void calibration() {
     }
     oneStep();
   }
+
+
+  output(0, 0);
+  step_target = 0;
 
   SerialUSB.println();
   SerialUSB.print("maximal error = ");
@@ -324,7 +397,7 @@ void calibration() {
     if (ticks[i] < 0) {
       ticks[i] += 65536;
     }
-    else if (ticks[i] > 15000) {
+    else if (ticks[i] > 32768) {
       ticks[i] -= 65536;
     }
 
@@ -496,7 +569,7 @@ void enableTC5Interrupts() {
   // ----- enables the main PID and measuring loop -----
   TC5->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC5
   WAIT_TC16_REGS_SYNC(TC5)                      //wait for sync
-  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC5
+  TC4->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;    //Enable TC4
   WAIT_TC16_REGS_SYNC(TC4)                      //wait for sync
 }
 
@@ -507,6 +580,11 @@ void disableTC5Interrupts() {
   WAIT_TC16_REGS_SYNC(TC5)                      // wait for sync
 }
 
+void disableTC4Interrupts() {
+  // ----- disables the main PID loop -----
+  TC4->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;   // Disable TC4
+  WAIT_TC16_REGS_SYNC(TC4)                      // wait for sync
+}
 
 
 void antiCoggingCal() {
@@ -794,8 +872,6 @@ void PID_autotune() {
     if (frequency < 2.0 || frequency > 9950.0) {
       SerialUSB.println();
       SerialUSB.println("Autotune failed, frequency not in usable range!");
-      SerialUSB.println();
-      SerialUSB.println(":> ");
       return;
     }
 
@@ -913,10 +989,19 @@ void PID_autotune() {
   int_Kp = (((temp_Kp / loops)) + 0.5);
   int_Ki = (((temp_Ki / loops)) + 0.5);
   int_Kd = (((temp_Kd / loops)) + 0.5);
-  Kp = int_Kp / 1000.0;
-  Ki = int_Ki / 1000.0;
-  Kd = int_Kd / 1000.0;
 
+  if (loops > 0) {
+    Kp = int_Kp / 1000.0;
+    Ki = int_Ki / 1000.0;
+    Kd = int_Kd / 1000.0;
+  }
+
+  SerialUSB.print("Kp = ");
+  SerialUSB.println(Kp, 5);
+  SerialUSB.print("Ki = ");
+  SerialUSB.println(Ki, 5);
+  SerialUSB.print("Kd = ");
+  SerialUSB.println(Kd, 5);
 
   enableTC5Interrupts();
 }
@@ -1015,7 +1100,7 @@ int sign(int input) {
 void boot() {
   SerialUSB.begin(baudrate);
 
-  delay(500);
+  delay(1000);
 
   SerialUSB.print("setup pins:");
   setupPins();
@@ -1052,6 +1137,8 @@ void boot() {
   dirInterrupt();
   SerialUSB.println(" OK");
 
+  // resetting the error register
+  error_register = 0B1000000000000000;
 
   SerialUSB.print("checking lookup table:");
   bool error = check_lookup(false);
@@ -1084,11 +1171,14 @@ void boot() {
   SerialUSB.println(identifier);
   SerialUSB.println("");
 
+  Serial_menu();
 
-  delay(50);
+  SerialUSB.println("");
+  SerialUSB.println(":>");
 
-  reset_error_register();
 }
+
+
 
 bool check_lookup(bool output) {
 
@@ -1130,50 +1220,7 @@ bool check_lookup(bool output) {
     last_temp = temp;
   }
 
-  if (minimal > 3) {
-    if (output) {
-      SerialUSB.println("minimal value to high");
-    }
-    error = true;
-  }
-
-  if (minimal < 0) {
-    if (output) {
-      SerialUSB.println("minimal value to low");
-    }
-    error = true;
-  }
-
-  if (maximal > 36000) {
-    if (output) {
-      SerialUSB.println("maximal value to high");
-    }
-    error = true;
-  }
-
-  if (maximal < 35995) {
-    if (output) {
-      SerialUSB.println("maximal value to low");
-    }
-    error = true;
-  }
-
-  if (max_dx > 5) {
-    if (output) {
-      SerialUSB.println("step between elements to high");
-    }
-    error = true;
-  }
-
-  if (max_dx < 1) {
-    if (output) {
-      SerialUSB.println("step between elements to low");
-    }
-    error = true;
-  }
-
-
-  if (output && !error) {
+  if (output) {
     SerialUSB.print("delta value: ");
     SerialUSB.println(max_dx);
 
@@ -1183,9 +1230,125 @@ bool check_lookup(bool output) {
     SerialUSB.print("maximal value: ");
     SerialUSB.println(maximal);
 
+    SerialUSB.println("");
+  }
+
+  if (minimal > 3) {
+    if (output) {
+      SerialUSB.println("minimal value to high");
+    }
+    error = true;
+    error_register = error_register | 0B0000000000001000;
+  }
+
+  if (minimal < 0) {
+    if (output) {
+      SerialUSB.println("minimal value to low");
+    }
+    error = true;
+    error_register = error_register | 0B0000000000001000;
+  }
+
+  if (maximal > 36000) {
+    if (output) {
+      SerialUSB.println("maximal value to high");
+    }
+    error = true;
+    error_register = error_register | 0B0000000000001000;
+  }
+
+  if (maximal < 35995) {
+    if (output) {
+      SerialUSB.println("maximal value to low");
+    }
+    error = true;
+    error_register = error_register | 0B0000000000001000;
+  }
+
+  if (max_dx > 5) {
+    if (output) {
+      SerialUSB.println("step between elements to high");
+    }
+    error = true;
+    error_register = error_register | 0B0000000000001000;
+  }
+
+  if (max_dx < 1) {
+    if (output) {
+      SerialUSB.println("step between elements to low");
+    }
+    error = true;
+    error_register = error_register | 0B0000000000001000;
+  }
+
+
+  if (output && !error) {
+
+    SerialUSB.println("");
     SerialUSB.println("Looks good!");
   }
 
   return error;
+}
+
+//                            timing error                    maximal error                   maximal current                       lookuptable
+bool LED_pattern[4][10] = { {1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 0, 1, 0}};
+
+void error_led() {
+
+  static unsigned int last_time;
+  static int pattern_counter;
+
+  unsigned int current_time = millis();
+
+  int errorcase = -1;
+
+
+
+  // LED is switched with 10 Hz
+  if (current_time - last_time > 200) {
+
+
+
+    if (error_register & (1 << 3))   {
+      //The lookup table has some failure
+      errorcase = 3;
+    }
+    if (error_register & (1 << 2))   {
+      //Maximal coil current reached
+      errorcase = 2;
+    }
+    if (error_register & (1 << 1))   {
+      //Maximal angular error exceeded
+      errorcase = 1;
+    }
+    if (error_register & (1 << 0))   {
+      //Timing error
+      errorcase = 0;
+    }
+
+
+
+
+    if (errorcase == -1) {
+      REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
+    }
+    else {
+      if (LED_pattern[errorcase][pattern_counter]) {
+        REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
+      }
+      else {
+        REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
+      }
+    }
+
+
+    pattern_counter += 1;
+    if (pattern_counter >= 10) {
+      pattern_counter = 0;
+    }
+
+    last_time = current_time;
+  }
 }
 

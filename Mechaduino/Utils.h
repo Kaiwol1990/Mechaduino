@@ -3,7 +3,7 @@
 #ifndef __UTILS_H__
 #define __UTIL_H__
 
-extern void setupPins();
+void setupPins();
 
 void setupSPI();
 
@@ -23,23 +23,27 @@ void setupTCInterrupts();
 
 void enableTC5Interrupts();
 
+void disableTC4Interrupts();
+
 void disableTC5Interrupts();
 
 void antiCoggingCal();
 
 void PID_autotune();
 
-extern float digitalSmooth(int rawIn, int *sensSmoothArray);
+float digitalSmooth(int rawIn, int *sensSmoothArray);
 
 bool canceled();
 
 bool timed_out(unsigned long now, int time_out);
 
-extern int sign(int input);
+int sign(int input);
 
-extern void boot();
+void boot();
 
 bool check_lookup(bool output);
+
+void error_led();
 
 #endif
 

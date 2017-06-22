@@ -17,7 +17,7 @@ int iMAX = 1500;
 int USE_ENABLE_PIN = 1;
 
 // microstepping setting for step input
-int microstepping = 64;
+int microstepping = 32;
 
 // fullsteps for 360 degrees
 int steps_per_revolution = 200;

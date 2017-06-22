@@ -47,10 +47,6 @@ void serialCheck() {
     }
     else if (Command.indexOf(autotune_command) == 0 && Command.length() == autotune_command.length()) {
       PID_autotune();
-      while (SerialUSB.available()) {
-        char dump = SerialUSB.read();
-      }
-      parameterQuery();
     }
     else if (Command.indexOf(diagnostics_command) == 0 && Command.length() == diagnostics_command.length()) {
       readEncoderDiagnostics();
@@ -94,10 +90,10 @@ void serialCheck() {
     else if (Command.indexOf(enableTC5) == 0 && Command.length() == enableTC5.length()) {
       enableTC5Interrupts();
     }
-    else if (Command.indexOf(print_error) == 0 && Command.length() == print_error.length()) {
+    else if (Command.indexOf(print_error_command) == 0 && Command.length() == print_error_command.length()) {
       print_error_register();
     }
-    else if (Command.indexOf(reset_error) == 0 && Command.length() == reset_error.length()) {
+    else if (Command.indexOf(reset_error_command) == 0 && Command.length() == reset_error_command.length()) {
       reset_error_register();
     }
     else {
@@ -145,21 +141,30 @@ void disable() {
 void Serial_menu() {
   SerialUSB.println(help_header);
   SerialUSB.println(help_command + " - " + help_menu);
-  SerialUSB.println(calibrate_command + " - " + calibrate_menu);
+  
+  SerialUSB.println(print_error_command + " - " + print_error_menu);
+  SerialUSB.println(reset_error_command + " - " + reset_error_menu);
   SerialUSB.println(diagnostics_command + " - " + diagnostics_menu);
-  SerialUSB.println(disable_command + " - " + disable_menu);
-  SerialUSB.println(editparam_command + " - " + editparam_menu);
-  SerialUSB.println(enable_command + " - " + enable_menu);
-  SerialUSB.println(read_command + " - " + read_menu);
-  SerialUSB.println(reset_command + " - " + reset_menu);
-  SerialUSB.println(getstate_command + " - " + getstate_menu);
-  SerialUSB.println(step_response_command + " - " + step_response_menu);
-  SerialUSB.println(parameter_command + " - " + parameter_menu);
-  SerialUSB.println(set_command + " - " + set_menu);
-  SerialUSB.println(autotune_command + " - " + autotune_menu);
-  SerialUSB.println(looptime_command + " - " + looptime_menu);
-  SerialUSB.println(noise_command + " - " + noise_menu);
   SerialUSB.println(check_lookup_command + " - " + check_lookup_menu);
+  
+  SerialUSB.println(enable_command + " - " + enable_menu);
+  SerialUSB.println(disable_command + " - " + disable_menu);
+  
+  SerialUSB.println(parameter_command + " - " + parameter_menu);
+  SerialUSB.println(editparam_command + " - " + editparam_menu);
+  
+  SerialUSB.println(read_command + " - " + read_menu);
+  SerialUSB.println(set_command + " - " + set_menu);
+  
+  SerialUSB.println(getstate_command + " - " + getstate_menu);
+  
+  SerialUSB.println(calibrate_command + " - " + calibrate_menu);
+  SerialUSB.println(autotune_command + " - " + autotune_menu);
+  SerialUSB.println(step_response_command + " - " + step_response_menu);
+  SerialUSB.println(noise_command + " - " + noise_menu);
+  
+  SerialUSB.println(reset_command + " - " + reset_menu);
+  
 }
 
 
@@ -1006,7 +1011,7 @@ void readEncoderDiagnostics() {
 
 void print_error_register() {
 
-  SerialUSB.println("//---- Checking Mechaduino diagnostic and error register ----");
+  SerialUSB.println(print_error_header);
   SerialUSB.println();
 
   SerialUSB.println(error_register & 0B1111111111111111, BIN);
@@ -1014,14 +1019,15 @@ void print_error_register() {
   if (error_register & (1 << 0))    SerialUSB.println("  Timing error occured!");
   if (error_register & (1 << 1))    SerialUSB.println("  Maximal angular error exceeded!");
   if (error_register & (1 << 2))    SerialUSB.println("  Maximal coil current reached!");
+  if (error_register & (1 << 3))    SerialUSB.println("  The lookup table has some failure!");
 
   if ((error_register & 0B1111111111111111) == 0B1000000000000000) SerialUSB.println("Looks good!");
 
-  SerialUSB.println();
 }
 
 
 void reset_error_register() {
+  SerialUSB.println(reset_error_header);
   error_register = 0B1000000000000000;
 }
 

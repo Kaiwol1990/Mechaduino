@@ -136,14 +136,12 @@ void TC5_Handler() {
     u_1 = u;
     r_1 = r;
 
-    //wrtie the max error led high or low
-    if (abs(error) < max_e) {
-      REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
+
+    if (abs(error) > max_e) {
+      // set error register if the error was to high at some point
+      error_register = error_register | 0B0000000000000010;
     }
-    else {
-      REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
-      error_register = error_register | 0B0000000000000010;    // log error in register
-    }
+
 
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag

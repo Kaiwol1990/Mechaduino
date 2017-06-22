@@ -41,7 +41,6 @@
 
 void setup() {
   boot();
-  Serial_menu();
 
 }
 
@@ -54,6 +53,7 @@ void setup() {
 void loop()
 {
   serialCheck();
+  error_led();
   Streaming();
 
 

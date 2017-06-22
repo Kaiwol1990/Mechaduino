@@ -25,7 +25,7 @@ const String getstate_header = "//---- State ----";
 
 
 const String editparam_command  = "editparam";
-const String editparam_menu = "edit parameter";
+const String editparam_menu = "submenu to edit the parameter";
 const String editparam_header = "//---- Edit parameter ----";
 
 
@@ -55,7 +55,7 @@ const String dirac_header = "//---- Dirac delta function ---- \n";
 
 const String help_command  = "help";
 const String help_menu = "prints this menu";
-const String help_header = "Mainmenu";
+const String help_header = "//---- Mainmenu -----";
 
 
 const String parameter_command  = "param";
@@ -72,6 +72,7 @@ const String autotune_command  = "autotune";
 const String autotune_menu = "PID autotune";
 const String autotune_header = "//---- Autotuning the current PID controller --- \n\r Enter number of tuning cycles";
 
+
 const String looptime_command  = "loop";
 const String looptime_menu = "calculates the maximal loopfrequency";
 const String looptime_header = "//---- Measuring loop time ---- \n\r make sure the motor is moving!";
@@ -81,24 +82,31 @@ const String noise_command  = "noise";
 const String noise_menu = "measures the noise of the encoder";
 const String noise_header = "//---- Measuring noise ----";
 
+
 const String check_lookup_command = "check";
 const String check_lookup_menu = "check the lookup table";
 const String check_lookup_header = "//---- checking lookup table ----";
 
-const String anticogging_command = "cogging";
+
+const String print_error_command = "error";
+const String print_error_menu = "outputs the mechaduino error register";
+const String print_error_header = "//---- Checking Mechaduino diagnostic and error register ----";
+
+const String reset_error_command = "reset_error";
+const String reset_error_menu = "resets the mechaduino error register";
+const String reset_error_header = "//---- resetting error register ----";
+
 
 
 const String stream_start_command = "start_stream";
 const String stream_stop_command = "stop_stream";
 
+const String anticogging_command = "cogging";
+
 const String load_param_command = "load_param";
 
 const String disableTC5 = "TC_off";
 const String enableTC5 = "TC_on";
-
-const String print_error = "error";
-const String reset_error = "reset_error";
-
 
 
 const String procent_bar = "|---+----+----+----+----+----+----+----+----+----|";
