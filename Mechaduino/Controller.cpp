@@ -17,25 +17,34 @@
 // ----- calculates the target velocity and PID settings -----
 void TC5_Handler() {
 
+  static unsigned int last_micros = micros();
+  unsigned int current_micros;
+
   //----- Variables -----
   static int ITerm;
   static int DTerm;
 
-  //int e_0;               // current error term
-  int u_raw;
   static int e_1;        // last error term
   static int r_1;        // target 1 loop ago
   static int u_1;
 
 
   int omega_target;    // target angle velocity
-  static int omega_target_1;
 
   int phase_advanced;
 
   //----- Calculations -----
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
+
+    current_micros = micros();
+    int dt = current_micros - last_micros;
+    last_micros = current_micros;
+
+    if (dt > target_dt) {
+      error_register = error_register | B10000000;    // log error in register
+    }
+
 
     // calculate the current target from the received steps and the angle per step
     r = (step_target * stepangle);
@@ -53,8 +62,14 @@ void TC5_Handler() {
 
       // calculate the I- and DTerm
       ITerm = ITerm + (int_Ki * error);
-      DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * int_Kd * (error - e_1))) / 128;
-      //DTerm = int_Kd * (error - e_1);
+
+
+      if (abs(omega_target) < 5 && abs(error) < 50) {
+        DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * (int_Kd / 4) * (error - e_1))) / 128;
+      }
+      else {
+        DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * int_Kd * (error - e_1))) / 128;
+      }
 
       // constrain the ITerm
       if (ITerm > ITerm_max) {
@@ -65,22 +80,10 @@ void TC5_Handler() {
       }
 
 
-
       // ------ Add up the Effort ------
       // -------------------------------
-      //         u-pid                         +         feedforward       +                 acceleration              +        friction
-      /*
-            if (omega_target != 0) {
-              u_raw = ( ((int_Kp * error) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) + (sign(omega_target) * int_Kff)  ) / 1024;
-            }
-            else {
-              u_raw = ( ((int_Kp * error) + ITerm + DTerm) + (omega_target * int_Kvff) + ((omega_target - omega_target_1) * int_J) +  0                              ) / 1024;
-
-            }*/
-
-      u_raw = ((int_Kp * error) + ITerm + DTerm)  / 1024;
-
-      u = ((u_LPFa * u_1) + (u_LPFb * u_raw)) / 128;
+      //         u-pid
+      u = ((u_LPFa * u_1) + (u_LPFb * (((int_Kp * error) + ITerm + DTerm)  / 1024))) / 128;
 
 
     }
@@ -95,19 +98,18 @@ void TC5_Handler() {
     // constrain the effort to the user spedified maximum
     if (u > uMAX) {
       u = uMAX;
+      error_register = error_register | B00100000;    // log error in register
     }
     else if (u < -uMAX) {
       u = -uMAX;
+      error_register = error_register | B00100000;    // log error in register
     }
 
 
     // calculate the phase advance term
     // when the motor is commanded to hold its position the term will be calculate from the posiition error and a small amount of the PA Term
     // when the motor is commanded to move the term will be set to it's maximum -> PA
-    if (abs(omega_target) != 0) {
-      phase_advanced = sign(u) * PA;
-    }
-    else {
+    if (abs(omega_target) < 5) {
       phase_advanced = ((sign(u) * PA) / 4 ) + error;
 
       if (phase_advanced >= PA) {
@@ -116,7 +118,9 @@ void TC5_Handler() {
       else if (phase_advanced <= -PA) {
         phase_advanced = -PA;
       }
-
+    }
+    else {
+      phase_advanced = sign(u) * PA;
     }
 
     // calculate the electrical angle for the motor coils
@@ -131,7 +135,6 @@ void TC5_Handler() {
     e_1 = error;
     u_1 = u;
     r_1 = r;
-    omega_target_1 = omega_target;
 
     //wrtie the max error led high or low
     if (abs(error) < max_e) {
@@ -139,6 +142,7 @@ void TC5_Handler() {
     }
     else {
       REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
+      error_register = error_register | B01000000;    // log error in register
     }
 
 

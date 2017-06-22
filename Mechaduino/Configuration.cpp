@@ -28,9 +28,6 @@ int mm_rev  =32;
 // max error in mm, if the error gets bigger the led turns off 
 float error_led_value = 0.05; 
  
-// mass of the load in g, can be set to 0 if not known 
-int m_load  = 300; 
- 
 //set to 1 to invert your motor direction 
 int INVERT = 0; 
  
@@ -44,8 +41,6 @@ float M_max = 0.59;
 // rated current for max moment in mA 
 int I_rated = 2000; 
  
-// rotor inertia in gcm^2 
-int J_rotor = 82; 
  
  
  
@@ -57,23 +52,17 @@ float Kp = 1.10600;
 float Ki = 0.04000; 
 float Kd = 4.70400; 
  
-float Kvff = 10.00; 
-float Kff = 0.25; 
- 
  
  
 //----------------------------------------------- Filter  Section ----------------------------------------------- 
 //--------------------------------------------------------------------------------------------------------------- 
 // break frequency in hertz for DTerm 
 int D_Term_LPF = 5000; 
- 
-// break frequency in hertz for position 
-int Encoder_LPF = 5000; 
+
  
 // break frequency in hertz for the effort filter 
 int u_LPF = 5000; 
  
-// break frequency in hertz for coil current filter 
-int coil_LPF = 5000; 
+
  
  

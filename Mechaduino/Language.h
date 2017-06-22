@@ -97,6 +97,9 @@ const String PROGMEM load_param_command = "load_param";
 const String PROGMEM disableTC5 = "TC_off";
 const String PROGMEM enableTC5 = "TC_on";
 
+const String PROGMEM print_error = "error";
+const String PROGMEM reset_error = "reset_error";
+
 
 
 const String PROGMEM procent_bar = "|---+----+----+----+----+----+----+----+----+----|";

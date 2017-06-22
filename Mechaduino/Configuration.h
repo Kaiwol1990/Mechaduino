@@ -27,16 +27,11 @@ extern int microstepping;
 // fullsteps for 360 degrees
 extern int steps_per_revolution;
 
-
 // mm per revolution
 extern int mm_rev;
 
 // max error in mm, if the error gets bigger the led turns off
 extern float error_led_value;
-
-// mass of the load in g, can be set to 0 if not known
-extern int m_load;
-
 
 //uncomment this to invert your motor direction
 extern int INVERT;
@@ -51,10 +46,6 @@ extern float M_max;
 
 // rated current for max moment in mA
 extern int I_rated;
-
-// rotor inertia
-// rotor inertia in gcm^2
-extern int J_rotor;
 
 
 
@@ -79,14 +70,10 @@ extern float Kff;
 // break frequency in hertz for DTerm
 extern int D_Term_LPF;
 
-// break frequency in hertz for position
-extern int Encoder_LPF;
-
 // break frequency in hertz for effort filter
 extern int u_LPF;
 
-// break frequency in hertz for coil current filter
-extern int coil_LPF;
+
 
 
 

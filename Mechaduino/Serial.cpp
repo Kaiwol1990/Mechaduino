@@ -94,6 +94,12 @@ void serialCheck() {
     else if (Command.indexOf(enableTC5) == 0 && Command.length() == enableTC5.length()) {
       enableTC5Interrupts();
     }
+    else if (Command.indexOf(print_error) == 0 && Command.length() == print_error.length()) {
+      print_error_register();
+    }
+    else if (Command.indexOf(reset_error) == 0 && Command.length() == reset_error.length()) {
+      reset_error_register();
+    }
     else {
       SerialUSB.println("unknown command send 'help'");
     }
@@ -242,12 +248,6 @@ void parameterQuery() {
   SerialUSB.print("I_rated = ");
   SerialUSB.println(I_rated);
 
-  SerialUSB.print("m_load = ");
-  SerialUSB.println(m_load);
-
-  SerialUSB.print("J_rotor = ");
-  SerialUSB.println(J_rotor);
-
   SerialUSB.print("Kp = ");
   SerialUSB.println(int_Kp / 1000.0, 5);
 
@@ -260,14 +260,8 @@ void parameterQuery() {
   SerialUSB.print("D_Term_LPF = ");
   SerialUSB.println(D_Term_LPF);
 
-  SerialUSB.print("Encoder_LPF = ");
-  SerialUSB.println(Encoder_LPF);
-
   SerialUSB.print("effort_LPF = ");
   SerialUSB.println(u_LPF);
-
-  SerialUSB.print("coil_LPF = ");
-  SerialUSB.println(coil_LPF);
 
   SerialUSB.print("mm_rev = ");
   SerialUSB.println(mm_rev);
@@ -277,12 +271,6 @@ void parameterQuery() {
 
   SerialUSB.print("INVERT = ");
   SerialUSB.println(INVERT);
-
-  SerialUSB.print("Kff = ");
-  SerialUSB.println(int_Kff / 1000.0, 5);
-
-  SerialUSB.print("Kvff = ");
-  SerialUSB.println(int_Kvff / 1000.0, 5);
 }
 
 
@@ -314,12 +302,6 @@ void parameterEdit(String arg) {
     SerialUSB.print("g ----- I_rated = ");
     SerialUSB.println(I_rated);
 
-    SerialUSB.print("h ----- m_load = ");
-    SerialUSB.println(m_load);
-
-    SerialUSB.print("j ----- J_rotor = ");
-    SerialUSB.println(J_rotor);
-
     SerialUSB.print("p ----- Kp = ");
     SerialUSB.println(int_Kp / 1000.0);
 
@@ -332,14 +314,8 @@ void parameterEdit(String arg) {
     SerialUSB.print("k ----- D_Term_LPF = ");
     SerialUSB.println(D_Term_LPF);
 
-    SerialUSB.print("l ----- Encoder_LPF = ");
-    SerialUSB.println(Encoder_LPF);
-
     SerialUSB.print("x ----- u_LPF = ");
     SerialUSB.println(u_LPF);
-
-    SerialUSB.print("x ----- coil_LPF = ");
-    SerialUSB.println(coil_LPF);
 
     SerialUSB.print("b ----- mm_rev = ");
     SerialUSB.println(mm_rev);
@@ -543,9 +519,6 @@ void parameterEdit(String arg) {
               SerialUSB.println(M_max);
 
               float D_pulley = (mm_rev / (10 * 3.14159283));
-              float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
-              // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -566,60 +539,12 @@ void parameterEdit(String arg) {
               SerialUSB.println(I_rated);
 
               float D_pulley = (mm_rev / (10 * 3.14159283));
-              float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
-              // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
           }
         }
         break;
-      case 'h': {
-          SerialUSB.read();
-          start_millis = millis();
-          SerialUSB.print("enter new load mass [g] = ");
-
-          while (1) {
-            if (timed_out(start_millis, time_out)) return;
-            delay(10);
-
-            if (SerialUSB.available()) {
-              m_load = SerialUSB.parseInt();
-              SerialUSB.println(m_load);
-
-              float D_pulley = (mm_rev / (10 * 3.14159283));
-              float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
-              // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-              return;
-            }
-          }
-        }
-        break;
-      case 'j': {
-          SerialUSB.read();
-          start_millis = millis();
-          SerialUSB.print("enter new Motor (Inertia [gcm^2] = ");
-
-          while (1) {
-            if (timed_out(start_millis, time_out)) return;
-            delay(10);
-
-            if (SerialUSB.available()) {
-              J_rotor = SerialUSB.parseInt();
-              SerialUSB.println(J_rotor);
-
-              float D_pulley = (mm_rev / (10 * 3.14159283));
-              float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
-              // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
-
-              return;
-            }
-          }
-        }
       case 'k': {
           SerialUSB.read();
           start_millis = millis();
@@ -635,27 +560,6 @@ void parameterEdit(String arg) {
 
               D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
               D_Term_LPFb = 128 - D_Term_LPFa;
-
-              return;
-            }
-          }
-        }
-        break;
-      case 'l': {
-          SerialUSB.read();
-          start_millis = millis();
-          SerialUSB.print("enter new frequenzy for Encoder_LPF [Hz] = ");
-
-          while (1) {
-            if (timed_out(start_millis, time_out)) return;
-            delay(10);
-
-            if (SerialUSB.available()) {
-              Encoder_LPF = SerialUSB.parseInt();
-              SerialUSB.println(Encoder_LPF);
-
-              Encoder_LPFa = ((128.0 * exp(Encoder_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              Encoder_LPFb = 128 - Encoder_LPFa;
 
               return;
             }
@@ -683,27 +587,6 @@ void parameterEdit(String arg) {
           }
         }
         break;
-      case 'y': {
-          SerialUSB.read();
-          start_millis = millis();
-          SerialUSB.print("enter new frequenzy for coil_LPF [Hz] = ");
-
-          while (1) {
-            if (timed_out(start_millis, time_out)) return;
-            delay(10);
-
-            if (SerialUSB.available()) {
-              coil_LPF = SerialUSB.parseInt();
-              SerialUSB.println(coil_LPF);
-
-              coil_LPFa = ((128.0 * exp(coil_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-              coil_LPFb = 128 - coil_LPFa;
-
-              return;
-            }
-          }
-        }
-        break;
       case 'b': {
           SerialUSB.read();
           start_millis = millis();
@@ -719,9 +602,6 @@ void parameterEdit(String arg) {
 
               max_e = (36000 * error_led_value) / mm_rev;
               float D_pulley = (mm_rev / (10 * 3.14159283));
-              float J_load = ((m_load * D_pulley * D_pulley) / 4.0);
-              // 1000 for int instead of float             from I to u                            from M to I                J from gcm^2 to kgm^2                           from deg/s to rad/s    from 100*deg/cycle to deg/s
-              int_J = (1024.0 * ( ((512.0 * 10.0 * rSense) / (1000.0 * 3.3)) * ((float)I_rated / (float)M_max) *  (((float)J_rotor + (float)J_load) / (1000.0 * 100.0 * 100.0)) * (3.14159283 / 360.0) * ((float)FPID / 100.0))) + 0.5;
 
               return;
             }
@@ -768,44 +648,6 @@ void parameterEdit(String arg) {
 
               dirInterrupt();
 
-              return;
-            }
-          }
-        }
-        break;
-      case 's': {
-          SerialUSB.read();
-          start_millis = millis();
-          SerialUSB.print("enter new friction feedforward setting [float] = ");
-
-          while (1) {
-            if (timed_out(start_millis, time_out)) return;
-            delay(10);
-
-            if (SerialUSB.available()) {
-              Kff = SerialUSB.parseFloat();
-              SerialUSB.println(Kff);
-
-              int_Kff = (1024 * Kff) + 0.5;
-              return;
-            }
-          }
-        }
-        break;
-      case 't': {
-          SerialUSB.read();
-          start_millis = millis();
-          SerialUSB.print("enter new velocity feedforward setting [float] = ");
-
-          while (1) {
-            if (timed_out(start_millis, time_out)) return;
-            delay(10);
-
-            if (SerialUSB.available()) {
-              Kvff = SerialUSB.parseFloat();
-              SerialUSB.println(Kvff);
-
-              int_Kvff = (1024 * Kvff) + 0.5;
               return;
             }
           }
@@ -1395,10 +1237,6 @@ void send_param() {
   SerialUSB.write(';');
   SerialUSB.print(I_rated);
   SerialUSB.write(';');
-  SerialUSB.print(J_rotor);
-  SerialUSB.write(';');
-  SerialUSB.print(m_load);
-  SerialUSB.write(';');
   SerialUSB.print(Kp, 5);
   SerialUSB.write(';');
   SerialUSB.print(Ki, 5);
@@ -1406,8 +1244,6 @@ void send_param() {
   SerialUSB.print(Kd, 5);
   SerialUSB.write(';');
   SerialUSB.print(D_Term_LPF);
-  SerialUSB.write(';');
-  SerialUSB.print(Encoder_LPF);
   SerialUSB.write(';');
   SerialUSB.print(mm_rev);
   SerialUSB.write(';');
@@ -1417,14 +1253,35 @@ void send_param() {
   SerialUSB.write(';');
   SerialUSB.print(INVERT);
   SerialUSB.write(';');
-  SerialUSB.print(Kff);
-  SerialUSB.write(';');
-  SerialUSB.print(Kvff);
-  SerialUSB.write(';');
   SerialUSB.print(u_LPF);
-  SerialUSB.write(';');
-  SerialUSB.print(coil_LPF);
   SerialUSB.println();
 
+}
+
+
+
+
+void print_error_register() {
+
+  SerialUSB.println();
+  SerialUSB.print("Error register = ");
+
+  SerialUSB.print(error_register & B11111111, BIN);
+
+  SerialUSB.println("");
+  SerialUSB.println(" ");
+
+  if (error_register & (1 << 7))    SerialUSB.println("Timing error occured!");
+  if (error_register & (1 << 6))    SerialUSB.println("Maximum angular error exceeded!");
+  if (error_register & (1 << 5))    SerialUSB.println("Maximal coil current reached!");
+
+  if (error_register == 0) SerialUSB.println("No error occured!");
+
+  SerialUSB.println();
+}
+
+
+void reset_error_register() {
+  error_register = 0;
 }
 

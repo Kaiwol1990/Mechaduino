@@ -42,4 +42,8 @@ void Streaming();
 
 void send_param();
 
+void print_error_register();
+
+void reset_error_register();
+
 #endif

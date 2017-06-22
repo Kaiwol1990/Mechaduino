@@ -20,6 +20,8 @@ extern int PA;                    // angle of one fullstepstep
 
 extern int max_e;                 // max error to turn the led off in mm
 
+extern int target_dt;
+
 extern int step_add;
 
 extern int pLPFa;
