@@ -42,7 +42,7 @@ void TC5_Handler() {
     last_micros = current_micros;
 
     if (dt > target_dt) {
-      error_register = error_register | B10000000;    // log error in register
+      error_register = error_register | 0B0000000000000001;    // log error in register
     }
 
 
@@ -98,11 +98,11 @@ void TC5_Handler() {
     // constrain the effort to the user spedified maximum
     if (u > uMAX) {
       u = uMAX;
-      error_register = error_register | B00100000;    // log error in register
+      error_register = error_register | 0B0000000000000100;    // log error in register
     }
     else if (u < -uMAX) {
       u = -uMAX;
-      error_register = error_register | B00100000;    // log error in register
+      error_register = error_register | 0B0000000000000100;    // log error in register
     }
 
 
@@ -142,7 +142,7 @@ void TC5_Handler() {
     }
     else {
       REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
-      error_register = error_register | B01000000;    // log error in register
+      error_register = error_register | 0B0000000000000010;    // log error in register
     }
 
 

@@ -954,13 +954,9 @@ void readEncoderDiagnostics() {
   SerialUSB.println((angleTemp | 0B1110000000000000000 ), BIN);
 
   if (angleTemp & (1 << 14))    SerialUSB.println("  Error occurred  ");
-
   if (angleTemp & (1 << 11))    SerialUSB.println("  MAGH - magnetic field strength too high, set if AGC = 0x00. This indicates the non-linearity error may be increased");
-
   if (angleTemp & (1 << 10))    SerialUSB.println("  MAGL - magnetic field strength too low, set if AGC = 0xFF. This indicates the output noise of the measured angle may be increased");
-
   if (angleTemp & (1 << 9))     SerialUSB.println("  COF - CORDIC overflow. This indicates the measured angle is not reliable");
-
   if (angleTemp & (1 << 8))     SerialUSB.println("  LF - offset compensation completed. At power-up, an internal offset compensation procedure is started, and this bit is set when the procedure is completed");
 
   if (!((angleTemp & (1 << 14)) | (angleTemp & (1 << 11)) | (angleTemp & (1 << 10)) | (angleTemp & (1 << 9)))) {
@@ -991,28 +987,42 @@ void readEncoderDiagnostics() {
   angleTemp = (((b1 << 8) | b2) & 0B1111111111111111);
   SerialUSB.println((angleTemp | 0B1110000000000000000 ), BIN);
 
-  if (angleTemp & (1 << 14)) {
-    SerialUSB.println("  Error occurred  ");
-  }
-  if (angleTemp & (1 << 2)) {
-    SerialUSB.println("  parity error ");
-  }
-  if (angleTemp & (1 << 1)) {
-    SerialUSB.println("  invalid register  ");
-  }
-  if (angleTemp & (1 << 0)) {
-    SerialUSB.println("  framing error  ");
-  }
+  if (angleTemp & (1 << 14))  SerialUSB.println("  Error occurred");
+  if (angleTemp & (1 << 2))   SerialUSB.println("  parity error");
+  if (angleTemp & (1 << 1))   SerialUSB.println("  invalid register");
+  if (angleTemp & (1 << 0))   SerialUSB.println("  framing error");
 
   if (!((angleTemp & (1 << 14)) | (angleTemp & (1 << 2)) | (angleTemp & (1 << 1)) | (angleTemp & (1 << 0)))) {
     SerialUSB.println("Looks good!");
   }
 
-
   digitalWrite(chipSelectPin, HIGH);
 
   delay(1);
   enableTC5Interrupts();
+}
+
+
+
+void print_error_register() {
+
+  SerialUSB.println("//---- Checking Mechaduino diagnostic and error register ----");
+  SerialUSB.println();
+
+  SerialUSB.println(error_register & 0B1111111111111111, BIN);
+
+  if (error_register & (1 << 0))    SerialUSB.println("  Timing error occured!");
+  if (error_register & (1 << 1))    SerialUSB.println("  Maximal angular error exceeded!");
+  if (error_register & (1 << 2))    SerialUSB.println("  Maximal coil current reached!");
+
+  if ((error_register & 0B1111111111111111) == 0B1000000000000000) SerialUSB.println("Looks good!");
+
+  SerialUSB.println();
+}
+
+
+void reset_error_register() {
+  error_register = 0B1000000000000000;
 }
 
 
@@ -1261,27 +1271,4 @@ void send_param() {
 
 
 
-void print_error_register() {
-
-  SerialUSB.println();
-  SerialUSB.print("Error register = ");
-
-  SerialUSB.print(error_register & B11111111, BIN);
-
-  SerialUSB.println("");
-  SerialUSB.println(" ");
-
-  if (error_register & (1 << 7))    SerialUSB.println("Timing error occured!");
-  if (error_register & (1 << 6))    SerialUSB.println("Maximum angular error exceeded!");
-  if (error_register & (1 << 5))    SerialUSB.println("Maximal coil current reached!");
-
-  if (error_register == 0) SerialUSB.println("No error occured!");
-
-  SerialUSB.println();
-}
-
-
-void reset_error_register() {
-  error_register = 0;
-}
 

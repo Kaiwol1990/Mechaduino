@@ -3,6 +3,8 @@
 #ifndef __UTILS_H__
 #define __UTIL_H__
 
+extern void setupPins();
+
 void setupSPI();
 
 void stepInterrupt();

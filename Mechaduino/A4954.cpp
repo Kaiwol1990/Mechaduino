@@ -50,7 +50,7 @@ void output(int electric_angle, int effort) {
     digitalWriteDirect(IN_4, LOW);
   }
 
- 
+
   analogFastWrite(VREF_1, abs(v_ref_coil_A));
   analogFastWrite(VREF_2, abs(v_ref_coil_B));
 

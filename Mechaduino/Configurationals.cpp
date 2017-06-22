@@ -12,11 +12,11 @@ int phase_multiplier = ((steps_per_revolution / 4) / 10);
 //---- Step settings -----
 //const int counts_per_revolution = 16384; 						// encoder counts for 360 degrees
 float stepangle = (36000.0 / (steps_per_revolution * 1024)); 	// angle of one microstep as float
-int PA = ((0.95 * 36000) / steps_per_revolution);                      // angle of one fullstep as int
+int PA =   36000 / steps_per_revolution;                      // angle of one fullstep as int
 
 int max_e = (36000 * error_led_value) / mm_rev;             // max error to turn the led off in mm
 
-int target_dt = 1.1*(1000000 / FPID);
+int target_dt = 1.1 * (1000000 / FPID);
 
 int step_add = 1024 / microstepping;
 

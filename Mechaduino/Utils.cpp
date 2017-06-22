@@ -13,6 +13,33 @@
 #include "Serial.h"
 #include "Language.h"
 
+void setupPins() {
+
+  pinMode(VREF_2, OUTPUT);
+  pinMode(VREF_1, OUTPUT);
+  pinMode(IN_4, OUTPUT);
+  pinMode(IN_3, OUTPUT);
+  pinMode(IN_2, OUTPUT);
+  pinMode(IN_1, OUTPUT);
+  pinMode(ledPin, OUTPUT);
+  pinMode(step_pin, INPUT);
+  pinMode(dir_pin, INPUT);
+  pinMode(chipSelectPin, OUTPUT); // CSn -- has to toggle high and low to signal chip to start data transfer
+
+  attachInterrupt(step_pin, stepInterrupt, RISING);
+  attachInterrupt(dir_pin, dirInterrupt, CHANGE);
+
+  pinMode(ena_pin, INPUT_PULLUP);
+  attachInterrupt(ena_pin, enaInterrupt, CHANGE);
+
+  digitalWriteDirect(IN_4, LOW);
+  digitalWriteDirect(IN_3, LOW);
+  digitalWriteDirect(IN_2, LOW);
+  digitalWriteDirect(IN_1, LOW);
+
+  digitalWriteDirect(VREF_2, LOW);
+  digitalWriteDirect(VREF_1, LOW);
+}
 
 
 void setupSPI() {
@@ -317,7 +344,7 @@ void calibration() {
   float lookupAngle;
   float tick;
 
-  SerialUSB.print("const PROGMEM unsigned int lookup[] = {");
+  SerialUSB.print("const unsigned int lookup[] = {");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
 
@@ -500,7 +527,7 @@ void antiCoggingCal() {
   // if steps_per_rev = 200
   // stepangle = 0.001757 deg
 
-  SerialUSB.print("const unsigned int cogging_lookup[] = {");
+  SerialUSB.print("const int cogging_lookup[] = {");
 
   enabled = true;
 
@@ -542,7 +569,7 @@ void PID_autotune() {
 
   int loops = 0;
   int outputStep = uMAX;
-  int frequency =2* FPID;
+  int frequency = 2 * FPID;
   int dt = (1000000 / frequency);
   int scan_dt = dt - 2;
 
@@ -1059,6 +1086,8 @@ void boot() {
 
 
   delay(50);
+
+  reset_error_register();
 }
 
 bool check_lookup(bool output) {

@@ -22,32 +22,6 @@
 
 
 
-static void setupPins() {
 
-  pinMode(VREF_2, OUTPUT);
-  pinMode(VREF_1, OUTPUT);
-  pinMode(IN_4, OUTPUT);
-  pinMode(IN_3, OUTPUT);
-  pinMode(IN_2, OUTPUT);
-  pinMode(IN_1, OUTPUT);
-  pinMode(ledPin, OUTPUT);
-  pinMode(step_pin, INPUT);
-  pinMode(dir_pin, INPUT);
-  pinMode(chipSelectPin, OUTPUT); // CSn -- has to toggle high and low to signal chip to start data transfer
-
-  attachInterrupt(step_pin, stepInterrupt, RISING);
-  attachInterrupt(dir_pin, dirInterrupt, CHANGE);
-
-  pinMode(ena_pin, INPUT_PULLUP);
-  attachInterrupt(ena_pin, enaInterrupt, CHANGE);
-
-  digitalWriteDirect(IN_4, LOW);
-  digitalWriteDirect(IN_3, LOW);
-  digitalWriteDirect(IN_2, LOW);
-  digitalWriteDirect(IN_1, LOW);
-
-  digitalWriteDirect(VREF_2, LOW);
-  digitalWriteDirect(VREF_1, LOW);
-}
 #endif//__BOARD_H__
 

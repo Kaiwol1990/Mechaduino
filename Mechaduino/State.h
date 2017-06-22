@@ -23,7 +23,7 @@ extern volatile bool frequency_test;       // flag for frequency test
 extern volatile bool streaming;	  		// flag for data streaming
 
 
-extern volatile byte error_register;
+extern volatile int16_t error_register;
 
 //---- PID Gains ----
 extern volatile int int_Kp;

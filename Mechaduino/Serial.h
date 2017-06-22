@@ -30,6 +30,10 @@ void get_max_frequency();
 
 void readEncoderDiagnostics(); //check encoder diagnostics registers
 
+void print_error_register();
+
+void reset_error_register();
+
 int measure_noise(bool serialoutput = true);
 
 int measure_setpoint();
@@ -41,9 +45,5 @@ bool split_command(String *Input_pointer, String *first_substring, String *secon
 void Streaming();
 
 void send_param();
-
-void print_error_register();
-
-void reset_error_register();
 
 #endif
