@@ -17,11 +17,12 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - Encoder readings are placed in its own ISR that runs with 10 kHz (oversampling)
 - changed the PWM resolution from 8 bit to 9 bit
 - PID auto tuning
-- LED shows errors by different blinking patterns
 - The lookup table is now in its own file (lookup_table.cpp)
 - The Parameters are now in Configuration.cpp
 - Added Language file for easy translation
 - added an invert direction setting
+- simple error register to save if an error occurred
+- LED shows errors by different blinking patterns
 
 
 ### LED blink pattern:
@@ -31,13 +32,37 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - Long on, short off, short on, short off: the lookup table shows some errors
 
 
+### List of commands
+To get an list of the possible commands send help over the serialmonitor
+|Command|Description|
+|-------|-----------|
+|help | prints this menu|
+|error | outputs the mechaduino error register|
+|reset_error | resets the mechaduino error register|
+|diagnose | read Encoder Diagnostics|
+|check | check the lookup table|
+|enable | enables the motor|
+|disable | disables the motor|
+|param | print the current PID parameter|
+|editparam | submenu to edit the parameter|
+|read | reads the curren angle|
+|set | enter new setpoint|
+|state | shows the current motor state|
+|calibrate | starts the calibration routine|
+|autotune | PID autotune|
+|response | generates a step response|
+|noise | measures the noise of the encoder|
+|reset | resets the board|
+|-------|-----------|
+
+
 # Windows GUI
 ![image](images/GUI.png)
 - Live view/stream motor parameter (angle, error, effort, ...)
 - generate and analyze a step response with different sampling rates
 - change parameters without the need of serial commands
 - generate a configuration file 
-- Log motor parameter as txt or csv file
+- Log streamed motor parameter as txt or csv file
 
 # License
 
