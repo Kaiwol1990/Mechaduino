@@ -36,7 +36,7 @@ const String dir_header = "//---- Direction = ";
 
 
 const String read_command  = "read";
-const String read_menu = "reads the current angle";
+const String read_menu = "reads the curren angle";
 const String read_header = "//---- current Setpoint ---- \n\r current setpoint = ";
 
 
@@ -64,12 +64,12 @@ const String parameter_header = "//---- PID Values -----";
 
 
 const String set_command  = "set";
-const String set_menu = "enter new set point";
+const String set_menu = "enter new setpoint";
 const String set_header = "//---- Setpoint ---- \n\r new setpoint = ";
 
 
 const String autotune_command  = "autotune";
-const String autotune_menu = "PID auto tune";
+const String autotune_menu = "PID autotune";
 const String autotune_header = "//---- Autotuning the current PID controller --- \n\r Enter number of tuning cycles";
 
 
