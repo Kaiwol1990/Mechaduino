@@ -136,7 +136,7 @@ void calibration() {
     return;
   }
 
-  
+
   dir = false;
   step_target = 0;
 
@@ -1292,61 +1292,82 @@ bool check_lookup(bool output) {
 }
 
 //                            timing error                    maximal error                   maximal current                       lookuptable
-bool LED_pattern[4][10] = { {1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 0, 1, 0}};
+bool LED_pattern[4][10] = { {1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}, {1, 1, 1, 1, 1, 1, 0, 1, 0, 1}};
 
 void error_led() {
 
   static unsigned int last_time;
-  static int pattern_counter;
 
   unsigned int current_time = millis();
 
-  int errorcase = -1;
-
+  int error_count = 0;
+  
+  static int pattern_counter;
+  static int errorcase;
+  static int k = 1;
+  static byte error_cases[5];
 
 
   // LED is switched with 10 Hz
-  if (current_time - last_time > 200) {
-
-
+  if (current_time - last_time > 100) {
 
     if (error_register & (1 << 3))   {
       //The lookup table has some failure
-      errorcase = 3;
+      error_cases[error_count] = 3;
+      error_count += 1;
     }
     if (error_register & (1 << 2))   {
       //Maximal coil current reached
-      errorcase = 2;
+      error_cases[error_count] = 2;
+      error_count += 1;
     }
     if (error_register & (1 << 1))   {
       //Maximal angular error exceeded
-      errorcase = 1;
+      error_cases[error_count] = 1;
+      error_count += 1;
     }
     if (error_register & (1 << 0))   {
       //Timing error
-      errorcase = 0;
+      error_cases[error_count] = 0;
+      error_count += 1;
     }
 
 
 
 
-    if (errorcase == -1) {
+    if (pattern_counter >= 30) {
+  
+
+      pattern_counter = 0;
+
+      if (k > (error_count)) {
+        k = 1;
+      }
+
+      errorcase = error_cases[k - 1];
+
+      k += 1;
+    }
+
+
+    if (error_count == 0) {
       REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
     }
-    else {
-      if (LED_pattern[errorcase][pattern_counter]) {
-        REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
+    else  {
+      if (pattern_counter < 10) {
+        if (LED_pattern[errorcase][pattern_counter]) {
+          REG_PORT_OUTSET0 = PORT_PA17;     //write LED HIGH
+        }
+        else {
+          REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
+        }
       }
       else {
         REG_PORT_OUTCLR0 = PORT_PA17;     //write LED LOW
       }
     }
 
-
     pattern_counter += 1;
-    if (pattern_counter >= 10) {
-      pattern_counter = 0;
-    }
 
     last_time = current_time;
   }

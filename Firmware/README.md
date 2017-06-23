@@ -26,13 +26,14 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 
 
 ### LED blink pattern:
+If an error occures the led will switch from constant on to different patterns. These patterns are separated from each other by a longer pause. After this pause one pattern will be shown and then after the pause the next pattern will be shown.
 
 |Pattern| Error|
 |-------|------|
 |Fast blinking | Timing error. This can occur if the mechaduino receives too much steps. Consider lowering your microsteps or limit the maximal speed|
-|Slow blinking | maximal error was reached|
-|Long on, short off | the maximal current was reached|
-|Long on, short off, short on, short off | the lookup table shows some errors|
+|Long on | maximal error was reached|
+|Long on, one flash | the maximal current was reached|
+|Long on, two flashs | the lookup table shows some errors|
 
 
 ### List of commands
