@@ -33,7 +33,7 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 
 
 # Windows GUI
-![image](images/GUI.PNG)
+![image](images/GUI.png)
 - Live view/stream motor parameter (angle, error, effort, ...)
 - generate and analyze a step response with different sampling rates
 - change parameters without the need of serial commands
