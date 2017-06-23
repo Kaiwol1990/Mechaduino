@@ -26,10 +26,13 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 
 
 ### LED blink pattern:
-- Fast blinking: Timing error. This can occur if the mechaduino receives too much steps. Consider lowering your microsteps or limit the maximal speed
-- Slow blinking: maximal error was reached
-- Long on, short off: the maximal current was reached 
-- Long on, short off, short on, short off: the lookup table shows some errors
+
+|Pattern| Error|
+|-------|------|
+|Fast blinking | Timing error. This can occur if the mechaduino receives too much steps. Consider lowering your microsteps or limit the maximal speed|
+|Slow blinking | maximal error was reached|
+|Long on, short off | the maximal current was reached|
+|Long on, short off, short on, short off | the lookup table shows some errors|
 
 
 ### List of commands
