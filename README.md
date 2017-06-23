@@ -33,7 +33,11 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 
 
 ### List of commands
+<<<<<<< HEAD
 To get an list of the possible commands send help over the serial monitor
+=======
+To get an list of the possible commands send help over the serialmonitor
+>>>>>>> origin/dev
 
 |Command|Description|
 |-------|-----------|
@@ -46,11 +50,19 @@ To get an list of the possible commands send help over the serial monitor
 |disable | disables the motor|
 |param | print the current PID parameter|
 |editparam | submenu to edit the parameter|
+<<<<<<< HEAD
 |read | reads the current angle|
 |set | enter new set point|
 |state | shows the current motor state|
 |calibrate | starts the calibration routine|
 |autotune | PID auto tune|
+=======
+|read | reads the curren angle|
+|set | enter new setpoint|
+|state | shows the current motor state|
+|calibrate | starts the calibration routine|
+|autotune | PID autotune|
+>>>>>>> origin/dev
 |response | generates a step response|
 |noise | measures the noise of the encoder|
 |reset | resets the board|
