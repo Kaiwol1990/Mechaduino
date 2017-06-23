@@ -2,7 +2,7 @@
 #include "State.h"
 #include "Configuration.h"
 #include "Configurationals.h"
-
+#include <math.h>
 
 //---- interrupt vars ----
 volatile int r = 0;  //target angle
@@ -23,7 +23,7 @@ volatile bool streaming = false;    // flag for data streaming
 
 // ----- array that holds the different possible errors -----
 // ----- [timing error, error to big, ..., ..., ...]
-volatile int16_t error_register = 0B1000000000000000;
+volatile int error_register = 0B1000000000000000;
 
 volatile int int_Kp = (Kp * 1024) + 0.5;
 volatile int int_Ki = (Ki * 1024) + 0.5;

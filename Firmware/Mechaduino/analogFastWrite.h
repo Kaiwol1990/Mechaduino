@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdint.h>
 
 #ifndef __ANALOGFASTWRITE_H__
 #define __ANALOGFASTWRITE_H__

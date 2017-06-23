@@ -1,6 +1,11 @@
 #ifndef __Serial_H__
 #define __Serial_H__
+
+#pragma once
+
 #include <arduino.h>
+
+
 
 void serialCheck();
 

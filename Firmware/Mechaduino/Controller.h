@@ -1,5 +1,5 @@
 //Contains the TC5 Handler declaration
-
+#pragma once
 
 #ifndef __CONTROLLER_H__
 #define  __CONTROLLER_H__

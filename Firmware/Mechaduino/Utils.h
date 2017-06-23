@@ -2,6 +2,7 @@
 
 #ifndef __UTILS_H__
 #define __UTIL_H__
+#pragma once
 
 void setupPins();
 

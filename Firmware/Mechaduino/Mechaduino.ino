@@ -21,17 +21,8 @@
 
 */
 
-#include "SanityCheck.h"
-#include "Configuration.h"
-#include "Configurationals.h"
-#include "State.h"
 #include "Utils.h"
-#include "board.h"
-#include "analogFastWrite.h"
-#include "lookup_table.h"
-#include "Encoder.h"
 #include "Serial.h"
-#include "Language.h"
 
 
 
@@ -41,7 +32,6 @@
 
 void setup() {
   boot();
-
 }
 
 
@@ -55,7 +45,4 @@ void loop()
   serialCheck();
   error_led();
   Streaming();
-
-
-
 }

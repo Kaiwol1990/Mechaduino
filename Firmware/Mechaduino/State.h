@@ -2,9 +2,7 @@
 
 #ifndef __STATE_H__
 #define __STATE_H__
-#include <stdint.h>
 
-#include <SPI.h>
 //---- interrupt vars ----
 extern volatile int r;            //target angle
 extern volatile int y;           //current angle
@@ -23,7 +21,7 @@ extern volatile bool frequency_test;       // flag for frequency test
 extern volatile bool streaming;	  		// flag for data streaming
 
 
-extern volatile int16_t error_register;
+extern volatile int error_register;
 
 //---- PID Gains ----
 extern volatile int int_Kp;

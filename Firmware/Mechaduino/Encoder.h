@@ -1,7 +1,6 @@
 #ifndef __ENCODER_H__
 #define __ENCODER_H__
-#include <stdint.h>
-
+#pragma once
 
 int readEncoder() __attribute__ ((optimize("O3")));
 

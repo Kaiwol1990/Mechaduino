@@ -1,7 +1,6 @@
 #include "Serial.h"
 #include "Utils.h"
 #include <SPI.h>
-#include <arduino.h>
 #include "board.h"
 #include "Configuration.h"
 #include "Configurationals.h"
