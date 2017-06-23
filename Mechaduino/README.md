@@ -24,7 +24,6 @@ Changed in Parameters:
 - The Parameters are now in Configuration.cpp
 - Added Language file for easy translation
 - added an invert direction setting
-- Major cleanup of the Serial interface
 
 
 LED blink pattern:
