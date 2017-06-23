@@ -1,4 +1,4 @@
-![image] (https://github.com/Kaiwol1990/Mechaduino/blob/dev/images/Arduino.png)
+![image](https://github.com/Kaiwol1990/Mechaduino/blob/dev/images/Arduino.png)
 
 Derivation of the original Mechaduino code from jcchurch13.
 
