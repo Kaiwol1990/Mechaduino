@@ -15,6 +15,7 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - added some filtering to the effort and D-Term
 - Changed the frequency of the PID loop to 5 kHz
 - Encoder readings are placed in its own ISR that runs with 10 kHz (oversampling)
+- maximal step frequency = 40 kHz
 - changed the PWM resolution from 8 bit to 9 bit
 - PID auto tuning
 - The lookup table is now in its own file (lookup_table.cpp)
@@ -23,7 +24,6 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - added an invert direction setting
 - simple error register to save if an error occurred
 - LED shows errors by different blinking patterns
-
 
 ### LED blink pattern:
 If an error occures the led will switch from constant on to different patterns. These patterns are separated from each other by a longer pause. After this pause one pattern will be shown and then after the pause the next pattern will be shown.

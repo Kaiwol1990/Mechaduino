@@ -13,6 +13,7 @@ Derivation of the original Mechaduino code from jcchurch13.
 - added some filtering to the effort and D-Term
 - Changed the frequency of the PID loop to 5 kHz
 - Encoder readings are placed in its own ISR that runs with 10 kHz (oversampling)
+- maximal step frequency = 40 kHz
 - changed the PWM resolution from 8 bit to 9 bit
 - PID auto tuning
 - The lookup table is now in its own file (lookup_table.cpp)
