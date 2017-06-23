@@ -5,7 +5,7 @@ Derivation of the original Mechaduino code from jcchurch13.
 Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmware/tree/multi-file/Mechaduino_01/Mechaduino_01
 
 
-## Changes:
+### Changes:
 
 - added an enable pin (pin 2, only 3.3 V compatible)
 - Some other changes 
@@ -25,7 +25,7 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - added an invert direction setting
 
 
-## LED blink pattern:
+### LED blink pattern:
 - Fast blinking: Timing error. This can occur if the mechaduino receives too much steps. Consider lowering your microsteps or limit the maximal speed
 - Slow blinking: maximal error was reached
 - Long on, short off: the maximal current was reached 
