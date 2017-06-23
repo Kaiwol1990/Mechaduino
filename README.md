@@ -54,7 +54,6 @@ To get an list of the possible commands send help over the serialmonitor
 |response | generates a step response|
 |noise | measures the noise of the encoder|
 |reset | resets the board|
-|-------|-----------|
 
 
 # Windows GUI
