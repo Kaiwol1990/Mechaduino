@@ -3,9 +3,12 @@ Derivation of the original Mechaduino code from jcchurch13.
 
 Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmware/tree/multi-file/Mechaduino_01/Mechaduino_01
 
+
+Changes:
 - added an enable pin (pin 2, only 3.3 V compatible)
 - Some other changes 
 - Menu entry for generating a step response
+- Menu entry for generating a dirac delta function
 - deleted all modes other than position 
 - changed all float to integer operations
 - added some filtering to the effort and D-Term
@@ -15,7 +18,8 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - PID auto tuning
 - LED shows errors by different blinking patterns
 
-Changed some Parameters! 
+
+Changed in Parameters:
 - The lookup table is now in its own file (lookup_table.cpp)
 - The Parameters are now in Configuration.cpp
 - Added Language file for easy translation
