@@ -1,10 +1,12 @@
-# Mechaduino
+![image](images/header.PNG)
+
 Derivation of the original Mechaduino code from jcchurch13.
 
 Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmware/tree/multi-file/Mechaduino_01/Mechaduino_01
 
 
-Changes:
+## Changes:
+
 - added an enable pin (pin 2, only 3.3 V compatible)
 - Some other changes 
 - Menu entry for generating a step response
@@ -17,23 +19,28 @@ Changes:
 - changed the PWM resolution from 8 bit to 9 bit
 - PID auto tuning
 - LED shows errors by different blinking patterns
-
-
-Changed in Parameters:
 - The lookup table is now in its own file (lookup_table.cpp)
 - The Parameters are now in Configuration.cpp
 - Added Language file for easy translation
 - added an invert direction setting
 
 
-LED blink pattern:
+## LED blink pattern:
 - Fast blinking: Timing error. This can occur if the mechaduino receives too much steps. Consider lowering your microsteps or limit the maximal speed
 - Slow blinking: maximal error was reached
 - Long on, short off: the maximal current was reached 
 - Long on, short off, short on, short off: the lookup table shows some errors
 
 
-License
+# Windows GUI
+![image](images/GUI.PNG)
+- Live view/stream motor parameter (angle, error, effort, ...)
+- generate and analyze a step response with different sampling rates
+- change parameters without the need of serial commands
+- generate a configuration file 
+- Log motor parameter as txt or csv file
+
+# License
 
 All Mechaduino related materials are released under the Creative Commons Attribution Share-Alike 4.0 License
 Much of the work is based on Mechaduino project:

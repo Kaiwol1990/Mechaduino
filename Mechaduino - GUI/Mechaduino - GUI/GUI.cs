@@ -295,7 +295,7 @@ namespace Mechaduino
                             }
                         }
                     }
-                    else if (substrings.Length == 21)
+                    else if (substrings.Length == 15)
                     {
                         txtIdentifier.Text = substrings[0];
                         txtFullstep.Text = substrings[1];
@@ -304,16 +304,13 @@ namespace Mechaduino
                         txtMaxM.Text = substrings[4];
                         txtMaxI.Text = substrings[5];
                         uMax = Convert.ToInt32((Convert.ToInt32(substrings[5]) * 0.15 * 10.0 * 512.0) / (1000.0 * 3.3));
-                        txtRotorJ.Text = substrings[6];
-                        txtloadMass.Text = substrings[7];
-                        txtKp.Text = substrings[8];
-                        txtKi.Text = substrings[9];
-                        txtKd.Text = substrings[10];
-                        txtPLPF.Text = substrings[11];
-                        txtEncoderLPF.Text = substrings[12];
-                        txtmmRev.Text = substrings[13];
-                        txtMaxE.Text = substrings[14];
-                        if (Convert.ToInt16(substrings[15]) == 1)
+                        txtKp.Text = substrings[6];
+                        txtKi.Text = substrings[7];
+                        txtKd.Text = substrings[8];
+                        txtPLPF.Text = substrings[9];
+                        txtmmRev.Text = substrings[10];
+                        txtMaxE.Text = substrings[11];
+                        if (Convert.ToInt16(substrings[12]) == 1)
                         {
                             checkEnable.Checked = true;
                         }
@@ -321,7 +318,7 @@ namespace Mechaduino
                         {
                             checkEnable.Checked = false;
                         }
-                        if (Convert.ToInt16(substrings[16]) == 1)
+                        if (Convert.ToInt16(substrings[13]) == 1)
                         {
                             checkInvert.Checked = true;
                         }
@@ -329,10 +326,7 @@ namespace Mechaduino
                         {
                             checkInvert.Checked = false;
                         }
-                        txtKff.Text = substrings[17];
-                        txtKvff.Text = substrings[18];
-                        txtuLPF.Text = substrings[19];
-                        txtcoilLPF.Text = substrings[20];
+                        txtuLPF.Text = substrings[14];
                     }
                     else
                     {
@@ -937,24 +931,7 @@ namespace Mechaduino
                     int i_rated = Convert.ToInt32(txtMaxI.Text);
                     cmd = Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("h\n");
-                    Thread.Sleep(10);
-                    int m_load = Convert.ToInt32(txtloadMass.Text);
-                    cmd = Convert.ToString(m_load, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("j\n");
-                    Thread.Sleep(10);
-                    int j_rotor = Convert.ToInt32(txtRotorJ.Text);
-                    cmd = Convert.ToString(j_rotor, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    
 
                     Thread.Sleep(10);
                     serialPort1.WriteLine("editparam d\n");
@@ -991,15 +968,7 @@ namespace Mechaduino
                     int pLPF = Convert.ToInt32(txtPLPF.Text);
                     cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("l\n");
-                    Thread.Sleep(10);
-                    int encoderLPF = Convert.ToInt32(txtEncoderLPF.Text);
-                    cmd = Convert.ToString(encoderLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                  
 
                     Thread.Sleep(10);
                     serialPort1.WriteLine("editparam d\n");
@@ -1028,23 +997,8 @@ namespace Mechaduino
                     cmd = Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
 
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("s\n");
-                    Thread.Sleep(10);
-                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                 
 
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("t\n");
-                    Thread.Sleep(10);
-                    double Kvff = Convert.ToDouble(txtKvff.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kvff, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
                 }
                 catch
                 {
@@ -1122,11 +1076,6 @@ namespace Mechaduino
                 File.AppendAllText(CSVFileName, txtMaxE.Text);
                 File.AppendAllText(CSVFileName, "; \n");
                 File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// mass of the load in g, can be set to 0 if not known \n");
-                File.AppendAllText(CSVFileName, "int m_load  = ");
-                File.AppendAllText(CSVFileName, txtloadMass.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, "//set to 1 to invert your motor direction \n");
                 if (checkInvert.Checked)
                 {
@@ -1151,11 +1100,6 @@ namespace Mechaduino
                 File.AppendAllText(CSVFileName, txtMaxI.Text);
                 File.AppendAllText(CSVFileName, "; \n");
                 File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// rotor inertia in gcm^2 \n");
-                File.AppendAllText(CSVFileName, "int J_rotor = ");
-                File.AppendAllText(CSVFileName, txtRotorJ.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, "//---------------------------------------------- Controller Section ---------------------------------------------- \n");
@@ -1174,14 +1118,6 @@ namespace Mechaduino
                 File.AppendAllText(CSVFileName, txtKd.Text);
                 File.AppendAllText(CSVFileName, "; \n");
                 File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "float Kvff = ");
-                File.AppendAllText(CSVFileName, txtKvff.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, "float Kff = ");
-                File.AppendAllText(CSVFileName, txtKff.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, "//----------------------------------------------- Filter  Section ----------------------------------------------- \n");
                 File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
@@ -1190,20 +1126,10 @@ namespace Mechaduino
                 File.AppendAllText(CSVFileName, txtPLPF.Text);
                 File.AppendAllText(CSVFileName, "; \n");
                 File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// break frequency in hertz for position \n");
-                File.AppendAllText(CSVFileName, "int Encoder_LPF = ");
-                File.AppendAllText(CSVFileName, txtEncoderLPF.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, "// break frequency in hertz for the effort filter \n");
                 File.AppendAllText(CSVFileName, "int u_LPF = ");
-                File.AppendAllText(CSVFileName, txtuLPF.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// break frequency in hertz for coil current filter \n");
-                File.AppendAllText(CSVFileName, "int coil_LPF = ");
-                double clpf = Convert.ToDouble(txtcoilLPF.Text, System.Globalization.CultureInfo.InvariantCulture);
-                File.AppendAllText(CSVFileName, Convert.ToString(clpf));
+                double ulpf = Convert.ToDouble(txtuLPF.Text, System.Globalization.CultureInfo.InvariantCulture);
+                File.AppendAllText(CSVFileName, Convert.ToString(ulpf));
                 File.AppendAllText(CSVFileName, "; \n");
                 File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, " \n");
@@ -1367,28 +1293,10 @@ namespace Mechaduino
                     Thread.Sleep(10);
                     serialPort1.Write("editparam d\n");
                     Thread.Sleep(10);
-                    serialPort1.Write("h\n");
-                    Thread.Sleep(10);
-                    int m_load = Convert.ToInt32(txtloadMass.Text);
-                    String cmd = Convert.ToString(m_load, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("j\n");
-                    Thread.Sleep(10);
-                    int j_rotor = Convert.ToInt32(txtRotorJ.Text);
-                    cmd = Convert.ToString(j_rotor, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
                     serialPort1.Write("e\n");
                     Thread.Sleep(10);
                     double max_e = Convert.ToDouble(txtMaxE.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
+                    String cmd = Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
 
                     Thread.Sleep(10);
@@ -1467,15 +1375,7 @@ namespace Mechaduino
                     int pLPF = Convert.ToInt32(txtPLPF.Text);
                     String cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("l\n");
-                    Thread.Sleep(10);
-                    int encoderLPF = Convert.ToInt32(txtEncoderLPF.Text);
-                    cmd = Convert.ToString(encoderLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    
 
                     Thread.Sleep(10);
                     serialPort1.WriteLine("editparam d\n");
@@ -1486,14 +1386,6 @@ namespace Mechaduino
                     cmd = Convert.ToString(uLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
 
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("y\n");
-                    Thread.Sleep(10);
-                    int coilLPF = Convert.ToInt32(txtcoilLPF.Text);
-                    cmd = Convert.ToString(coilLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
                 }
                 catch
                 {
@@ -1502,36 +1394,7 @@ namespace Mechaduino
         }
 
 
-        private void btnSendFeedforward_Click(object sender, EventArgs e)
-        {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("s\n");
-                    Thread.Sleep(10);
-                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    String cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("t\n");
-                    Thread.Sleep(10);
-                    double Kvff = Convert.ToDouble(txtKvff.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kvff, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                }
-                catch
-                {
-                }
-            }
-
-        }
+      
 
         private void btnDirac_Click(object sender, EventArgs e)
         {
