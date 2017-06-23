@@ -4,7 +4,7 @@ Derivation of the original Mechaduino code from jcchurch13.
 
 Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmware/tree/multi-file/Mechaduino_01/Mechaduino_01
 
-
+# Firmware
 ### Changes:
 
 - added an enable pin (pin 2, only 3.3 V compatible)
