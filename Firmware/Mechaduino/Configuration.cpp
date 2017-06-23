@@ -57,7 +57,7 @@ float Kd = 4.70400;
 //----------------------------------------------- Filter  Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 // break frequency in hertz for DTerm
-int D_Term_LPF = 5000;
+int D_Term_LPF = 1500;
 
 
 // break frequency in hertz for the effort filter

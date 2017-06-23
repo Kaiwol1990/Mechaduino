@@ -1,8 +1,6 @@
 #include "Arduino.h"
 #include "wiring_private.h"
 
-static uint_fast8_t _readResolution = 9;
-static uint_fast8_t _ADCResolution = 9;
 static uint_fast8_t _writeResolution = 9;
 
 // Wait for synchronization of registers between the clock domains

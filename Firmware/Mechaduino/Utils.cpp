@@ -258,7 +258,7 @@ void calibration() {
   // needed to smooth the fullstep readings
   float gausian[31];
   counter = 0;
-  float m;
+  float m = 0.0;
   for (int i = -15; i <= 15; i++) {
     gausian[counter] = exp(-0.5 * ((float)i * (float)i) / (25.0));
     m = m + gausian[counter];
@@ -316,7 +316,7 @@ void calibration() {
   SerialUSB.println(procent_bar);
   counter = 0;
   count = (steps_per_revolution) / 50;
-  float smoothed_error;
+  float smoothed_error = 0.0;
 
 
   temp_reading = 4 * readEncoder();
@@ -593,9 +593,6 @@ void antiCoggingCal() {
 
   float u_cogging = 0;
 
-  int max_count =  16384;
-
-  int prozent = ((max_count / 50) + 0.5) + 1;
 
   SerialUSB.println("//---- Calculating friciton ----");
 
@@ -711,6 +708,7 @@ void PID_autotune() {
 
     // measure the noise from the controller
     int noiseBand = measure_noise(false);
+    disableTC5Interrupts();
 
     SerialUSB.print("|   ");
     SerialUSB.print(noiseBand);
@@ -720,10 +718,7 @@ void PID_autotune() {
     else {
       SerialUSB.print("   ");
     }
-    /*
-        int raw_0 = mod(y, 36000);
-        int raw_1 = raw_0;
-        int y_1 = y;*/
+
 
     float points[1124] = {0};
     float smoothed[1124] = {0};
@@ -733,7 +728,6 @@ void PID_autotune() {
 
     int peakType = 0;
     int peakCount = 0;
-    bool justchanged = false;
     int absMax = setpoint;
     int absMin = setpoint;
 
@@ -745,6 +739,7 @@ void PID_autotune() {
     int counter = 0;
     unsigned long start_millis = millis() + 500;
 
+    u = outputStep;
     // start the oscilations and measure the behavior every 50 microsseconds
     while (counter < 1124) {
 
@@ -924,7 +919,6 @@ void PID_autotune() {
         if (peakType == -1)
         {
           peakType = 1;
-          justchanged = true;
         }
         peaks[peakCount] = refVal;
 
@@ -938,7 +932,6 @@ void PID_autotune() {
         if (peakType == 1) {
           peakType = -1;
           peakCount++;
-          justchanged = true;
         }
       }
     }
@@ -1301,7 +1294,7 @@ void error_led() {
   unsigned int current_time = millis();
 
   int error_count = 0;
-  
+
   static int pattern_counter;
   static int errorcase;
   static int k = 1;
@@ -1336,7 +1329,7 @@ void error_led() {
 
 
     if (pattern_counter >= 30) {
-  
+
 
       pattern_counter = 0;
 

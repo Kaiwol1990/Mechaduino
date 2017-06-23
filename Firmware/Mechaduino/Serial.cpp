@@ -15,7 +15,7 @@
 
 void serialCheck() {
 
-  bool ended = false;
+
   String Command = "";
   String argument = "";
 
@@ -140,30 +140,30 @@ void disable() {
 void Serial_menu() {
   SerialUSB.println(help_header);
   SerialUSB.println(help_command + " - " + help_menu);
-  
+
   SerialUSB.println(print_error_command + " - " + print_error_menu);
   SerialUSB.println(reset_error_command + " - " + reset_error_menu);
   SerialUSB.println(diagnostics_command + " - " + diagnostics_menu);
   SerialUSB.println(check_lookup_command + " - " + check_lookup_menu);
-  
+
   SerialUSB.println(enable_command + " - " + enable_menu);
   SerialUSB.println(disable_command + " - " + disable_menu);
-  
+
   SerialUSB.println(parameter_command + " - " + parameter_menu);
   SerialUSB.println(editparam_command + " - " + editparam_menu);
-  
+
   SerialUSB.println(read_command + " - " + read_menu);
   SerialUSB.println(set_command + " - " + set_menu);
-  
+
   SerialUSB.println(getstate_command + " - " + getstate_menu);
-  
+
   SerialUSB.println(calibrate_command + " - " + calibrate_menu);
   SerialUSB.println(autotune_command + " - " + autotune_menu);
   SerialUSB.println(step_response_command + " - " + step_response_menu);
   SerialUSB.println(noise_command + " - " + noise_menu);
-  
+
   SerialUSB.println(reset_command + " - " + reset_menu);
-  
+
 }
 
 
@@ -522,8 +522,6 @@ void parameterEdit(String arg) {
               M_max = SerialUSB.parseFloat();
               SerialUSB.println(M_max);
 
-              float D_pulley = (mm_rev / (10 * 3.14159283));
-
               return;
             }
           }
@@ -541,8 +539,6 @@ void parameterEdit(String arg) {
             if (SerialUSB.available()) {
               I_rated = SerialUSB.parseInt();
               SerialUSB.println(I_rated);
-
-              float D_pulley = (mm_rev / (10 * 3.14159283));
 
               return;
             }
@@ -605,7 +601,6 @@ void parameterEdit(String arg) {
               SerialUSB.println(mm_rev);
 
               max_e = (36000 * error_led_value) / mm_rev;
-              float D_pulley = (mm_rev / (10 * 3.14159283));
 
               return;
             }
@@ -668,11 +663,8 @@ void step_response() {
 
   SerialUSB.print(step_response_header);
 
-  int current_position = y;
   int response_steps = 0;
   int frequency = 0;
-  const int last_step_target = step_target;
-  //int last_step_target = step_target;
 
   unsigned const int time_out = 5000;
   unsigned int start_millis = millis();
@@ -773,7 +765,6 @@ void dirac() {
 
   SerialUSB.print(dirac_header);
 
-  int current_position = y;
   int response_steps = 0;
   int frequency = 0;
   int last_step_target = step_target;
@@ -1032,9 +1023,10 @@ void reset_error_register() {
 
 
 int measure_noise(bool serialoutput) {
+  disableTC5Interrupts();
+
   if (serialoutput) {
     SerialUSB.println(noise_header);
-    disableTC5Interrupts();
   }
 
   delay(100);
@@ -1047,17 +1039,13 @@ int measure_noise(bool serialoutput) {
 
 
   while (counter < 500) {
-
     now = micros();
-
     if (now > last_time + dt) {
       last_time = now;
 
       points[counter] = y;
       counter++;
     }
-
-
   }
 
   float mean = 0;
@@ -1095,13 +1083,6 @@ int measure_noise(bool serialoutput) {
       lowest = points[i];
     }
   }
-  /*
-    for (int i = 0; i < 3000; i++) {
-      SerialUSB.print(times[i]);
-      SerialUSB.print(',');
-      SerialUSB.println(points[i]);
-    }
-  */
 
   if (serialoutput) {
     SerialUSB.print("min = ");
@@ -1120,13 +1101,14 @@ int measure_noise(bool serialoutput) {
     SerialUSB.print( abs(abs(highest) - abs(lowest)) / 100.0, 3 );
     SerialUSB.println(" degree");
 
-    enableTC5Interrupts();
-  }
-  else {
-    return abs((abs(highest) - abs(lowest)));
   }
 
+  enableTC5Interrupts();
+  return abs((abs(highest) - abs(lowest)));
+
 }
+
+
 
 int measure_setpoint() {
   int setpoint = 0;
@@ -1136,7 +1118,6 @@ int measure_setpoint() {
   }
 
   return setpoint / 1000.0;
-
 }
 
 
@@ -1210,7 +1191,6 @@ bool split_command(String * Input_pointer, String * first_substring, String * se
 
 
 void Streaming() {
-  bool binary = true;
   if (streaming) {
     static unsigned int next_time;
     unsigned int current_time = millis();
