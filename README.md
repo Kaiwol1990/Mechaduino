@@ -8,10 +8,10 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - Menu entry for generating a step response
 - deleted all modes other than position 
 - changed all float to integer operations
-- added some filtering to the coil current setting
-- Changed the frequency of the PID loop to 15-20 kHz
-- changed the PWM resolution from 8 bit to 10 bit
-- Processing script to display the step response
+- added some filtering to the effort and D-Term
+- Changed the frequency of the PID loop to 5 kHz
+- Encoder readings are placed in its own ISR that runs with 10 kHz (oversampling)
+- changed the PWM resolution from 8 bit to 9 bit
 - PID auto tuning
 - LED shows errors by different blinking patterns
 
