@@ -1,91 +1,67 @@
-
-#ifndef __CONFIGURATION_H__
-#define __CONFIGURATION_H__
+#include "Configuration.h"
 
 
 //-------------------------------------------------- Identifier -------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
-
-// string to identify the mechaduino with the Serial monitor
-extern char identifier;
+// char to identify the mechaduino with the Serial monitor
+char identifier = 'Y';
 
 
 
 //---------------------------------------------- Hardware Section ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
-
 // max current per coil 2000 mA for A4954 driver should be lower (thermal conditions)
-extern int iMAX;
+int iMAX = 1500;
 
-
-//uncomment this if you want to use a enable pin
-extern int USE_ENABLE_PIN;
+//set to 1 if you want to use a enable pin
+int USE_ENABLE_PIN = 1;
 
 // microstepping setting for step input
-extern int microstepping;
+int microstepping = 32;
 
 // fullsteps for 360 degrees
-extern int steps_per_revolution;
+int steps_per_revolution = 200;
 
 // mm per revolution
-extern int mm_rev;
+int mm_rev  = 32;
 
 // max error in mm, if the error gets bigger the led turns off
-extern float error_led_value;
+float error_led_value = 0.05;
 
-//uncomment this to invert your motor direction
-extern int INVERT;
-
+//set to 1 to invert your motor direction
+int INVERT = 0;
 
 
 
 //------------------------------------------------ Motor Section ------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 // max moment in Nm
-extern float M_max;
+float M_max = 0.59;
 
 // rated current for max moment in mA
-extern int I_rated;
+int I_rated = 2000;
 
 
 
 
 //---------------------------------------------- Controller Section ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
-
 //---- PID Values current control -----
+//1500 mA coil current
+float Kp = 1.10600;
+float Ki = 0.04000;
+float Kd = 4.70400;
 
-extern float Kp;
-extern float Ki;
-extern float Kd;
-
-
-extern float Kvff;
-extern float Kff;
 
 
 //----------------------------------------------- Filter  Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
-
 // break frequency in hertz for DTerm
-extern int D_Term_LPF;
-
-// break frequency in hertz for effort filter
-extern int u_LPF;
+int D_Term_LPF = 5000;
 
 
-
-
-
-
-//----------------------------------------------- Internal Section ----------------------------------------------
-//------------------------------------------------- don't change ------------------------------------------------
-// baudrate speed bit/s
-#define baudrate 250000
-
-// frequency of the PID loop change only if you know what you're doing
-#define FPID 5000
-#endif
+// break frequency in hertz for the effort filter
+int u_LPF = 5000;
 
 
 
