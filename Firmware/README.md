@@ -1,5 +1,3 @@
-![image](images/header.PNG)
-
 Derivation of the original Mechaduino code from jcchurch13.
 
 Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmware/tree/multi-file/Mechaduino_01/Mechaduino_01
@@ -54,15 +52,6 @@ To get an list of the possible commands send help over the serial monitor
 |response | generates a step response|
 |noise | measures the noise of the encoder|
 |reset | resets the board|
-
-
-# Windows GUI
-![image](images/GUI.png)
-- Live view/stream motor parameter (angle, error, effort, ...)
-- generate and analyze a step response with different sampling rates
-- change parameters without the need of serial commands
-- generate a configuration file 
-- Log streamed motor parameter as txt or csv file
 
 # License
 
