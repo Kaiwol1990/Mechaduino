@@ -34,6 +34,7 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 
 ### List of commands
 To get an list of the possible commands send help over the serialmonitor
+
 |Command|Description|
 |-------|-----------|
 |help | prints this menu|
