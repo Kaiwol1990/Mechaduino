@@ -8,7 +8,6 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 ### Changes:
 
 - added an enable pin (pin 2, only 3.3 V compatible)
-- Some other changes 
 - Menu entry for generating a step response
 - Menu entry for generating a dirac delta function
 - deleted all modes other than position 
