@@ -29,6 +29,11 @@ extern volatile int int_Ki;
 extern volatile int int_Kd;
 
 
+extern volatile int int_pessen_Kp;
+extern volatile int int_pessen_Ki;
+extern volatile int int_pessen_Kd;
+
+
 extern volatile int step_target;        // target as step gets incremented if an step is received
 
 

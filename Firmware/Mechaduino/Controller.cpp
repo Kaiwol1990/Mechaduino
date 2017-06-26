@@ -61,30 +61,56 @@ void TC5_Handler() {
       // calculate the error
       error = (r_1 - y);
 
-      // calculate the I- and DTerm
-      ITerm = ITerm + (int_Ki * error);
 
-
+      // small errors and low speed ueses another pid gain set
       if (abs(omega_target) < 5 && abs(error) < 50) {
-        DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * (int_Kd / 4) * (error - e_1))) / 128;
+
+
+        // calculate the I- and DTerm
+        ITerm = ITerm + (int_pessen_Ki * error);
+
+        // constrain the ITerm
+        if (ITerm > ITerm_max) {
+          ITerm = ITerm_max;
+        }
+        else if (ITerm < -ITerm_max) {
+          ITerm = -ITerm_max;
+        }
+
+        //DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * (int_Kd / 4) * (error - e_1))) / 128;
+        DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * (int_pessen_Kd) * (error - e_1))) / 128;
+
+        // ------ Add up the Effort ------
+        // -------------------------------
+        //         u-pid
+        u = ((u_LPFa * u_1) + (u_LPFb * (((int_pessen_Kp * error) + ITerm + DTerm)  / 1024))) / 128;
+
+
       }
       else {
+
+
+
+        // calculate the I- and DTerm
+        ITerm = ITerm + (int_Ki * error);
+
+        // constrain the ITerm
+        if (ITerm > ITerm_max) {
+          ITerm = ITerm_max;
+        }
+        else if (ITerm < -ITerm_max) {
+          ITerm = -ITerm_max;
+        }
+
         DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * int_Kd * (error - e_1))) / 128;
-      }
 
-      // constrain the ITerm
-      if (ITerm > ITerm_max) {
-        ITerm = ITerm_max;
-      }
-      else if (ITerm < -ITerm_max) {
-        ITerm = -ITerm_max;
-      }
+        // ------ Add up the Effort ------
+        // -------------------------------
+        //         u-pid
+        u = ((u_LPFa * u_1) + (u_LPFb * (((int_Kp * error) + ITerm + DTerm)  / 1024))) / 128;
 
 
-      // ------ Add up the Effort ------
-      // -------------------------------
-      //         u-pid
-      u = ((u_LPFa * u_1) + (u_LPFb * (((int_Kp * error) + ITerm + DTerm)  / 1024))) / 128;
+      }
 
 
     }
@@ -123,6 +149,7 @@ void TC5_Handler() {
     else {
       phase_advanced = sign(u) * PA;
     }
+
 
     // calculate the electrical angle for the motor coils
     electric_angle = -(raw_0 + phase_advanced);
@@ -171,12 +198,19 @@ void TC4_Handler() {
       case 1:
         y_temp = readAngle(y, raw_0);
         break;
-      case 2:
+      case 2:/*
+        y_temp = y_temp + readAngle(y, raw_0);
+        break;
+      case 3:
+        y_temp = y_temp + readAngle(y, raw_0);
+        break;
+      case 4:*/
         y = (y_temp + readAngle(y, raw_0)) / 2;
         raw_0 = mod(y, 36000);
         counter = 0;
         break;
     }
+
 
     TC4->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }

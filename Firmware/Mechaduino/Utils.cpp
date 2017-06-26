@@ -591,45 +591,43 @@ void antiCoggingCal() {
 
   bool last_enabled = enabled;
 
-  float u_cogging = 0;
+  float temp_u_cogging = 0;
 
 
   SerialUSB.println("//---- Calculating friciton ----");
 
-  step_target = ( y / stepangle);
-
-  // stepangle = 36000/(steps_per_rev*1024)
-  // if steps_per_rev = 200
-  // stepangle = 0.001757 deg
-
-  SerialUSB.print("const int cogging_lookup[] = {");
+  step_target = 0;
 
   enabled = true;
 
   step_target = 0;
 
-  delay(100);
+  delay(500);
 
-  for (int i = 0; i < 36000; i++) {
+  for (int i = 0; i < 3600; i++) {
 
-    step_target = i / stepangle;
+    step_target += (10 / stepangle);
 
-    delay(5);
+    delay(10);
 
     float sum = 0;
     for (int k = 0; k < 50; k++) {
       sum = sum + u;
+      delayMicroseconds(20);
     }
 
-    u_cogging = (sum / 50.0);
-    SerialUSB.print(u_cogging);
-    SerialUSB.print(',');
-
-
+    temp_u_cogging += (sum / 50.0);
   }
 
+
+  temp_u_cogging = temp_u_cogging / 3600;
+
   enabled = last_enabled;
-  SerialUSB.println("};");
+
+  SerialUSB.print("int u_cogging = ");
+  SerialUSB.print((int)(temp_u_cogging + 0.5));
+
+  SerialUSB.println(";");
   SerialUSB.println();
 }
 
@@ -642,9 +640,10 @@ void PID_autotune() {
 
   disableTC5Interrupts();
 
+
   int loops = 0;
-  int outputStep = uMAX;
-  int frequency = 2 * FPID;
+  float outputStep = uMAX/2.0;
+  int frequency = FPID;
   int dt = (1000000 / frequency);
   int scan_dt = dt - 2;
 
@@ -660,7 +659,40 @@ void PID_autotune() {
 
   SerialUSB.println(autotune_header);
   SerialUSB.println(cancle_header);
+
+
+
+  SerialUSB.print("The motor will vibrate violently, continue? (y/n) = ");
+  while (!received) {
+
+    if (timed_out(now, 5000)) return;
+
+    if (SerialUSB.available()) {
+
+      if (SerialUSB.read() == 'n') {
+
+        SerialUSB.println('n');
+        while (SerialUSB.available()) {
+          SerialUSB.read();
+        }
+        return;
+      }
+
+      received = true;
+    }
+  }
+  SerialUSB.println('y');
+
+
+  // flsuh the serial port
+  while (SerialUSB.available()) {
+    SerialUSB.read();
+  }
+
+
   SerialUSB.print("Cycles = ");
+  received = false;
+  now = millis();
 
 
   while (!received) {
@@ -683,6 +715,11 @@ void PID_autotune() {
 
       received = true;
     }
+  }
+
+  // flsuh the serial port
+  while (SerialUSB.available()) {
+    SerialUSB.read();
   }
 
   SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
@@ -720,10 +757,10 @@ void PID_autotune() {
     }
 
 
-    float points[1124] = {0};
+    int points[1124] = {0};
     float smoothed[1124] = {0};
 
-#define filterSamples   25
+#define filterSamples   3
     int sensSmoothArray1 [filterSamples];
 
     int peakType = 0;
@@ -766,6 +803,7 @@ void PID_autotune() {
         }
 
 
+
         if (u > 0) {
           output(-raw_0 - PA, u);
         }
@@ -778,6 +816,8 @@ void PID_autotune() {
           points[counter] = y;
           counter++;
         }
+
+        last_time = now;
 
       }
     }
@@ -797,15 +837,16 @@ void PID_autotune() {
     }
 
     // building mean of the position data
-    int sum = 0;
+    float sum = 0;
     for (int i = 0; i < 1024; i++) {
-      sum = sum + smoothed[i];
+     sum = sum + smoothed[i];
+    //  sum = sum + points[i];
     }
     sum = sum / 1024.0;
 
     for (int i = 0; i < 1024; i++) {
       smoothed[i] = smoothed[i] - sum;
-      points[i] = points[i] - sum;
+      points[i] = (points[i] - sum) + 0.5;
     }
 
     if (debug) {
@@ -824,12 +865,12 @@ void PID_autotune() {
     int period = 0;
     int i = 0;
 
-    while (i < len - 1 && pd_state < 3) {
+    while (i < len - 1 && pd_state != 3) {
       sum_old = sum;
       sum = 0;
 
       for (int k = 1; k < len - i; k++) {
-        sum = sum + (points[k]) * (points[k + i]);
+        sum = sum + (smoothed[k]) * (smoothed[k + i]);
       }
 
       if (pd_state == 2 && (sum - sum_old) <= 0) {
@@ -841,7 +882,8 @@ void PID_autotune() {
         pd_state = 2;
       }
 
-      if (!i) {
+      //if (!i) {
+      if (i == 0) {
         thresh = sum * 0.5;
         pd_state = 1;
       }
@@ -849,8 +891,15 @@ void PID_autotune() {
       i = i + 1;
     }
 
+
+    if (period == 0) {
+      SerialUSB.println();
+      SerialUSB.println("Autotune failed, no oscilation detected!");
+      return;
+    }
+
     float frequency = (1000000.0 / (float)(dt)) / period;
-    double Tu = 1.0 / frequency;
+    float Tu = 1.0 / frequency;
 
     SerialUSB.print("|   ");
     SerialUSB.print(frequency, 1);
@@ -886,7 +935,7 @@ void PID_autotune() {
     int refVal = 0;
 
     for (int i = 0; i < 1024; i++) {
-      refVal = smoothed[i];
+     refVal = smoothed[i];
 
       if (refVal > absMax) {
         absMax = refVal;
@@ -946,7 +995,7 @@ void PID_autotune() {
     A = A / (peakCount - 1);
 
     // calculating PID settings
-    float Ku = 4 * 2 * outputStep * 1000 / (PI * 2 * A);
+    float Ku = (4.0 * (2.0 * (float)outputStep))  / (PI * 2.0 * A);
 
     if (k == 1) {
       temp_Kp = (0.6 * Ku);
@@ -960,11 +1009,11 @@ void PID_autotune() {
     }
 
     SerialUSB.print("| ");
-    SerialUSB.print((0.6 * Ku) / 1000.0, 4);
+    SerialUSB.print((0.6 * Ku), 4);
     SerialUSB.print(" | ");
-    SerialUSB.print(((1.2 * Ku) / (Tu * FPID)) / 1000.0, 4);
+    SerialUSB.print(((1.2 * Ku) / (Tu * FPID)), 4);
     SerialUSB.print(" | ");
-    SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8) / 1000.0, 4);
+    SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8.0) , 4);
     SerialUSB.print(" |");
 
     SerialUSB.println("");
@@ -979,15 +1028,15 @@ void PID_autotune() {
   SerialUSB.println();
   SerialUSB.println();
 
-  int_Kp = (((temp_Kp / loops)) + 0.5);
-  int_Ki = (((temp_Ki / loops)) + 0.5);
-  int_Kd = (((temp_Kd / loops)) + 0.5);
 
-  if (loops > 0) {
-    Kp = int_Kp / 1000.0;
-    Ki = int_Ki / 1000.0;
-    Kd = int_Kd / 1000.0;
-  }
+  Kp = temp_Kp / loops;
+  Ki = temp_Ki / loops;
+  Kd = temp_Kd / loops;
+
+  int_Kp = ((1024.0 * (temp_Kp / loops)) + 0.5);
+  int_Ki = ((1024.0 * (temp_Ki / loops)) + 0.5);
+  int_Kd = ((1024.0 * (temp_Kd / loops)) + 0.5);
+
 
   SerialUSB.print("Kp = ");
   SerialUSB.println(Kp, 5);

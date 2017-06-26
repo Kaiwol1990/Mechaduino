@@ -359,6 +359,7 @@ void parameterEdit(String arg) {
               SerialUSB.println(Kp);
 
               int_Kp = (1024 * Kp) + 0.5;
+              int_pessen_Kp = (1024.0 * ((Kp * 0.7) / (0.6))) + 0.5;
               return;
             }
 
@@ -379,6 +380,7 @@ void parameterEdit(String arg) {
               SerialUSB.println(Ki);
 
               int_Ki = (1024 * Ki) + 0.5;
+              int_pessen_Ki = (1024.0 * ((Ki * 0.7 * 2.5) / (2 * 0.6))) + 0.5;
               return;
             }
           }
@@ -398,6 +400,7 @@ void parameterEdit(String arg) {
               SerialUSB.println(Kd);
 
               int_Kd = (1024 * Kd) + 0.5;
+              int_pessen_Kd = (1024.0 * ((Kd * 8.0 * 0.7) / (20.0 * 0.6))) + 0.5;
               return;
             }
           }

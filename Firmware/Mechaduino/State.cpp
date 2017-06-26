@@ -25,10 +25,16 @@ volatile bool streaming = false;    // flag for data streaming
 // ----- [timing error, error to big, ..., ..., ...]
 volatile int error_register = 0B1000000000000000;
 
-volatile int int_Kp = (Kp * 1024) + 0.5;
-volatile int int_Ki = (Ki * 1024) + 0.5;
-volatile int int_Kd = (Kd * 1024) + 0.5;
+volatile int int_Kp = (Kp * 1024.0) + 0.5;
+volatile int int_Ki = (Ki * 1024.0) + 0.5;
+volatile int int_Kd = (Kd * 1024.0) + 0.5;
 
+
+// calculate pid settings after pesson rule. is active for small errors
+// https://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method#cite_note-microstar-2
+volatile int int_pessen_Kp = (1024.0*((Kp * 0.7) / (0.6)))+0.5;
+volatile int int_pessen_Ki = (1024.0*((Ki * 0.7 * 2.5) / (2 * 0.6))) + 0.5;
+volatile int int_pessen_Kd = (1024.0*((Kd * 8.0 * 0.7) / (20.0 * 0.6))) + 0.5;
 
 
 

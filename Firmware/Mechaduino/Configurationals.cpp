@@ -20,5 +20,5 @@ int target_dt = 1.1 * (1000000 / FPID);
 
 int step_add = 1024 / microstepping;
 
-int ITerm_max = uMAX * 1000;
+int ITerm_max = uMAX * 1024.0;
 
