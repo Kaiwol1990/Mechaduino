@@ -507,7 +507,7 @@ int mod(int xMod, int mMod) {
 
 void setupTCInterrupts() {
   const int overflow_TC_5 = (48000000 / FPID) - 1;
-  const int overflow_TC_4 = ((48000000 / (4 * FPID))) - 1;
+  const int overflow_TC_4 = ((48000000 / (2 * FPID))) - 1;
 
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (int) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
