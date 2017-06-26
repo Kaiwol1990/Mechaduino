@@ -258,7 +258,7 @@ void calibration() {
   // needed to smooth the fullstep readings
   float gausian[31];
   counter = 0;
-  float m;
+  float m = 0.0;
   for (int i = -15; i <= 15; i++) {
     gausian[counter] = exp(-0.5 * ((float)i * (float)i) / (25.0));
     m = m + gausian[counter];
@@ -316,7 +316,7 @@ void calibration() {
   SerialUSB.println(procent_bar);
   counter = 0;
   count = (steps_per_revolution) / 50;
-  float smoothed_error;
+  float smoothed_error = 0.0;
 
 
   temp_reading = 4 * readEncoder();
@@ -507,7 +507,7 @@ int mod(int xMod, int mMod) {
 
 void setupTCInterrupts() {
   const int overflow_TC_5 = (48000000 / FPID) - 1;
-  const int overflow_TC_4 = ((48000000 / (2 * FPID))) - 1;
+  const int overflow_TC_4 = ((48000000 / (4 * FPID))) - 1;
 
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (int) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
@@ -591,48 +591,43 @@ void antiCoggingCal() {
 
   bool last_enabled = enabled;
 
-  float u_cogging = 0;
+  float temp_u_cogging = 0;
 
-  int max_count =  16384;
-
-  int prozent = ((max_count / 50) + 0.5) + 1;
 
   SerialUSB.println("//---- Calculating friciton ----");
 
-  step_target = ( y / stepangle);
-
-  // stepangle = 36000/(steps_per_rev*1024)
-  // if steps_per_rev = 200
-  // stepangle = 0.001757 deg
-
-  SerialUSB.print("const int cogging_lookup[] = {");
+  step_target = 0;
 
   enabled = true;
 
   step_target = 0;
 
-  delay(100);
+  delay(500);
 
-  for (int i = 0; i < 36000; i++) {
+  for (int i = 0; i < 3600; i++) {
 
-    step_target = i / stepangle;
+    step_target += (10 / stepangle);
 
-    delay(5);
+    delay(10);
 
     float sum = 0;
     for (int k = 0; k < 50; k++) {
       sum = sum + u;
+      delayMicroseconds(20);
     }
 
-    u_cogging = (sum / 50.0);
-    SerialUSB.print(u_cogging);
-    SerialUSB.print(',');
-
-
+    temp_u_cogging += (sum / 50.0);
   }
 
+
+  temp_u_cogging = temp_u_cogging / 3600;
+
   enabled = last_enabled;
-  SerialUSB.println("};");
+
+  SerialUSB.print("int u_cogging = ");
+  SerialUSB.print((int)(temp_u_cogging + 0.5));
+
+  SerialUSB.println(";");
   SerialUSB.println();
 }
 
@@ -644,10 +639,11 @@ void antiCoggingCal() {
 void PID_autotune() {
 
   disableTC5Interrupts();
+ 
 
   int loops = 0;
   int outputStep = uMAX;
-  int frequency = 2 * FPID;
+  int frequency = FPID;
   int dt = (1000000 / frequency);
   int scan_dt = dt - 2;
 
@@ -663,7 +659,40 @@ void PID_autotune() {
 
   SerialUSB.println(autotune_header);
   SerialUSB.println(cancle_header);
+
+
+
+  SerialUSB.print("The motor will vibrate violently, continue? (y/n) = ");
+  while (!received) {
+
+    if (timed_out(now, 5000)) return;
+
+    if (SerialUSB.available()) {
+
+      if (SerialUSB.read() == 'n') {
+
+        SerialUSB.println('n');
+        while (SerialUSB.available()) {
+          SerialUSB.read();
+        }
+        return;
+      }
+
+      received = true;
+    }
+  }
+  SerialUSB.println('y');
+
+
+  // flsuh the serial port
+  while (SerialUSB.available()) {
+    SerialUSB.read();
+  }
+
+
   SerialUSB.print("Cycles = ");
+  received = false;
+  now = millis();
 
 
   while (!received) {
@@ -686,6 +715,11 @@ void PID_autotune() {
 
       received = true;
     }
+  }
+
+  // flsuh the serial port
+  while (SerialUSB.available()) {
+    SerialUSB.read();
   }
 
   SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
@@ -711,6 +745,7 @@ void PID_autotune() {
 
     // measure the noise from the controller
     int noiseBand = measure_noise(false);
+    disableTC5Interrupts();
 
     SerialUSB.print("|   ");
     SerialUSB.print(noiseBand);
@@ -720,12 +755,9 @@ void PID_autotune() {
     else {
       SerialUSB.print("   ");
     }
-    /*
-        int raw_0 = mod(y, 36000);
-        int raw_1 = raw_0;
-        int y_1 = y;*/
 
-    float points[1124] = {0};
+
+    int points[1124] = {0};
     float smoothed[1124] = {0};
 
 #define filterSamples   25
@@ -733,7 +765,6 @@ void PID_autotune() {
 
     int peakType = 0;
     int peakCount = 0;
-    bool justchanged = false;
     int absMax = setpoint;
     int absMin = setpoint;
 
@@ -744,7 +775,9 @@ void PID_autotune() {
 
     int counter = 0;
     unsigned long start_millis = millis() + 500;
+    int last_raw = mod(y, 36000);
 
+    u = outputStep;
     // start the oscilations and measure the behavior every 50 microsseconds
     while (counter < 1124) {
 
@@ -770,19 +803,26 @@ void PID_autotune() {
           u = outputStep;
         }
 
+        int electric_angle = -(raw_0 + (sign(u) * PA));
 
-        if (u > 0) {
-          output(-raw_0 - PA, u);
-        }
-        else {
-          output(-raw_0 + PA, u);
-        }
 
+        // write the output
+        output(electric_angle, u);
+
+        /*    if (u > 0) {
+              output(-raw_0 - PA, u);
+            }
+            else {
+              output(-raw_0 + PA, u);
+            }
+        */
         // wait half a second to get stable oscilations
         if (millis() > start_millis) {
           points[counter] = y;
           counter++;
         }
+
+        last_time = now;
 
       }
     }
@@ -802,7 +842,7 @@ void PID_autotune() {
     }
 
     // building mean of the position data
-    int sum = 0;
+    float sum = 0;
     for (int i = 0; i < 1024; i++) {
       sum = sum + smoothed[i];
     }
@@ -810,7 +850,7 @@ void PID_autotune() {
 
     for (int i = 0; i < 1024; i++) {
       smoothed[i] = smoothed[i] - sum;
-      points[i] = points[i] - sum;
+      points[i] = (points[i] - sum) + 0.5;
     }
 
     if (debug) {
@@ -829,12 +869,13 @@ void PID_autotune() {
     int period = 0;
     int i = 0;
 
-    while (i < len - 1 && pd_state < 3) {
+    while (i < len - 1 && pd_state != 3) {
       sum_old = sum;
       sum = 0;
 
       for (int k = 1; k < len - i; k++) {
-        sum = sum + (points[k]) * (points[k + i]);
+        //sum = sum + (points[k]) * (points[k + i]);
+        sum = sum + (smoothed[k]) * (smoothed[k + i]);
       }
 
       if (pd_state == 2 && (sum - sum_old) <= 0) {
@@ -846,12 +887,20 @@ void PID_autotune() {
         pd_state = 2;
       }
 
-      if (!i) {
+      //if (!i) {
+      if (i == 0) {
         thresh = sum * 0.5;
         pd_state = 1;
       }
 
       i = i + 1;
+    }
+
+
+    if (period == 0) {
+      SerialUSB.println();
+      SerialUSB.println("Autotune failed, no oscilation detected!");
+      return;
     }
 
     float frequency = (1000000.0 / (float)(dt)) / period;
@@ -924,7 +973,6 @@ void PID_autotune() {
         if (peakType == -1)
         {
           peakType = 1;
-          justchanged = true;
         }
         peaks[peakCount] = refVal;
 
@@ -938,7 +986,6 @@ void PID_autotune() {
         if (peakType == 1) {
           peakType = -1;
           peakCount++;
-          justchanged = true;
         }
       }
     }
@@ -1301,7 +1348,7 @@ void error_led() {
   unsigned int current_time = millis();
 
   int error_count = 0;
-  
+
   static int pattern_counter;
   static int errorcase;
   static int k = 1;
@@ -1336,7 +1383,7 @@ void error_led() {
 
 
     if (pattern_counter >= 30) {
-  
+
 
       pattern_counter = 0;
 
