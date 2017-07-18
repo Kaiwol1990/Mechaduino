@@ -8,6 +8,7 @@ extern volatile int r;            //target angle
 extern volatile int y;           //current angle
 extern volatile int raw_0;      //current shaft-angle
 extern volatile int error;      //error angle
+extern volatile int omega;      //error angle
 
 extern volatile int u;            // control effort
 
@@ -28,6 +29,8 @@ extern volatile int int_Kp;
 extern volatile int int_Ki;
 extern volatile int int_Kd;
 
+extern volatile int int_Kff;
+extern volatile int int_Kacc;
 
 extern volatile int int_pessen_Kp;
 extern volatile int int_pessen_Ki;

@@ -9,6 +9,7 @@ volatile int r = 0;  //target angle
 volatile int y = 0;  //current angle
 volatile int raw_0 = 0;  //current shaft-angle
 volatile int error = 0;  //error angle
+volatile int omega = 0;  //error angle
 
 volatile int u = 0;   // control effort
 
@@ -29,12 +30,16 @@ volatile int int_Kp = (Kp * 1024.0) + 0.5;
 volatile int int_Ki = (Ki * 1024.0) + 0.5;
 volatile int int_Kd = (Kd * 1024.0) + 0.5;
 
+volatile int int_Kff = (Kff * 1024.0) + 0.5;
+volatile int int_Kacc = (Kacc * 1024.0) + 0.5;
+
+
 
 // calculate pid settings after pesson rule. is active for small errors
 // https://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method#cite_note-microstar-2
-volatile int int_pessen_Kp = (1024.0*((Kp * 0.7) / (0.6)))+0.5;
-volatile int int_pessen_Ki = (1024.0*((Ki * 0.7 * 2.5) / (2 * 0.6))) + 0.5;
-volatile int int_pessen_Kd = (1024.0*((Kd * 8.0 * 0.7) / (20.0 * 0.6))) + 0.5;
+volatile int int_pessen_Kp = (1024.0 * ((Kp * 0.7) / (0.6))) + 0.5;
+volatile int int_pessen_Ki = (1024.0 * ((Ki * 0.7 * 2.5) / (2 * 0.6))) + 0.5;
+volatile int int_pessen_Kd = (1024.0 * ((Kd * 8.0 * 0.7) / (15.0 * 0.6))) + 0.5;
 
 
 

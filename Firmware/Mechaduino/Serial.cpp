@@ -95,6 +95,15 @@ void serialCheck() {
     else if (Command.indexOf(reset_error_command) == 0 && Command.length() == reset_error_command.length()) {
       reset_error_register();
     }
+    else if (Command.indexOf(twiddle_command) == 0 && Command.length() == twiddle_command.length()) {
+      twiddle();
+    }
+    else if (Command.indexOf(test_command) == 0 && Command.length() == test_command.length()) {
+      test();
+    }
+    else if (Command.indexOf(downhill_command) == 0 && Command.length() == downhill_command.length()) {
+      downhill_simplex();
+    }
     else {
       SerialUSB.println("unknown command send 'help'");
     }
@@ -359,7 +368,6 @@ void parameterEdit(String arg) {
               SerialUSB.println(Kp);
 
               int_Kp = (1024 * Kp) + 0.5;
-              int_pessen_Kp = (1024.0 * ((Kp * 0.7) / (0.6))) + 0.5;
               return;
             }
 
@@ -380,7 +388,6 @@ void parameterEdit(String arg) {
               SerialUSB.println(Ki);
 
               int_Ki = (1024 * Ki) + 0.5;
-              int_pessen_Ki = (1024.0 * ((Ki * 0.7 * 2.5) / (2 * 0.6))) + 0.5;
               return;
             }
           }
@@ -400,7 +407,6 @@ void parameterEdit(String arg) {
               SerialUSB.println(Kd);
 
               int_Kd = (1024 * Kd) + 0.5;
-              int_pessen_Kd = (1024.0 * ((Kd * 8.0 * 0.7) / (20.0 * 0.6))) + 0.5;
               return;
             }
           }
@@ -668,6 +674,7 @@ void step_response() {
 
   int response_steps = 0;
   int frequency = 0;
+  int last_step_target = step_target;
 
   unsigned const int time_out = 5000;
   unsigned int start_millis = millis();
@@ -715,41 +722,27 @@ void step_response() {
 
   int counter = 0;
 
-  unsigned int start_time = micros();
-  unsigned int current_time = start_time;
-  unsigned int next_time = start_time;
+  unsigned int current_time = micros();
+  unsigned int next_time = current_time;
 
   unsigned int dt = 1000000 / frequency;
-  unsigned int short_time = (100 * dt) + start_time;
-  unsigned int long_time = (1490 * dt) + start_time;
   SerialUSB.println(frequency);
 
-  while (current_time < short_time) {
-    current_time = micros();
-    if (current_time >= next_time) {
-      next_time = current_time + dt;
-      answer[counter] = y;
-      target[counter] = r;
-      counter += 1;
-    }
-  }
-
-  step_target = step_target + (response_steps * step_add);
-
-  while (current_time < long_time) {
-    current_time = micros();
-    if (current_time >= next_time) {
-      next_time = current_time + dt;
-      answer[counter] = y;
-      target[counter] = r;
-      counter += 1;
-    }
-  }
 
   while (counter < 1500) {
-    answer[counter] = answer[counter - 1];
-    target[counter] = target[counter - 1];
-    counter += 1;
+    current_time = micros();
+
+    if (current_time >= next_time) {
+
+      if (counter == 400) {
+        step_target = step_target + (response_steps * step_add);
+      }
+
+      next_time = current_time + dt;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
   }
 
   for (int i = 0; i < 1500; i++) {
@@ -758,6 +751,18 @@ void step_response() {
     SerialUSB.println(target[i]);
 
   }
+
+  // move back to last position
+  while (step_target > last_step_target) {
+    current_time = micros();
+    if (current_time >= next_time) {
+      next_time = current_time + 50;
+      step_target -= 1;
+    }
+  }
+
+
+
   // set parameters back to the values before the response
   enabled = last_enabled;
   dir = last_dir;
@@ -812,56 +817,32 @@ void dirac() {
   int target[1500];
   int counter = 0;
 
-  unsigned int start_time = micros();
-  unsigned int current_time = start_time;
-  unsigned int next_time = start_time;
+  //unsigned int start_time = micros();
+  unsigned int current_time = micros();
+  unsigned int next_time = current_time;
 
 
   unsigned int dt = 1000000 / frequency;
-  unsigned int short_time = (100 * dt) + start_time;
-  unsigned int long_time = (1490 * dt) + start_time;
-  unsigned int short_time_2 = short_time + (2 * dt);
-
-
-  while (current_time < short_time) {
-    current_time = micros();
-    if (current_time >= next_time) {
-      next_time = current_time + dt;
-      answer[counter] = y;
-      target[counter] = r;
-      counter += 1;
-    }
-  }
-
-  step_target = last_step_target + (response_steps * step_add);
-
-  while (current_time < short_time_2) {
-    current_time = micros();
-    if (current_time >= next_time) {
-      next_time = current_time + dt;
-      answer[counter] = y;
-      target[counter] = r;
-      counter += 1;
-    }
-  }
-
-  step_target = last_step_target;
-
-  while (current_time < long_time) {
-    current_time = micros();
-    if (current_time >= next_time) {
-      next_time = current_time + dt;
-      answer[counter] = y;
-      target[counter] = r;
-      counter += 1;
-    }
-  }
 
   while (counter < 1500) {
-    answer[counter] = answer[counter - 1];
-    target[counter] = target[counter - 1];
-    counter += 1;
+    current_time = micros();
+
+    if (current_time >= next_time) {
+
+      if (counter == 400) {
+        step_target = step_target + (response_steps * step_add);
+      }
+      else if (counter == 401) {
+        step_target = last_step_target;
+      }
+
+      next_time = current_time + dt;
+      answer[counter] = y;
+      target[counter] = r;
+      counter += 1;
+    }
   }
+
 
 
   for (int i = 0; i < 1500; i++) {
@@ -1035,6 +1016,7 @@ int measure_noise(bool serialoutput) {
   delay(100);
   int counter = 0;
   float points[500] = {0};
+  float omega_buf[500] = {0};
 
   unsigned long now = micros();
   unsigned long last_time = now;
@@ -1047,6 +1029,7 @@ int measure_noise(bool serialoutput) {
       last_time = now;
 
       points[counter] = y;
+      omega_buf[counter] = omega;
       counter++;
     }
   }
@@ -1106,6 +1089,11 @@ int measure_noise(bool serialoutput) {
 
   }
 
+  
+  for (int i = 0; i < 500; i++) {
+    SerialUSB.print(omega_buf[i]);
+    SerialUSB.print(",");
+  }
   enableTC5Interrupts();
   return abs((abs(highest) - abs(lowest)));
 
@@ -1208,7 +1196,8 @@ void Streaming() {
       SerialUSB.write(';');
       SerialUSB.print(r);               //print target position
       SerialUSB.write(';');
-      SerialUSB.print(error);           //print error
+      //SerialUSB.print(error);           //print error
+      SerialUSB.print(omega);           //print error
       SerialUSB.write(';');
       SerialUSB.print(u);               //print effort
       SerialUSB.write(';');

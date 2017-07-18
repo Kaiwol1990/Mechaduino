@@ -28,6 +28,7 @@ void TC5_Handler() {
   static int e_1;        // last error term
   static int r_1;        // target 1 loop ago
   static int u_1;
+  static int omega_target_1;
 
 
   int omega_target;    // target angle velocity
@@ -63,12 +64,12 @@ void TC5_Handler() {
 
 
       // small errors and low speed ueses another pid gain set
-      if (abs(omega_target) < 5 && abs(error) < 50) {
+      if (abs(omega_target) <= 0 && abs(error) < 50) {
 
-
-        // calculate the I- and DTerm
-        ITerm = ITerm + (int_pessen_Ki * error);
-
+        if (abs(u) < uMAX) {
+          // calculate the I- and DTerm
+          ITerm = ITerm + (int_pessen_Ki * error);
+        }
         // constrain the ITerm
         if (ITerm > ITerm_max) {
           ITerm = ITerm_max;
@@ -77,22 +78,21 @@ void TC5_Handler() {
           ITerm = -ITerm_max;
         }
 
-        //DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * (int_Kd / 4) * (error - e_1))) / 128;
         DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * (int_pessen_Kd) * (error - e_1))) / 128;
 
         // ------ Add up the Effort ------
         // -------------------------------
         //         u-pid
-        u = ((u_LPFa * u_1) + (u_LPFb * (((int_pessen_Kp * error) + ITerm + DTerm)  / 1024))) / 128;
+        u = ((u_LPFa * u_1) + (u_LPFb * (((int_pessen_Kp * error) + ITerm + DTerm + (int_Kff * omega_target) + (int_Kacc * (omega_target - omega_target_1)))  / 1024))) / 128;
 
 
       }
       else {
 
-
-
-        // calculate the I- and DTerm
-        ITerm = ITerm + (int_Ki * error);
+        if (abs(u) < uMAX) {
+          // calculate the I- and DTerm
+          ITerm = ITerm + (int_Ki * error);
+        }
 
         // constrain the ITerm
         if (ITerm > ITerm_max) {
@@ -107,8 +107,7 @@ void TC5_Handler() {
         // ------ Add up the Effort ------
         // -------------------------------
         //         u-pid
-        u = ((u_LPFa * u_1) + (u_LPFb * (((int_Kp * error) + ITerm + DTerm)  / 1024))) / 128;
-
+        u = ((u_LPFa * u_1) + (u_LPFb * (((int_Kp * error) + ITerm + DTerm + (int_Kff * omega_target) + (int_Kacc * (omega_target - omega_target_1)))  / 1024))) / 128;
 
       }
 
@@ -136,7 +135,7 @@ void TC5_Handler() {
     // calculate the phase advance term
     // when the motor is commanded to hold its position the term will be calculate from the posiition error and a small amount of the PA Term
     // when the motor is commanded to move the term will be set to it's maximum -> PA
-    if (abs(omega_target) < 5) {
+    if (omega_target == 0) {
       phase_advanced = ((sign(u) * PA) / 4 ) + error;
 
       if (phase_advanced >= PA) {
@@ -145,9 +144,10 @@ void TC5_Handler() {
       else if (phase_advanced <= -PA) {
         phase_advanced = -PA;
       }
+
     }
     else {
-      phase_advanced = sign(u) * PA;
+      phase_advanced = (sign(u) * PA) + omega;
     }
 
 
@@ -163,6 +163,7 @@ void TC5_Handler() {
     e_1 = error;
     u_1 = u;
     r_1 = r;
+    omega_target_1 = omega_target;
 
 
     if (abs(error) > max_e) {
@@ -189,6 +190,10 @@ void TC5_Handler() {
 void TC4_Handler() {
   static byte counter;
   static int y_temp;
+  static int sum = 0;
+  static int omega_buffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+  static byte omega_pointer = 0;
+
 
   if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {
 
@@ -196,17 +201,40 @@ void TC4_Handler() {
 
     switch (counter) {
       case 1:
+
         y_temp = readAngle(y, raw_0);
+
+        sum = sum - omega_buffer[omega_pointer];
+        omega_buffer[omega_pointer] = y_temp - y;
+        sum = sum + omega_buffer[omega_pointer];
+
+        omega_pointer++;
+        if (omega_pointer > 7) {
+          omega_pointer = 0;
+        }
+
         break;
-      case 2:/*
-        y_temp = y_temp + readAngle(y, raw_0);
-        break;
-      case 3:
-        y_temp = y_temp + readAngle(y, raw_0);
-        break;
-      case 4:*/
-        y = (y_temp + readAngle(y, raw_0)) / 2;
+      case 2:
+
+        int y_temp_2 = readAngle(y, raw_0);
+
+        sum = sum - omega_buffer[omega_pointer];
+        omega_buffer[omega_pointer] = y_temp_2 - y;
+        sum = sum + omega_buffer[omega_pointer];
+        omega_pointer++;
+        if (omega_pointer > 7) {
+          omega_pointer = 0;
+        }
+
+
+
+        omega = sum >> 3;
+
+
+        y = (y_temp + y_temp_2) / 2;
         raw_0 = mod(y, 36000);
+
+
         counter = 0;
         break;
     }

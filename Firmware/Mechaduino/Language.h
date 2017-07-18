@@ -73,6 +73,17 @@ const String autotune_menu = "PID auto tune";
 const String autotune_header = "//---- Autotuning the current PID controller --- \n\r Enter number of tuning cycles";
 
 
+
+const String downhill_command = "downhill";
+const String downhill_menu = "Downhhill simplex algorithm";
+const String downhill_header = "//---- Autotuning the current PID controller with the downhill simplex algorithm--- ";
+
+
+const String twiddle_command = "twiddle";
+const String twiddle_menu = "Downhhill simplex algorithm";
+const String twiddle_header = "//---- Autotuning the current PID controller with the twiddle algorithm--- ";
+
+
 const String looptime_command  = "loop";
 const String looptime_menu = "calculates the maximal loopfrequency";
 const String looptime_header = "//---- Measuring loop time ---- \n\r make sure the motor is moving!";
@@ -107,6 +118,10 @@ const String load_param_command = "load_param";
 
 const String disableTC5 = "TC_off";
 const String enableTC5 = "TC_on";
+
+const String test_command = "test";
+
+
 
 
 const String procent_bar = "|---+----+----+----+----+----+----+----+----+----|";
