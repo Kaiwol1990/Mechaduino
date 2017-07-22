@@ -1,7 +1,7 @@
 # Windows GUI
-![image](https://github.com/Kaiwol1990/Mechaduino/blob/dev/images/GUI.png)
+![image](images/GUI.png)
 - Live view/stream motor parameter (angle, error, effort, ...)
-- generate and analyze a step response with different sampling rates
+- generate and analyze different test moves with different sampling rates (step response, dirac delta function, ...)
 - change parameters without the need of serial commands
 - generate a configuration file 
 - Log streamed motor parameter as txt or csv file
