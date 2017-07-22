@@ -112,7 +112,7 @@ void calibration() {
   }
   encoderReading = encoderReading / 50.0;
 
-
+/*
   SerialUSB.println("searching zeropoint");
   step_target = 0;
   if (encoderReading < (16384 / steps_per_revolution)) {
@@ -122,6 +122,14 @@ void calibration() {
       delay(100);
     }
   }
+
+  dir = false;
+  while (readEncoder() > (16384 / steps_per_revolution)) {
+    oneStep();
+    delay(100);
+  }
+
+*/
 
 
   dir = true;
@@ -358,7 +366,10 @@ void calibration() {
 
     float temp =  abs(x[i] - (encoderReading / avg));
 
- 
+    if (temp > 32768.0) {
+      temp = 65536.0 - temp;
+    }
+
     if (temp > smoothed_error) {
       smoothed_error = temp;
     }
