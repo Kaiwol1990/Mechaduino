@@ -1226,8 +1226,8 @@ void Streaming() {
       SerialUSB.write(';');
       SerialUSB.print(r);               //print target position
       SerialUSB.write(';');
-      //SerialUSB.print(error);           //print error
-      SerialUSB.print(omega);           //print error
+      SerialUSB.print(error);           //print error
+      //SerialUSB.print(omega);           //print error
       SerialUSB.write(';');
       SerialUSB.print(u);               //print effort
       SerialUSB.write(';');
