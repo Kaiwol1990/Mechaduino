@@ -25,9 +25,10 @@ namespace Mechaduino
 
         int[] response_position = new int[1500];
         int[] response_target = new int[1500];
-        
-        double last_y = 0;
+        int[] omega = new int[1500];
+        int[] omega_target = new int[1500];
 
+        double last_y = 0;
 
 
         int y = 0;
@@ -103,6 +104,7 @@ namespace Mechaduino
             saveFileDialogConfig.FileName = "Configuration.cpp";
 
 
+            response_plot_variable.SelectedIndex = 0;
 
             Thread.Sleep(300);
             
@@ -167,7 +169,6 @@ namespace Mechaduino
             pltError.ChartAreas[0].AxisX.MinorTickMark.Enabled = false;
 
 
-
             // response plot
             pltresponse.ChartAreas[0].CursorX.IsUserEnabled = Enabled;
             pltresponse.ChartAreas[0].CursorX.IsUserSelectionEnabled = Enabled;
@@ -226,13 +227,15 @@ namespace Mechaduino
                 {
                     String[] substrings = value.Split(';');
 
-                    if (substrings.Length == 2)
+                    if (substrings.Length == 4)
                     {
-                        response_position[response_command_Length] = Convert.ToInt32(substrings[0]);
-                        response_target[response_command_Length] = Convert.ToInt32(substrings[1]);
+                        response_target[response_command_Length] = Convert.ToInt32(substrings[0]);
+                        response_position[response_command_Length] = Convert.ToInt32(substrings[1]);
+                        omega_target[response_command_Length] = Convert.ToInt32(substrings[2]);
+                        omega[response_command_Length] = Convert.ToInt32(substrings[3]);
 
                         response_command_Length = response_command_Length + 1;
-                        if (response_command_Length >= 1490)
+                        if (response_command_Length >= 990)
                         {
                             response_income = true;
                         }
@@ -632,6 +635,9 @@ namespace Mechaduino
 
             if (response_income)
             {
+                btn_plot_Click(sender, e);
+
+                /*
                 response_income = false;
                 pltresponse.Series[0].Points.Clear();
                 pltresponse.Series[1].Points.Clear();
@@ -657,7 +663,7 @@ namespace Mechaduino
                 }
 
                 response_command_Length = 0;
-                changeYScala(pltresponse,5);
+                changeYScala(pltresponse,5);*/
             }
         }
 
@@ -839,15 +845,37 @@ namespace Mechaduino
         {
             if (serialPort1.IsOpen)
             {
-                Thread.Sleep(10);
-                serialPort1.WriteLine("autotune\n");
-                Thread.Sleep(10);
-                int cycles = Convert.ToInt32(txtAutotuneCycles.Text, System.Globalization.CultureInfo.InvariantCulture);
-                String cmd = Convert.ToString(cycles, System.Globalization.CultureInfo.InvariantCulture);
-                serialPort1.Write(cmd + "\n");
-                serialPort1.Write(" \n");
-                serialPort1.Write(" \n");
-                serialPort1.Write("load_param\n");
+
+                DialogResult result = MessageBox.Show("The motor will vibrate violently, continue?", "Warning",MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (result == DialogResult.Yes)
+                {
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("autotune\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("y");
+                    int cycles = Convert.ToInt32(txtAutotuneCycles.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    String cmd = Convert.ToString(cycles, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+                    serialPort1.Write(" \n");
+                    serialPort1.Write(" \n");
+                    serialPort1.Write("load_param\n");
+                }
+                else if (result == DialogResult.No)
+                {
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("autotune\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("n");
+                }
+                else if (result == DialogResult.Cancel)
+                {
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("autotune\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("n");
+                }
+
+
             }
         }
 
@@ -1458,7 +1486,9 @@ namespace Mechaduino
 
                 pltresponse.Series[0].Points.Clear();
                 pltresponse.Series[1].Points.Clear();
-              
+
+                response_command_Length = 0;
+
                 serialPort1.Write("stop_stream \n");
                 Thread.Sleep(100);
                 serialPort1.Write("response \n");
@@ -1466,6 +1496,8 @@ namespace Mechaduino
                 serialPort1.Write(cmd_response + "\n");
                 Thread.Sleep(100);
                 serialPort1.Write(cmd_frequency + "\n");
+
+
             }
         }
 
@@ -1489,6 +1521,8 @@ namespace Mechaduino
 
                 pltresponse.Series[0].Points.Clear();
                 pltresponse.Series[1].Points.Clear();
+
+                response_command_Length = 0;
 
                 serialPort1.Write("dirac \n");
                 Thread.Sleep(100);
@@ -1568,6 +1602,134 @@ namespace Mechaduino
 
                     }
 
+            }
+
+        }
+
+        private void btn_plot_Click(object sender, EventArgs e)
+        {
+            response_income = false;
+            pltresponse.Series[0].Points.Clear();
+            pltresponse.Series[1].Points.Clear();
+
+            double start_position = 0;
+            double start_target = 0;
+
+            int frequency = Convert.ToInt32(txtfrequency.Text);
+            double dt = 1 / frequency;
+
+            if (response_plot_variable.Text == "velocity")
+            {
+
+                pltresponse.Series[0].Name = "position [deg/s]";
+                pltresponse.Series[1].Name = "target [deg/s]";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + omega[j];
+                    start_target = start_target + omega_target[j];
+                }
+                start_position = start_position / 50;
+                start_target = start_target / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * (omega[j] - start_position) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_target[j] - start_target) / 100.0);
+                }
+
+                btn_plot.Text = "Plot";
+            }
+            else if (response_plot_variable.Text == "angle")
+            {
+
+                pltresponse.Series[0].Name = "position [deg]";
+                pltresponse.Series[1].Name = "target [deg]";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + response_position[j];
+                    start_target = start_target + response_target[j];
+                }
+                start_position = start_position / 50;
+                start_target = start_target / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, (response_position[j] - start_position) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_target) / 100.0);
+                }
+
+                btn_plot.Text = "Plot";
+            }
+            else if (response_plot_variable.Text == "angle error")
+            {
+
+                pltresponse.Series[0].Name = "angle error [deg]";
+                pltresponse.Series[1].Name = " ";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + (response_target[j]-response_position[j]);
+                }
+                start_position = start_position / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, ((response_target[j] - response_position[j]) - start_position) / 100.0);
+                }
+
+                btn_plot.Text = "Plot";
+            }
+            else if (response_plot_variable.Text == "velocity error")
+            {
+
+                pltresponse.Series[0].Name = "velocity error [deg/s]";
+                pltresponse.Series[1].Name = " ";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + (omega_target[j]-omega[j]);
+                }
+                start_position = start_position / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * ((omega_target[j]-omega[j]) - start_position) / 100.0);
+                }
+
+                btn_plot.Text = "Plot";
+            }
+            else
+            {
+                btn_plot.Text = "failed";
+            }
+
+
+            //response_command_Length = 0;
+            changeYScala(pltresponse, 5);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+
+            if (serialPort1.IsOpen)
+            {
+                int frequency = Convert.ToInt32(txtfrequency.Text);
+                string cmd_frequency = Convert.ToString(frequency, System.Globalization.CultureInfo.InvariantCulture);
+
+                saveFileDialog1.FileName = "test_move_" + cmd_frequency + "Hz";
+                saveFileDialog1.Title = "Save test move data";
+
+                pltresponse.Series[0].Points.Clear();
+                pltresponse.Series[1].Points.Clear();
+
+                response_command_Length = 0;
+
+                serialPort1.Write("test \n");
+                Thread.Sleep(100);
+                serialPort1.Write(cmd_frequency + "\n");
             }
 
         }

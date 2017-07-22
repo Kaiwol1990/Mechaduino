@@ -24,6 +24,7 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - added an invert direction setting
 - simple error register to save if an error occurred
 - LED shows errors by different blinking patterns
+- downhill simplex algorithm to fine tune the pid settings
 
 ### LED blink pattern:
 If an error occures the led will switch from constant on to different patterns. These patterns are separated from each other by a longer pause. After this pause one pattern will be shown and then after the pause the next pattern will be shown.
@@ -58,6 +59,8 @@ To get an list of the possible commands send help over the serial monitor
 |response | generates a step response|
 |noise | measures the noise of the encoder|
 |reset | resets the board|
+|test | starts a test move|
+|downhill | starts the downhill simplex algorithm|
 
 # License
 All Mechaduino related materials are released under the Creative Commons Attribution Share-Alike 4.0 License

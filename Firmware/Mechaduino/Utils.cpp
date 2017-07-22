@@ -1958,11 +1958,11 @@ float test_move(int step_add, int F_Sample) {
   // omega_answer[999] = omega_answer[998];
   omega_target[999] = omega_target[998];
 
-/*
-  for (int i = 0; i < 999; i++) {
-    omega_answer[i] = (0.6 * omega_answer[i]) + (0.4 * omega_answer[i + 1]);
-  }
-  omega_answer[999] = omega_answer[998];*/
+  /*
+    for (int i = 0; i < 999; i++) {
+      omega_answer[i] = (0.6 * omega_answer[i]) + (0.4 * omega_answer[i + 1]);
+    }
+    omega_answer[999] = omega_answer[998];*/
 
 
   float error_omega = 0.0;
@@ -2446,8 +2446,50 @@ void downhill_simplex() {
 
 
 void test() {
+
+
+  //SerialUSB.print(dirac_header);
+
+  int frequency = 0;
+  // int last_step_target = step_target;
+
+
+  //response_steps = 1000;
+
+  unsigned const int time_out = 5000;
+  unsigned int start_millis = millis();
+
+  SerialUSB.print(" Sample rate = ");
+
+  // get the frequency for data recording
+  while (frequency == 0) {
+    if (timed_out(start_millis, time_out)) return;
+    frequency = SerialUSB.parseInt();
+  }
+
+  if (frequency < 200) {
+    // limit the lower edge of the frequency to 200 Hz
+    frequency = 200;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" lower frequency limited to 200 Hz");
+
+  }
+  else if (frequency > 10000) {
+    // limit the upper frequency to 10 kHz
+    frequency = 10000;
+    SerialUSB.println(frequency);
+    SerialUSB.println(" upper frequency limited to 10 kHz");
+  }
+  else {
+    SerialUSB.println(frequency);
+  }
+
+
+
+
+
   int velocity = 80;
-  int F_Sample = 5000;
+  int F_Sample = frequency;
 
   int step_add = (velocity * steps_per_revolution * microstepping * microstepping) / (mm_rev * F_Sample);
 
@@ -2534,28 +2576,15 @@ void test() {
 
 
   // calculate the velocity profiles
-
   for (int i = 0; i < 999; i++) {
-    //omega_answer[i] = answer[i + 1] - answer[i] ;
     omega_target[i] = target[i + 1] - target[i] ;
   }
-  // omega_answer[999] = omega_answer[998];
   omega_target[999] = omega_target[998];
 
-
-  float error_omega = 0.0;
   for (int i = 0; i < 1000; i++) {
-    error_omega = error_omega + ((omega_target[i] - omega_answer[i]) * (omega_target[i] - omega_answer[i])) ;
+    omega_target[i] = (omega_target[i] * F_Sample) / FPID;
   }
-  error_omega = error_omega;
 
-  float error_position = 0.0;
-  for (int i = 0; i < 1000; i++) {
-    error_position = error_position + ((target[i] - answer[i]) * (target[i] - answer[i])) ;
-  }
-  error_position = error_position / 15.0;
-
-  float cost = error_position + error_omega;
 
   int_pessen_Kp = int_pessen_Kp_old;
   int_pessen_Ki = int_pessen_Ki_old;
@@ -2563,23 +2592,14 @@ void test() {
 
   delay(100);
 
-  SerialUSB.println("");
-  SerialUSB.println("");
-  SerialUSB.println(error_position, 3);
-  SerialUSB.println(error_omega, 3);
-  SerialUSB.println("");
-  SerialUSB.println("");
   for (int i = 0; i < 1000; i++) {
     SerialUSB.print(target[i]);
-    SerialUSB.print(',');
+    SerialUSB.print(';');
     SerialUSB.print(answer[i]);
-    SerialUSB.print(',');
+    SerialUSB.print(';');
     SerialUSB.print(omega_target[i]);
-    SerialUSB.print(',');
+    SerialUSB.print(';');
     SerialUSB.println(omega_answer[i]);
   }
-  SerialUSB.println("");
-  SerialUSB.println(cost, 3);
-  SerialUSB.println("");
 
 }

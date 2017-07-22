@@ -22,6 +22,7 @@ Derivation of the original Mechaduino code from jcchurch13.
 - added an invert direction setting
 - simple error register to save if an error occurred
 - LED shows errors by different blinking patterns
+- downhill simplex algorithm to fine tune the pid settings
 
 
 ### LED blink pattern:
@@ -57,6 +58,8 @@ To get an list of the possible commands send help over the serial monitor
 |response | generates a step response|
 |noise | measures the noise of the encoder|
 |reset | resets the board|
+|test | starts a test move|
+|downhill | starts the downhill simplex algorithm|
 
 
 # Windows GUI

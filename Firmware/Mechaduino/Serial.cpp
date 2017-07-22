@@ -717,8 +717,11 @@ void step_response() {
   enabled = true;
 
 
-  int answer[1500];
-  int target[1500];
+  int answer[1000];
+  int target[1000];
+
+  int omega_answer[1000];
+  int omega_target[1000];
 
   int counter = 0;
 
@@ -729,26 +732,38 @@ void step_response() {
   SerialUSB.println(frequency);
 
 
-  while (counter < 1500) {
+  while (counter < 1000) {
     current_time = micros();
 
     if (current_time >= next_time) {
 
-      if (counter == 400) {
+      if (counter == 200) {
         step_target = step_target + (response_steps * step_add);
       }
 
       next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
+      omega_answer[counter] = omega;
       counter += 1;
     }
   }
 
-  for (int i = 0; i < 1500; i++) {
+
+  for (int i = 0; i < 999; i++) {
+    omega_target[i] = target[i + 1] - target[i] ;
+  }
+  omega_target[999] = omega_target[998];
+
+
+  for (int i = 0; i < 1000; i++) {
+    SerialUSB.print(target[i]);
+    SerialUSB.print(';');
     SerialUSB.print(answer[i]);
     SerialUSB.print(';');
-    SerialUSB.println(target[i]);
+    SerialUSB.print(omega_target[i]);
+    SerialUSB.print(';');
+    SerialUSB.println(omega_answer[i]);
 
   }
 
@@ -813,8 +828,12 @@ void dirac() {
   dir = true;
   enabled = true;
 
-  int answer[1500];
-  int target[1500];
+  int answer[1000];
+  int target[1000];
+
+  int omega_answer[1000];
+  int omega_target[1000];
+
   int counter = 0;
 
   //unsigned int start_time = micros();
@@ -824,33 +843,44 @@ void dirac() {
 
   unsigned int dt = 1000000 / frequency;
 
-  while (counter < 1500) {
+  while (counter < 1000) {
     current_time = micros();
 
     if (current_time >= next_time) {
 
-      if (counter == 400) {
+      if (counter == 200) {
         step_target = step_target + (response_steps * step_add);
       }
-      else if (counter == 401) {
+      else if (counter == 201) {
         step_target = last_step_target;
       }
 
       next_time = current_time + dt;
       answer[counter] = y;
       target[counter] = r;
+      omega_answer[counter] = omega;
       counter += 1;
     }
   }
 
+  // calculate the velocity profiles
+  for (int i = 0; i < 999; i++) {
+    omega_target[i] = target[i + 1] - target[i] ;
+  }
+  omega_target[999] = omega_target[998];
 
 
-  for (int i = 0; i < 1500; i++) {
+
+  for (int i = 0; i < 1000; i++) {
+    SerialUSB.print(target[i]);
+    SerialUSB.print(';');
     SerialUSB.print(answer[i]);
     SerialUSB.print(';');
-    SerialUSB.println(target[i]);
-
+    SerialUSB.print(omega_target[i]);
+    SerialUSB.print(';');
+    SerialUSB.println(omega_answer[i]);
   }
+
   // set parameters back to the values before the response
   enabled = last_enabled;
   dir = last_dir;
@@ -1089,7 +1119,7 @@ int measure_noise(bool serialoutput) {
 
   }
 
-  
+
   for (int i = 0; i < 500; i++) {
     SerialUSB.print(omega_buf[i]);
     SerialUSB.print(",");
