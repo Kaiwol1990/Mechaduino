@@ -107,8 +107,10 @@ void calibration() {
 
   float encoderReading = 0;
 
-  encoderReading = readEncoder();
-
+  for (int i = 0; i < 50; i++) {
+    encoderReading = encoderReading + readEncoder();
+  }
+  encoderReading = encoderReading / 50.0;
 
 
   SerialUSB.println("searching zeropoint");
@@ -129,7 +131,15 @@ void calibration() {
   delay(100);
   oneStep();
 
-  if ((readEncoder() - encoderReading) < 0)
+
+  float temp_pos = 0;
+  for (int i = 0; i < 50; i++) {
+    temp_pos = temp_pos + readEncoder();
+  }
+  temp_pos = temp_pos / 50.0;
+
+
+  if ((temp_pos - encoderReading) > 0)
   {
     SerialUSB.println("Wired backwards");
     enableTC5Interrupts();
@@ -346,12 +356,9 @@ void calibration() {
       delayMicroseconds(100);
     }
 
-    if ((encoderReading / avg) > 65536) {
-      encoderReading = encoderReading - (avg * 65536);
-    }
+    float temp =  abs(x[i] - (encoderReading / avg));
 
-    float temp =  abs((encoderReading / avg) - x[i]);
-
+ 
     if (temp > smoothed_error) {
       smoothed_error = temp;
     }
