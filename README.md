@@ -53,8 +53,8 @@ To get an list of the possible commands send help over the serial monitor
 |read | reads the current angle|
 |set | enter new set point|
 |state | shows the current motor state|
-|calibrate | starts the calibration routine|
-|autotune | PID auto tune|
+|calibrate | starts the calibration routine. Arguments: -f = forces the calibration routine to start |
+|autotune | PID auto tune. Arguments: -d = outputs the measured oscilations |
 |response | generates a step response|
 |noise | measures the noise of the encoder|
 |reset | resets the board|
