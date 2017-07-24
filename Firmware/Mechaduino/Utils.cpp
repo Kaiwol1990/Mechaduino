@@ -93,16 +93,24 @@ void enaInterrupt() {
 }
 
 
-void calibration() {
+void calibration(String arg) {
 
   disableTC5Interrupts();
   disableTC4Interrupts();
 
   int avg = 100;
-
+  bool force = false;
 
   SerialUSB.println(calibrate_header);
-  enabled = false;
+
+  if (arg == "-f") {
+    SerialUSB.println("");
+    SerialUSB.println("forceing calibration!");
+    SerialUSB.read();
+    force = true;
+  }
+
+  enabled = true;
 
 
   float encoderReading = 0;
@@ -112,24 +120,6 @@ void calibration() {
   }
   encoderReading = encoderReading / 50.0;
 
-/*
-  SerialUSB.println("searching zeropoint");
-  step_target = 0;
-  if (encoderReading < (16384 / steps_per_revolution)) {
-    dir = true;
-    while (readEncoder() < (16384 / steps_per_revolution)) {
-      oneStep();
-      delay(100);
-    }
-  }
-
-  dir = false;
-  while (readEncoder() > (16384 / steps_per_revolution)) {
-    oneStep();
-    delay(100);
-  }
-
-*/
 
 
   dir = true;
@@ -146,14 +136,14 @@ void calibration() {
   }
   temp_pos = temp_pos / 50.0;
 
-
-  if ((temp_pos - encoderReading) > 0)
-  {
-    SerialUSB.println("Wired backwards");
-    enableTC5Interrupts();
-    return;
+  if (!force) {
+    if ((temp_pos - encoderReading) > 0)
+    {
+      SerialUSB.println("Wired backwards");
+      enableTC5Interrupts();
+      return;
+    }
   }
-
 
   dir = false;
   step_target = 0;
@@ -178,7 +168,11 @@ void calibration() {
   // step to every single fullstep position and read the Encoder
   for (int i = 0; i < steps_per_revolution; i++) {
 
-    if (canceled()) return;
+    if (canceled()) {
+      enabled = false;
+      return;
+    }
+
     counter += 1;
 
     delay(100);
@@ -210,10 +204,12 @@ void calibration() {
       readings[i] = readings[i] - 65536;
     }
 
-    if (i >= 1) {
-      if (abs(readings[i] - readings[i - 1]) < (65536 / (1.1 * steps_per_revolution))) {
-        SerialUSB.println("Motor is not moving -> abbort");
-        return;
+    if (!force) {
+      if (i >= 1) {
+        if (abs(readings[i] - readings[i - 1]) < (65536 / (1.1 * steps_per_revolution))) {
+          SerialUSB.println("Motor is not moving -> abbort");
+          return;
+        }
       }
     }
 
@@ -654,7 +650,7 @@ void antiCoggingCal() {
 
 
 
-void PID_autotune() {
+void PID_autotune(String arg) {
 
   disableTC5Interrupts();
 
@@ -678,7 +674,12 @@ void PID_autotune() {
   SerialUSB.println(autotune_header);
   SerialUSB.println(cancle_header);
 
-
+  if (arg == "-d") {
+    SerialUSB.println("");
+    SerialUSB.println("debug mode!");
+    SerialUSB.read();
+    debug = true;
+  }
 
   SerialUSB.print("The motor will vibrate violently, continue? (y/n) = ");
   while (!received) {
@@ -719,12 +720,6 @@ void PID_autotune() {
     if (timed_out(now, 5000)) return;
 
     if (SerialUSB.available()) {
-
-      if (SerialUSB.peek() == 'd') {
-        SerialUSB.println("");
-        SerialUSB.println("debug mode!");
-        debug = true;
-      }
 
       loops = SerialUSB.parseInt();
 

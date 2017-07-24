@@ -77,7 +77,7 @@ extern int u_LPF;
 //----------------------------------------------- Internal Section ----------------------------------------------
 //------------------------------------------------- don't change ------------------------------------------------
 // baudrate speed bit/s
-#define baudrate 250000
+#define baudrate 1843200
 
 // frequency of the PID loop change only if you know what you're doing
 #define FPID 5000

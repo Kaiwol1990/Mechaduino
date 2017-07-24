@@ -13,7 +13,6 @@
 #include "lookup_table.h"
 
 
-
 // ----- gets called with FPID -----
 // ----- calculates the target velocity and PID settings -----
 void TC5_Handler() {
@@ -30,8 +29,10 @@ void TC5_Handler() {
   static int u_1;
   static int omega_target_1;
 
+  static int serial_counter = 0;
 
-  int omega_target;    // target angle velocity
+  static unsigned int last_serial_time;
+
 
   int phase_advanced;
 
@@ -52,7 +53,7 @@ void TC5_Handler() {
     r = (step_target * stepangle);
 
     // target angular velocity buffered over two sample times
-    omega_target = (r - r_1);
+    int omega_target = (r - r_1);
 
     // start the calculations only if the motor is enabled
     if (enabled) {
@@ -84,6 +85,7 @@ void TC5_Handler() {
         // -------------------------------
         //         u-pid
         u = ((u_LPFa * u_1) + (u_LPFb * (((int_pessen_Kp * error) + ITerm + DTerm + (int_Kff * omega_target) + (int_Kacc * (omega_target - omega_target_1)))  / 1024))) / 128;
+
 
 
       }
@@ -171,6 +173,25 @@ void TC5_Handler() {
       error_register = error_register | 0B0000000000000010;
     }
 
+    serial_counter++;
+
+    if (serial_counter == 20) {
+      unsigned int serial_time = micros();
+
+      Serial_Buffer[0] = serial_time - last_serial_time; //save time
+      Serial_Buffer[1] = streaming; //save target
+      Serial_Buffer[2] = r; //save target
+      Serial_Buffer[3] = y; //save position
+      Serial_Buffer[4] = error; //save current error
+      Serial_Buffer[5] = omega_target; //save target velocity
+      Serial_Buffer[6] = omega; //save velocity
+      Serial_Buffer[7] = u;
+      Serial_Buffer[8] = electric_angle;
+      Serial_Buffer[9] = enabled;
+
+      serial_counter = 0;
+      last_serial_time = serial_time;
+    }
 
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag

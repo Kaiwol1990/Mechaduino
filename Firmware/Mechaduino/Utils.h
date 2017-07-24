@@ -4,6 +4,8 @@
 #define __UTIL_H__
 #pragma once
 
+#include <arduino.h>
+
 void setupPins();
 
 void setupSPI();
@@ -14,7 +16,7 @@ void enaInterrupt();
 
 void dirInterrupt();
 
-void calibration();
+void calibration(String arg = "");
 
 void oneStep();
 
@@ -30,7 +32,7 @@ void disableTC5Interrupts();
 
 void antiCoggingCal();
 
-void PID_autotune();
+void PID_autotune(String arg = "");
 
 float digitalSmooth(int rawIn, int *sensSmoothArray);
 

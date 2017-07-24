@@ -40,6 +40,7 @@ extern volatile int int_pessen_Kd;
 extern volatile int step_target;        // target as step gets incremented if an step is received
 
 
+extern int Serial_Buffer[10];
 
 //---- filter section ----
 extern int D_Term_LPFa; // z = e^st pole mapping

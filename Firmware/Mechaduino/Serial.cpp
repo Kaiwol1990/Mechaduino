@@ -21,7 +21,7 @@ void serialCheck() {
 
   if (read_serialcommand(500, &Command, &argument)) {
     if (Command.indexOf(calibrate_command) == 0 && Command.length() == calibrate_command.length()) {
-      calibration();
+      calibration(argument);
     }
     else if (Command.indexOf(set_command) == 0 && Command.length() == set_command.length()) {
       setpoint(argument);
@@ -45,7 +45,7 @@ void serialCheck() {
       get_max_frequency();
     }
     else if (Command.indexOf(autotune_command) == 0 && Command.length() == autotune_command.length()) {
-      PID_autotune();
+      PID_autotune(argument);
     }
     else if (Command.indexOf(diagnostics_command) == 0 && Command.length() == diagnostics_command.length()) {
       readEncoderDiagnostics();
@@ -1046,7 +1046,6 @@ int measure_noise(bool serialoutput) {
   delay(100);
   int counter = 0;
   float points[500] = {0};
-  float omega_buf[500] = {0};
 
   unsigned long now = micros();
   unsigned long last_time = now;
@@ -1059,7 +1058,6 @@ int measure_noise(bool serialoutput) {
       last_time = now;
 
       points[counter] = y;
-      omega_buf[counter] = omega;
       counter++;
     }
   }
@@ -1120,10 +1118,6 @@ int measure_noise(bool serialoutput) {
   }
 
 
-  for (int i = 0; i < 500; i++) {
-    SerialUSB.print(omega_buf[i]);
-    SerialUSB.print(",");
-  }
   enableTC5Interrupts();
   return abs((abs(highest) - abs(lowest)));
 
@@ -1220,22 +1214,30 @@ void Streaming() {
       //streaming with 250 Hz
       next_time = current_time + 4;
 
-      SerialUSB.print(streaming);         //print enable status
-      SerialUSB.write(';');
-      SerialUSB.print(y);               //print current position
-      SerialUSB.write(';');
-      SerialUSB.print(r);               //print target position
-      SerialUSB.write(';');
-      SerialUSB.print(error);           //print error
-      //SerialUSB.print(omega);           //print error
-      SerialUSB.write(';');
-      SerialUSB.print(u);               //print effort
-      SerialUSB.write(';');
-      SerialUSB.print(electric_angle);  //print electric_angle
-      SerialUSB.write(';');
-      SerialUSB.print(enabled);         //print enable status
+      for (byte i = 0; i < 9; i++) {
+        SerialUSB.print(Serial_Buffer[i]);
+        SerialUSB.print(';');
+      }
+      SerialUSB.print(Serial_Buffer[9]);
       SerialUSB.println();
 
+      /*
+        SerialUSB.print(streaming);         //print enable status
+        SerialUSB.write(';');
+        SerialUSB.print(y);               //print current position
+        SerialUSB.write(';');
+        SerialUSB.print(r);               //print target position
+        SerialUSB.write(';');
+        SerialUSB.print(error);           //print error
+        //SerialUSB.print(omega);           //print error
+        SerialUSB.write(';');
+        SerialUSB.print(u);               //print effort
+        SerialUSB.write(';');
+        SerialUSB.print(electric_angle);  //print electric_angle
+        SerialUSB.write(';');
+        SerialUSB.print(enabled);         //print enable status
+        SerialUSB.println();
+      */
     }
   }
 }

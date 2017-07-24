@@ -34,7 +34,6 @@ volatile int int_Kff = (Kff * 1024.0) + 0.5;
 volatile int int_Kacc = (Kacc * 1024.0) + 0.5;
 
 
-
 // calculate pid settings after pesson rule. is active for small errors
 // https://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method#cite_note-microstar-2
 volatile int int_pessen_Kp = (1024.0 * ((Kp * 0.7) / (0.6))) + 0.5;
@@ -53,6 +52,7 @@ float D_pulley = (mm_rev / (10 * 3.14159283));
 volatile int step_target = 0;      // target as step gets incremented if an step is received
 
 
+int Serial_Buffer[10] = {0};
 
 //---- filter section ----
 int D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping

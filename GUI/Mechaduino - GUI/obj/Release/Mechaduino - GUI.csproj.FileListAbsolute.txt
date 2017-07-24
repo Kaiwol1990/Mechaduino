@@ -40,3 +40,9 @@ D:\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino___GUI
 D:\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino - GUI.csproj.GenerateResource.Cache
 D:\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino - GUI.exe
 D:\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino - GUI.pdb
+C:\Users\Wolter\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\bin\Release\Mechaduino - GUI.exe
+C:\Users\Wolter\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\bin\Release\Mechaduino - GUI.pdb
+C:\Users\Wolter\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino - GUI.csprojResolveAssemblyReference.cache
+C:\Users\Wolter\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino.GUI.resources
+C:\Users\Wolter\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino___GUI.Properties.Resources.resources
+C:\Users\Wolter\Dropbox\Servo\Visual Studio\GUI\Mechaduino - GUI\obj\Release\Mechaduino - GUI.csproj.GenerateResource.Cache
