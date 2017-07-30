@@ -50,7 +50,13 @@ extern int D_Term_LPFb;
 extern int u_LPFa; // z = e^st pole mapping
 extern int u_LPFb;
 
+extern int max_serial_counter;
 
+
+extern int fifo[9][100];
+extern int fifo_counter;
+extern int serial_counter;
+extern int serial_delay;
 
 
 

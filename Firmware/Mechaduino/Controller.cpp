@@ -11,6 +11,7 @@
 #include "Configurationals.h"
 #include "Encoder.h"
 #include "lookup_table.h"
+#include "Serial.h"
 
 
 // ----- gets called with FPID -----
@@ -29,11 +30,9 @@ void TC5_Handler() {
   static int u_1;
   static int omega_target_1;
 
-  static int serial_counter = 0;
-
-  static unsigned int last_serial_time;
-
-
+  static int serial_loop_counter;
+  static unsigned int last_time;
+  
   int phase_advanced;
 
   //----- Calculations -----
@@ -173,24 +172,31 @@ void TC5_Handler() {
       error_register = error_register | 0B0000000000000010;
     }
 
-    serial_counter++;
 
-    if (serial_counter == 20) {
-      unsigned int serial_time = micros();
+    if (streaming) {
+      serial_loop_counter++;
 
-      Serial_Buffer[0] = serial_time - last_serial_time; //save time
-      Serial_Buffer[1] = streaming; //save target
-      Serial_Buffer[2] = r; //save target
-      Serial_Buffer[3] = y; //save position
-      Serial_Buffer[4] = error; //save current error
-      Serial_Buffer[5] = omega_target; //save target velocity
-      Serial_Buffer[6] = omega; //save velocity
-      Serial_Buffer[7] = u;
-      Serial_Buffer[8] = electric_angle;
-      Serial_Buffer[9] = enabled;
+      if (serial_loop_counter >= max_serial_counter) {
 
-      serial_counter = 0;
-      last_serial_time = serial_time;
+        fifo_counter++;
+
+        byte fifo_position = mod(fifo_counter, 99);
+
+        unsigned int current_time = micros();
+
+        fifo[0][fifo_position] = (current_time - last_time);
+        fifo[1][fifo_position] = streaming;
+        fifo[2][fifo_position] = r;
+        fifo[3][fifo_position] = y;
+        fifo[4][fifo_position] = error;
+        fifo[5][fifo_position] = omega_target;
+        fifo[6][fifo_position] = omega;
+        fifo[7][fifo_position] = u;
+        fifo[8][fifo_position] = electric_angle;
+
+        serial_loop_counter = 0;
+        last_time = current_time;
+      }
     }
 
 

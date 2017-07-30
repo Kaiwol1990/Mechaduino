@@ -108,8 +108,7 @@ const String reset_error_menu = "resets the mechaduino error register";
 const String reset_error_header = "//---- resetting error register ----";
 
 
-
-const String stream_start_command = "start_stream";
+const String stream_command = "stream";
 const String stream_stop_command = "stop_stream";
 
 const String anticogging_command = "cogging";

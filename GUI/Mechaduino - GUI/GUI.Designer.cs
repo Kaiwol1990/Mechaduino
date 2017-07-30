@@ -29,23 +29,23 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series13 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series14 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series9 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series10 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series11 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series12 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title5 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea14 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series27 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series28 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea15 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series29 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series30 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title11 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea16 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series31 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series32 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title12 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GUI));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series15 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series16 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title6 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea13 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series25 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series26 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title10 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabConnection = new System.Windows.Forms.TabPage();
@@ -62,8 +62,6 @@
             this.groupBox12 = new System.Windows.Forms.GroupBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
-            this.txtRamp = new System.Windows.Forms.TextBox();
-            this.btnRamp = new System.Windows.Forms.Button();
             this.label46 = new System.Windows.Forms.Label();
             this.btnmp100 = new System.Windows.Forms.Button();
             this.btnmp10 = new System.Windows.Forms.Button();
@@ -86,11 +84,16 @@
             this.btnn10 = new System.Windows.Forms.Button();
             this.btnn1 = new System.Windows.Forms.Button();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label48 = new System.Windows.Forms.Label();
+            this.txtFrequencyFrame = new System.Windows.Forms.TextBox();
+            this.label45 = new System.Windows.Forms.Label();
             this.txtTimeframe = new System.Windows.Forms.TextBox();
             this.btnSetTimeframe = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.panelEnabled = new System.Windows.Forms.Panel();
+            this.label52 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.buffer_state = new System.Windows.Forms.Label();
+            this.label_Enabled = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
@@ -103,6 +106,18 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.anglePlot = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Variable_2_pltError_color = new System.Windows.Forms.Button();
+            this.Variable_1_pltError_color = new System.Windows.Forms.Button();
+            this.Variable_2_pltPosition_color = new System.Windows.Forms.Button();
+            this.Variable_1_pltPosition_color = new System.Windows.Forms.Button();
+            this.label38 = new System.Windows.Forms.Label();
+            this.Variable_2_pltError = new System.Windows.Forms.ComboBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.Variable_1_pltError = new System.Windows.Forms.ComboBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.Variable_2_pltPosition = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.Variable_1_pltPosition = new System.Windows.Forms.ComboBox();
             this.pltError = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.pltPosition = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.tabParameter = new System.Windows.Forms.TabPage();
@@ -126,6 +141,12 @@
             this.label17 = new System.Windows.Forms.Label();
             this.txtPLPF = new System.Windows.Forms.TextBox();
             this.groupBox18 = new System.Windows.Forms.GroupBox();
+            this.label55 = new System.Windows.Forms.Label();
+            this.label58 = new System.Windows.Forms.Label();
+            this.txtKacc = new System.Windows.Forms.TextBox();
+            this.label53 = new System.Windows.Forms.Label();
+            this.label54 = new System.Windows.Forms.Label();
+            this.txtKff = new System.Windows.Forms.TextBox();
             this.label43 = new System.Windows.Forms.Label();
             this.label42 = new System.Windows.Forms.Label();
             this.label41 = new System.Windows.Forms.Label();
@@ -179,7 +200,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.txtIdentifier = new System.Windows.Forms.TextBox();
             this.btnLoad = new System.Windows.Forms.Button();
-            this.tabResponse = new System.Windows.Forms.TabPage();
+            this.tabTuning = new System.Windows.Forms.TabPage();
             this.groupBox24 = new System.Windows.Forms.GroupBox();
             this.button1 = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
@@ -196,7 +217,6 @@
             this.label51 = new System.Windows.Forms.Label();
             this.groupBox20 = new System.Windows.Forms.GroupBox();
             this.response_plot_variable = new System.Windows.Forms.ComboBox();
-            this.btn_plot = new System.Windows.Forms.Button();
             this.btnresetzoom = new System.Windows.Forms.Button();
             this.pltresponse = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.groupBox15 = new System.Windows.Forms.GroupBox();
@@ -210,17 +230,14 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.label22 = new System.Windows.Forms.Label();
             this.timerCSV = new System.Windows.Forms.Timer(this.components);
-            this.timerRamp = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialogConfig = new System.Windows.Forms.SaveFileDialog();
+            this.colorDialog3 = new System.Windows.Forms.ColorDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.Variable_1_pltPosition = new System.Windows.Forms.ComboBox();
-            this.label13 = new System.Windows.Forms.Label();
-            this.label18 = new System.Windows.Forms.Label();
-            this.Variable_2_pltPosition = new System.Windows.Forms.ComboBox();
-            this.label37 = new System.Windows.Forms.Label();
-            this.Variable_1_pltError = new System.Windows.Forms.ComboBox();
-            this.label38 = new System.Windows.Forms.Label();
-            this.Variable_2_pltError = new System.Windows.Forms.ComboBox();
+            this.Variable_1_unit_pltPosition = new System.Windows.Forms.Label();
+            this.Variable_2_unit_pltPosition = new System.Windows.Forms.Label();
+            this.Variable_2_unit_pltError = new System.Windows.Forms.Label();
+            this.Variable_1_unit_pltError = new System.Windows.Forms.Label();
+            this.label59 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabConnection.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -248,7 +265,7 @@
             this.groupBox14.SuspendLayout();
             this.groupBox13.SuspendLayout();
             this.groupBox11.SuspendLayout();
-            this.tabResponse.SuspendLayout();
+            this.tabTuning.SuspendLayout();
             this.groupBox24.SuspendLayout();
             this.groupBox26.SuspendLayout();
             this.groupBox25.SuspendLayout();
@@ -263,7 +280,7 @@
             this.tabControl1.Controls.Add(this.tabConnection);
             this.tabControl1.Controls.Add(this.tabPlots);
             this.tabControl1.Controls.Add(this.tabParameter);
-            this.tabControl1.Controls.Add(this.tabResponse);
+            this.tabControl1.Controls.Add(this.tabTuning);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(5);
@@ -422,8 +439,6 @@
             // 
             // groupBox10
             // 
-            this.groupBox10.Controls.Add(this.txtRamp);
-            this.groupBox10.Controls.Add(this.btnRamp);
             this.groupBox10.Controls.Add(this.label46);
             this.groupBox10.Controls.Add(this.btnmp100);
             this.groupBox10.Controls.Add(this.btnmp10);
@@ -451,25 +466,6 @@
             this.groupBox10.TabIndex = 26;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Move";
-            // 
-            // txtRamp
-            // 
-            this.txtRamp.Location = new System.Drawing.Point(283, 142);
-            this.txtRamp.Name = "txtRamp";
-            this.txtRamp.Size = new System.Drawing.Size(100, 20);
-            this.txtRamp.TabIndex = 28;
-            this.txtRamp.Text = "0,0";
-            this.txtRamp.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // btnRamp
-            // 
-            this.btnRamp.Location = new System.Drawing.Point(282, 165);
-            this.btnRamp.Name = "btnRamp";
-            this.btnRamp.Size = new System.Drawing.Size(100, 20);
-            this.btnRamp.TabIndex = 27;
-            this.btnRamp.Text = "Ramp";
-            this.btnRamp.UseVisualStyleBackColor = true;
-            this.btnRamp.Click += new System.EventHandler(this.btnRamp_Click);
             // 
             // label46
             // 
@@ -543,7 +539,7 @@
             // 
             // btnJump
             // 
-            this.btnJump.Location = new System.Drawing.Point(282, 115);
+            this.btnJump.Location = new System.Drawing.Point(282, 136);
             this.btnJump.Name = "btnJump";
             this.btnJump.Size = new System.Drawing.Size(100, 20);
             this.btnJump.TabIndex = 18;
@@ -553,7 +549,7 @@
             // 
             // txtJump
             // 
-            this.txtJump.Location = new System.Drawing.Point(282, 91);
+            this.txtJump.Location = new System.Drawing.Point(282, 112);
             this.txtJump.Name = "txtJump";
             this.txtJump.Size = new System.Drawing.Size(100, 20);
             this.txtJump.TabIndex = 17;
@@ -681,29 +677,50 @@
             // 
             // groupBox9
             // 
-            this.groupBox9.Controls.Add(this.label1);
+            this.groupBox9.Controls.Add(this.label48);
+            this.groupBox9.Controls.Add(this.txtFrequencyFrame);
+            this.groupBox9.Controls.Add(this.label45);
             this.groupBox9.Controls.Add(this.txtTimeframe);
             this.groupBox9.Controls.Add(this.btnSetTimeframe);
-            this.groupBox9.Location = new System.Drawing.Point(385, 107);
+            this.groupBox9.Location = new System.Drawing.Point(385, 95);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(155, 123);
+            this.groupBox9.Size = new System.Drawing.Size(155, 135);
             this.groupBox9.TabIndex = 25;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Timeframe";
             // 
-            // label1
+            // label48
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 20);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(128, 26);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Set the plot timeframe in s\r\n[min = 0.5 s, max = 10 s]\r\n";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label48.AutoSize = true;
+            this.label48.Location = new System.Drawing.Point(48, 17);
+            this.label48.Name = "label48";
+            this.label48.Size = new System.Drawing.Size(57, 13);
+            this.label48.TabIndex = 5;
+            this.label48.Text = "Frequency";
+            this.label48.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // txtFrequencyFrame
+            // 
+            this.txtFrequencyFrame.Location = new System.Drawing.Point(27, 33);
+            this.txtFrequencyFrame.Name = "txtFrequencyFrame";
+            this.txtFrequencyFrame.Size = new System.Drawing.Size(100, 20);
+            this.txtFrequencyFrame.TabIndex = 4;
+            this.txtFrequencyFrame.Text = "250";
+            this.txtFrequencyFrame.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(62, 59);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(30, 13);
+            this.label45.TabIndex = 3;
+            this.label45.Text = "Time";
+            this.label45.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // txtTimeframe
             // 
-            this.txtTimeframe.Location = new System.Drawing.Point(27, 50);
+            this.txtTimeframe.Location = new System.Drawing.Point(27, 75);
             this.txtTimeframe.Name = "txtTimeframe";
             this.txtTimeframe.Size = new System.Drawing.Size(100, 20);
             this.txtTimeframe.TabIndex = 1;
@@ -712,9 +729,9 @@
             // 
             // btnSetTimeframe
             // 
-            this.btnSetTimeframe.Location = new System.Drawing.Point(36, 76);
+            this.btnSetTimeframe.Location = new System.Drawing.Point(27, 101);
             this.btnSetTimeframe.Name = "btnSetTimeframe";
-            this.btnSetTimeframe.Size = new System.Drawing.Size(86, 19);
+            this.btnSetTimeframe.Size = new System.Drawing.Size(100, 20);
             this.btnSetTimeframe.TabIndex = 0;
             this.btnSetTimeframe.Text = "Set";
             this.btnSetTimeframe.UseVisualStyleBackColor = true;
@@ -722,21 +739,60 @@
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.panelEnabled);
+            this.groupBox5.Controls.Add(this.label52);
+            this.groupBox5.Controls.Add(this.label1);
+            this.groupBox5.Controls.Add(this.buffer_state);
+            this.groupBox5.Controls.Add(this.label_Enabled);
             this.groupBox5.Location = new System.Drawing.Point(385, 11);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(155, 93);
+            this.groupBox5.Size = new System.Drawing.Size(155, 78);
             this.groupBox5.TabIndex = 24;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "State";
             // 
-            // panelEnabled
+            // label52
             // 
-            this.panelEnabled.BackColor = System.Drawing.Color.Red;
-            this.panelEnabled.Location = new System.Drawing.Point(50, 20);
-            this.panelEnabled.Name = "panelEnabled";
-            this.panelEnabled.Size = new System.Drawing.Size(60, 60);
-            this.panelEnabled.TabIndex = 1;
+            this.label52.AutoSize = true;
+            this.label52.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label52.Location = new System.Drawing.Point(12, 13);
+            this.label52.Name = "label52";
+            this.label52.Size = new System.Drawing.Size(58, 18);
+            this.label52.TabIndex = 6;
+            this.label52.Text = "Motor:";
+            this.label52.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(12, 44);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(58, 18);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "Buffer:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // buffer_state
+            // 
+            this.buffer_state.AutoSize = true;
+            this.buffer_state.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buffer_state.Location = new System.Drawing.Point(70, 44);
+            this.buffer_state.Name = "buffer_state";
+            this.buffer_state.Size = new System.Drawing.Size(78, 18);
+            this.buffer_state.TabIndex = 4;
+            this.buffer_state.Text = "Unknown";
+            this.buffer_state.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // label_Enabled
+            // 
+            this.label_Enabled.AutoSize = true;
+            this.label_Enabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_Enabled.Location = new System.Drawing.Point(70, 13);
+            this.label_Enabled.Name = "label_Enabled";
+            this.label_Enabled.Size = new System.Drawing.Size(78, 18);
+            this.label_Enabled.TabIndex = 3;
+            this.label_Enabled.Text = "Unknown";
+            this.label_Enabled.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // groupBox4
             // 
@@ -851,27 +907,35 @@
             this.anglePlot.BackSecondaryColor = System.Drawing.Color.Transparent;
             this.anglePlot.BorderlineColor = System.Drawing.Color.Transparent;
             this.anglePlot.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
-            chartArea7.BackColor = System.Drawing.Color.Transparent;
-            chartArea7.Name = "ChartArea1";
-            this.anglePlot.ChartAreas.Add(chartArea7);
+            chartArea14.BackColor = System.Drawing.Color.Transparent;
+            chartArea14.Name = "ChartArea1";
+            this.anglePlot.ChartAreas.Add(chartArea14);
             this.anglePlot.Cursor = System.Windows.Forms.Cursors.No;
             this.anglePlot.Location = new System.Drawing.Point(9, 19);
             this.anglePlot.Margin = new System.Windows.Forms.Padding(2);
             this.anglePlot.Name = "anglePlot";
-            series13.ChartArea = "ChartArea1";
-            series13.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series13.Name = "Series1";
-            series14.ChartArea = "ChartArea1";
-            series14.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series14.Name = "Series2";
-            this.anglePlot.Series.Add(series13);
-            this.anglePlot.Series.Add(series14);
+            series27.ChartArea = "ChartArea1";
+            series27.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series27.Name = "Series1";
+            series28.ChartArea = "ChartArea1";
+            series28.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series28.Name = "Series2";
+            this.anglePlot.Series.Add(series27);
+            this.anglePlot.Series.Add(series28);
             this.anglePlot.Size = new System.Drawing.Size(232, 244);
             this.anglePlot.TabIndex = 17;
             this.anglePlot.Text = "chart1";
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.Variable_1_unit_pltError);
+            this.groupBox1.Controls.Add(this.Variable_2_unit_pltError);
+            this.groupBox1.Controls.Add(this.Variable_2_unit_pltPosition);
+            this.groupBox1.Controls.Add(this.Variable_1_unit_pltPosition);
+            this.groupBox1.Controls.Add(this.Variable_2_pltError_color);
+            this.groupBox1.Controls.Add(this.Variable_1_pltError_color);
+            this.groupBox1.Controls.Add(this.Variable_2_pltPosition_color);
+            this.groupBox1.Controls.Add(this.Variable_1_pltPosition_color);
             this.groupBox1.Controls.Add(this.label38);
             this.groupBox1.Controls.Add(this.Variable_2_pltError);
             this.groupBox1.Controls.Add(this.label37);
@@ -891,49 +955,201 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Live plots";
             // 
+            // Variable_2_pltError_color
+            // 
+            this.Variable_2_pltError_color.ForeColor = System.Drawing.Color.Blue;
+            this.Variable_2_pltError_color.Location = new System.Drawing.Point(530, 255);
+            this.Variable_2_pltError_color.Name = "Variable_2_pltError_color";
+            this.Variable_2_pltError_color.Size = new System.Drawing.Size(21, 21);
+            this.Variable_2_pltError_color.TabIndex = 38;
+            this.Variable_2_pltError_color.Text = "C";
+            this.Variable_2_pltError_color.UseVisualStyleBackColor = false;
+            this.Variable_2_pltError_color.Click += new System.EventHandler(this.Variable_2_pltError_color_Click);
+            // 
+            // Variable_1_pltError_color
+            // 
+            this.Variable_1_pltError_color.ForeColor = System.Drawing.Color.Red;
+            this.Variable_1_pltError_color.Location = new System.Drawing.Point(250, 255);
+            this.Variable_1_pltError_color.Name = "Variable_1_pltError_color";
+            this.Variable_1_pltError_color.Size = new System.Drawing.Size(21, 21);
+            this.Variable_1_pltError_color.TabIndex = 37;
+            this.Variable_1_pltError_color.Text = "C";
+            this.Variable_1_pltError_color.UseVisualStyleBackColor = false;
+            this.Variable_1_pltError_color.Click += new System.EventHandler(this.Variable_1_pltError_color_Click);
+            // 
+            // Variable_2_pltPosition_color
+            // 
+            this.Variable_2_pltPosition_color.ForeColor = System.Drawing.Color.Blue;
+            this.Variable_2_pltPosition_color.Location = new System.Drawing.Point(530, 18);
+            this.Variable_2_pltPosition_color.Name = "Variable_2_pltPosition_color";
+            this.Variable_2_pltPosition_color.Size = new System.Drawing.Size(21, 21);
+            this.Variable_2_pltPosition_color.TabIndex = 36;
+            this.Variable_2_pltPosition_color.Text = "C";
+            this.Variable_2_pltPosition_color.UseVisualStyleBackColor = false;
+            this.Variable_2_pltPosition_color.Click += new System.EventHandler(this.Variable_2_pltPosition_color_Click);
+            // 
+            // Variable_1_pltPosition_color
+            // 
+            this.Variable_1_pltPosition_color.ForeColor = System.Drawing.Color.Red;
+            this.Variable_1_pltPosition_color.Location = new System.Drawing.Point(250, 18);
+            this.Variable_1_pltPosition_color.Name = "Variable_1_pltPosition_color";
+            this.Variable_1_pltPosition_color.Size = new System.Drawing.Size(21, 21);
+            this.Variable_1_pltPosition_color.TabIndex = 35;
+            this.Variable_1_pltPosition_color.Text = "C";
+            this.Variable_1_pltPosition_color.UseVisualStyleBackColor = false;
+            this.Variable_1_pltPosition_color.Click += new System.EventHandler(this.Variable_1_pltPosition_color_Click);
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(288, 258);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(63, 13);
+            this.label38.TabIndex = 34;
+            this.label38.Text = "Variable 2 =";
+            this.label38.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // Variable_2_pltError
+            // 
+            this.Variable_2_pltError.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Variable_2_pltError.FormattingEnabled = true;
+            this.Variable_2_pltError.Items.AddRange(new object[] {
+            "",
+            "Target",
+            "Position",
+            "Error",
+            "Target Velocity",
+            "Velocity",
+            "Effort"});
+            this.Variable_2_pltError.Location = new System.Drawing.Point(357, 254);
+            this.Variable_2_pltError.Name = "Variable_2_pltError";
+            this.Variable_2_pltError.Size = new System.Drawing.Size(121, 21);
+            this.Variable_2_pltError.TabIndex = 33;
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(6, 259);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(63, 13);
+            this.label37.TabIndex = 32;
+            this.label37.Text = "Variable 1 =";
+            this.label37.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // Variable_1_pltError
+            // 
+            this.Variable_1_pltError.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Variable_1_pltError.FormattingEnabled = true;
+            this.Variable_1_pltError.Items.AddRange(new object[] {
+            "",
+            "Target",
+            "Position",
+            "Error",
+            "Target Velocity",
+            "Velocity",
+            "Effort"});
+            this.Variable_1_pltError.Location = new System.Drawing.Point(75, 255);
+            this.Variable_1_pltError.Name = "Variable_1_pltError";
+            this.Variable_1_pltError.Size = new System.Drawing.Size(121, 21);
+            this.Variable_1_pltError.TabIndex = 31;
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(288, 22);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(63, 13);
+            this.label18.TabIndex = 30;
+            this.label18.Text = "Variable 2 =";
+            this.label18.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // Variable_2_pltPosition
+            // 
+            this.Variable_2_pltPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Variable_2_pltPosition.FormattingEnabled = true;
+            this.Variable_2_pltPosition.Items.AddRange(new object[] {
+            "",
+            "Target",
+            "Position",
+            "Error",
+            "Target Velocity",
+            "Velocity",
+            "Effort"});
+            this.Variable_2_pltPosition.Location = new System.Drawing.Point(357, 18);
+            this.Variable_2_pltPosition.Name = "Variable_2_pltPosition";
+            this.Variable_2_pltPosition.Size = new System.Drawing.Size(121, 21);
+            this.Variable_2_pltPosition.TabIndex = 29;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(6, 22);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(63, 13);
+            this.label13.TabIndex = 28;
+            this.label13.Text = "Variable 1 =";
+            this.label13.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // Variable_1_pltPosition
+            // 
+            this.Variable_1_pltPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Variable_1_pltPosition.FormattingEnabled = true;
+            this.Variable_1_pltPosition.Items.AddRange(new object[] {
+            "",
+            "Target",
+            "Position",
+            "Error",
+            "Target Velocity",
+            "Velocity",
+            "Effort"});
+            this.Variable_1_pltPosition.Location = new System.Drawing.Point(75, 18);
+            this.Variable_1_pltPosition.Name = "Variable_1_pltPosition";
+            this.Variable_1_pltPosition.Size = new System.Drawing.Size(121, 21);
+            this.Variable_1_pltPosition.TabIndex = 27;
+            // 
             // pltError
             // 
             this.pltError.BorderlineColor = System.Drawing.Color.Black;
-            chartArea5.Name = "ChartArea1";
-            this.pltError.ChartAreas.Add(chartArea5);
+            chartArea15.Name = "ChartArea1";
+            this.pltError.ChartAreas.Add(chartArea15);
             this.pltError.Location = new System.Drawing.Point(2, 280);
             this.pltError.Margin = new System.Windows.Forms.Padding(2);
             this.pltError.Name = "pltError";
-            series9.ChartArea = "ChartArea1";
-            series9.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series9.Name = "Error";
-            series10.ChartArea = "ChartArea1";
-            series10.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series10.Name = "Series2";
-            this.pltError.Series.Add(series9);
-            this.pltError.Series.Add(series10);
+            series29.ChartArea = "ChartArea1";
+            series29.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series29.Name = "Error";
+            series30.ChartArea = "ChartArea1";
+            series30.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series30.Name = "Series2";
+            this.pltError.Series.Add(series29);
+            this.pltError.Series.Add(series30);
             this.pltError.Size = new System.Drawing.Size(927, 126);
             this.pltError.TabIndex = 25;
             this.pltError.Text = "chart1";
-            title4.Name = "Title1";
-            this.pltError.Titles.Add(title4);
+            title11.Name = "Title1";
+            this.pltError.Titles.Add(title11);
             // 
             // pltPosition
             // 
             this.pltPosition.BorderlineColor = System.Drawing.Color.Black;
-            chartArea6.Name = "ChartArea1";
-            this.pltPosition.ChartAreas.Add(chartArea6);
+            chartArea16.Name = "ChartArea1";
+            this.pltPosition.ChartAreas.Add(chartArea16);
             this.pltPosition.Location = new System.Drawing.Point(8, 34);
             this.pltPosition.Margin = new System.Windows.Forms.Padding(2);
             this.pltPosition.Name = "pltPosition";
-            series11.ChartArea = "ChartArea1";
-            series11.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series11.Name = "Position";
-            series12.ChartArea = "ChartArea1";
-            series12.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series12.Name = "Target";
-            this.pltPosition.Series.Add(series11);
-            this.pltPosition.Series.Add(series12);
+            series31.ChartArea = "ChartArea1";
+            series31.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series31.Name = "Position";
+            series32.ChartArea = "ChartArea1";
+            series32.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series32.Name = "Target";
+            this.pltPosition.Series.Add(series31);
+            this.pltPosition.Series.Add(series32);
             this.pltPosition.Size = new System.Drawing.Size(921, 206);
             this.pltPosition.TabIndex = 24;
             this.pltPosition.Text = "chart1";
-            title5.Name = "Title1";
-            this.pltPosition.Titles.Add(title5);
+            title12.Name = "Title1";
+            this.pltPosition.Titles.Add(title12);
             // 
             // tabParameter
             // 
@@ -1069,7 +1285,7 @@
             this.groupBox19.Controls.Add(this.label30);
             this.groupBox19.Controls.Add(this.label17);
             this.groupBox19.Controls.Add(this.txtPLPF);
-            this.groupBox19.Location = new System.Drawing.Point(479, 241);
+            this.groupBox19.Location = new System.Drawing.Point(479, 326);
             this.groupBox19.Name = "groupBox19";
             this.groupBox19.Size = new System.Drawing.Size(465, 116);
             this.groupBox19.TabIndex = 14;
@@ -1152,6 +1368,12 @@
             // 
             // groupBox18
             // 
+            this.groupBox18.Controls.Add(this.label55);
+            this.groupBox18.Controls.Add(this.label58);
+            this.groupBox18.Controls.Add(this.txtKacc);
+            this.groupBox18.Controls.Add(this.label53);
+            this.groupBox18.Controls.Add(this.label54);
+            this.groupBox18.Controls.Add(this.txtKff);
             this.groupBox18.Controls.Add(this.label43);
             this.groupBox18.Controls.Add(this.label42);
             this.groupBox18.Controls.Add(this.label41);
@@ -1165,10 +1387,62 @@
             this.groupBox18.Controls.Add(this.txtKp);
             this.groupBox18.Location = new System.Drawing.Point(479, 106);
             this.groupBox18.Name = "groupBox18";
-            this.groupBox18.Size = new System.Drawing.Size(465, 128);
+            this.groupBox18.Size = new System.Drawing.Size(465, 214);
             this.groupBox18.TabIndex = 13;
             this.groupBox18.TabStop = false;
             this.groupBox18.Text = "Controller settings";
+            // 
+            // label55
+            // 
+            this.label55.AutoSize = true;
+            this.label55.Location = new System.Drawing.Point(194, 174);
+            this.label55.Name = "label55";
+            this.label55.Size = new System.Drawing.Size(33, 13);
+            this.label55.TabIndex = 27;
+            this.label55.Text = "[float]";
+            // 
+            // label58
+            // 
+            this.label58.AutoSize = true;
+            this.label58.Location = new System.Drawing.Point(7, 174);
+            this.label58.Name = "label58";
+            this.label58.Size = new System.Drawing.Size(35, 13);
+            this.label58.TabIndex = 26;
+            this.label58.Text = "Kacc:";
+            // 
+            // txtKacc
+            // 
+            this.txtKacc.Location = new System.Drawing.Point(88, 174);
+            this.txtKacc.Name = "txtKacc";
+            this.txtKacc.Size = new System.Drawing.Size(100, 20);
+            this.txtKacc.TabIndex = 25;
+            this.txtKacc.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label53
+            // 
+            this.label53.AutoSize = true;
+            this.label53.Location = new System.Drawing.Point(194, 148);
+            this.label53.Name = "label53";
+            this.label53.Size = new System.Drawing.Size(33, 13);
+            this.label53.TabIndex = 24;
+            this.label53.Text = "[float]";
+            // 
+            // label54
+            // 
+            this.label54.AutoSize = true;
+            this.label54.Location = new System.Drawing.Point(7, 148);
+            this.label54.Name = "label54";
+            this.label54.Size = new System.Drawing.Size(23, 13);
+            this.label54.TabIndex = 23;
+            this.label54.Text = "Kff:";
+            // 
+            // txtKff
+            // 
+            this.txtKff.Location = new System.Drawing.Point(88, 148);
+            this.txtKff.Name = "txtKff";
+            this.txtKff.Size = new System.Drawing.Size(100, 20);
+            this.txtKff.TabIndex = 22;
+            this.txtKff.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // label43
             // 
@@ -1200,7 +1474,7 @@
             // btnSendControllerSettings
             // 
             this.btnSendControllerSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSendControllerSettings.Location = new System.Drawing.Point(384, 99);
+            this.btnSendControllerSettings.Location = new System.Drawing.Point(384, 185);
             this.btnSendControllerSettings.Name = "btnSendControllerSettings";
             this.btnSendControllerSettings.Size = new System.Drawing.Size(75, 23);
             this.btnSendControllerSettings.TabIndex = 14;
@@ -1691,21 +1965,21 @@
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoad_Click);
             // 
-            // tabResponse
+            // tabTuning
             // 
-            this.tabResponse.Controls.Add(this.groupBox24);
-            this.tabResponse.Controls.Add(this.groupBox26);
-            this.tabResponse.Controls.Add(this.groupBox25);
-            this.tabResponse.Controls.Add(this.groupBox23);
-            this.tabResponse.Controls.Add(this.groupBox20);
-            this.tabResponse.Controls.Add(this.groupBox15);
-            this.tabResponse.Location = new System.Drawing.Point(4, 22);
-            this.tabResponse.Name = "tabResponse";
-            this.tabResponse.Padding = new System.Windows.Forms.Padding(3);
-            this.tabResponse.Size = new System.Drawing.Size(951, 708);
-            this.tabResponse.TabIndex = 4;
-            this.tabResponse.Text = "Step Response";
-            this.tabResponse.UseVisualStyleBackColor = true;
+            this.tabTuning.Controls.Add(this.groupBox24);
+            this.tabTuning.Controls.Add(this.groupBox26);
+            this.tabTuning.Controls.Add(this.groupBox25);
+            this.tabTuning.Controls.Add(this.groupBox23);
+            this.tabTuning.Controls.Add(this.groupBox20);
+            this.tabTuning.Controls.Add(this.groupBox15);
+            this.tabTuning.Location = new System.Drawing.Point(4, 22);
+            this.tabTuning.Name = "tabTuning";
+            this.tabTuning.Padding = new System.Windows.Forms.Padding(3);
+            this.tabTuning.Size = new System.Drawing.Size(951, 708);
+            this.tabTuning.TabIndex = 4;
+            this.tabTuning.Text = "Tuning";
+            this.tabTuning.UseVisualStyleBackColor = true;
             // 
             // groupBox24
             // 
@@ -1851,8 +2125,8 @@
             // 
             // groupBox20
             // 
+            this.groupBox20.Controls.Add(this.label59);
             this.groupBox20.Controls.Add(this.response_plot_variable);
-            this.groupBox20.Controls.Add(this.btn_plot);
             this.groupBox20.Controls.Add(this.btnresetzoom);
             this.groupBox20.Controls.Add(this.pltresponse);
             this.groupBox20.Location = new System.Drawing.Point(8, 195);
@@ -1871,22 +2145,12 @@
             "velocity",
             "angle error",
             "velocity error"});
-            this.response_plot_variable.Location = new System.Drawing.Point(657, 21);
+            this.response_plot_variable.Location = new System.Drawing.Point(728, 21);
             this.response_plot_variable.Margin = new System.Windows.Forms.Padding(2);
             this.response_plot_variable.Name = "response_plot_variable";
             this.response_plot_variable.Size = new System.Drawing.Size(192, 21);
             this.response_plot_variable.TabIndex = 19;
-            // 
-            // btn_plot
-            // 
-            this.btn_plot.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_plot.Location = new System.Drawing.Point(855, 19);
-            this.btn_plot.Name = "btn_plot";
-            this.btn_plot.Size = new System.Drawing.Size(75, 23);
-            this.btn_plot.TabIndex = 14;
-            this.btn_plot.Text = "Plot";
-            this.btn_plot.UseVisualStyleBackColor = true;
-            this.btn_plot.Click += new System.EventHandler(this.btn_plot_Click);
+            this.response_plot_variable.SelectedIndexChanged += new System.EventHandler(this.response_plot_variable_SelectedIndexChanged);
             // 
             // btnresetzoom
             // 
@@ -1901,26 +2165,26 @@
             // 
             // pltresponse
             // 
-            chartArea8.Name = "ChartArea1";
-            this.pltresponse.ChartAreas.Add(chartArea8);
-            legend2.Name = "Legend1";
-            this.pltresponse.Legends.Add(legend2);
+            chartArea13.Name = "ChartArea1";
+            this.pltresponse.ChartAreas.Add(chartArea13);
+            legend4.Name = "Legend1";
+            this.pltresponse.Legends.Add(legend4);
             this.pltresponse.Location = new System.Drawing.Point(9, 19);
             this.pltresponse.Name = "pltresponse";
-            series15.ChartArea = "ChartArea1";
-            series15.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series15.Legend = "Legend1";
-            series15.Name = "Position";
-            series16.ChartArea = "ChartArea1";
-            series16.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series16.Legend = "Legend1";
-            series16.Name = "Target";
-            this.pltresponse.Series.Add(series15);
-            this.pltresponse.Series.Add(series16);
+            series25.ChartArea = "ChartArea1";
+            series25.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series25.Legend = "Legend1";
+            series25.Name = "Position";
+            series26.ChartArea = "ChartArea1";
+            series26.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series26.Legend = "Legend1";
+            series26.Name = "Target";
+            this.pltresponse.Series.Add(series25);
+            this.pltresponse.Series.Add(series26);
             this.pltresponse.Size = new System.Drawing.Size(920, 482);
             this.pltresponse.TabIndex = 0;
-            title6.Name = "Title1";
-            this.pltresponse.Titles.Add(title6);
+            title10.Name = "Title1";
+            this.pltresponse.Titles.Add(title10);
             // 
             // groupBox15
             // 
@@ -2010,123 +2274,54 @@
             this.timerCSV.Enabled = true;
             this.timerCSV.Tick += new System.EventHandler(this.timerCSV_Tick);
             // 
-            // timerRamp
+            // Variable_1_unit_pltPosition
             // 
-            this.timerRamp.Enabled = true;
-            this.timerRamp.Interval = 50;
-            this.timerRamp.Tick += new System.EventHandler(this.timerRamp_Tick);
+            this.Variable_1_unit_pltPosition.AutoSize = true;
+            this.Variable_1_unit_pltPosition.Location = new System.Drawing.Point(202, 22);
+            this.Variable_1_unit_pltPosition.Name = "Variable_1_unit_pltPosition";
+            this.Variable_1_unit_pltPosition.Size = new System.Drawing.Size(13, 13);
+            this.Variable_1_unit_pltPosition.TabIndex = 39;
+            this.Variable_1_unit_pltPosition.Text = "[]";
+            this.Variable_1_unit_pltPosition.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // Variable_1_pltPosition
+            // Variable_2_unit_pltPosition
             // 
-            this.Variable_1_pltPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Variable_1_pltPosition.FormattingEnabled = true;
-            this.Variable_1_pltPosition.Items.AddRange(new object[] {
-            "",
-            "Target",
-            "Position",
-            "Error",
-            "Target Velocity",
-            "Velocity",
-            "Effort",
-            "dt"});
-            this.Variable_1_pltPosition.Location = new System.Drawing.Point(75, 18);
-            this.Variable_1_pltPosition.Name = "Variable_1_pltPosition";
-            this.Variable_1_pltPosition.Size = new System.Drawing.Size(121, 21);
-            this.Variable_1_pltPosition.TabIndex = 27;
+            this.Variable_2_unit_pltPosition.AutoSize = true;
+            this.Variable_2_unit_pltPosition.Location = new System.Drawing.Point(484, 21);
+            this.Variable_2_unit_pltPosition.Name = "Variable_2_unit_pltPosition";
+            this.Variable_2_unit_pltPosition.Size = new System.Drawing.Size(13, 13);
+            this.Variable_2_unit_pltPosition.TabIndex = 40;
+            this.Variable_2_unit_pltPosition.Text = "[]";
+            this.Variable_2_unit_pltPosition.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // label13
+            // Variable_2_unit_pltError
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(6, 22);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(63, 13);
-            this.label13.TabIndex = 28;
-            this.label13.Text = "Variable 1 =";
-            this.label13.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.Variable_2_unit_pltError.AutoSize = true;
+            this.Variable_2_unit_pltError.Location = new System.Drawing.Point(484, 258);
+            this.Variable_2_unit_pltError.Name = "Variable_2_unit_pltError";
+            this.Variable_2_unit_pltError.Size = new System.Drawing.Size(13, 13);
+            this.Variable_2_unit_pltError.TabIndex = 41;
+            this.Variable_2_unit_pltError.Text = "[]";
+            this.Variable_2_unit_pltError.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // label18
+            // Variable_1_unit_pltError
             // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(202, 22);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(63, 13);
-            this.label18.TabIndex = 30;
-            this.label18.Text = "Variable 2 =";
-            this.label18.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.Variable_1_unit_pltError.AutoSize = true;
+            this.Variable_1_unit_pltError.Location = new System.Drawing.Point(202, 258);
+            this.Variable_1_unit_pltError.Name = "Variable_1_unit_pltError";
+            this.Variable_1_unit_pltError.Size = new System.Drawing.Size(13, 13);
+            this.Variable_1_unit_pltError.TabIndex = 42;
+            this.Variable_1_unit_pltError.Text = "[]";
+            this.Variable_1_unit_pltError.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
-            // Variable_2_pltPosition
+            // label59
             // 
-            this.Variable_2_pltPosition.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Variable_2_pltPosition.FormattingEnabled = true;
-            this.Variable_2_pltPosition.Items.AddRange(new object[] {
-            "",
-            "Target",
-            "Position",
-            "Error",
-            "Target Velocity",
-            "Velocity",
-            "Effort",
-            "dt"});
-            this.Variable_2_pltPosition.Location = new System.Drawing.Point(271, 18);
-            this.Variable_2_pltPosition.Name = "Variable_2_pltPosition";
-            this.Variable_2_pltPosition.Size = new System.Drawing.Size(121, 21);
-            this.Variable_2_pltPosition.TabIndex = 29;
-            // 
-            // label37
-            // 
-            this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(6, 259);
-            this.label37.Name = "label37";
-            this.label37.Size = new System.Drawing.Size(63, 13);
-            this.label37.TabIndex = 32;
-            this.label37.Text = "Variable 1 =";
-            this.label37.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // Variable_1_pltError
-            // 
-            this.Variable_1_pltError.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Variable_1_pltError.FormattingEnabled = true;
-            this.Variable_1_pltError.Items.AddRange(new object[] {
-            "",
-            "Target",
-            "Position",
-            "Error",
-            "Target Velocity",
-            "Velocity",
-            "Effort",
-            "dt"});
-            this.Variable_1_pltError.Location = new System.Drawing.Point(75, 255);
-            this.Variable_1_pltError.Name = "Variable_1_pltError";
-            this.Variable_1_pltError.Size = new System.Drawing.Size(121, 21);
-            this.Variable_1_pltError.TabIndex = 31;
-            // 
-            // label38
-            // 
-            this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(202, 259);
-            this.label38.Name = "label38";
-            this.label38.Size = new System.Drawing.Size(63, 13);
-            this.label38.TabIndex = 34;
-            this.label38.Text = "Variable 2 =";
-            this.label38.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // Variable_2_pltError
-            // 
-            this.Variable_2_pltError.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.Variable_2_pltError.FormattingEnabled = true;
-            this.Variable_2_pltError.Items.AddRange(new object[] {
-            "",
-            "Target",
-            "Position",
-            "Error",
-            "Target Velocity",
-            "Velocity",
-            "Effort",
-            "dt"});
-            this.Variable_2_pltError.Location = new System.Drawing.Point(271, 255);
-            this.Variable_2_pltError.Name = "Variable_2_pltError";
-            this.Variable_2_pltError.Size = new System.Drawing.Size(121, 21);
-            this.Variable_2_pltError.TabIndex = 33;
+            this.label59.AutoSize = true;
+            this.label59.Location = new System.Drawing.Point(695, 24);
+            this.label59.Name = "label59";
+            this.label59.Size = new System.Drawing.Size(28, 13);
+            this.label59.TabIndex = 20;
+            this.label59.Text = "Plot:";
             // 
             // GUI
             // 
@@ -2157,6 +2352,7 @@
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
             this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
@@ -2185,7 +2381,7 @@
             this.groupBox13.PerformLayout();
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
-            this.tabResponse.ResumeLayout(false);
+            this.tabTuning.ResumeLayout(false);
             this.groupBox24.ResumeLayout(false);
             this.groupBox24.PerformLayout();
             this.groupBox26.ResumeLayout(false);
@@ -2195,6 +2391,7 @@
             this.groupBox23.ResumeLayout(false);
             this.groupBox23.PerformLayout();
             this.groupBox20.ResumeLayout(false);
+            this.groupBox20.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pltresponse)).EndInit();
             this.groupBox15.ResumeLayout(false);
             this.groupBox15.PerformLayout();
@@ -2223,7 +2420,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Panel panelTorque;
         private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.Panel panelEnabled;
         private System.Windows.Forms.Button btnEnable;
         private System.Windows.Forms.GroupBox groupBox7;
         private System.Windows.Forms.TextBox txtConsole;
@@ -2239,7 +2435,6 @@
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.TextBox txtTimeframe;
         private System.Windows.Forms.Button btnSetTimeframe;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox10;
         private System.Windows.Forms.Button btnp100;
         private System.Windows.Forms.Button btnp10;
@@ -2336,7 +2531,7 @@
         private System.Windows.Forms.Button btnmn100;
         private System.Windows.Forms.Button btnmn10;
         private System.Windows.Forms.Button btnmn1;
-        private System.Windows.Forms.TabPage tabResponse;
+        private System.Windows.Forms.TabPage tabTuning;
         private System.Windows.Forms.GroupBox groupBox20;
         private System.Windows.Forms.DataVisualization.Charting.Chart pltresponse;
         private System.Windows.Forms.GroupBox groupBox15;
@@ -2350,9 +2545,6 @@
         private System.Windows.Forms.Button btnDirac;
         private System.Windows.Forms.Label label51;
         private System.Windows.Forms.Timer timerCSV;
-        private System.Windows.Forms.TextBox txtRamp;
-        private System.Windows.Forms.Button btnRamp;
-        private System.Windows.Forms.Timer timerRamp;
         private System.Windows.Forms.SaveFileDialog saveFileDialogConfig;
         private System.Windows.Forms.Label label56;
         private System.Windows.Forms.Label label57;
@@ -2366,7 +2558,6 @@
         private System.Windows.Forms.Label label63;
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.ComboBox response_plot_variable;
-        private System.Windows.Forms.Button btn_plot;
         private System.Windows.Forms.GroupBox groupBox24;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label12;
@@ -2376,9 +2567,32 @@
         private System.Windows.Forms.ComboBox Variable_2_pltPosition;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.ComboBox Variable_1_pltPosition;
-        private System.Windows.Forms.ColorDialog colorDialog1;
         private System.Windows.Forms.Label label38;
         private System.Windows.Forms.ComboBox Variable_2_pltError;
+        private System.Windows.Forms.ColorDialog colorDialog3;
+        private System.Windows.Forms.Button Variable_1_pltPosition_color;
+        private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.Button Variable_2_pltPosition_color;
+        private System.Windows.Forms.Button Variable_2_pltError_color;
+        private System.Windows.Forms.Button Variable_1_pltError_color;
+        private System.Windows.Forms.Label label_Enabled;
+        private System.Windows.Forms.Label label48;
+        private System.Windows.Forms.TextBox txtFrequencyFrame;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.Label buffer_state;
+        private System.Windows.Forms.Label label52;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label55;
+        private System.Windows.Forms.Label label58;
+        private System.Windows.Forms.TextBox txtKacc;
+        private System.Windows.Forms.Label label53;
+        private System.Windows.Forms.Label label54;
+        private System.Windows.Forms.TextBox txtKff;
+        private System.Windows.Forms.Label Variable_1_unit_pltError;
+        private System.Windows.Forms.Label Variable_2_unit_pltError;
+        private System.Windows.Forms.Label Variable_2_unit_pltPosition;
+        private System.Windows.Forms.Label Variable_1_unit_pltPosition;
+        private System.Windows.Forms.Label label59;
     }
 }
 

@@ -17,16 +17,18 @@ namespace Mechaduino
     {
         int length = 500;
 
-        int[] uValues = new int[500];
+        double[] uValues = new double[500];
         double[] yValues = new double[500];
         double[] rValues = new double[500];
         double[] eValues = new double[500];
-        int[] dt_values = new int[1500];
+        double[] tValues = new double[1500];
+        double[] omegaValues = new double[1500];
+        double[] omega_targetValues = new double[1500];
+
 
         int[] response_position = new int[1500];
         int[] response_target = new int[1500];
-        int[] omega = new int[1500];
-        int[] omega_target = new int[1500];
+
 
         int y = 0;
         int r = 0;
@@ -34,22 +36,28 @@ namespace Mechaduino
         int u = 0;
         int electrical_angle = 0;
         int enabled = 0;
+        int int_frequency = 250;
+        int omega_target = 0;
+        int omega = 0;
+        double fifo_workload = 0;
 
         int uMax = 0;
         int Torque = 0;
+        double time = 0;
+        double dt = 0.0;
 
         int wrap_pointer = 0;
 
         int streaming = 0;
 
+        bool changing_size = false;
         bool wasOpen = false;
         bool savetoCSV = false;
         String CSVFileName = "";
 
         bool response_income = false;
         int response_command_Length = 0;
-
-        int k = 0;
+        
 
         bool Ramp;
 
@@ -84,7 +92,7 @@ namespace Mechaduino
             
             ((Control)this.tabPlots).Enabled = false;
             ((Control)this.tabParameter).Enabled = false;
-            ((Control)this.tabResponse).Enabled = false;
+            ((Control)this.tabTuning).Enabled = false;
 
 
             saveFileDialog1.Filter = "CSV File|*.csv|Text File|*.txt";
@@ -126,28 +134,45 @@ namespace Mechaduino
             anglePlot.BackImage = "bgImg";
 
 
-            
+
             // position plot
             pltPosition.Series[0].Points.Clear();
-            pltPosition.ChartAreas[0].AxisX.LabelStyle.Enabled = false;
-            pltPosition.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
-            pltPosition.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
-            pltPosition.ChartAreas[0].AxisX.MinorGrid.Enabled = false;
+            pltPosition.ChartAreas[0].BorderWidth = 200;
+            pltPosition.ChartAreas[0].AxisX.LabelStyle.Enabled = true;
+            pltPosition.ChartAreas[0].AxisX.LabelStyle.Format = "{0:0.00}";
+            pltPosition.ChartAreas[0].AxisX.MajorGrid.Enabled = true;
+            pltPosition.ChartAreas[0].AxisX.MinorGrid.Enabled = true;
+            pltPosition.ChartAreas[0].AxisX.MajorGrid.LineColor = Color.LightGray;
+            pltPosition.ChartAreas[0].AxisX.MinorGrid.LineColor = Color.LightGray;
+            pltPosition.ChartAreas[0].AxisX.MajorTickMark.Enabled = true;
+            pltPosition.ChartAreas[0].AxisX.MinorTickMark.Enabled = true;
+
+            pltPosition.ChartAreas[0].AxisY.MajorGrid.Enabled = true;
             pltPosition.ChartAreas[0].AxisY.MinorGrid.Enabled = false;
-            pltPosition.ChartAreas[0].AxisX.MajorTickMark.Enabled = false;
-            pltPosition.ChartAreas[0].AxisX.MinorTickMark.Enabled = false;
-            //pltPosition.Series[1].Color = Color.Red;
+            pltPosition.ChartAreas[0].AxisY.MajorGrid.LineColor = Color.LightGray;
+            pltPosition.ChartAreas[0].AxisY.MinorGrid.LineColor = Color.LightGray;
+            pltPosition.Series[0].Color = Color.Red;
+            pltPosition.Series[1].Color = Color.Blue;
 
 
             // Error plot
             pltError.Series[0].Points.Clear();
-            pltError.ChartAreas[0].AxisX.LabelStyle.Enabled = false;
-            pltError.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
-            pltError.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
-            pltError.ChartAreas[0].AxisX.MinorGrid.Enabled = false;
+            pltError.ChartAreas[0].BorderWidth = 200;
+            pltError.ChartAreas[0].AxisX.LabelStyle.Enabled = true;
+            pltError.ChartAreas[0].AxisX.LabelStyle.Format = "{0:0.00}";
+            pltError.ChartAreas[0].AxisX.MajorGrid.Enabled = true;
+            pltError.ChartAreas[0].AxisX.MinorGrid.Enabled = true;
+            pltError.ChartAreas[0].AxisX.MajorGrid.LineColor = Color.LightGray;
+            pltError.ChartAreas[0].AxisX.MinorGrid.LineColor = Color.LightGray;
+            pltError.ChartAreas[0].AxisX.MajorTickMark.Enabled = true;
+            pltError.ChartAreas[0].AxisX.MinorTickMark.Enabled = true;
+
+            pltError.ChartAreas[0].AxisY.MajorGrid.Enabled = true;
             pltError.ChartAreas[0].AxisY.MinorGrid.Enabled = false;
-            pltError.ChartAreas[0].AxisX.MajorTickMark.Enabled = false;
-            pltError.ChartAreas[0].AxisX.MinorTickMark.Enabled = false;
+            pltError.ChartAreas[0].AxisY.MajorGrid.LineColor = Color.LightGray;
+            pltError.ChartAreas[0].AxisY.MinorGrid.LineColor = Color.LightGray;
+            pltError.Series[0].Color = Color.Red;
+            pltError.Series[1].Color = Color.Blue;
 
 
             // response plot
@@ -212,8 +237,8 @@ namespace Mechaduino
                     {
                         response_target[response_command_Length] = Convert.ToInt32(substrings[0]);
                         response_position[response_command_Length] = Convert.ToInt32(substrings[1]);
-                        omega_target[response_command_Length] = Convert.ToInt32(substrings[2]);
-                        omega[response_command_Length] = Convert.ToInt32(substrings[3]);
+                        omega_targetValues[response_command_Length] = Convert.ToInt32(substrings[2]);
+                        omegaValues[response_command_Length] = Convert.ToInt32(substrings[3]);
 
                         response_command_Length = response_command_Length + 1;
                         if (response_command_Length >= 990)
@@ -225,40 +250,57 @@ namespace Mechaduino
                     }
                     else if (substrings.Length == 10)
                     {
-                        //Data Stream is received here
-                        streaming = Convert.ToInt16(substrings[1]);
-                        electrical_angle = Math.Abs(Convert.ToInt32(substrings[8]));
-                        enabled = Convert.ToInt16(substrings[9]);
-
-                        Torque = (Math.Abs(u) * 240) / uMax;
-
-                        if (savetoCSV)
+                        if (!changing_size)
                         {
-                            buffer[buffer_counter] = value;
-                            buffer_counter += 1;
+                            //Data Stream is received here
+                            streaming = Convert.ToInt16(substrings[1]);
+                            electrical_angle = Math.Abs(Convert.ToInt32(substrings[8]));
+                            fifo_workload = (Convert.ToDouble(substrings[9]));
+
+                            Torque = (Math.Abs(u) * 240) / uMax;
+
+                            if (savetoCSV)
+                            {
+                                buffer[buffer_counter] = value;
+                                buffer_counter += 1;
+                            }
+
+                            if ((u+ Convert.ToInt32(substrings[7])) != 0)
+                            {
+                                enabled = 1;
+                            }
+                            else
+                            {
+                                enabled = 0;
+                            }
+                            r = Convert.ToInt32(substrings[2]);
+                            y = Convert.ToInt32(substrings[3]);
+                            e = Convert.ToInt32(substrings[4]);
+                            u = Convert.ToInt32(substrings[7]);
+                            dt = Convert.ToInt32(substrings[0]) / 1000000.0;
+                            omega_target = (Convert.ToInt32(substrings[5]));
+                            omega = (Convert.ToInt32(substrings[6]));
+
+
+
+                            time = time + dt;
+
+                            tValues[wrap_pointer] = time;
+
+                            rValues[wrap_pointer] = r / 100.0;
+                            yValues[wrap_pointer] = y / 100.0;
+                            eValues[wrap_pointer] = e / 100.0;
+                            omega_targetValues[wrap_pointer] = 50.0 * omega_target;
+                            omegaValues[wrap_pointer] = 50.0 * omega;
+                            uValues[wrap_pointer] = (u * 1000.0 * 3.3) / (512.0 * 10.0 * 0.15);
+
+
+                            wrap_pointer += 1;
+                            wrap_pointer = wrap_pointer % yValues.Length;
                         }
-
-                        r = Convert.ToInt32(substrings[2]);
-                        y = Convert.ToInt32(substrings[3]);
-                        e = Convert.ToInt32(substrings[4]);
-                        u = Convert.ToInt32(substrings[7]);
-
-                        dt_values[wrap_pointer] = (Convert.ToInt32(substrings[0]));
-
-                        rValues[wrap_pointer] = r / 100.0;
-                        yValues[wrap_pointer] = y / 100.0;
-                        eValues[wrap_pointer] = e / 100.0;
-                        omega_target[wrap_pointer] = (Convert.ToInt32(substrings[5]));
-                        omega[wrap_pointer] = (Convert.ToInt32(substrings[6]));
-                        uValues[wrap_pointer] = Convert.ToInt32((u*1000.0 * 3.3) / (512.0 * 10.0 * 0.15));
-
-
-                        wrap_pointer += 1;
-                        wrap_pointer = wrap_pointer % yValues.Length;
-
                         
                     }
-                    else if (substrings.Length == 15)
+                    else if (substrings.Length == 17)
                     {
                         txtIdentifier.Text = substrings[0];
                         txtFullstep.Text = substrings[1];
@@ -290,7 +332,8 @@ namespace Mechaduino
                             checkInvert.Checked = false;
                         }
                         txtuLPF.Text = substrings[14];
-                        
+                        txtKff.Text = substrings[15];
+                        txtKacc.Text = substrings[16];
                     }
                     else
                     {
@@ -320,6 +363,8 @@ namespace Mechaduino
 
             for (int s = 0; s < tmpChart.Series.Count(); s++)
             {
+                /*DataPoint data = tmpChart.Series[s].Points.FindMaxByValue("Y");
+                Debug.Print(Convert.ToString(data));*/
                 foreach (DataPoint dp in tmpChart.Series[s].Points)
                 {
                     if (dp.XValue >= leftLimit && dp.XValue <= rightLimit)
@@ -343,7 +388,15 @@ namespace Mechaduino
                 temp_min = temp_min - 1;
                 temp_max = temp_max + 1;
             }
-            
+            if (temp_max< temp_min)
+            {
+                temp_max = temp_min + 1;
+            }
+            if (temp_min > temp_max)
+            {
+                temp_min = temp_max - 1;
+            }
+
             tmpChart.ChartAreas[0].AxisY.Maximum = temp_max;
             tmpChart.ChartAreas[0].AxisY.Minimum = temp_min;
         }
@@ -360,26 +413,31 @@ namespace Mechaduino
             {
                 if (streaming == 0)
                 {
+                    
                     serialPort1.DiscardInBuffer();
                     btnStream.Text = "Stop stream";
                     btnEnable.Enabled = true;
-
-                   // Array.Clear(yValues, 0, yValues.Length);
-                   // Array.Clear(rValues, 0, rValues.Length);
-                   // Array.Clear(eValues, 0, eValues.Length);
+                    
                     pltPosition.Series[0].Points.Clear();
                     pltPosition.Series[1].Points.Clear();
                     pltError.Series[0].Points.Clear();
                     pltError.Series[1].Points.Clear();
 
-                    serialPort1.WriteLine("start_stream\n");
+                    serialPort1.WriteLine("stream\n");
+                    Thread.Sleep(100);
+                    serialPort1.Write(Convert.ToString(int_frequency) + "\n");
                 }
                 else
                 {
+                    label_Enabled.Text = "Unknown";
+                    label_Enabled.ForeColor = Color.Black;
+                    buffer_state.Text = "Unknown";
+                    buffer_state.ForeColor = Color.Black;
+
                     serialPort1.DiscardInBuffer();
                     btnStream.Text = "Start stream";
                     btnEnable.Enabled = false;
-                    serialPort1.WriteLine("stop_stream\n");
+                    serialPort1.WriteLine("stream\n");
                 }
             }
         }
@@ -435,7 +493,7 @@ namespace Mechaduino
 
                 ((Control)this.tabPlots).Enabled = false;
                 ((Control)this.tabParameter).Enabled = false;
-                ((Control)this.tabResponse).Enabled = false;
+                ((Control)this.tabTuning).Enabled = false;
             }
             else
             {
@@ -459,7 +517,7 @@ namespace Mechaduino
                 {
                     ((Control)this.tabPlots).Enabled = true;
                     ((Control)this.tabParameter).Enabled = true;
-                    ((Control)this.tabResponse).Enabled = true;
+                    ((Control)this.tabTuning).Enabled = true;
                     serialPort1.WriteLine("\n");
                     Thread.Sleep(100);
 
@@ -548,14 +606,30 @@ namespace Mechaduino
         {
             if (streaming == 1)
             {
+                //buffer_state.Text = Convert.ToString(fifo_workload, 3) + " %";
+                buffer_state.Text = string.Format("{0:0.00}",fifo_workload) + " %";
+                if (fifo_workload > 90.0)
+                {
+                    buffer_state.ForeColor = Color.Red;
+                }
+                if (fifo_workload > 70.0)
+                {
+                    buffer_state.ForeColor = Color.Orange;
+                }
+                else
+                {
+                    buffer_state.ForeColor = Color.Lime;
+                }
                 if (enabled == 1)
                 {
-                    panelEnabled.BackColor = Color.Lime;
+                    label_Enabled.ForeColor = Color.Lime;
+                    label_Enabled.Text = "Enabled";
                     btnEnable.Text = "Disable";
                 }
                 else
                 {
-                    panelEnabled.BackColor = Color.Red;
+                    label_Enabled.ForeColor = Color.Red;
+                    label_Enabled.Text = "Disabled";
                     btnEnable.Text = "Enable";
                 }
 
@@ -576,65 +650,62 @@ namespace Mechaduino
 
                 if (Variable_1_pltPosition.Text == "Position")
                 {
+                    Variable_1_unit_pltPosition.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[0].Points.AddXY(i * dt_values[pointer], yValues[pointer]);
+                        pltPosition.Series[0].Points.AddXY(tValues[pointer], yValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltPosition.Text == "Target")
                 {
+                    Variable_1_unit_pltPosition.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[0].Points.AddXY(i * dt_values[pointer], rValues[pointer]);
+                        pltPosition.Series[0].Points.AddXY(tValues[pointer], rValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltPosition.Text == "Error")
                 {
+                    Variable_1_unit_pltPosition.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[0].Points.AddXY(i * dt_values[pointer], eValues[pointer]);
+                        pltPosition.Series[0].Points.AddXY(tValues[pointer], eValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltPosition.Text == "Target Velocity")
                 {
+                    Variable_1_unit_pltPosition.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[0].Points.AddXY(i * dt_values[pointer], omega_target[pointer]);
+                        pltPosition.Series[0].Points.AddXY(tValues[pointer], omega_targetValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltPosition.Text == "Velocity")
                 {
+                    Variable_1_unit_pltPosition.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[0].Points.AddXY(i * dt_values[pointer], omega[pointer]);
+                        pltPosition.Series[0].Points.AddXY(tValues[pointer], omegaValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltPosition.Text == "Effort")
                 {
+                    Variable_1_unit_pltPosition.Text = "[mA]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[0].Points.AddXY(i * dt_values[pointer], uValues[pointer]);
-                    }
-                }
-                else if (Variable_1_pltPosition.Text == "dt")
-                {
-                    for (int i = 0; i <= yValues.Length - 1; i++)
-                    {
-                        int pointer = wrap_pointer + i;
-                        pointer = pointer % yValues.Length;
-                        pltPosition.Series[0].Points.AddXY(i * dt_values[pointer], dt_values[pointer]);
+                        pltPosition.Series[0].Points.AddXY(tValues[pointer], uValues[pointer]);
                     }
                 }
 
@@ -643,65 +714,62 @@ namespace Mechaduino
 
                 if (Variable_2_pltPosition.Text == "Position")
                 {
+                    Variable_2_unit_pltPosition.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[1].Points.AddXY(i * dt_values[pointer], yValues[pointer]);
+                        pltPosition.Series[1].Points.AddXY(tValues[pointer], yValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltPosition.Text == "Target")
                 {
+                    Variable_2_unit_pltPosition.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[1].Points.AddXY(i * dt_values[pointer], rValues[pointer]);
+                        pltPosition.Series[1].Points.AddXY(tValues[pointer], rValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltPosition.Text == "Error")
                 {
+                    Variable_2_unit_pltPosition.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[1].Points.AddXY(i * dt_values[pointer], eValues[pointer]);
+                        pltPosition.Series[1].Points.AddXY(tValues[pointer], eValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltPosition.Text == "Target Velocity")
                 {
+                    Variable_2_unit_pltPosition.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[1].Points.AddXY(i * dt_values[pointer], omega_target[pointer]);
+                        pltPosition.Series[1].Points.AddXY(tValues[pointer], omega_targetValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltPosition.Text == "Velocity")
                 {
+                    Variable_2_unit_pltPosition.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[1].Points.AddXY(i * dt_values[pointer], omega[pointer]);
+                        pltPosition.Series[1].Points.AddXY(tValues[pointer], omegaValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltPosition.Text == "Effort")
                 {
+                    Variable_2_unit_pltPosition.Text = "[mA]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltPosition.Series[1].Points.AddXY(i * dt_values[pointer], uValues[pointer]);
-                    }
-                }
-                else if (Variable_2_pltPosition.Text == "Effort")
-                {
-                    for (int i = 0; i <= yValues.Length - 1; i++)
-                    {
-                        int pointer = wrap_pointer + i;
-                        pointer = pointer % yValues.Length;
-                        pltPosition.Series[1].Points.AddXY(i * dt_values[pointer], dt_values[pointer]);
+                        pltPosition.Series[1].Points.AddXY(tValues[pointer], uValues[pointer]);
                     }
                 }
 
@@ -710,65 +778,62 @@ namespace Mechaduino
 
                 if (Variable_1_pltError.Text == "Position")
                 {
+                    Variable_1_unit_pltError.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[0].Points.AddXY(i * dt_values[pointer], yValues[pointer]);
+                        pltError.Series[0].Points.AddXY(tValues[pointer], yValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltError.Text == "Target")
                 {
+                    Variable_1_unit_pltError.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[0].Points.AddXY(i * dt_values[pointer], rValues[pointer]);
+                        pltError.Series[0].Points.AddXY(tValues[pointer], rValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltError.Text == "Error")
                 {
+                    Variable_1_unit_pltError.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[0].Points.AddXY(i * dt_values[pointer], eValues[pointer]);
+                        pltError.Series[0].Points.AddXY(tValues[pointer], eValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltError.Text == "Target Velocity")
                 {
+                    Variable_1_unit_pltError.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[0].Points.AddXY(i * dt_values[pointer], omega_target[pointer]);
+                        pltError.Series[0].Points.AddXY(tValues[pointer], omega_targetValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltError.Text == "Velocity")
                 {
+                    Variable_1_unit_pltError.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[0].Points.AddXY(i * dt_values[pointer], omega[pointer]);
+                        pltError.Series[0].Points.AddXY(tValues[pointer], omegaValues[pointer]);
                     }
                 }
                 else if (Variable_1_pltError.Text == "Effort")
                 {
+                    Variable_1_unit_pltError.Text = "[mA]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[0].Points.AddXY(i * dt_values[pointer], uValues[pointer]);
-                    }
-                }
-                else if (Variable_1_pltError.Text == "Effort")
-                {
-                    for (int i = 0; i <= yValues.Length - 1; i++)
-                    {
-                        int pointer = wrap_pointer + i;
-                        pointer = pointer % yValues.Length;
-                        pltError.Series[0].Points.AddXY(i * dt_values[pointer], dt_values[pointer]);
+                        pltError.Series[0].Points.AddXY(tValues[pointer], uValues[pointer]);
                     }
                 }
 
@@ -778,65 +843,62 @@ namespace Mechaduino
 
                 if (Variable_2_pltError.Text == "Position")
                 {
+                    Variable_2_unit_pltError.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[1].Points.AddXY(i * dt_values[pointer], yValues[pointer]);
+                        pltError.Series[1].Points.AddXY(tValues[pointer], yValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltError.Text == "Target")
                 {
+                    Variable_2_unit_pltError.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[1].Points.AddXY(i * dt_values[pointer], rValues[pointer]);
+                        pltError.Series[1].Points.AddXY(tValues[pointer], rValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltError.Text == "Error")
                 {
+                    Variable_2_unit_pltError.Text = "[deg]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[1].Points.AddXY(i * dt_values[pointer], eValues[pointer]);
+                        pltError.Series[1].Points.AddXY(tValues[pointer], eValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltError.Text == "Target Velocity")
                 {
+                    Variable_2_unit_pltError.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[1].Points.AddXY(i * dt_values[pointer], omega_target[pointer]);
+                        pltError.Series[1].Points.AddXY(tValues[pointer], omega_targetValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltError.Text == "Velocity")
                 {
+                    Variable_2_unit_pltError.Text = "[deg/s]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[1].Points.AddXY(i * dt_values[pointer], omega[pointer]);
+                        pltError.Series[1].Points.AddXY(tValues[pointer], omegaValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltError.Text == "Effort")
                 {
+                    Variable_2_unit_pltError.Text = "[mA]";
                     for (int i = 0; i <= yValues.Length - 1; i++)
                     {
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
-                        pltError.Series[1].Points.AddXY(i * dt_values[pointer], uValues[pointer]);
-                    }
-                }
-                else if (Variable_2_pltError.Text == "Effort")
-                {
-                    for (int i = 0; i <= yValues.Length - 1; i++)
-                    {
-                        int pointer = wrap_pointer + i;
-                        pointer = pointer % yValues.Length;
-                        pltError.Series[1].Points.AddXY(i * dt_values[pointer], dt_values[pointer]);
+                        pltError.Series[1].Points.AddXY(tValues[pointer], uValues[pointer]);
                     }
                 }
 
@@ -850,46 +912,93 @@ namespace Mechaduino
 
             if (response_income)
             {
-                btn_plot_Click(sender, e);
+                response_plot_variable_SelectedIndexChanged(sender, e);
             }
         }
 
-        private void btnSetTimeframe_Click(object sender, EventArgs e){
+
+
+        private void btnSetTimeframe_Click(object sender,EventArgs ev)
+        {
+            changing_size = true;
+            double frequency = Convert.ToDouble(txtFrequencyFrame.Text);
+            if (frequency < 1.0)
+            {
+                frequency = 1.0;
+            }
+            else if (frequency > 300.0)
+            {
+                frequency = 300.0;
+            }
+
+            int_frequency = Convert.ToInt32(frequency);
+            int max_serial_counter = Convert.ToInt32((5000.0 / int_frequency) + 0.5);
+            int_frequency = Convert.ToInt32(5000.0/ max_serial_counter)+1;
+
+            double max_time = 2000.0 / int_frequency;
 
             double time = Convert.ToDouble(txtTimeframe.Text);
             if (time < 0.1)
             {
                 time = 0.1;
-                txtTimeframe.Text = Convert.ToString(time);
             }
-            else if (time > 10.0)
+            else if (time > max_time)
             {
-                time = 10.0;
-                txtTimeframe.Text = Convert.ToString(time);
+                time = max_time;
             }
 
-            length = Convert.ToInt32(125*time);
+
+            time = Convert.ToInt32(10 * time)/10.0;
+
+            txtTimeframe.Text = Convert.ToString(time);
+            txtFrequencyFrame.Text = Convert.ToString(frequency);
+
+            length = Convert.ToInt32(int_frequency * time);
+
+            Debug.Print(Convert.ToString(length));
+            
 
             
-            pltPosition.Series[0].Points.Clear();
-            pltPosition.Series[1].Points.Clear();
-            pltError.Series[0].Points.Clear();
-            pltError.Series[1].Points.Clear();
-
             Array.Clear(uValues, 0, uValues.Length);
-            Array.Clear(yValues, 0, uValues.Length);
-            Array.Clear(rValues, 0, uValues.Length);
-            Array.Clear(eValues, 0, uValues.Length);
-            Array.Clear(dt_values, 0, uValues.Length);
+            Array.Clear(yValues, 0, yValues.Length);
+            Array.Clear(rValues, 0, rValues.Length);
+            Array.Clear(eValues, 0, eValues.Length);
+            Array.Clear(tValues, 0, tValues.Length);
+            Array.Clear(omegaValues, 0, omegaValues.Length);
+            Array.Clear(omega_targetValues, 0, omega_targetValues.Length);
+
 
             Array.Resize(ref uValues, length);
             Array.Resize(ref yValues, length);
             Array.Resize(ref rValues, length);
             Array.Resize(ref eValues, length);
-            Array.Resize(ref dt_values, length);
+            Array.Resize(ref tValues, length);
+            Array.Resize(ref omegaValues, length);
+            Array.Resize(ref omega_targetValues, length);
 
-            wrap_pointer = 0;
 
+            for (int i = 0; i < length; i++)
+            {
+                uValues[i] = Convert.ToInt32((u * 1000.0 * 3.3) / (512.0 * 10.0 * 0.15));
+                yValues[i] = y / 100.0;
+                rValues[i] = r / 100.0;
+                eValues[i] = e / 100.0;
+                tValues[i] = time;
+                omegaValues[i] = omega;
+                omega_targetValues[i] = omega_target;
+            }
+            if (streaming == 1)
+            {
+
+                serialPort1.WriteLine("stream\n");
+                Thread.Sleep(500);
+                serialPort1.WriteLine("stream\n");
+                Thread.Sleep(100);
+                serialPort1.Write(Convert.ToString(int_frequency) + "\n");
+            }
+
+            wrap_pointer = 1;
+            changing_size = false;
 
         }
         
@@ -1206,7 +1315,25 @@ namespace Mechaduino
                     cmd = Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
 
-                 
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("f\n");
+                    Thread.Sleep(10);
+                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("a\n");
+                    Thread.Sleep(10);
+                    double Kacc = Convert.ToDouble(txtKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+
 
                 }
                 catch
@@ -1325,6 +1452,14 @@ namespace Mechaduino
                 File.AppendAllText(CSVFileName, "; \n");
                 File.AppendAllText(CSVFileName, "float Kd = ");
                 File.AppendAllText(CSVFileName, txtKd.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "float Kff = ");
+                File.AppendAllText(CSVFileName, txtKff.Text);
+                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, "float Kacc = ");
+                File.AppendAllText(CSVFileName, txtKacc.Text);
                 File.AppendAllText(CSVFileName, "; \n");
                 File.AppendAllText(CSVFileName, " \n");
                 File.AppendAllText(CSVFileName, " \n");
@@ -1559,6 +1694,24 @@ namespace Mechaduino
                     double Kd = Convert.ToDouble(txtKd.Text, System.Globalization.CultureInfo.InvariantCulture);
                     cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("f\n");
+                    Thread.Sleep(10);
+                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
+
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("editparam d\n");
+                    Thread.Sleep(10);
+                    serialPort1.WriteLine("a\n");
+                    Thread.Sleep(10);
+                    double Kacc = Convert.ToDouble(txtKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + "\n");
                 }
                 catch
                 {
@@ -1725,7 +1878,6 @@ namespace Mechaduino
                         sw.Write(buffer[i] + "\n");
                     }
                     buffer_counter = 0;
-                    //sw.Write(value);
                 }
             }
         }
@@ -1735,32 +1887,7 @@ namespace Mechaduino
             Ramp = true;
         }
 
-        private void timerRamp_Tick(object sender, EventArgs e)
-        {
-
-            if (Ramp)
-            {
-                Counter = Counter + 1;
-                
-                if (serialPort1.IsOpen)
-                {
-                    double step = Convert.ToDouble(txtRamp.Text)/100.0;
-                    double start = (Convert.ToDouble(r) / 100.0);
-                    string cmd = Convert.ToString(start + step, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write("set ");
-                    serialPort1.Write(cmd);
-                    serialPort1.Write("\n");
-                }
-            }
-
-            if (Counter == 100)
-            {
-                Ramp = false;
-                Counter = 0;
-            }
-
-        }
-
+       
         private void btnExport_Click(object sender, EventArgs e)
         {
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
@@ -1786,110 +1913,7 @@ namespace Mechaduino
             }
 
         }
-
-        private void btn_plot_Click(object sender, EventArgs e)
-        {
-            response_income = false;
-            pltresponse.Series[0].Points.Clear();
-            pltresponse.Series[1].Points.Clear();
-
-            double start_position = 0;
-            double start_target = 0;
-
-            int frequency = Convert.ToInt32(txtfrequency.Text);
-            double dt = 1 / frequency;
-
-            if (response_plot_variable.Text == "velocity")
-            {
-
-                pltresponse.Series[0].Name = "position [deg/s]";
-                pltresponse.Series[1].Name = "target [deg/s]";
-
-                for (int j = 0; j < 50; j++)
-                {
-                    start_position = start_position + omega[j];
-                    start_target = start_target + omega_target[j];
-                }
-                start_position = start_position / 50;
-                start_target = start_target / 50;
-
-                for (int j = 0; j < response_command_Length; j++)
-                {
-                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * (omega[j] - start_position) / 100.0);
-                    pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_target[j] - start_target) / 100.0);
-                }
-
-                btn_plot.Text = "Plot";
-            }
-            else if (response_plot_variable.Text == "angle")
-            {
-
-                pltresponse.Series[0].Name = "position [deg]";
-                pltresponse.Series[1].Name = "target [deg]";
-
-                for (int j = 0; j < 50; j++)
-                {
-                    start_position = start_position + response_position[j];
-                    start_target = start_target + response_target[j];
-                }
-                start_position = start_position / 50;
-                start_target = start_target / 50;
-
-                for (int j = 0; j < response_command_Length; j++)
-                {
-                    pltresponse.Series[0].Points.AddXY(j * dt, (response_position[j] - start_position) / 100.0);
-                    pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_target) / 100.0);
-                }
-
-                btn_plot.Text = "Plot";
-            }
-            else if (response_plot_variable.Text == "angle error")
-            {
-
-                pltresponse.Series[0].Name = "angle error [deg]";
-                pltresponse.Series[1].Name = " ";
-
-                for (int j = 0; j < 50; j++)
-                {
-                    start_position = start_position + (response_target[j]-response_position[j]);
-                }
-                start_position = start_position / 50;
-
-                for (int j = 0; j < response_command_Length; j++)
-                {
-                    pltresponse.Series[0].Points.AddXY(j * dt, ((response_target[j] - response_position[j]) - start_position) / 100.0);
-                }
-
-                btn_plot.Text = "Plot";
-            }
-            else if (response_plot_variable.Text == "velocity error")
-            {
-
-                pltresponse.Series[0].Name = "velocity error [deg/s]";
-                pltresponse.Series[1].Name = " ";
-
-                for (int j = 0; j < 50; j++)
-                {
-                    start_position = start_position + (omega_target[j]-omega[j]);
-                }
-                start_position = start_position / 50;
-
-                for (int j = 0; j < response_command_Length; j++)
-                {
-                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * ((omega_target[j]-omega[j]) - start_position) / 100.0);
-                }
-
-                btn_plot.Text = "Plot";
-            }
-            else
-            {
-                btn_plot.Text = "failed";
-            }
-
-
-            //response_command_Length = 0;
-            changeYScala(pltresponse, 5);
-        }
+       
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -1914,7 +1938,180 @@ namespace Mechaduino
             }
 
         }
-        
+
+       
+
+        private void Variable_1_pltPosition_color_Click(object sender, EventArgs e)
+        {
+            ColorDialog MyDialog = new ColorDialog();
+            // Keeps the user from selecting a custom color.
+            MyDialog.AllowFullOpen = false;
+            // Allows the user to get help. (The default is false.)
+            MyDialog.ShowHelp = true;
+            // Sets the initial color select to the current text color.
+            MyDialog.Color = Variable_1_pltPosition_color.BackColor;
+
+            // Update the text box color if the user clicks OK 
+            if (MyDialog.ShowDialog() == DialogResult.OK)
+            {
+                Variable_1_pltPosition_color.ForeColor = MyDialog.Color;
+                pltPosition.Series[0].Color = MyDialog.Color;
+            }
+
+        }
+
+        private void Variable_2_pltPosition_color_Click(object sender, EventArgs e)
+        {
+            ColorDialog MyDialog = new ColorDialog();
+            // Keeps the user from selecting a custom color.
+            MyDialog.AllowFullOpen = false;
+            // Allows the user to get help. (The default is false.)
+            MyDialog.ShowHelp = true;
+            // Sets the initial color select to the current text color.
+            MyDialog.Color = Variable_2_pltPosition_color.ForeColor;
+
+            // Update the text box color if the user clicks OK 
+            if (MyDialog.ShowDialog() == DialogResult.OK)
+            {
+                Variable_2_pltPosition_color.ForeColor = MyDialog.Color;
+                pltPosition.Series[1].Color = MyDialog.Color;
+            }
+
+        }
+
+        private void Variable_1_pltError_color_Click(object sender, EventArgs e)
+        {
+            ColorDialog MyDialog = new ColorDialog();
+            // Keeps the user from selecting a custom color.
+            MyDialog.AllowFullOpen = false;
+            // Allows the user to get help. (The default is false.)
+            MyDialog.ShowHelp = true;
+            // Sets the initial color select to the current text color.
+            MyDialog.Color = Variable_1_pltError_color.ForeColor;
+
+            // Update the text box color if the user clicks OK 
+            if (MyDialog.ShowDialog() == DialogResult.OK)
+            {
+                Variable_1_pltError_color.ForeColor = MyDialog.Color;
+                pltError.Series[0].Color = MyDialog.Color;
+            }
+
+        }
+
+        private void Variable_2_pltError_color_Click(object sender, EventArgs e)
+        {
+            ColorDialog MyDialog = new ColorDialog();
+            // Keeps the user from selecting a custom color.
+            MyDialog.AllowFullOpen = false;
+            // Allows the user to get help. (The default is false.)
+            MyDialog.ShowHelp = true;
+            // Sets the initial color select to the current text color.
+            MyDialog.Color = Variable_2_pltError_color.ForeColor;
+
+            // Update the text box color if the user clicks OK 
+            if (MyDialog.ShowDialog() == DialogResult.OK)
+            {
+                Variable_2_pltError_color.ForeColor = MyDialog.Color;
+                pltError.Series[0].Color = MyDialog.Color;
+            }
+
+        }
+
+        private void response_plot_variable_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            response_income = false;
+            pltresponse.Series[0].Points.Clear();
+            pltresponse.Series[1].Points.Clear();
+
+            double start_position = 0;
+            double start_target = 0;
+
+            int frequency = Convert.ToInt32(txtfrequency.Text);
+            double dt = 1 / frequency;
+
+            if (response_plot_variable.Text == "velocity")
+            {
+
+                pltresponse.Series[0].Name = "position [deg/s]";
+                pltresponse.Series[1].Name = "target [deg/s]";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + omegaValues[j];
+                    start_target = start_target + omega_targetValues[j];
+                }
+                start_position = start_position / 50;
+                start_target = start_target / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * (omegaValues[j] - start_position) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_targetValues[j] - start_target) / 100.0);
+                }
+                
+            }
+            else if (response_plot_variable.Text == "angle")
+            {
+
+                pltresponse.Series[0].Name = "position [deg]";
+                pltresponse.Series[1].Name = "target [deg]";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + response_position[j];
+                    start_target = start_target + response_target[j];
+                }
+                start_position = start_position / 50;
+                start_target = start_target / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, (response_position[j] - start_position) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_target) / 100.0);
+                }
+                
+            }
+            else if (response_plot_variable.Text == "angle error")
+            {
+
+                pltresponse.Series[0].Name = "angle error [deg]";
+                pltresponse.Series[1].Name = " ";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + (response_target[j] - response_position[j]);
+                }
+                start_position = start_position / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, ((response_target[j] - response_position[j]) - start_position) / 100.0);
+                }
+                
+            }
+            else if (response_plot_variable.Text == "velocity error")
+            {
+
+                pltresponse.Series[0].Name = "velocity error [deg/s]";
+                pltresponse.Series[1].Name = " ";
+
+                for (int j = 0; j < 50; j++)
+                {
+                    start_position = start_position + (omega_targetValues[j] - omegaValues[j]);
+                }
+                start_position = start_position / 50;
+
+                for (int j = 0; j < response_command_Length; j++)
+                {
+                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * ((omega_targetValues[j] - omegaValues[j]) - start_position) / 100.0);
+                }
+                
+            }
+
+
+            //response_command_Length = 0;
+            changeYScala(pltresponse, 5);
+        }
     }
 
 

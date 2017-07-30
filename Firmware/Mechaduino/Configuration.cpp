@@ -47,16 +47,6 @@ int I_rated = 2000;
 //---------------------------------------------------------------------------------------------------------------
 //---- PID Values current control -----
 //1500 mA coil current
-/*
-float Kp = 1.10703;
-float Ki = 0.07760;
-float Kd = 4.73307;
-
-float Kff = 0.00378;
-float Kacc = 0.00660;
-
-*/
-
 float Kp = 1.26771;
 float Ki = 0.07322;
 float Kd = 5.42301;

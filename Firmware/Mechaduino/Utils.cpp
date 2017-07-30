@@ -2460,41 +2460,42 @@ void downhill_simplex() {
 
 void test() {
 
-
-  //SerialUSB.print(dirac_header);
-
   int frequency = 0;
-  // int last_step_target = step_target;
-
-
-  //response_steps = 1000;
-
-  unsigned const int time_out = 5000;
+  
   unsigned int start_millis = millis();
 
   SerialUSB.print(" Sample rate = ");
 
-  // get the frequency for data recording
-  while (frequency == 0) {
-    if (timed_out(start_millis, time_out)) return;
-    frequency = SerialUSB.parseInt();
-  }
+  bool received = false;
+  while (!received) {
+    if (canceled()){
+      return;
+    }
 
-  if (frequency < 200) {
-    // limit the lower edge of the frequency to 200 Hz
-    frequency = 200;
-    SerialUSB.println(frequency);
-    SerialUSB.println(" lower frequency limited to 200 Hz");
+    if (timed_out(start_millis, 5000)) return;
 
-  }
-  else if (frequency > 10000) {
-    // limit the upper frequency to 10 kHz
-    frequency = 10000;
-    SerialUSB.println(frequency);
-    SerialUSB.println(" upper frequency limited to 10 kHz");
-  }
-  else {
-    SerialUSB.println(frequency);
+    if (SerialUSB.available()) {
+
+      frequency = SerialUSB.parseInt();
+
+      if (frequency == 0) {
+        frequency = 1000;
+      }
+      else if (frequency < 200) {
+        frequency = 200;
+        SerialUSB.println(frequency);
+        SerialUSB.println(" lower frequency limited to 200 Hz");
+      }
+      else if (frequency > 10000) {
+        frequency = 10000;
+        SerialUSB.println(frequency);
+        SerialUSB.println(" upper frequency limited to 10 kHz");
+      }
+
+      SerialUSB.println(frequency);
+
+      received = true;
+    }
   }
 
 
@@ -2516,7 +2517,6 @@ void test() {
 
   int answer[1000];
   int target[1000];
-
   int omega_answer[1000];
   int omega_target[1000];
 
@@ -2614,5 +2614,7 @@ void test() {
     SerialUSB.print(';');
     SerialUSB.println(omega_answer[i]);
   }
+
+  return;
 
 }

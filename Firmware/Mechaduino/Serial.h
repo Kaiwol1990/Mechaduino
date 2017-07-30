@@ -47,7 +47,9 @@ bool read_serialcommand(int timeout, String *command, String *argument);
 
 bool split_command(String *Input_pointer, String *first_substring, String *second_substring);
 
-void Streaming();
+void set_streaming();
+
+void streaming_handler();
 
 void send_param();
 

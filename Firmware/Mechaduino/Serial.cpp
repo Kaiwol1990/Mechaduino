@@ -74,8 +74,8 @@ void serialCheck() {
     else if (Command.indexOf(check_lookup_command) == 0 && Command.length() == check_lookup_command.length()) {
       check_lookup(true);
     }
-    else if (Command.indexOf(stream_start_command) == 0 && Command.length() == stream_start_command.length()) {
-      streaming = true;
+    else if (Command.indexOf(stream_command) == 0 && Command.length() == stream_command.length()) {
+      set_streaming();
     }
     else if (Command.indexOf(stream_stop_command) == 0 && Command.length() == stream_stop_command.length()) {
       streaming = false;
@@ -262,13 +262,13 @@ void parameterQuery() {
   SerialUSB.println(I_rated);
 
   SerialUSB.print("Kp = ");
-  SerialUSB.println(int_Kp / 1000.0, 5);
+  SerialUSB.println(Kp, 5);
 
   SerialUSB.print("Ki = ");
-  SerialUSB.println(int_Ki / 1000.0, 5);
+  SerialUSB.println(Ki, 5);
 
   SerialUSB.print("Kd = ");
-  SerialUSB.println(int_Kd / 1000.0, 5);
+  SerialUSB.println(Kd, 5);
 
   SerialUSB.print("D_Term_LPF = ");
   SerialUSB.println(D_Term_LPF);
@@ -284,6 +284,12 @@ void parameterQuery() {
 
   SerialUSB.print("INVERT = ");
   SerialUSB.println(INVERT);
+
+  SerialUSB.print("Kff = ");
+  SerialUSB.println(Kff, 5);
+
+  SerialUSB.print("Kacc = ");
+  SerialUSB.println(Kacc, 5);
 }
 
 
@@ -338,6 +344,12 @@ void parameterEdit(String arg) {
 
     SerialUSB.print("q ----- INVERT = ");
     SerialUSB.println(INVERT);
+
+    SerialUSB.print("y ----- Kff = ");
+    SerialUSB.println(Kff);
+
+    SerialUSB.print("z ----- Kacc = ");
+    SerialUSB.println(Kacc);
   }
 
   SerialUSB.read();
@@ -661,6 +673,42 @@ void parameterEdit(String arg) {
           }
         }
         break;
+      case 'y': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new Kff [float] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              Kff = SerialUSB.parseFloat();
+              SerialUSB.println(Kff);
+
+              int_Kff = (1024 * Kff) + 0.5;
+            }
+          }
+        }
+        break;
+      case 'z': {
+          SerialUSB.read();
+          start_millis = millis();
+          SerialUSB.print("enter new Kff [float] = ");
+
+          while (1) {
+            if (timed_out(start_millis, time_out)) return;
+            delay(10);
+
+            if (SerialUSB.available()) {
+              Kacc = SerialUSB.parseFloat();
+              SerialUSB.println(Kacc);
+
+              int_Kacc = (1024 * Kacc) + 0.5;
+            }
+          }
+        }
+        break;
     }
   }
 
@@ -676,40 +724,62 @@ void step_response() {
   int frequency = 0;
   int last_step_target = step_target;
 
-  unsigned const int time_out = 5000;
   unsigned int start_millis = millis();
 
+  bool received = false;
+
   // get the number of steps for the step response
-  while (response_steps == 0) {
-    if (timed_out(start_millis, time_out)) return;
-    response_steps = SerialUSB.parseInt();
+  while (!received) {
+    if (canceled()) return;
+
+    if (timed_out(start_millis, 5000)) return;
+
+    if (SerialUSB.available()) {
+
+      response_steps = SerialUSB.parseInt();
+
+      if (response_steps == 0) {
+        response_steps = 250;
+      }
+      else if (response_steps > 3000) {
+        response_steps = 3000;
+      }
+
+      SerialUSB.println(response_steps);
+      received = true;
+    }
   }
 
-  SerialUSB.println(response_steps);
-  SerialUSB.print(" Sample rate = ");
 
   // get the frequency for data recording
-  while (frequency == 0) {
-    if (timed_out(start_millis, time_out)) return;
-    frequency = SerialUSB.parseInt();
+  SerialUSB.print(" Sample rate = ");
+  received = false;
+  while (!received) {
+    if (canceled()) return;
+
+    if (timed_out(start_millis, 5000)) return;
+
+    if (SerialUSB.available()) {
+
+      frequency = SerialUSB.parseInt();
+
+      if (frequency == 0) {
+        frequency = 1000;
+      }
+      else if (frequency < 200) {
+        frequency = 200;
+        SerialUSB.println(" lower frequency limited to 200 Hz");
+      }
+      else if (frequency > 10000) {
+        frequency = 10000;
+        SerialUSB.println(" upper frequency limited to 10 kHz");
+      }
+
+      SerialUSB.println(frequency);
+      received = true;
+    }
   }
 
-  if (frequency < 200) {
-    // limit the lower edge of the frequency to 200 Hz
-    frequency = 200;
-    SerialUSB.println(frequency);
-    SerialUSB.println(" lower frequency limited to 200 Hz");
-
-  }
-  else if (frequency > 10000) {
-    // limit the upper frequency to 10 kHz
-    frequency = 10000;
-    SerialUSB.println(frequency);
-    SerialUSB.println(" upper frequency limited to 10 kHz");
-  }
-  else {
-    SerialUSB.println(frequency);
-  }
 
   bool last_enabled = enabled;
   bool last_dir = dir;
@@ -732,29 +802,38 @@ void step_response() {
   SerialUSB.println(frequency);
 
 
+  // calculate the target vector
+  target[0] = step_target;
+  for (int i = 1; i < 1000; i++) {
+    target[i] = target[i - 1];
+
+    if (i == 200) {
+      target[i] = target[i - 1]  + (response_steps * step_add);
+    }
+  }
+
   while (counter < 1000) {
     current_time = micros();
 
     if (current_time >= next_time) {
-
-      if (counter == 200) {
-        step_target = step_target + (response_steps * step_add);
-      }
-
       next_time = current_time + dt;
+
       answer[counter] = y;
-      target[counter] = r;
       omega_answer[counter] = omega;
+      step_target = target[counter];
+
       counter += 1;
     }
   }
-
 
   for (int i = 0; i < 999; i++) {
     omega_target[i] = target[i + 1] - target[i] ;
   }
   omega_target[999] = omega_target[998];
 
+  for (int i = 0; i < 1000; i++) {
+    target[i] = target[i] * stepangle;
+  }
 
   for (int i = 0; i < 1000; i++) {
     SerialUSB.print(target[i]);
@@ -771,7 +850,7 @@ void step_response() {
   while (step_target > last_step_target) {
     current_time = micros();
     if (current_time >= next_time) {
-      next_time = current_time + 50;
+      next_time = current_time + 5;
       step_target -= 1;
     }
   }
@@ -1203,44 +1282,77 @@ bool split_command(String * Input_pointer, String * first_substring, String * se
   }
 }
 
+void set_streaming() {
+  unsigned int now = millis();
 
+  bool received = false;
 
-void Streaming() {
+  int frequency = 250;
+
   if (streaming) {
-    static unsigned int next_time;
-    unsigned int current_time = millis();
+    streaming = false;
+  }
+  else {
 
-    if (current_time >= next_time) {
-      //streaming with 250 Hz
-      next_time = current_time + 4;
+    while (!received) {
+      if (canceled()) return;
 
-      for (byte i = 0; i < 9; i++) {
-        SerialUSB.print(Serial_Buffer[i]);
-        SerialUSB.print(';');
+      if (timed_out(now, 5000)) return;
+
+      if (SerialUSB.available()) {
+
+        frequency = SerialUSB.parseInt();
+
+        if (frequency == 0) {
+          frequency = 250;
+        }
+        else if (frequency < 1) {
+          frequency = 1;
+        }
+        else if (frequency > 300) {
+          frequency = 300;
+        }
+
+
+        received = true;
       }
-      SerialUSB.print(Serial_Buffer[9]);
-      SerialUSB.println();
-
-      /*
-        SerialUSB.print(streaming);         //print enable status
-        SerialUSB.write(';');
-        SerialUSB.print(y);               //print current position
-        SerialUSB.write(';');
-        SerialUSB.print(r);               //print target position
-        SerialUSB.write(';');
-        SerialUSB.print(error);           //print error
-        //SerialUSB.print(omega);           //print error
-        SerialUSB.write(';');
-        SerialUSB.print(u);               //print effort
-        SerialUSB.write(';');
-        SerialUSB.print(electric_angle);  //print electric_angle
-        SerialUSB.write(';');
-        SerialUSB.print(enabled);         //print enable status
-        SerialUSB.println();
-      */
     }
+    SerialUSB.print("Starting Stream with ");
+    SerialUSB.print(frequency);
+    SerialUSB.println(" Hz");
+
+
+    max_serial_counter = (FPID / frequency) + 0.5;
+    serial_delay = 1000000.0 / frequency;
+
+    streaming = true;
+  }
+
+}
+
+
+void streaming_handler() {
+
+  byte buffer_length = fifo_counter - serial_counter;
+
+  if (streaming && (buffer_length > 0)) {
+
+    byte serial_position = mod(serial_counter, 99);
+
+    for (int i = 0; i < 9; i++) {
+      SerialUSB.print(fifo[i][serial_position]);
+      SerialUSB.print(';');
+    }
+
+    SerialUSB.println(buffer_length);
+
+    serial_counter++;
   }
 }
+
+
+
+
 
 void send_param() {
 
@@ -1273,6 +1385,10 @@ void send_param() {
   SerialUSB.print(INVERT);
   SerialUSB.write(';');
   SerialUSB.print(u_LPF);
+  SerialUSB.write(';');
+  SerialUSB.print(Kff, 5);
+  SerialUSB.write(';');
+  SerialUSB.print(Kacc, 5);
   SerialUSB.println();
 
 }
