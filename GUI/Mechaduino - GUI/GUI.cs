@@ -11,7 +11,7 @@ using System.IO;
 
 namespace Mechaduino
 {
-   
+
 
     public partial class GUI : Form
     {
@@ -28,6 +28,16 @@ namespace Mechaduino
 
         int[] response_position = new int[1500];
         int[] response_target = new int[1500];
+
+        int[] tuning_position = new int[1500];
+        int[] tuning_target = new int[1500];
+        int[] tuning_omega_target = new int[1500];
+        int[] tuning_omega = new int[1500];
+
+        int tuning_command_Length = 0;
+        bool tuning_income = false;
+
+
 
 
         int y = 0;
@@ -50,19 +60,18 @@ namespace Mechaduino
 
         int streaming = 0;
 
-        bool changing_size = false;
+        bool listen_to_stream = false;
+        
         bool wasOpen = false;
         bool savetoCSV = false;
         String CSVFileName = "";
 
         bool response_income = false;
         int response_command_Length = 0;
-        
-
-        bool Ramp;
 
 
-        int Counter = 0;
+
+
         String value = "";
 
         String[] buffer = new String[100];
@@ -75,8 +84,8 @@ namespace Mechaduino
             InitializeComponent();
         }
 
-        
-        
+
+
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -89,10 +98,11 @@ namespace Mechaduino
             btnOpen.Enabled = true;
             btnStream.Enabled = false;
             btnEnable.Enabled = false;
-            
+
             ((Control)this.tabPlots).Enabled = false;
             ((Control)this.tabParameter).Enabled = false;
             ((Control)this.tabTuning).Enabled = false;
+            ((Control)this.tabAutotune).Enabled = false;
 
 
             saveFileDialog1.Filter = "CSV File|*.csv|Text File|*.txt";
@@ -107,7 +117,7 @@ namespace Mechaduino
             response_plot_variable.SelectedIndex = 0;
 
             Thread.Sleep(300);
-            
+
 
             anglePlot.Series[0].Points.Clear();
             anglePlot.Series[1].Points.Clear();
@@ -192,6 +202,43 @@ namespace Mechaduino
             pltresponse.ChartAreas[0].AxisY.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
             pltresponse.ChartAreas[0].AxisY.ScaleView.SmallScrollMinSize = 0;
             pltresponse.Series[1].Color = Color.Red;
+
+
+            // autotune plot
+            pltAutotune_1.ChartAreas[0].CursorX.IsUserEnabled = Enabled;
+            pltAutotune_1.ChartAreas[0].CursorX.IsUserSelectionEnabled = Enabled;
+            pltAutotune_1.ChartAreas[0].CursorX.Interval = 0;
+            pltAutotune_1.ChartAreas[0].AxisX.ScaleView.Zoomable = Enabled;
+            pltAutotune_1.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
+            pltAutotune_1.ChartAreas[0].AxisX.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
+            pltAutotune_1.ChartAreas[0].AxisX.ScaleView.SmallScrollMinSize = 0;
+
+            pltAutotune_1.ChartAreas[0].CursorY.IsUserEnabled = Enabled;
+            pltAutotune_1.ChartAreas[0].CursorY.IsUserSelectionEnabled = Enabled;
+            pltAutotune_1.ChartAreas[0].CursorY.Interval = 0;
+            pltAutotune_1.ChartAreas[0].AxisY.ScaleView.Zoomable = Enabled;
+            pltAutotune_1.ChartAreas[0].AxisY.ScrollBar.IsPositionedInside = true;
+            pltAutotune_1.ChartAreas[0].AxisY.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
+            pltAutotune_1.ChartAreas[0].AxisY.ScaleView.SmallScrollMinSize = 0;
+            pltAutotune_1.Series[1].Color = Color.Red;
+
+            // autotune plot
+            pltAutotune_2.ChartAreas[0].CursorX.IsUserEnabled = Enabled;
+            pltAutotune_2.ChartAreas[0].CursorX.IsUserSelectionEnabled = Enabled;
+            pltAutotune_2.ChartAreas[0].CursorX.Interval = 0;
+            pltAutotune_2.ChartAreas[0].AxisX.ScaleView.Zoomable = Enabled;
+            pltAutotune_2.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = true;
+            pltAutotune_2.ChartAreas[0].AxisX.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
+            pltAutotune_2.ChartAreas[0].AxisX.ScaleView.SmallScrollMinSize = 0;
+
+            pltAutotune_2.ChartAreas[0].CursorY.IsUserEnabled = Enabled;
+            pltAutotune_2.ChartAreas[0].CursorY.IsUserSelectionEnabled = Enabled;
+            pltAutotune_2.ChartAreas[0].CursorY.Interval = 0;
+            pltAutotune_2.ChartAreas[0].AxisY.ScaleView.Zoomable = Enabled;
+            pltAutotune_2.ChartAreas[0].AxisY.ScrollBar.IsPositionedInside = true;
+            pltAutotune_2.ChartAreas[0].AxisY.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
+            pltAutotune_2.ChartAreas[0].AxisY.ScaleView.SmallScrollMinSize = 0;
+            pltAutotune_2.Series[1].Color = Color.Red;
         }
 
 
@@ -205,7 +252,7 @@ namespace Mechaduino
                 string InputData = serialPort1.ReadLine();
                 if (InputData != String.Empty)
                 {
-                   processValue(InputData);
+                    processValue(InputData);
                     value = InputData;
                 }
                 else
@@ -231,113 +278,161 @@ namespace Mechaduino
                 // ... safe to update GUI in here ...
                 if (!String.IsNullOrEmpty(value))
                 {
-                    String[] substrings = value.Split(';');
+                    String[] substrings_command = value.Split(',');
 
-                    if (substrings.Length == 4)
+                    if (substrings_command.Length > 1)
                     {
-                        response_target[response_command_Length] = Convert.ToInt32(substrings[0]);
-                        response_position[response_command_Length] = Convert.ToInt32(substrings[1]);
-                        omega_targetValues[response_command_Length] = Convert.ToInt32(substrings[2]);
-                        omegaValues[response_command_Length] = Convert.ToInt32(substrings[3]);
+                        String Command = substrings_command[0];
+                        String argument = substrings_command[1];
 
-                        response_command_Length = response_command_Length + 1;
-                        if (response_command_Length >= 990)
+                        String[] substrings = argument.Split(';');
+                        try
                         {
-                            response_income = true;
-                        }
-
-
-                    }
-                    else if (substrings.Length == 10)
-                    {
-                        if (!changing_size)
-                        {
-                            //Data Stream is received here
-                            streaming = Convert.ToInt16(substrings[1]);
-                            electrical_angle = Math.Abs(Convert.ToInt32(substrings[8]));
-                            fifo_workload = (Convert.ToDouble(substrings[9]));
-
-                            Torque = (Math.Abs(u) * 240) / uMax;
-
-                            if (savetoCSV)
+                            switch (Command)
                             {
-                                buffer[buffer_counter] = value;
-                                buffer_counter += 1;
+                                // Stream received -> send to stream tab
+                                case "s":
+
+                                    if (listen_to_stream == true)
+                                    {
+                                        streaming = 1;
+                                    }
+
+                                    dt = Convert.ToInt32(substrings[0]) / 1000000.0;
+
+                                    Torque = (Math.Abs(u) * 240) / uMax;
+
+                                    if (savetoCSV)
+                                    {
+                                        buffer[buffer_counter] = value;
+                                        buffer_counter += 1;
+                                    }
+
+                                    r = Convert.ToInt32(substrings[1]);
+                                    y = Convert.ToInt32(substrings[2]);
+                                    e = Convert.ToInt32(substrings[3]);
+                                    omega_target = (Convert.ToInt32(substrings[4]));
+                                    omega = (Convert.ToInt32(substrings[5]));
+
+
+                                    if (((0.9 * u) + (0.1 * Convert.ToInt32(substrings[6]))) != 0.0)
+                                    {
+                                        enabled = 1;
+                                    }
+                                    else
+                                    {
+                                        enabled = 0;
+                                    }
+
+                                    u = Convert.ToInt32(substrings[6]);
+
+                                    electrical_angle = Math.Abs(Convert.ToInt32(substrings[7]));
+                                    fifo_workload = (Convert.ToDouble(substrings[8]));
+
+
+                                    time = time + dt;
+
+                                    tValues[wrap_pointer] = time;
+
+                                    rValues[wrap_pointer] = r / 100.0;
+                                    yValues[wrap_pointer] = y / 100.0;
+                                    eValues[wrap_pointer] = e / 100.0;
+                                    omega_targetValues[wrap_pointer] = 50.0 * omega_target;
+                                    omegaValues[wrap_pointer] = 50.0 * omega;
+                                    uValues[wrap_pointer] = (u * 1000.0 * 3.3) / (512.0 * 10.0 * 0.15);
+
+
+                                    wrap_pointer += 1;
+                                    wrap_pointer = wrap_pointer % yValues.Length;
+                                    break;
+
+
+
+                                // Paramter received -> send to parameter tab
+                                case "p":
+                                    txtIdentifier.Text = substrings[0];
+                                    txtFullstep.Text = substrings[1];
+                                    txtMicrostep.Text = substrings[2];
+                                    txtCurrent.Text = substrings[3];
+                                    uMax = Convert.ToInt32((Convert.ToInt32(substrings[3]) * 0.15 * 10.0 * 512.0) / (1000.0 * 3.3));
+                                    txtMaxM.Text = substrings[4];
+                                    txtMaxI.Text = substrings[5];
+                                    txtKp.Text = substrings[6];
+                                    txtKi.Text = substrings[7];
+                                    txtKd.Text = substrings[8];
+                                    txtPLPF.Text = substrings[9];
+                                    txtmmRev.Text = substrings[10];
+                                    txtMaxE.Text = substrings[11];
+                                    if (Convert.ToInt16(substrings[12]) == 1)
+                                    {
+                                        checkEnable.Checked = true;
+                                    }
+                                    else
+                                    {
+                                        checkEnable.Checked = false;
+                                    }
+                                    if (Convert.ToInt16(substrings[13]) == 1)
+                                    {
+                                        checkInvert.Checked = true;
+                                    }
+                                    else
+                                    {
+                                        checkInvert.Checked = false;
+                                    }
+                                    txtuLPF.Text = substrings[14];
+                                    txtKff.Text = substrings[15];
+                                    txtKacc.Text = substrings[16];
+
+                                    break;
+
+
+                                // Tuning Values received
+                                case "t":
+                                    response_target[response_command_Length] = Convert.ToInt32(substrings[0]);
+                                    response_position[response_command_Length] = Convert.ToInt32(substrings[1]);
+                                    omega_targetValues[response_command_Length] = Convert.ToInt32(substrings[2]);
+                                    omegaValues[response_command_Length] = Convert.ToInt32(substrings[3]);
+
+                                    response_command_Length = response_command_Length + 1;
+                                    if (response_command_Length == 1000)
+                                    {
+                                        response_income = true;
+                                    }
+
+                                    break;
+
+                                case "a":
+                                    tuning_target[tuning_command_Length] = Convert.ToInt32(substrings[0]);
+                                    tuning_position[tuning_command_Length] = Convert.ToInt32(substrings[1]);
+                                    tuning_omega_target[tuning_command_Length] = Convert.ToInt32(substrings[2]);
+                                    tuning_omega[tuning_command_Length] = Convert.ToInt32(substrings[3]);
+
+                                    tuning_command_Length = tuning_command_Length + 1;
+                                    if (tuning_command_Length == 1000)
+                                    {
+                                        tuning_income = true;
+                                    }
+
+                                    break;
+
+
+                                // Human information received -> append to serial txtbox
+                                default:
+                                    txtReceived.AppendText(value + "\n");
+                                    txtReceived.ScrollToCaret();
+                                    break;
                             }
-
-                            if ((u+ Convert.ToInt32(substrings[7])) != 0)
-                            {
-                                enabled = 1;
-                            }
-                            else
-                            {
-                                enabled = 0;
-                            }
-                            r = Convert.ToInt32(substrings[2]);
-                            y = Convert.ToInt32(substrings[3]);
-                            e = Convert.ToInt32(substrings[4]);
-                            u = Convert.ToInt32(substrings[7]);
-                            dt = Convert.ToInt32(substrings[0]) / 1000000.0;
-                            omega_target = (Convert.ToInt32(substrings[5]));
-                            omega = (Convert.ToInt32(substrings[6]));
-
-
-
-                            time = time + dt;
-
-                            tValues[wrap_pointer] = time;
-
-                            rValues[wrap_pointer] = r / 100.0;
-                            yValues[wrap_pointer] = y / 100.0;
-                            eValues[wrap_pointer] = e / 100.0;
-                            omega_targetValues[wrap_pointer] = 50.0 * omega_target;
-                            omegaValues[wrap_pointer] = 50.0 * omega;
-                            uValues[wrap_pointer] = (u * 1000.0 * 3.3) / (512.0 * 10.0 * 0.15);
-
-
-                            wrap_pointer += 1;
-                            wrap_pointer = wrap_pointer % yValues.Length;
                         }
-                        
-                    }
-                    else if (substrings.Length == 17)
-                    {
-                        txtIdentifier.Text = substrings[0];
-                        txtFullstep.Text = substrings[1];
-                        txtMicrostep.Text = substrings[2];
-                        txtCurrent.Text = substrings[3];
-                        uMax = Convert.ToInt32((Convert.ToInt32(substrings[3]) * 0.15 * 10.0 * 512.0) / (1000.0 * 3.3));
-                        txtMaxM.Text = substrings[4];
-                        txtMaxI.Text = substrings[5];
-                        txtKp.Text = substrings[6];
-                        txtKi.Text = substrings[7];
-                        txtKd.Text = substrings[8];
-                        txtPLPF.Text = substrings[9];
-                        txtmmRev.Text = substrings[10];
-                        txtMaxE.Text = substrings[11];
-                        if (Convert.ToInt16(substrings[12]) == 1)
+                        catch
                         {
-                            checkEnable.Checked = true;
+                            txtReceived.AppendText(argument + "\n");
+                            txtReceived.ScrollToCaret();
                         }
-                        else
-                        {
-                            checkEnable.Checked = false;
-                        }
-                        if (Convert.ToInt16(substrings[13]) == 1)
-                        {
-                            checkInvert.Checked = true;
-                        }
-                        else
-                        {
-                            checkInvert.Checked = false;
-                        }
-                        txtuLPF.Text = substrings[14];
-                        txtKff.Text = substrings[15];
-                        txtKacc.Text = substrings[16];
+
+
                     }
                     else
                     {
-                        streaming = 0;
                         txtReceived.AppendText(value + "\n");
                         txtReceived.ScrollToCaret();
                     }
@@ -347,11 +442,11 @@ namespace Mechaduino
 
 
 
-        
 
 
 
-        private void changeYScala(object chart,double percent)
+
+        private void changeYScala(object chart, double percent)
         {
             double temp_max = Double.MinValue;
             double temp_min = Double.MaxValue;
@@ -363,8 +458,8 @@ namespace Mechaduino
 
             for (int s = 0; s < tmpChart.Series.Count(); s++)
             {
-                /*DataPoint data = tmpChart.Series[s].Points.FindMaxByValue("Y");
-                Debug.Print(Convert.ToString(data));*/
+                //DataPoint data = tmpChart.Series[s].Points.FindMaxByValue("Y");
+             
                 foreach (DataPoint dp in tmpChart.Series[s].Points)
                 {
                     if (dp.XValue >= leftLimit && dp.XValue <= rightLimit)
@@ -379,16 +474,16 @@ namespace Mechaduino
 
             temp_min = temp_min - diff * (percent / 100);
             temp_max = temp_max + diff * (percent / 100);
-            
+
             temp_min = Math.Floor(temp_min * 100) / 100.0;
-            temp_max = Math.Ceiling(temp_max * 100) / 100.0;          
+            temp_max = Math.Ceiling(temp_max * 100) / 100.0;
 
             if (temp_min == temp_max)
             {
                 temp_min = temp_min - 1;
                 temp_max = temp_max + 1;
             }
-            if (temp_max< temp_min)
+            if (temp_max < temp_min)
             {
                 temp_max = temp_min + 1;
             }
@@ -413,11 +508,12 @@ namespace Mechaduino
             {
                 if (streaming == 0)
                 {
-                    
+                    listen_to_stream = true;
+
                     serialPort1.DiscardInBuffer();
                     btnStream.Text = "Stop stream";
                     btnEnable.Enabled = true;
-                    
+
                     pltPosition.Series[0].Points.Clear();
                     pltPosition.Series[1].Points.Clear();
                     pltError.Series[0].Points.Clear();
@@ -429,6 +525,7 @@ namespace Mechaduino
                 }
                 else
                 {
+                    listen_to_stream = false;
                     label_Enabled.Text = "Unknown";
                     label_Enabled.ForeColor = Color.Black;
                     buffer_state.Text = "Unknown";
@@ -438,6 +535,7 @@ namespace Mechaduino
                     btnStream.Text = "Start stream";
                     btnEnable.Enabled = false;
                     serialPort1.WriteLine("stream\n");
+                    streaming = 0;
                 }
             }
         }
@@ -458,7 +556,7 @@ namespace Mechaduino
 
         private void btnEnable_Click(object sender, EventArgs e)
         {
-            if (enabled==1)
+            if (enabled == 1)
             {
                 serialPort1.WriteLine("disable\n");
             }
@@ -494,6 +592,7 @@ namespace Mechaduino
                 ((Control)this.tabPlots).Enabled = false;
                 ((Control)this.tabParameter).Enabled = false;
                 ((Control)this.tabTuning).Enabled = false;
+                ((Control)this.tabAutotune).Enabled = false;
             }
             else
             {
@@ -518,13 +617,14 @@ namespace Mechaduino
                     ((Control)this.tabPlots).Enabled = true;
                     ((Control)this.tabParameter).Enabled = true;
                     ((Control)this.tabTuning).Enabled = true;
+                    ((Control)this.tabAutotune).Enabled = true;
                     serialPort1.WriteLine("\n");
                     Thread.Sleep(100);
 
                     serialPort1.DiscardInBuffer();
                     txtReceived.Text = "";
                     wasOpen = true;
-                    
+
                     btnStream.Enabled = true;
                     btnOpen.Text = "Close";
 
@@ -596,7 +696,7 @@ namespace Mechaduino
 
 
 
-     
+
 
 
 
@@ -607,7 +707,7 @@ namespace Mechaduino
             if (streaming == 1)
             {
                 //buffer_state.Text = Convert.ToString(fifo_workload, 3) + " %";
-                buffer_state.Text = string.Format("{0:0.00}",fifo_workload) + " %";
+                buffer_state.Text = string.Format("{0:0.00}", fifo_workload) + " %";
                 if (fifo_workload > 90.0)
                 {
                     buffer_state.ForeColor = Color.Red;
@@ -903,8 +1003,8 @@ namespace Mechaduino
                 }
 
                 // Update y axis scaling 
-                changeYScala(pltPosition,5);
-                changeYScala(pltError,5);
+                changeYScala(pltPosition, 5);
+                changeYScala(pltError, 5);
 
                 // update bar plots
                 panelTorque.Height = 240 - Torque;
@@ -914,13 +1014,17 @@ namespace Mechaduino
             {
                 response_plot_variable_SelectedIndexChanged(sender, e);
             }
+
+            if (tuning_income)
+            {
+                plot_tune(sender, e);
+            }
         }
 
 
 
-        private void btnSetTimeframe_Click(object sender,EventArgs ev)
+        private void btnSetTimeframe_Click(object sender, EventArgs ev)
         {
-            changing_size = true;
             double frequency = Convert.ToDouble(txtFrequencyFrame.Text);
             if (frequency < 1.0)
             {
@@ -933,7 +1037,7 @@ namespace Mechaduino
 
             int_frequency = Convert.ToInt32(frequency);
             int max_serial_counter = Convert.ToInt32((5000.0 / int_frequency) + 0.5);
-            int_frequency = Convert.ToInt32(5000.0/ max_serial_counter)+1;
+            int_frequency = Convert.ToInt32(5000.0 / max_serial_counter) + 1;
 
             double max_time = 2000.0 / int_frequency;
 
@@ -948,17 +1052,16 @@ namespace Mechaduino
             }
 
 
-            time = Convert.ToInt32(10 * time)/10.0;
+            time = Convert.ToInt32(10 * time) / 10.0;
 
             txtTimeframe.Text = Convert.ToString(time);
             txtFrequencyFrame.Text = Convert.ToString(frequency);
 
             length = Convert.ToInt32(int_frequency * time);
-
-            Debug.Print(Convert.ToString(length));
             
 
-            
+
+
             Array.Clear(uValues, 0, uValues.Length);
             Array.Clear(yValues, 0, yValues.Length);
             Array.Clear(rValues, 0, rValues.Length);
@@ -998,10 +1101,9 @@ namespace Mechaduino
             }
 
             wrap_pointer = 1;
-            changing_size = false;
 
         }
-        
+
 
 
         private void serial_box_DropDown(object sender, EventArgs e)
@@ -1081,7 +1183,7 @@ namespace Mechaduino
         {
             if (serialPort1.IsOpen)
             {
-                if (enabled==1)
+                if (enabled == 1)
                 {
                     serialPort1.WriteLine("disable \n");
                     Thread.Sleep(50);
@@ -1093,13 +1195,13 @@ namespace Mechaduino
 
         private void btnGetpoint_Click(object sender, EventArgs e)
         {
-            txtSetpoint.Text=Convert.ToString(r/100.0);
+            txtSetpoint.Text = Convert.ToString(r / 100.0);
 
         }
 
         private void btnJump_Click(object sender, EventArgs e)
         {
-            string cmd = Convert.ToString((Convert.ToDouble(r) + 100*Convert.ToDouble(txtJump.Text))/100.0, System.Globalization.CultureInfo.InvariantCulture);
+            string cmd = Convert.ToString((Convert.ToDouble(r) + 100 * Convert.ToDouble(txtJump.Text)) / 100.0, System.Globalization.CultureInfo.InvariantCulture);
             if (serialPort1.IsOpen)
             {
                 serialPort1.Write("set " + cmd + "\n");
@@ -1110,7 +1212,7 @@ namespace Mechaduino
         {
             if (!savetoCSV)
             {
-                
+
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     CSVFileName = saveFileDialog1.FileName;
@@ -1136,7 +1238,7 @@ namespace Mechaduino
             if (serialPort1.IsOpen)
             {
 
-                DialogResult result = MessageBox.Show("The motor will vibrate violently, continue?", "Warning",MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                DialogResult result = MessageBox.Show("The motor will vibrate violently, continue?", "Warning", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
                 if (result == DialogResult.Yes)
                 {
                     Thread.Sleep(10);
@@ -1249,7 +1351,7 @@ namespace Mechaduino
                     int i_rated = Convert.ToInt32(txtMaxI.Text);
                     cmd = Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
-                    
+
 
                     Thread.Sleep(10);
                     serialPort1.WriteLine("editparam d\n");
@@ -1286,7 +1388,7 @@ namespace Mechaduino
                     int pLPF = Convert.ToInt32(txtPLPF.Text);
                     cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
-                  
+
 
                     Thread.Sleep(10);
                     serialPort1.WriteLine("editparam d\n");
@@ -1356,7 +1458,7 @@ namespace Mechaduino
             }
         }
 
-        
+
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
@@ -1737,7 +1839,7 @@ namespace Mechaduino
                     int pLPF = Convert.ToInt32(txtPLPF.Text);
                     String cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + "\n");
-                    
+
 
                     Thread.Sleep(10);
                     serialPort1.WriteLine("editparam d\n");
@@ -1756,16 +1858,16 @@ namespace Mechaduino
         }
 
 
-      
+
 
         private void btnDirac_Click(object sender, EventArgs e)
         {
             double setpoint = Convert.ToDouble(r);
-            double high = (setpoint + 10000)/100;
-            double low = (setpoint) /100;
+            double high = (setpoint + 10000) / 100;
+            double low = (setpoint) / 100;
             string cmd_jump = Convert.ToString(high, System.Globalization.CultureInfo.InvariantCulture);
             string cmd_jump_back = Convert.ToString(low, System.Globalization.CultureInfo.InvariantCulture);
- 
+
             if (serialPort1.IsOpen)
             {
                 serialPort1.Write("set " + cmd_jump + " \n");
@@ -1778,12 +1880,12 @@ namespace Mechaduino
 
         private void btnmp100_Click(object sender, EventArgs e)
         {
-            setpoint(100*1.8/Convert.ToInt32(txtMicrostep.Text));
+            setpoint(100 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
         private void btnmp10_Click(object sender, EventArgs e)
         {
-            setpoint(10*1.8 / Convert.ToInt32(txtMicrostep.Text));
+            setpoint(10 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
         private void btnmp1_Click(object sender, EventArgs e)
@@ -1798,12 +1900,12 @@ namespace Mechaduino
 
         private void btnmn10_Click(object sender, EventArgs e)
         {
-            setpoint(-10*1.8 / Convert.ToInt32(txtMicrostep.Text));
+            setpoint(-10 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
         private void btnmn100_Click(object sender, EventArgs e)
         {
-            setpoint(-100*1.8 / Convert.ToInt32(txtMicrostep.Text));
+            setpoint(-100 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
         private void btnStepResponse_Click(object sender, EventArgs e)
@@ -1882,12 +1984,8 @@ namespace Mechaduino
             }
         }
 
-        private void btnRamp_Click(object sender, EventArgs e)
-        {
-            Ramp = true;
-        }
 
-       
+
         private void btnExport_Click(object sender, EventArgs e)
         {
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
@@ -1913,7 +2011,7 @@ namespace Mechaduino
             }
 
         }
-       
+
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -1939,7 +2037,7 @@ namespace Mechaduino
 
         }
 
-       
+
 
         private void Variable_1_pltPosition_color_Click(object sender, EventArgs e)
         {
@@ -2046,9 +2144,10 @@ namespace Mechaduino
                 for (int j = 0; j < response_command_Length; j++)
                 {
                     pltresponse.Series[0].Points.AddXY(j * dt, 5000 * (omegaValues[j] - start_position) / 100.0);
-                    pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_targetValues[j] - start_target) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_targetValues[j] - start_position) / 100.0);
+                    //pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_targetValues[j] - start_target) / 100.0);
                 }
-                
+
             }
             else if (response_plot_variable.Text == "angle")
             {
@@ -2067,9 +2166,10 @@ namespace Mechaduino
                 for (int j = 0; j < response_command_Length; j++)
                 {
                     pltresponse.Series[0].Points.AddXY(j * dt, (response_position[j] - start_position) / 100.0);
-                    pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_target) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_position) / 100.0);
+                    //pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_target) / 100.0);
                 }
-                
+
             }
             else if (response_plot_variable.Text == "angle error")
             {
@@ -2087,7 +2187,7 @@ namespace Mechaduino
                 {
                     pltresponse.Series[0].Points.AddXY(j * dt, ((response_target[j] - response_position[j]) - start_position) / 100.0);
                 }
-                
+
             }
             else if (response_plot_variable.Text == "velocity error")
             {
@@ -2105,12 +2205,87 @@ namespace Mechaduino
                 {
                     pltresponse.Series[0].Points.AddXY(j * dt, 5000 * ((omega_targetValues[j] - omegaValues[j]) - start_position) / 100.0);
                 }
-                
+
             }
 
-
-            //response_command_Length = 0;
+            
             changeYScala(pltresponse, 5);
+        }
+
+
+        // gets called if a set of tuning data is received 
+        private void plot_tune(object sender, EventArgs e)
+        {
+
+            tuning_income = false;
+
+            pltAutotune_1.Series[0].Points.Clear();
+            pltAutotune_1.Series[1].Points.Clear();
+            pltAutotune_2.Series[0].Points.Clear();
+            pltAutotune_2.Series[1].Points.Clear();
+
+            double start_position = 0;
+            double dt = 1 / 5000;
+            
+            for (int j = 0; j < 50; j++)
+            {
+                start_position = start_position + tuning_position[j];
+            }
+            start_position = start_position / 50;
+
+
+            for (int j = 0; j < tuning_command_Length; j++)
+            {
+                pltAutotune_1.Series[0].Points.AddXY(j * dt, (tuning_position[j] - start_position) / 100.0);
+                pltAutotune_1.Series[1].Points.AddXY(j * dt, (tuning_target[j] - start_position) / 100.0);
+            }
+
+            start_position = 0;
+            for (int j = 0; j < 50; j++)
+            {
+                start_position = start_position + tuning_omega[j];
+            }
+            start_position = start_position / 50;
+
+            for (int j = 0; j < tuning_command_Length; j++)
+            {
+                pltAutotune_2.Series[0].Points.AddXY(j * dt, 5000 * (tuning_omega[j] - start_position) / 100.0);
+                pltAutotune_2.Series[1].Points.AddXY(j * dt, 5000 * (tuning_omega_target[j] - start_position) / 100.0);
+            }
+
+            tuning_command_Length = 0;
+
+            changeYScala(pltAutotune_1, 5);
+
+        }
+
+        private void btnDownhill_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.WriteLine("downhill\n");
+                Thread.Sleep(100);
+                //  serialPort1.Write(Convert.ToString(int_frequency) + "\n");
+            }
+        }
+
+        private void btnCancle_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.WriteLine("c\n");
+                Thread.Sleep(100);
+                //  serialPort1.Write(Convert.ToString(int_frequency) + "\n");
+            }
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            pltAutotune_1.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
+            pltAutotune_1.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
+            pltAutotune_2.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
+            pltAutotune_2.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
         }
     }
 

@@ -29,23 +29,31 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea14 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series27 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series28 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea15 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series29 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series30 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title11 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea16 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series31 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series32 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title12 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea45 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series89 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series90 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea46 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series91 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series92 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title38 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea47 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series93 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series94 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title39 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GUI));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea13 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series25 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Series series26 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title10 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea48 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend8 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series95 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series96 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title40 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea43 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series85 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series86 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title36 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea44 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series87 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series88 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title37 = new System.Windows.Forms.DataVisualization.Charting.Title();
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabConnection = new System.Windows.Forms.TabPage();
@@ -106,6 +114,10 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.anglePlot = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Variable_1_unit_pltError = new System.Windows.Forms.Label();
+            this.Variable_2_unit_pltError = new System.Windows.Forms.Label();
+            this.Variable_2_unit_pltPosition = new System.Windows.Forms.Label();
+            this.Variable_1_unit_pltPosition = new System.Windows.Forms.Label();
             this.Variable_2_pltError_color = new System.Windows.Forms.Button();
             this.Variable_1_pltError_color = new System.Windows.Forms.Button();
             this.Variable_2_pltPosition_color = new System.Windows.Forms.Button();
@@ -124,11 +136,6 @@
             this.groupBox22 = new System.Windows.Forms.GroupBox();
             this.btnRunCalibration = new System.Windows.Forms.Button();
             this.label23 = new System.Windows.Forms.Label();
-            this.groupBox21 = new System.Windows.Forms.GroupBox();
-            this.btnAutotuneRun = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.txtAutotuneCycles = new System.Windows.Forms.TextBox();
-            this.label21 = new System.Windows.Forms.Label();
             this.btnSendAll = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.groupBox19 = new System.Windows.Forms.GroupBox();
@@ -216,6 +223,7 @@
             this.btnDirac = new System.Windows.Forms.Button();
             this.label51 = new System.Windows.Forms.Label();
             this.groupBox20 = new System.Windows.Forms.GroupBox();
+            this.label59 = new System.Windows.Forms.Label();
             this.response_plot_variable = new System.Windows.Forms.ComboBox();
             this.btnresetzoom = new System.Windows.Forms.Button();
             this.pltresponse = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -225,6 +233,9 @@
             this.label49 = new System.Windows.Forms.Label();
             this.label50 = new System.Windows.Forms.Label();
             this.txtStepResponse = new System.Windows.Forms.TextBox();
+            this.tabAutotune = new System.Windows.Forms.TabPage();
+            this.pltAutotune_2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.pltAutotune_1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.timerCheck = new System.Windows.Forms.Timer(this.components);
             this.timerPlot = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -233,11 +244,16 @@
             this.saveFileDialogConfig = new System.Windows.Forms.SaveFileDialog();
             this.colorDialog3 = new System.Windows.Forms.ColorDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.Variable_1_unit_pltPosition = new System.Windows.Forms.Label();
-            this.Variable_2_unit_pltPosition = new System.Windows.Forms.Label();
-            this.Variable_2_unit_pltError = new System.Windows.Forms.Label();
-            this.Variable_1_unit_pltError = new System.Windows.Forms.Label();
-            this.label59 = new System.Windows.Forms.Label();
+            this.groupBox21 = new System.Windows.Forms.GroupBox();
+            this.btnAutotuneRun = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtAutotuneCycles = new System.Windows.Forms.TextBox();
+            this.label21 = new System.Windows.Forms.Label();
+            this.groupBox27 = new System.Windows.Forms.GroupBox();
+            this.label65 = new System.Windows.Forms.Label();
+            this.btnCancle = new System.Windows.Forms.Button();
+            this.btnDownhill = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabConnection.SuspendLayout();
             this.groupBox8.SuspendLayout();
@@ -257,7 +273,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pltPosition)).BeginInit();
             this.tabParameter.SuspendLayout();
             this.groupBox22.SuspendLayout();
-            this.groupBox21.SuspendLayout();
             this.groupBox19.SuspendLayout();
             this.groupBox18.SuspendLayout();
             this.groupBox17.SuspendLayout();
@@ -273,6 +288,11 @@
             this.groupBox20.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pltresponse)).BeginInit();
             this.groupBox15.SuspendLayout();
+            this.tabAutotune.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pltAutotune_2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pltAutotune_1)).BeginInit();
+            this.groupBox21.SuspendLayout();
+            this.groupBox27.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -281,6 +301,7 @@
             this.tabControl1.Controls.Add(this.tabPlots);
             this.tabControl1.Controls.Add(this.tabParameter);
             this.tabControl1.Controls.Add(this.tabTuning);
+            this.tabControl1.Controls.Add(this.tabAutotune);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(5);
@@ -907,21 +928,21 @@
             this.anglePlot.BackSecondaryColor = System.Drawing.Color.Transparent;
             this.anglePlot.BorderlineColor = System.Drawing.Color.Transparent;
             this.anglePlot.BorderlineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Solid;
-            chartArea14.BackColor = System.Drawing.Color.Transparent;
-            chartArea14.Name = "ChartArea1";
-            this.anglePlot.ChartAreas.Add(chartArea14);
+            chartArea45.BackColor = System.Drawing.Color.Transparent;
+            chartArea45.Name = "ChartArea1";
+            this.anglePlot.ChartAreas.Add(chartArea45);
             this.anglePlot.Cursor = System.Windows.Forms.Cursors.No;
             this.anglePlot.Location = new System.Drawing.Point(9, 19);
             this.anglePlot.Margin = new System.Windows.Forms.Padding(2);
             this.anglePlot.Name = "anglePlot";
-            series27.ChartArea = "ChartArea1";
-            series27.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series27.Name = "Series1";
-            series28.ChartArea = "ChartArea1";
-            series28.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series28.Name = "Series2";
-            this.anglePlot.Series.Add(series27);
-            this.anglePlot.Series.Add(series28);
+            series89.ChartArea = "ChartArea1";
+            series89.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series89.Name = "Series1";
+            series90.ChartArea = "ChartArea1";
+            series90.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series90.Name = "Series2";
+            this.anglePlot.Series.Add(series89);
+            this.anglePlot.Series.Add(series90);
             this.anglePlot.Size = new System.Drawing.Size(232, 244);
             this.anglePlot.TabIndex = 17;
             this.anglePlot.Text = "chart1";
@@ -954,6 +975,46 @@
             this.groupBox1.TabIndex = 20;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Live plots";
+            // 
+            // Variable_1_unit_pltError
+            // 
+            this.Variable_1_unit_pltError.AutoSize = true;
+            this.Variable_1_unit_pltError.Location = new System.Drawing.Point(202, 258);
+            this.Variable_1_unit_pltError.Name = "Variable_1_unit_pltError";
+            this.Variable_1_unit_pltError.Size = new System.Drawing.Size(13, 13);
+            this.Variable_1_unit_pltError.TabIndex = 42;
+            this.Variable_1_unit_pltError.Text = "[]";
+            this.Variable_1_unit_pltError.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // Variable_2_unit_pltError
+            // 
+            this.Variable_2_unit_pltError.AutoSize = true;
+            this.Variable_2_unit_pltError.Location = new System.Drawing.Point(484, 258);
+            this.Variable_2_unit_pltError.Name = "Variable_2_unit_pltError";
+            this.Variable_2_unit_pltError.Size = new System.Drawing.Size(13, 13);
+            this.Variable_2_unit_pltError.TabIndex = 41;
+            this.Variable_2_unit_pltError.Text = "[]";
+            this.Variable_2_unit_pltError.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // Variable_2_unit_pltPosition
+            // 
+            this.Variable_2_unit_pltPosition.AutoSize = true;
+            this.Variable_2_unit_pltPosition.Location = new System.Drawing.Point(484, 21);
+            this.Variable_2_unit_pltPosition.Name = "Variable_2_unit_pltPosition";
+            this.Variable_2_unit_pltPosition.Size = new System.Drawing.Size(13, 13);
+            this.Variable_2_unit_pltPosition.TabIndex = 40;
+            this.Variable_2_unit_pltPosition.Text = "[]";
+            this.Variable_2_unit_pltPosition.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // Variable_1_unit_pltPosition
+            // 
+            this.Variable_1_unit_pltPosition.AutoSize = true;
+            this.Variable_1_unit_pltPosition.Location = new System.Drawing.Point(202, 22);
+            this.Variable_1_unit_pltPosition.Name = "Variable_1_unit_pltPosition";
+            this.Variable_1_unit_pltPosition.Size = new System.Drawing.Size(13, 13);
+            this.Variable_1_unit_pltPosition.TabIndex = 39;
+            this.Variable_1_unit_pltPosition.Text = "[]";
+            this.Variable_1_unit_pltPosition.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // Variable_2_pltError_color
             // 
@@ -1110,51 +1171,50 @@
             // pltError
             // 
             this.pltError.BorderlineColor = System.Drawing.Color.Black;
-            chartArea15.Name = "ChartArea1";
-            this.pltError.ChartAreas.Add(chartArea15);
+            chartArea46.Name = "ChartArea1";
+            this.pltError.ChartAreas.Add(chartArea46);
             this.pltError.Location = new System.Drawing.Point(2, 280);
             this.pltError.Margin = new System.Windows.Forms.Padding(2);
             this.pltError.Name = "pltError";
-            series29.ChartArea = "ChartArea1";
-            series29.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series29.Name = "Error";
-            series30.ChartArea = "ChartArea1";
-            series30.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series30.Name = "Series2";
-            this.pltError.Series.Add(series29);
-            this.pltError.Series.Add(series30);
+            series91.ChartArea = "ChartArea1";
+            series91.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series91.Name = "Error";
+            series92.ChartArea = "ChartArea1";
+            series92.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series92.Name = "Series2";
+            this.pltError.Series.Add(series91);
+            this.pltError.Series.Add(series92);
             this.pltError.Size = new System.Drawing.Size(927, 126);
             this.pltError.TabIndex = 25;
             this.pltError.Text = "chart1";
-            title11.Name = "Title1";
-            this.pltError.Titles.Add(title11);
+            title38.Name = "Title1";
+            this.pltError.Titles.Add(title38);
             // 
             // pltPosition
             // 
             this.pltPosition.BorderlineColor = System.Drawing.Color.Black;
-            chartArea16.Name = "ChartArea1";
-            this.pltPosition.ChartAreas.Add(chartArea16);
+            chartArea47.Name = "ChartArea1";
+            this.pltPosition.ChartAreas.Add(chartArea47);
             this.pltPosition.Location = new System.Drawing.Point(8, 34);
             this.pltPosition.Margin = new System.Windows.Forms.Padding(2);
             this.pltPosition.Name = "pltPosition";
-            series31.ChartArea = "ChartArea1";
-            series31.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series31.Name = "Position";
-            series32.ChartArea = "ChartArea1";
-            series32.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series32.Name = "Target";
-            this.pltPosition.Series.Add(series31);
-            this.pltPosition.Series.Add(series32);
+            series93.ChartArea = "ChartArea1";
+            series93.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series93.Name = "Position";
+            series94.ChartArea = "ChartArea1";
+            series94.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series94.Name = "Target";
+            this.pltPosition.Series.Add(series93);
+            this.pltPosition.Series.Add(series94);
             this.pltPosition.Size = new System.Drawing.Size(921, 206);
             this.pltPosition.TabIndex = 24;
             this.pltPosition.Text = "chart1";
-            title12.Name = "Title1";
-            this.pltPosition.Titles.Add(title12);
+            title39.Name = "Title1";
+            this.pltPosition.Titles.Add(title39);
             // 
             // tabParameter
             // 
             this.tabParameter.Controls.Add(this.groupBox22);
-            this.tabParameter.Controls.Add(this.groupBox21);
             this.tabParameter.Controls.Add(this.btnSendAll);
             this.tabParameter.Controls.Add(this.btnSave);
             this.tabParameter.Controls.Add(this.groupBox19);
@@ -1202,58 +1262,6 @@
             this.label23.Size = new System.Drawing.Size(460, 39);
             this.label23.TabIndex = 8;
             this.label23.Text = resources.GetString("label23.Text");
-            // 
-            // groupBox21
-            // 
-            this.groupBox21.Controls.Add(this.btnAutotuneRun);
-            this.groupBox21.Controls.Add(this.label2);
-            this.groupBox21.Controls.Add(this.txtAutotuneCycles);
-            this.groupBox21.Controls.Add(this.label21);
-            this.groupBox21.Location = new System.Drawing.Point(8, 607);
-            this.groupBox21.Name = "groupBox21";
-            this.groupBox21.Size = new System.Drawing.Size(465, 98);
-            this.groupBox21.TabIndex = 17;
-            this.groupBox21.TabStop = false;
-            this.groupBox21.Text = "PID Autotune";
-            // 
-            // btnAutotuneRun
-            // 
-            this.btnAutotuneRun.Location = new System.Drawing.Point(384, 68);
-            this.btnAutotuneRun.Name = "btnAutotuneRun";
-            this.btnAutotuneRun.Size = new System.Drawing.Size(75, 23);
-            this.btnAutotuneRun.TabIndex = 11;
-            this.btnAutotuneRun.Text = "Run";
-            this.btnAutotuneRun.UseVisualStyleBackColor = true;
-            this.btnAutotuneRun.Click += new System.EventHandler(this.btnAutotuneRun_Click);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 76);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(41, 13);
-            this.label2.TabIndex = 10;
-            this.label2.Text = "Cycles:";
-            // 
-            // txtAutotuneCycles
-            // 
-            this.txtAutotuneCycles.Location = new System.Drawing.Point(88, 73);
-            this.txtAutotuneCycles.Name = "txtAutotuneCycles";
-            this.txtAutotuneCycles.Size = new System.Drawing.Size(100, 20);
-            this.txtAutotuneCycles.TabIndex = 9;
-            this.txtAutotuneCycles.Text = "5";
-            this.txtAutotuneCycles.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // label21
-            // 
-            this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(6, 16);
-            this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(424, 26);
-            this.label21.TabIndex = 8;
-            this.label21.Text = "Tunes the PID Controller of the Meachaduino. Insert the number of cycles and klic" +
-    "k run. \r\nThe Autotune will run the number of cycles and average the calculated p" +
-    "arameters.\r\n";
             // 
             // btnSendAll
             // 
@@ -2136,6 +2144,15 @@
             this.groupBox20.TabStop = false;
             this.groupBox20.Text = "Plot";
             // 
+            // label59
+            // 
+            this.label59.AutoSize = true;
+            this.label59.Location = new System.Drawing.Point(695, 24);
+            this.label59.Name = "label59";
+            this.label59.Size = new System.Drawing.Size(28, 13);
+            this.label59.TabIndex = 20;
+            this.label59.Text = "Plot:";
+            // 
             // response_plot_variable
             // 
             this.response_plot_variable.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -2165,26 +2182,26 @@
             // 
             // pltresponse
             // 
-            chartArea13.Name = "ChartArea1";
-            this.pltresponse.ChartAreas.Add(chartArea13);
-            legend4.Name = "Legend1";
-            this.pltresponse.Legends.Add(legend4);
+            chartArea48.Name = "ChartArea1";
+            this.pltresponse.ChartAreas.Add(chartArea48);
+            legend8.Name = "Legend1";
+            this.pltresponse.Legends.Add(legend8);
             this.pltresponse.Location = new System.Drawing.Point(9, 19);
             this.pltresponse.Name = "pltresponse";
-            series25.ChartArea = "ChartArea1";
-            series25.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series25.Legend = "Legend1";
-            series25.Name = "Position";
-            series26.ChartArea = "ChartArea1";
-            series26.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series26.Legend = "Legend1";
-            series26.Name = "Target";
-            this.pltresponse.Series.Add(series25);
-            this.pltresponse.Series.Add(series26);
+            series95.ChartArea = "ChartArea1";
+            series95.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series95.Legend = "Legend1";
+            series95.Name = "Position";
+            series96.ChartArea = "ChartArea1";
+            series96.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series96.Legend = "Legend1";
+            series96.Name = "Target";
+            this.pltresponse.Series.Add(series95);
+            this.pltresponse.Series.Add(series96);
             this.pltresponse.Size = new System.Drawing.Size(920, 482);
             this.pltresponse.TabIndex = 0;
-            title10.Name = "Title1";
-            this.pltresponse.Titles.Add(title10);
+            title40.Name = "Title1";
+            this.pltresponse.Titles.Add(title40);
             // 
             // groupBox15
             // 
@@ -2248,6 +2265,60 @@
             this.txtStepResponse.Text = "900";
             this.txtStepResponse.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
+            // tabAutotune
+            // 
+            this.tabAutotune.Controls.Add(this.button2);
+            this.tabAutotune.Controls.Add(this.groupBox27);
+            this.tabAutotune.Controls.Add(this.groupBox21);
+            this.tabAutotune.Controls.Add(this.pltAutotune_2);
+            this.tabAutotune.Controls.Add(this.pltAutotune_1);
+            this.tabAutotune.Location = new System.Drawing.Point(4, 22);
+            this.tabAutotune.Name = "tabAutotune";
+            this.tabAutotune.Size = new System.Drawing.Size(951, 708);
+            this.tabAutotune.TabIndex = 5;
+            this.tabAutotune.Text = "Autotune";
+            this.tabAutotune.UseVisualStyleBackColor = true;
+            // 
+            // pltAutotune_2
+            // 
+            chartArea43.Name = "ChartArea1";
+            this.pltAutotune_2.ChartAreas.Add(chartArea43);
+            this.pltAutotune_2.Location = new System.Drawing.Point(10, 404);
+            this.pltAutotune_2.Name = "pltAutotune_2";
+            series85.ChartArea = "ChartArea1";
+            series85.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series85.Name = "omega";
+            series86.ChartArea = "ChartArea1";
+            series86.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series86.Name = "target";
+            this.pltAutotune_2.Series.Add(series85);
+            this.pltAutotune_2.Series.Add(series86);
+            this.pltAutotune_2.Size = new System.Drawing.Size(930, 300);
+            this.pltAutotune_2.TabIndex = 2;
+            title36.Name = "Title1";
+            title36.Text = "Velocity / Target Velocity [deg/s]";
+            this.pltAutotune_2.Titles.Add(title36);
+            // 
+            // pltAutotune_1
+            // 
+            chartArea44.Name = "ChartArea1";
+            this.pltAutotune_1.ChartAreas.Add(chartArea44);
+            this.pltAutotune_1.Location = new System.Drawing.Point(10, 119);
+            this.pltAutotune_1.Name = "pltAutotune_1";
+            series87.ChartArea = "ChartArea1";
+            series87.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series87.Name = "Position";
+            series88.ChartArea = "ChartArea1";
+            series88.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series88.Name = "Target";
+            this.pltAutotune_1.Series.Add(series87);
+            this.pltAutotune_1.Series.Add(series88);
+            this.pltAutotune_1.Size = new System.Drawing.Size(930, 300);
+            this.pltAutotune_1.TabIndex = 1;
+            title37.Name = "Title1";
+            title37.Text = "Position / Target Position [deg]";
+            this.pltAutotune_1.Titles.Add(title37);
+            // 
             // timerCheck
             // 
             this.timerCheck.Enabled = true;
@@ -2274,54 +2345,111 @@
             this.timerCSV.Enabled = true;
             this.timerCSV.Tick += new System.EventHandler(this.timerCSV_Tick);
             // 
-            // Variable_1_unit_pltPosition
+            // groupBox21
             // 
-            this.Variable_1_unit_pltPosition.AutoSize = true;
-            this.Variable_1_unit_pltPosition.Location = new System.Drawing.Point(202, 22);
-            this.Variable_1_unit_pltPosition.Name = "Variable_1_unit_pltPosition";
-            this.Variable_1_unit_pltPosition.Size = new System.Drawing.Size(13, 13);
-            this.Variable_1_unit_pltPosition.TabIndex = 39;
-            this.Variable_1_unit_pltPosition.Text = "[]";
-            this.Variable_1_unit_pltPosition.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.groupBox21.Controls.Add(this.btnAutotuneRun);
+            this.groupBox21.Controls.Add(this.label2);
+            this.groupBox21.Controls.Add(this.txtAutotuneCycles);
+            this.groupBox21.Controls.Add(this.label21);
+            this.groupBox21.Location = new System.Drawing.Point(10, 3);
+            this.groupBox21.Name = "groupBox21";
+            this.groupBox21.Size = new System.Drawing.Size(465, 110);
+            this.groupBox21.TabIndex = 18;
+            this.groupBox21.TabStop = false;
+            this.groupBox21.Text = "Oscilation";
             // 
-            // Variable_2_unit_pltPosition
+            // btnAutotuneRun
             // 
-            this.Variable_2_unit_pltPosition.AutoSize = true;
-            this.Variable_2_unit_pltPosition.Location = new System.Drawing.Point(484, 21);
-            this.Variable_2_unit_pltPosition.Name = "Variable_2_unit_pltPosition";
-            this.Variable_2_unit_pltPosition.Size = new System.Drawing.Size(13, 13);
-            this.Variable_2_unit_pltPosition.TabIndex = 40;
-            this.Variable_2_unit_pltPosition.Text = "[]";
-            this.Variable_2_unit_pltPosition.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.btnAutotuneRun.Location = new System.Drawing.Point(384, 81);
+            this.btnAutotuneRun.Name = "btnAutotuneRun";
+            this.btnAutotuneRun.Size = new System.Drawing.Size(75, 23);
+            this.btnAutotuneRun.TabIndex = 11;
+            this.btnAutotuneRun.Text = "Run";
+            this.btnAutotuneRun.UseVisualStyleBackColor = true;
+            this.btnAutotuneRun.Click += new System.EventHandler(this.btnAutotuneRun_Click);
             // 
-            // Variable_2_unit_pltError
+            // label2
             // 
-            this.Variable_2_unit_pltError.AutoSize = true;
-            this.Variable_2_unit_pltError.Location = new System.Drawing.Point(484, 258);
-            this.Variable_2_unit_pltError.Name = "Variable_2_unit_pltError";
-            this.Variable_2_unit_pltError.Size = new System.Drawing.Size(13, 13);
-            this.Variable_2_unit_pltError.TabIndex = 41;
-            this.Variable_2_unit_pltError.Text = "[]";
-            this.Variable_2_unit_pltError.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 89);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(41, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Cycles:";
             // 
-            // Variable_1_unit_pltError
+            // txtAutotuneCycles
             // 
-            this.Variable_1_unit_pltError.AutoSize = true;
-            this.Variable_1_unit_pltError.Location = new System.Drawing.Point(202, 258);
-            this.Variable_1_unit_pltError.Name = "Variable_1_unit_pltError";
-            this.Variable_1_unit_pltError.Size = new System.Drawing.Size(13, 13);
-            this.Variable_1_unit_pltError.TabIndex = 42;
-            this.Variable_1_unit_pltError.Text = "[]";
-            this.Variable_1_unit_pltError.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.txtAutotuneCycles.Location = new System.Drawing.Point(88, 86);
+            this.txtAutotuneCycles.Name = "txtAutotuneCycles";
+            this.txtAutotuneCycles.Size = new System.Drawing.Size(100, 20);
+            this.txtAutotuneCycles.TabIndex = 9;
+            this.txtAutotuneCycles.Text = "2";
+            this.txtAutotuneCycles.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
-            // label59
+            // label21
             // 
-            this.label59.AutoSize = true;
-            this.label59.Location = new System.Drawing.Point(695, 24);
-            this.label59.Name = "label59";
-            this.label59.Size = new System.Drawing.Size(28, 13);
-            this.label59.TabIndex = 20;
-            this.label59.Text = "Plot:";
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(6, 16);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(424, 52);
+            this.label21.TabIndex = 8;
+            this.label21.Text = resources.GetString("label21.Text");
+            // 
+            // groupBox27
+            // 
+            this.groupBox27.Controls.Add(this.btnCancle);
+            this.groupBox27.Controls.Add(this.btnDownhill);
+            this.groupBox27.Controls.Add(this.label65);
+            this.groupBox27.Location = new System.Drawing.Point(481, 3);
+            this.groupBox27.Name = "groupBox27";
+            this.groupBox27.Size = new System.Drawing.Size(465, 110);
+            this.groupBox27.TabIndex = 19;
+            this.groupBox27.TabStop = false;
+            this.groupBox27.Text = "Downhill Simplex Algorithm";
+            // 
+            // label65
+            // 
+            this.label65.AutoSize = true;
+            this.label65.Location = new System.Drawing.Point(6, 16);
+            this.label65.Name = "label65";
+            this.label65.Size = new System.Drawing.Size(412, 39);
+            this.label65.TabIndex = 8;
+            this.label65.Text = "Starts the Downhill Simplex algorithm. The algorithm attempts to optimize the dev" +
+    "iation \r\nbetween a predefined path and the distance traveled.\r\nTuned paramters: " +
+    "Kp, Ki, Kd, Kacc, Kff";
+            // 
+            // btnCancle
+            // 
+            this.btnCancle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCancle.Location = new System.Drawing.Point(384, 78);
+            this.btnCancle.Name = "btnCancle";
+            this.btnCancle.Size = new System.Drawing.Size(75, 23);
+            this.btnCancle.TabIndex = 16;
+            this.btnCancle.Text = "Cancle";
+            this.btnCancle.UseVisualStyleBackColor = true;
+            this.btnCancle.Click += new System.EventHandler(this.btnCancle_Click);
+            // 
+            // btnDownhill
+            // 
+            this.btnDownhill.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDownhill.Location = new System.Drawing.Point(303, 78);
+            this.btnDownhill.Name = "btnDownhill";
+            this.btnDownhill.Size = new System.Drawing.Size(75, 23);
+            this.btnDownhill.TabIndex = 15;
+            this.btnDownhill.Text = "Autotune";
+            this.btnDownhill.UseVisualStyleBackColor = true;
+            this.btnDownhill.Click += new System.EventHandler(this.btnDownhill_Click);
+            // 
+            // button2
+            // 
+            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button2.Location = new System.Drawing.Point(871, 681);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 20;
+            this.button2.Text = "Reset Zoom";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // GUI
             // 
@@ -2365,8 +2493,6 @@
             this.tabParameter.ResumeLayout(false);
             this.groupBox22.ResumeLayout(false);
             this.groupBox22.PerformLayout();
-            this.groupBox21.ResumeLayout(false);
-            this.groupBox21.PerformLayout();
             this.groupBox19.ResumeLayout(false);
             this.groupBox19.PerformLayout();
             this.groupBox18.ResumeLayout(false);
@@ -2395,6 +2521,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.pltresponse)).EndInit();
             this.groupBox15.ResumeLayout(false);
             this.groupBox15.PerformLayout();
+            this.tabAutotune.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pltAutotune_2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pltAutotune_1)).EndInit();
+            this.groupBox21.ResumeLayout(false);
+            this.groupBox21.PerformLayout();
+            this.groupBox27.ResumeLayout(false);
+            this.groupBox27.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2481,11 +2614,6 @@
         private System.Windows.Forms.GroupBox groupBox12;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
-        private System.Windows.Forms.GroupBox groupBox21;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox txtAutotuneCycles;
-        private System.Windows.Forms.Label label21;
-        private System.Windows.Forms.Button btnAutotuneRun;
         private System.Windows.Forms.GroupBox groupBox22;
         private System.Windows.Forms.Button btnRunCalibration;
         private System.Windows.Forms.Label label23;
@@ -2593,6 +2721,19 @@
         private System.Windows.Forms.Label Variable_2_unit_pltPosition;
         private System.Windows.Forms.Label Variable_1_unit_pltPosition;
         private System.Windows.Forms.Label label59;
+        private System.Windows.Forms.TabPage tabAutotune;
+        private System.Windows.Forms.DataVisualization.Charting.Chart pltAutotune_1;
+        private System.Windows.Forms.DataVisualization.Charting.Chart pltAutotune_2;
+        private System.Windows.Forms.GroupBox groupBox21;
+        private System.Windows.Forms.Button btnAutotuneRun;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtAutotuneCycles;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.GroupBox groupBox27;
+        private System.Windows.Forms.Button btnCancle;
+        private System.Windows.Forms.Button btnDownhill;
+        private System.Windows.Forms.Label label65;
+        private System.Windows.Forms.Button button2;
     }
 }
 

@@ -185,14 +185,13 @@ void TC5_Handler() {
         unsigned int current_time = micros();
 
         fifo[0][fifo_position] = (current_time - last_time);
-        fifo[1][fifo_position] = streaming;
-        fifo[2][fifo_position] = r;
-        fifo[3][fifo_position] = y;
-        fifo[4][fifo_position] = error;
-        fifo[5][fifo_position] = omega_target;
-        fifo[6][fifo_position] = omega;
-        fifo[7][fifo_position] = u;
-        fifo[8][fifo_position] = electric_angle;
+        fifo[1][fifo_position] = r;
+        fifo[2][fifo_position] = y;
+        fifo[3][fifo_position] = error;
+        fifo[4][fifo_position] = omega_target;
+        fifo[5][fifo_position] = omega;
+        fifo[6][fifo_position] = u;
+        fifo[7][fifo_position] = electric_angle;
 
         serial_loop_counter = 0;
         last_time = current_time;

@@ -67,7 +67,7 @@ int u_LPFb = 128 - u_LPFa;
 int max_serial_counter = 20;
 
 
-int fifo[9][100] = {0};
+int fifo[8][100] = {0};
 int fifo_counter = 0;
 int serial_counter = 0;
 

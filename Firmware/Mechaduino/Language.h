@@ -73,15 +73,9 @@ const String autotune_menu = "PID auto tune";
 const String autotune_header = "//---- Autotuning the current PID controller --- \n\r Enter number of tuning cycles";
 
 
-
 const String downhill_command = "downhill";
 const String downhill_menu = "Downhhill simplex algorithm";
 const String downhill_header = "//---- Autotuning the current PID controller with the downhill simplex algorithm--- ";
-
-
-const String twiddle_command = "twiddle";
-const String twiddle_menu = "Downhhill simplex algorithm";
-const String twiddle_header = "//---- Autotuning the current PID controller with the twiddle algorithm--- ";
 
 
 const String looptime_command  = "loop";

@@ -95,9 +95,6 @@ void serialCheck() {
     else if (Command.indexOf(reset_error_command) == 0 && Command.length() == reset_error_command.length()) {
       reset_error_register();
     }
-    else if (Command.indexOf(twiddle_command) == 0 && Command.length() == twiddle_command.length()) {
-      twiddle();
-    }
     else if (Command.indexOf(test_command) == 0 && Command.length() == test_command.length()) {
       test();
     }
@@ -836,6 +833,8 @@ void step_response() {
   }
 
   for (int i = 0; i < 1000; i++) {
+    SerialUSB.print('t');
+    SerialUSB.print(',');
     SerialUSB.print(target[i]);
     SerialUSB.print(';');
     SerialUSB.print(answer[i]);
@@ -951,6 +950,8 @@ void dirac() {
 
 
   for (int i = 0; i < 1000; i++) {
+    SerialUSB.print('t');
+    SerialUSB.print(',');
     SerialUSB.print(target[i]);
     SerialUSB.print(';');
     SerialUSB.print(answer[i]);
@@ -1339,7 +1340,8 @@ void streaming_handler() {
 
     byte serial_position = mod(serial_counter, 99);
 
-    for (int i = 0; i < 9; i++) {
+    SerialUSB.print("s,");
+    for (int i = 0; i < 8; i++) {
       SerialUSB.print(fifo[i][serial_position]);
       SerialUSB.print(';');
     }
@@ -1356,6 +1358,8 @@ void streaming_handler() {
 
 void send_param() {
 
+  SerialUSB.print('p');
+  SerialUSB.write(',');
   SerialUSB.print(identifier);
   SerialUSB.write(';');
   SerialUSB.print(steps_per_revolution);

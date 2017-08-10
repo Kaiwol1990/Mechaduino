@@ -53,7 +53,7 @@ extern int u_LPFb;
 extern int max_serial_counter;
 
 
-extern int fifo[9][100];
+extern int fifo[8][100];
 extern int fifo_counter;
 extern int serial_counter;
 extern int serial_delay;

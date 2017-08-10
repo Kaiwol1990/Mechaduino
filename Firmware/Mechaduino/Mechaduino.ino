@@ -33,24 +33,6 @@
 
 void setup() {
   boot();
-
-  /*
-    SerialUSB.println(int_Kp);
-    SerialUSB.println(int_Ki);
-    SerialUSB.println(int_Kd);
-    SerialUSB.println('-');
-    SerialUSB.println(int_pessen_Kp);
-    SerialUSB.println(int_pessen_Ki);
-    SerialUSB.println(int_pessen_Kd);
-
-
-    int_Kp=int_pessen_Kp;
-    int_Ki=int_pessen_Ki;
-    int_Kd=int_pessen_Kd;
-    SerialUSB.println(int_Kp);
-    SerialUSB.println(int_Ki);
-    SerialUSB.println(int_Kd);
-  */
 }
 
 

@@ -48,8 +48,6 @@ bool check_lookup(bool output);
 
 void error_led();
 
-void twiddle();
-
 float test_move(int step_add, int F_Sample);
 
 void downhill_simplex();
