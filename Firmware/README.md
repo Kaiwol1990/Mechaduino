@@ -45,17 +45,17 @@ To get an list of the possible commands send help over the serial monitor
 |help | prints this menu |
 |calibrate | starts the calibration routine | |
 |diagnose | read Encoder Diagnostics | |
-|state | shows and sets the motor state | [-on, -off] |
-|stream | streams servo parameters | [-f {int}, -on, -off] |
-|parameter | Get or set parameter | [-set {-parameter} {value}, -get] |
-|error | get or reset the error register | [-reset] |
-|dirac | generates a dirac delta distrebution | [-f {int}] |
-|response | generates a step response | [-f {int}, -s {int}] |
-|error | get or reset the error register | [-reset] |
-|autotune | PID auto tune | [-c {byte}, -d] |
-|downhill | Downhhill simplex algorithm | [-f {int}, -v {int}, -o] |
-|testmove | Starts a testmove for the servo | [-f {int}, -v {int}, -o] |
-|interrupt | Starts or stops the ISR | [-TC5 {bool}, -TC4 {bool}] |
+|state | shows and sets the motor state | -on, -off |
+|stream | streams servo parameters | -f {int}, -on, -off |
+|parameter | Get or set parameter | -set {-parameter} {value}, -get |
+|error | get or reset the error register | -reset |
+|dirac | generates a Delta-Distribution | -f {int} |
+|response | generates a step response | -f {int}, -s {int} |
+|error | get or reset the error register | -reset |
+|autotune | PID auto tune | -c {byte}, -d |
+|downhill | Downhhill simplex algorithm | -f {int}, -v {int}, -o |
+|testmove | Starts a testmove for the servo | -f {int}, -v {int}, -o |
+|interrupt | Starts or stops the ISR | -TC5 {bool}, -TC4 {bool} |
 
 # License
 All Mechaduino related materials are released under the Creative Commons Attribution Share-Alike 4.0 License
