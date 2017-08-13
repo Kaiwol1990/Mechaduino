@@ -7,50 +7,32 @@
 
 
 
-void serialCheck();
+void init_menu();
 
-void SoftReset();
+void set_TC(int arg_cnt, char **args);
 
-void getstate();
+void state(int arg_cnt, char **args);
 
-void enable();
+void SoftReset(int arg_cnt, char **args);
 
-void disable();
+void Serial_menu(int arg_cnt, char **args);
 
-void Serial_menu();
+void setpoint(int arg_cnt, char **args);
 
-void setpoint(String arg = "");
+void parameterEdit(int arg_cnt, char **args);
 
-void readangle();
+void step_response(int arg_cnt, char **args);
 
-void parameterQuery();
+void dirac(int arg_cnt, char **args);
 
-void parameterEdit(String arg = "");
+void readEncoderDiagnostics(int arg_cnt, char **args); 
 
-void step_response();
+void error_reg(int arg_cnt, char **args);
 
-void dirac();
-
-void get_max_frequency();
-
-void readEncoderDiagnostics(); //check encoder diagnostics registers
-
-void print_error_register();
-
-void reset_error_register();
-
-int measure_noise(bool serialoutput = true);
-
-int measure_setpoint();
-
-bool read_serialcommand(int timeout, String *command, String *argument);
-
-bool split_command(String *Input_pointer, String *first_substring, String *second_substring);
-
-void set_streaming();
+void set_streaming(int arg_cnt, char **args);
 
 void streaming_handler();
 
-void send_param();
+void start_testmove(int arg_cnt, char **args);
 
 #endif

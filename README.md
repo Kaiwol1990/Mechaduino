@@ -39,27 +39,23 @@ If an error occures the led will switch from constant on to different patterns. 
 ### List of commands
 To get an list of the possible commands send help over the serial monitor
 
-|Command|Description|
-|-------|-----------|
-|help | prints this menu|
-|error | outputs the mechaduino error register|
-|reset_error | resets the mechaduino error register|
-|diagnose | read Encoder Diagnostics|
-|check | check the lookup table|
-|enable | enables the motor|
-|disable | disables the motor|
-|param | print the current PID parameter|
-|editparam | submenu to edit the parameter|
-|read | reads the current angle|
-|set | enter new set point|
-|state | shows the current motor state|
-|calibrate | starts the calibration routine. Arguments: -f = forces the calibration routine to start |
-|autotune | PID auto tune. Arguments: -d = outputs the measured oscilations |
-|response | generates a step response|
-|noise | measures the noise of the encoder|
-|reset | resets the board|
-|test | starts a test move|
-|downhill | starts the downhill simplex algorithm|
+|Command|Description|Arguments|
+|-------|-----------|---------|
+|help | prints this menu |
+|calibrate | starts the calibration routine | |
+|diagnose | read Encoder Diagnostics | |
+|state | shows and sets the motor state | [-on, -off] |
+|stream | streams servo parameters | [-f {int}, -on, -off] |
+|parameter | Get or set parameter | [-set {-parameter} {value}, -get] |
+|error | get or reset the error register | [-reset] |
+|dirac | generates a dirac delta distrebution | [-f {int}] |
+|response | generates a step response | [-f {int}, -s {int}] |
+|error | get or reset the error register | [-reset] |
+|autotune | PID auto tune | [-c {byte}, -d] |
+|downhill | Downhhill simplex algorithm | [-f {int}, -v {int}, -o] |
+|testmove | Starts a testmove for the servo | [-f {int}, -v {int}, -o] |
+|interrupt | Starts or stops the ISR | [-TC5 {bool}, -TC4 {bool}] |
+
 
 
 # Windows GUI

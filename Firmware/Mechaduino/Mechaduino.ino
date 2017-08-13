@@ -24,7 +24,7 @@
 #include "Utils.h"
 #include "Serial.h"
 #include "State.h"
-
+#include "Cmd.h"
 
 
 //////////////////////////////////////
@@ -33,6 +33,14 @@
 
 void setup() {
   boot();
+  init_menu();
+
+/*  
+  insert_command("state");
+
+  insert_command("diagnose");
+  */
+
 }
 
 
@@ -43,7 +51,7 @@ void setup() {
 
 void loop()
 {
-  serialCheck();
   streaming_handler();
   error_led();
+  cmdPoll();
 }

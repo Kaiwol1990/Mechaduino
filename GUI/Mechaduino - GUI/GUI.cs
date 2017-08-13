@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Threading;
-using System.IO;
 
 
 namespace Mechaduino
@@ -61,21 +61,24 @@ namespace Mechaduino
         int streaming = 0;
 
         bool listen_to_stream = false;
-        
+
         bool wasOpen = false;
         bool savetoCSV = false;
-        String CSVFileName = "";
+        string CSVFileName = "";
 
         bool response_income = false;
         int response_command_Length = 0;
+        
 
 
+        string value = "";
 
-
-        String value = "";
-
-        String[] buffer = new String[100];
+        string[] buffer = new string[100];
         int buffer_counter = 0;
+
+
+
+
 
 
 
@@ -84,8 +87,17 @@ namespace Mechaduino
             InitializeComponent();
         }
 
+        double max_Kp = 2.0;
+        double max_Ki = 0.5;
+        double max_Kd = 10.0;
+        double max_Kff = 0.05;
+        double max_Kacc = 0.05;
 
-
+        double Kp_gain = 50.0;
+        double Ki_gain = 200.0;
+        double Kd_gain = 10.0;
+        double Kff_gain = 2000.0;
+        double Kacc_gain = 2000.0;
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -103,6 +115,17 @@ namespace Mechaduino
             ((Control)this.tabParameter).Enabled = false;
             ((Control)this.tabTuning).Enabled = false;
             ((Control)this.tabAutotune).Enabled = false;
+
+
+
+            txtmaxKp.Text = Convert.ToString(max_Kp, System.Globalization.CultureInfo.InvariantCulture);
+            txtmaxKi.Text = Convert.ToString(max_Ki, System.Globalization.CultureInfo.InvariantCulture);
+            txtmaxKd.Text = Convert.ToString(max_Kd, System.Globalization.CultureInfo.InvariantCulture);
+            txtmaxKff.Text = Convert.ToString(max_Kff, System.Globalization.CultureInfo.InvariantCulture);
+            txtmaxKacc.Text = Convert.ToString(max_Kacc, System.Globalization.CultureInfo.InvariantCulture);
+            //Calculate_gains_tune_settings();
+
+
 
 
             saveFileDialog1.Filter = "CSV File|*.csv|Text File|*.txt";
@@ -163,7 +186,8 @@ namespace Mechaduino
             pltPosition.ChartAreas[0].AxisY.MinorGrid.LineColor = Color.LightGray;
             pltPosition.Series[0].Color = Color.Red;
             pltPosition.Series[1].Color = Color.Blue;
-
+            pltPosition.ChartAreas[0].AxisX.LabelStyle.Format = "#.#";
+            pltPosition.ChartAreas[0].AxisY.LabelStyle.Format = "#.##";
 
             // Error plot
             pltError.Series[0].Points.Clear();
@@ -202,6 +226,8 @@ namespace Mechaduino
             pltresponse.ChartAreas[0].AxisY.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
             pltresponse.ChartAreas[0].AxisY.ScaleView.SmallScrollMinSize = 0;
             pltresponse.Series[1].Color = Color.Red;
+            pltresponse.ChartAreas[0].AxisX.LabelStyle.Format = "#.#";
+            pltresponse.ChartAreas[0].AxisY.LabelStyle.Format = "#.##";
 
 
             // autotune plot
@@ -221,6 +247,8 @@ namespace Mechaduino
             pltAutotune_1.ChartAreas[0].AxisY.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
             pltAutotune_1.ChartAreas[0].AxisY.ScaleView.SmallScrollMinSize = 0;
             pltAutotune_1.Series[1].Color = Color.Red;
+            pltAutotune_1.ChartAreas[0].AxisX.LabelStyle.Format = "#.#";
+            pltAutotune_1.ChartAreas[0].AxisY.LabelStyle.Format = "#.##";
 
             // autotune plot
             pltAutotune_2.ChartAreas[0].CursorX.IsUserEnabled = Enabled;
@@ -239,6 +267,8 @@ namespace Mechaduino
             pltAutotune_2.ChartAreas[0].AxisY.ScrollBar.ButtonStyle = System.Windows.Forms.DataVisualization.Charting.ScrollBarButtonStyles.SmallScroll;
             pltAutotune_2.ChartAreas[0].AxisY.ScaleView.SmallScrollMinSize = 0;
             pltAutotune_2.Series[1].Color = Color.Red;
+            pltAutotune_2.ChartAreas[0].AxisX.LabelStyle.Format = "#.#";
+            pltAutotune_2.ChartAreas[0].AxisY.LabelStyle.Format = "#.##";
         }
 
 
@@ -250,7 +280,7 @@ namespace Mechaduino
             try
             {
                 string InputData = serialPort1.ReadLine();
-                if (InputData != String.Empty)
+                if (InputData != string.Empty)
                 {
                     processValue(InputData);
                     value = InputData;
@@ -276,152 +306,23 @@ namespace Mechaduino
             else
             {
                 // ... safe to update GUI in here ...
-                if (!String.IsNullOrEmpty(value))
+                if (!string.IsNullOrEmpty(value))
                 {
-                    String[] substrings_command = value.Split(',');
+                    string[] substrings_command = value.Split(',');
 
                     if (substrings_command.Length > 1)
                     {
-                        String Command = substrings_command[0];
-                        String argument = substrings_command[1];
+                        string Command = substrings_command[0];
 
-                        String[] substrings = argument.Split(';');
+                        substrings_command[1] = substrings_command[1].Replace("\r", "");
+                        substrings_command[1] = substrings_command[1].Replace("\n", "");
+
+                        string argument = substrings_command[1];
+
+                        string[] substrings = argument.Split(';');
                         try
                         {
-                            switch (Command)
-                            {
-                                // Stream received -> send to stream tab
-                                case "s":
-
-                                    if (listen_to_stream == true)
-                                    {
-                                        streaming = 1;
-                                    }
-
-                                    dt = Convert.ToInt32(substrings[0]) / 1000000.0;
-
-                                    Torque = (Math.Abs(u) * 240) / uMax;
-
-                                    if (savetoCSV)
-                                    {
-                                        buffer[buffer_counter] = value;
-                                        buffer_counter += 1;
-                                    }
-
-                                    r = Convert.ToInt32(substrings[1]);
-                                    y = Convert.ToInt32(substrings[2]);
-                                    e = Convert.ToInt32(substrings[3]);
-                                    omega_target = (Convert.ToInt32(substrings[4]));
-                                    omega = (Convert.ToInt32(substrings[5]));
-
-
-                                    if (((0.9 * u) + (0.1 * Convert.ToInt32(substrings[6]))) != 0.0)
-                                    {
-                                        enabled = 1;
-                                    }
-                                    else
-                                    {
-                                        enabled = 0;
-                                    }
-
-                                    u = Convert.ToInt32(substrings[6]);
-
-                                    electrical_angle = Math.Abs(Convert.ToInt32(substrings[7]));
-                                    fifo_workload = (Convert.ToDouble(substrings[8]));
-
-
-                                    time = time + dt;
-
-                                    tValues[wrap_pointer] = time;
-
-                                    rValues[wrap_pointer] = r / 100.0;
-                                    yValues[wrap_pointer] = y / 100.0;
-                                    eValues[wrap_pointer] = e / 100.0;
-                                    omega_targetValues[wrap_pointer] = 50.0 * omega_target;
-                                    omegaValues[wrap_pointer] = 50.0 * omega;
-                                    uValues[wrap_pointer] = (u * 1000.0 * 3.3) / (512.0 * 10.0 * 0.15);
-
-
-                                    wrap_pointer += 1;
-                                    wrap_pointer = wrap_pointer % yValues.Length;
-                                    break;
-
-
-
-                                // Paramter received -> send to parameter tab
-                                case "p":
-                                    txtIdentifier.Text = substrings[0];
-                                    txtFullstep.Text = substrings[1];
-                                    txtMicrostep.Text = substrings[2];
-                                    txtCurrent.Text = substrings[3];
-                                    uMax = Convert.ToInt32((Convert.ToInt32(substrings[3]) * 0.15 * 10.0 * 512.0) / (1000.0 * 3.3));
-                                    txtMaxM.Text = substrings[4];
-                                    txtMaxI.Text = substrings[5];
-                                    txtKp.Text = substrings[6];
-                                    txtKi.Text = substrings[7];
-                                    txtKd.Text = substrings[8];
-                                    txtPLPF.Text = substrings[9];
-                                    txtmmRev.Text = substrings[10];
-                                    txtMaxE.Text = substrings[11];
-                                    if (Convert.ToInt16(substrings[12]) == 1)
-                                    {
-                                        checkEnable.Checked = true;
-                                    }
-                                    else
-                                    {
-                                        checkEnable.Checked = false;
-                                    }
-                                    if (Convert.ToInt16(substrings[13]) == 1)
-                                    {
-                                        checkInvert.Checked = true;
-                                    }
-                                    else
-                                    {
-                                        checkInvert.Checked = false;
-                                    }
-                                    txtuLPF.Text = substrings[14];
-                                    txtKff.Text = substrings[15];
-                                    txtKacc.Text = substrings[16];
-
-                                    break;
-
-
-                                // Tuning Values received
-                                case "t":
-                                    response_target[response_command_Length] = Convert.ToInt32(substrings[0]);
-                                    response_position[response_command_Length] = Convert.ToInt32(substrings[1]);
-                                    omega_targetValues[response_command_Length] = Convert.ToInt32(substrings[2]);
-                                    omegaValues[response_command_Length] = Convert.ToInt32(substrings[3]);
-
-                                    response_command_Length = response_command_Length + 1;
-                                    if (response_command_Length == 1000)
-                                    {
-                                        response_income = true;
-                                    }
-
-                                    break;
-
-                                case "a":
-                                    tuning_target[tuning_command_Length] = Convert.ToInt32(substrings[0]);
-                                    tuning_position[tuning_command_Length] = Convert.ToInt32(substrings[1]);
-                                    tuning_omega_target[tuning_command_Length] = Convert.ToInt32(substrings[2]);
-                                    tuning_omega[tuning_command_Length] = Convert.ToInt32(substrings[3]);
-
-                                    tuning_command_Length = tuning_command_Length + 1;
-                                    if (tuning_command_Length == 1000)
-                                    {
-                                        tuning_income = true;
-                                    }
-
-                                    break;
-
-
-                                // Human information received -> append to serial txtbox
-                                default:
-                                    txtReceived.AppendText(value + "\n");
-                                    txtReceived.ScrollToCaret();
-                                    break;
-                            }
+                            Handle_Command(value, Command, substrings);
                         }
                         catch
                         {
@@ -440,16 +341,163 @@ namespace Mechaduino
             }
         }
 
+        private void Handle_Command(string value, string Command, string[] substrings)
+        {
+            switch (Command)
+            {
+                // Stream received -> send to stream tab
+                case "s":
+
+                    if (listen_to_stream == true)
+                    {
+                        streaming = 1;
+                    }
+
+                    dt = Convert.ToInt32(substrings[0]) / 1000000.0;
+
+                    Torque = (Math.Abs(u) * 240) / uMax;
+
+                    if (savetoCSV)
+                    {
+                        buffer[buffer_counter] = value;
+                        buffer_counter += 1;
+                    }
+
+                    r = Convert.ToInt32(substrings[1]);
+                    y = Convert.ToInt32(substrings[2]);
+                    e = Convert.ToInt32(substrings[3]);
+                    omega_target = (Convert.ToInt32(substrings[4]));
+                    omega = (Convert.ToInt32(substrings[5]));
 
 
+                    if (((0.9 * u) + (0.1 * Convert.ToInt32(substrings[6]))) != 0.0)
+                    {
+                        enabled = 1;
+                    }
+                    else
+                    {
+                        enabled = 0;
+                    }
 
+                    u = Convert.ToInt32(substrings[6]);
+
+                    electrical_angle = Math.Abs(Convert.ToInt32(substrings[7]));
+                    fifo_workload = (Convert.ToDouble(substrings[8]));
+
+
+                    time = time + dt;
+
+                    tValues[wrap_pointer] = time;
+
+                    rValues[wrap_pointer] = r / 100.0;
+                    yValues[wrap_pointer] = y / 100.0;
+                    eValues[wrap_pointer] = e / 100.0;
+                    omega_targetValues[wrap_pointer] = 50.0 * omega_target;
+                    omegaValues[wrap_pointer] = 50.0 * omega;
+                    uValues[wrap_pointer] = (u * 1000.0 * 3.3) / (512.0 * 10.0 * 0.15);
+
+
+                    wrap_pointer += 1;
+                    wrap_pointer = wrap_pointer % yValues.Length;
+                    break;
+
+                // Paramter received -> send to parameter tab
+                case "p":
+                    txtIdentifier.Text = substrings[0];
+                    txtFullstep.Text = substrings[1];
+                    txtMicrostep.Text = substrings[2];
+                    txtCurrent.Text = substrings[3];
+                    uMax = Convert.ToInt32((Convert.ToInt32(substrings[3]) * 0.15 * 10.0 * 512.0) / (1000.0 * 3.3));
+                    txtMaxM.Text = substrings[4];
+                    txtMaxI.Text = substrings[5];
+                    txtKp.Text = substrings[6];
+                    txtKi.Text = substrings[7];
+                    txtKd.Text = substrings[8];
+                    txtPLPF.Text = substrings[9];
+                    txtmmRev.Text = substrings[10];
+                    txtMaxE.Text = substrings[11];
+
+
+                    TxttuneKp.Text = substrings[6];
+                    txttuneKi.Text = substrings[7];
+                    txttuneKd.Text = substrings[8];
+                    txttuneKff.Text = substrings[15];
+                    txttuneKacc.Text = substrings[16];
+                    
+
+                    trackBarKp.Value = Convert.ToInt32((Kp_gain * Convert.ToDouble(substrings[6], System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKi.Value = Convert.ToInt32((Ki_gain * Convert.ToDouble(substrings[7], System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKd.Value = Convert.ToInt32((Kd_gain * Convert.ToDouble(substrings[8], System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKff.Value = Convert.ToInt32((Kff_gain * Convert.ToDouble(substrings[15], System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKacc.Value = Convert.ToInt32((Kacc_gain * Convert.ToDouble(substrings[16], System.Globalization.CultureInfo.InvariantCulture)));
+
+                    if (Convert.ToInt16(substrings[12]) == 1)
+                    {
+                        checkEnable.Checked = true;
+                    }
+                    else
+                    {
+                        checkEnable.Checked = false;
+                    }
+                    if (Convert.ToInt16(substrings[13]) == 1)
+                    {
+                        checkInvert.Checked = true;
+                    }
+                    else
+                    {
+                        checkInvert.Checked = false;
+                    }
+                    txtuLPF.Text = substrings[14];
+                    txtKff.Text = substrings[15];
+                    txtKacc.Text = substrings[16];
+
+                    break;
+
+
+                // Tuning Values received
+                case "t":
+                    response_target[response_command_Length] = Convert.ToInt32(substrings[0]);
+                    response_position[response_command_Length] = Convert.ToInt32(substrings[1]);
+                    omega_targetValues[response_command_Length] = Convert.ToInt32(substrings[2]);
+                    omegaValues[response_command_Length] = Convert.ToInt32(substrings[3]);
+
+                    response_command_Length = response_command_Length + 1;
+                    if (response_command_Length == 1000)
+                    {
+                        response_income = true;
+                    }
+
+                    break;
+
+                case "a":
+                    tuning_target[tuning_command_Length] = Convert.ToInt32(substrings[0]);
+                    tuning_position[tuning_command_Length] = Convert.ToInt32(substrings[1]);
+                    tuning_omega_target[tuning_command_Length] = Convert.ToInt32(substrings[2]);
+                    tuning_omega[tuning_command_Length] = Convert.ToInt32(substrings[3]);
+
+                    tuning_command_Length = tuning_command_Length + 1;
+                    if (tuning_command_Length == 1000)
+                    {
+                        tuning_income = true;
+                    }
+
+                    break;
+
+
+                // Human information received -> append to serial txtbox
+                default:
+                    txtReceived.AppendText(value + "\n");
+                    txtReceived.ScrollToCaret();
+                    break;
+            }
+        }
 
 
 
         private void changeYScala(object chart, double percent)
         {
-            double temp_max = Double.MinValue;
-            double temp_min = Double.MaxValue;
+            double temp_max = double.MinValue;
+            double temp_min = double.MaxValue;
 
             Chart tmpChart = (Chart)chart;
 
@@ -458,8 +506,7 @@ namespace Mechaduino
 
             for (int s = 0; s < tmpChart.Series.Count(); s++)
             {
-                //DataPoint data = tmpChart.Series[s].Points.FindMaxByValue("Y");
-             
+
                 foreach (DataPoint dp in tmpChart.Series[s].Points)
                 {
                     if (dp.XValue >= leftLimit && dp.XValue <= rightLimit)
@@ -494,6 +541,7 @@ namespace Mechaduino
 
             tmpChart.ChartAreas[0].AxisY.Maximum = temp_max;
             tmpChart.ChartAreas[0].AxisY.Minimum = temp_min;
+            tmpChart.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
         }
 
 
@@ -519,9 +567,7 @@ namespace Mechaduino
                     pltError.Series[0].Points.Clear();
                     pltError.Series[1].Points.Clear();
 
-                    serialPort1.WriteLine("stream\n");
-                    Thread.Sleep(100);
-                    serialPort1.Write(Convert.ToString(int_frequency) + "\n");
+                    serialPort1.Write("stream -on -f " + Convert.ToString(int_frequency) + " \r");
                 }
                 else
                 {
@@ -534,41 +580,28 @@ namespace Mechaduino
                     serialPort1.DiscardInBuffer();
                     btnStream.Text = "Start stream";
                     btnEnable.Enabled = false;
-                    serialPort1.WriteLine("stream\n");
+                    serialPort1.Write("stream -off\r");
                     streaming = 0;
                 }
             }
         }
-
-
-
-
-
 
         private int mod(int xMod, int mMod)
         {
             return (xMod % mMod + mMod) % mMod;
         }
 
-
-
-
-
         private void btnEnable_Click(object sender, EventArgs e)
         {
             if (enabled == 1)
             {
-                serialPort1.WriteLine("disable\n");
+                serialPort1.Write("state -off\r");
             }
             else
             {
-                serialPort1.WriteLine("enable\n");
+                serialPort1.Write("state -on\r");
             }
         }
-
-
-
-
 
         private void btnOpen_Click(object sender, EventArgs e)
         {
@@ -618,7 +651,6 @@ namespace Mechaduino
                     ((Control)this.tabParameter).Enabled = true;
                     ((Control)this.tabTuning).Enabled = true;
                     ((Control)this.tabAutotune).Enabled = true;
-                    serialPort1.WriteLine("\n");
                     Thread.Sleep(100);
 
                     serialPort1.DiscardInBuffer();
@@ -630,12 +662,8 @@ namespace Mechaduino
 
                     txtConsole.Text = "Serial port open";
                     txtConsole.BackColor = Color.White;
-                    serialPort1.WriteLine("stop_stream \n");
-                    serialPort1.DiscardInBuffer();
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("load_param\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("help \n");
+                    serialPort1.Write("stream -off\r");
+                    Get_parameter();
                     txtReceived.Clear();
                 }
                 else
@@ -647,15 +675,20 @@ namespace Mechaduino
 
         }
 
-
-
-
-
-        private void btnSend_Click_1(object sender, EventArgs e)
+        private void Get_parameter()
         {
             if (serialPort1.IsOpen)
             {
-                serialPort1.WriteLine(txtSend.Text + "\n");
+                serialPort1.Write("parameter -gui\r");
+            }
+        }
+
+
+        private void BtnSend_Click_1(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                serialPort1.Write(txtSend.Text + " \r");
                 txtSend.Clear();
             }
             else
@@ -669,7 +702,7 @@ namespace Mechaduino
 
 
 
-        private void timerCheck_Tick(object sender, EventArgs e)
+        private void TimerCheck_Tick(object sender, EventArgs e)
         {
             if (!serialPort1.IsOpen)
             {
@@ -702,7 +735,7 @@ namespace Mechaduino
 
 
 
-        private void timerPlot_Tick(object sender, EventArgs e)
+        private void TimerPlot_Tick(object sender, EventArgs e)
         {
             if (streaming == 1)
             {
@@ -1012,27 +1045,27 @@ namespace Mechaduino
 
             if (response_income)
             {
-                response_plot_variable_SelectedIndexChanged(sender, e);
+                Response_plot_variable_SelectedIndexChanged(sender, e);
             }
 
             if (tuning_income)
             {
-                plot_tune(sender, e);
+                Plot_tune(sender, e);
             }
         }
 
 
 
-        private void btnSetTimeframe_Click(object sender, EventArgs ev)
+        private void BtnSetTimeframe_Click(object sender, EventArgs ev)
         {
             double frequency = Convert.ToDouble(txtFrequencyFrame.Text);
             if (frequency < 1.0)
             {
                 frequency = 1.0;
             }
-            else if (frequency > 300.0)
+            else if (frequency > 500.0)
             {
-                frequency = 300.0;
+                frequency = 500.0;
             }
 
             int_frequency = Convert.ToInt32(frequency);
@@ -1058,7 +1091,7 @@ namespace Mechaduino
             txtFrequencyFrame.Text = Convert.ToString(frequency);
 
             length = Convert.ToInt32(int_frequency * time);
-            
+
 
 
 
@@ -1090,15 +1123,8 @@ namespace Mechaduino
                 omegaValues[i] = omega;
                 omega_targetValues[i] = omega_target;
             }
-            if (streaming == 1)
-            {
 
-                serialPort1.WriteLine("stream\n");
-                Thread.Sleep(500);
-                serialPort1.WriteLine("stream\n");
-                Thread.Sleep(100);
-                serialPort1.Write(Convert.ToString(int_frequency) + "\n");
-            }
+            serialPort1.Write("stream -f " + Convert.ToString(int_frequency) + " \r");
 
             wrap_pointer = 1;
 
@@ -1106,7 +1132,7 @@ namespace Mechaduino
 
 
 
-        private void serial_box_DropDown(object sender, EventArgs e)
+        private void Serial_box_DropDown(object sender, EventArgs e)
         {
             string[] ports = SerialPort.GetPortNames();
             serial_box.Items.Clear();
@@ -1117,98 +1143,98 @@ namespace Mechaduino
             }
         }
 
-        private void btnp100_Click(object sender, EventArgs e)
+        private void Btnp100_Click(object sender, EventArgs e)
         {
-            setpoint(100);
+            Setpoint(100);
         }
 
-        private void btnp10_Click(object sender, EventArgs e)
+        private void Btnp10_Click(object sender, EventArgs e)
         {
-            setpoint(10);
+            Setpoint(10);
         }
 
-        private void btnp1_Click(object sender, EventArgs e)
+        private void Btnp1_Click(object sender, EventArgs e)
         {
-            setpoint(1);
+            Setpoint(1);
         }
 
-        private void btnp01_Click(object sender, EventArgs e)
+        private void Btnp01_Click(object sender, EventArgs e)
         {
-            setpoint(0.1);
+            Setpoint(0.1);
         }
 
-        private void btnn01_Click(object sender, EventArgs e)
+        private void Btnn01_Click(object sender, EventArgs e)
         {
-            setpoint(-0.1);
+            Setpoint(-0.1);
         }
-        private void btnn1_Click(object sender, EventArgs e)
+        private void Btnn1_Click(object sender, EventArgs e)
         {
-            setpoint(-1);
-        }
-
-        private void btnn10_Click(object sender, EventArgs e)
-        {
-            setpoint(-10);
+            Setpoint(-1);
         }
 
-        private void btnn100_Click(object sender, EventArgs e)
+        private void Btnn10_Click(object sender, EventArgs e)
         {
-            setpoint(-100);
+            Setpoint(-10);
+        }
+
+        private void Btnn100_Click(object sender, EventArgs e)
+        {
+            Setpoint(-100);
         }
 
 
 
-        private void setpoint(double angle)
+        private void Setpoint(double angle)
         {
             if (serialPort1.IsOpen)
             {
                 string cmd = Convert.ToString(((Convert.ToDouble(r) + (angle * 100.0)) / 100.0), System.Globalization.CultureInfo.InvariantCulture);
-                serialPort1.Write("set " + cmd + "\n");
+                serialPort1.Write("setpoint -set " + cmd + " \r");
             }
 
 
         }
 
-        private void btnSetpoint_Click(object sender, EventArgs e)
+        private void BtnSetpoint_Click(object sender, EventArgs e)
         {
             string cmd = Convert.ToString(Convert.ToDouble(txtSetpoint.Text), System.Globalization.CultureInfo.InvariantCulture);
 
             if (serialPort1.IsOpen)
             {
-                serialPort1.Write("set " + cmd + "\n");
+                serialPort1.Write("setpoint -set " + cmd + " \r");
             }
         }
 
-        private void btnResetSetpoint_Click(object sender, EventArgs e)
+        private void BtnResetSetpoint_Click(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen)
             {
                 if (enabled == 1)
                 {
-                    serialPort1.WriteLine("disable \n");
+                    serialPort1.Write("state -off\r");
                     Thread.Sleep(50);
-                    serialPort1.WriteLine("enable \n");
+                    serialPort1.Write("state -on\r");
                 }
             }
 
         }
 
-        private void btnGetpoint_Click(object sender, EventArgs e)
+        private void BtnGetpoint_Click(object sender, EventArgs e)
         {
             txtSetpoint.Text = Convert.ToString(r / 100.0);
 
         }
 
-        private void btnJump_Click(object sender, EventArgs e)
+        private void BtnJump_Click(object sender, EventArgs e)
         {
             string cmd = Convert.ToString((Convert.ToDouble(r) + 100 * Convert.ToDouble(txtJump.Text)) / 100.0, System.Globalization.CultureInfo.InvariantCulture);
             if (serialPort1.IsOpen)
             {
-                serialPort1.Write("set " + cmd + "\n");
+                serialPort1.Write("setpoint -set " + cmd + " \r");
             }
         }
 
-        public void checkBox1_CheckedChanged(object sender, EventArgs e)
+        public void CheckBoxCSV_CheckedChanged(object sender, EventArgs e)
         {
             if (!savetoCSV)
             {
@@ -1217,7 +1243,7 @@ namespace Mechaduino
                 {
                     CSVFileName = saveFileDialog1.FileName;
                     File.WriteAllText(CSVFileName, "");
-                    File.AppendAllText(CSVFileName, "streaming;position;target;error;effort;electrical_angle;enabled \n");
+                    File.AppendAllText(CSVFileName, "streaming;position;target;error;effort;electrical_angle;enabled\r");
                     savetoCSV = true;
                 }
             }
@@ -1233,7 +1259,7 @@ namespace Mechaduino
             }
         }
 
-        private void btnAutotuneRun_Click(object sender, EventArgs e)
+        private void BtnAutotuneRun_Click(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen)
             {
@@ -1241,201 +1267,287 @@ namespace Mechaduino
                 DialogResult result = MessageBox.Show("The motor will vibrate violently, continue?", "Warning", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
                 if (result == DialogResult.Yes)
                 {
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("autotune\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("y");
                     int cycles = Convert.ToInt32(txtAutotuneCycles.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    String cmd = Convert.ToString(cycles, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                    serialPort1.Write(" \n");
-                    serialPort1.Write(" \n");
-                    serialPort1.Write("load_param\n");
-                }
-                else if (result == DialogResult.No)
-                {
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("autotune\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("n");
-                }
-                else if (result == DialogResult.Cancel)
-                {
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("autotune\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("n");
+                    string cmd = Convert.ToString(cycles, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write("autotune -c " + cmd + " -gui \r");
                 }
 
 
             }
         }
 
-        private void btnRunCalibration_Click(object sender, EventArgs e)
+        private void BtnRunCalibration_Click(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen)
             {
-                String cmd = "calibrate";
-                serialPort1.Write(cmd + "\n");
+                string cmd = "calibrate";
+                serialPort1.Write(cmd + " \r");
             }
         }
 
-        private void btnSendAll_Click(object sender, EventArgs e)
+        private void BtnSendAll_Click(object sender, EventArgs e)
         {
 
             if (serialPort1.IsOpen)
             {
                 try
                 {
-                    String cmd = "";
+                    string cmd = "";
 
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("a\n");
-                    Thread.Sleep(10);
-                    String identifier = (txtIdentifier.Text);
-                    cmd = Convert.ToString(identifier, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    string identifier = (txtIdentifier.Text);
+                    cmd = "parameter -set -identifier " + Convert.ToString(identifier, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
 
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("n\n");
-                    Thread.Sleep(10);
-                    int steps_per_revolution = Convert.ToInt32(txtFullstep.Text);
-                    cmd = Convert.ToString(steps_per_revolution, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("m\n");
-                    Thread.Sleep(10);
-                    int microstepping = Convert.ToInt32(txtMicrostep.Text);
-                    cmd = Convert.ToString(microstepping, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("r\n");
-                    Thread.Sleep(10);
-                    int iMax = Convert.ToInt32(txtCurrent.Text);
-                    cmd = Convert.ToString(iMax, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("e\n");
-                    Thread.Sleep(10);
-                    double max_e = Convert.ToDouble(txtMaxE.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("f\n");
-                    Thread.Sleep(10);
-                    double mMax = Convert.ToDouble(txtMaxM.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(mMax, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("g\n");
-                    Thread.Sleep(10);
-                    int i_rated = Convert.ToInt32(txtMaxI.Text);
-                    cmd = Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("p\n");
-                    Thread.Sleep(10);
                     double Kp = Convert.ToDouble(txtKp.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kp, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    cmd = "parameter -set -Kp " + Convert.ToString(Kp, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
 
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("i\n");
-                    Thread.Sleep(10);
                     double Ki = Convert.ToDouble(txtKi.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Ki, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    cmd = "parameter -set -Ki " + Convert.ToString(Ki, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
 
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("d\n");
-                    Thread.Sleep(10);
                     double Kd = Convert.ToDouble(txtKd.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    cmd = "parameter -set -Kd " + Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
 
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("k\n");
-                    Thread.Sleep(10);
-                    int pLPF = Convert.ToInt32(txtPLPF.Text);
-                    cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("b\n");
-                    Thread.Sleep(10);
-                    int mm_rev = Convert.ToInt32(txtmmRev.Text);
-                    cmd = Convert.ToString(mm_rev, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("o\n");
-                    Thread.Sleep(10);
-                    int enable = Convert.ToInt32(checkEnable.Checked);
-                    cmd = Convert.ToString(enable, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("q\n");
-                    Thread.Sleep(10);
-                    int invert = Convert.ToInt32(checkInvert.Checked);
-                    cmd = Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("f\n");
-                    Thread.Sleep(10);
                     double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    cmd = "parameter -set -Kff " + Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
 
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("a\n");
-                    Thread.Sleep(10);
                     double Kacc = Convert.ToDouble(txtKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
+                    cmd = "parameter -set -Kacc " + Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int steps_per_revolution = Convert.ToInt32(txtFullstep.Text);
+                    cmd = "parameter -set -steps_per_revolution " + Convert.ToString(steps_per_revolution, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int microstepping = Convert.ToInt32(txtMicrostep.Text);
+                    cmd = "parameter -set -microstepping " + Convert.ToString(microstepping, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int iMax = Convert.ToInt32(txtCurrent.Text);
+                    cmd = "parameter -set -iMax " + Convert.ToString(iMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    double max_e = Convert.ToDouble(txtMaxE.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set -error_led_value " + Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    double mMax = Convert.ToDouble(txtMaxM.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set -M_Max " + Convert.ToString(mMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int i_rated = Convert.ToInt32(txtMaxI.Text);
+                    cmd = "parameter -set -I_rated " + Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int pLPF = Convert.ToInt32(txtPLPF.Text);
+                    cmd = "parameter -set -D_Term_LPF " + Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int uLPF = Convert.ToInt32(txtuLPF.Text);
+                    cmd = "parameter -set -effort_LPF " + Convert.ToString(uLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int mm_rev = Convert.ToInt32(txtmmRev.Text);
+                    cmd = "parameter -set -mm_rev " + Convert.ToString(mm_rev, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int enable = Convert.ToInt32(checkEnable.Checked);
+                    cmd = "parameter -set -USE_ENABLE_PIN " + Convert.ToString(enable, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int invert = Convert.ToInt32(checkInvert.Checked);
+                    cmd = "parameter -set -INVERT " + Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                }
+                catch
+                {
+                }
+            }
+        }
 
 
+
+        private void BtnSendIdentifier_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    string identifier = (txtIdentifier.Text);
+                    string cmd = "parameter -set -identifier " + Convert.ToString(identifier, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+
+        private void BtnSendStepSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    int steps_per_revolution = Convert.ToInt32(txtFullstep.Text);
+                    string cmd = "parameter -set -steps_per_revolution " + Convert.ToString(steps_per_revolution, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int microstepping = Convert.ToInt32(txtMicrostep.Text);
+                    cmd = "parameter -set -microstepping " + Convert.ToString(microstepping, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+        private void BtnSendMotorSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+
+                    int iMax = Convert.ToInt32(txtCurrent.Text);
+                    string cmd = "parameter -set -iMAX " + Convert.ToString(iMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    double mMax = Convert.ToDouble(txtMaxM.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set - M_max " + Convert.ToString(mMax, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int i_rated = Convert.ToInt32(txtMaxI.Text);
+                    cmd = "parameter -set -I_rated " + Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+        private void BtnSendPins_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    int enable = Convert.ToInt32(checkEnable.Checked);
+                    string cmd = "parameter -set -USE_ENABLE_PIN " + Convert.ToString(enable, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int invert = Convert.ToInt32(checkInvert.Checked);
+                    cmd = "parameter -set -INVERT " + Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+
+
+        private void BtnSendKinematics_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+
+                    double max_e = Convert.ToDouble(txtMaxE.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    string cmd = "parameter -set -error_led_value " + Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int mm_rev = Convert.ToInt32(txtmmRev.Text);
+                    cmd = "parameter -set -mm_rev " + Convert.ToString(mm_rev, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+        private void BtnSendControllerSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    double Kp = Convert.ToDouble(txtKp.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    string cmd = "parameter -set -Kp " + Convert.ToString(Kp, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    double Ki = Convert.ToDouble(txtKi.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set -Ki " + Convert.ToString(Ki, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    double Kd = Convert.ToDouble(txtKd.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set -Kd " + Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set -Kff " + Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    double Kacc = Convert.ToDouble(txtKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set -Kacc " + Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+
+
+
+        private void BtnSendFilterSettings_Click(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen)
+            {
+                try
+                {
+                    int pLPF = Convert.ToInt32(txtPLPF.Text);
+                    string cmd = "parameter -set -D_Term_LPF " + Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
+
+                    int uLPF = Convert.ToInt32(txtuLPF.Text);
+                    cmd = "parameter -set -effort_LPF " + Convert.ToString(uLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    serialPort1.Write(cmd + " \r");
 
                 }
                 catch
@@ -1450,465 +1562,170 @@ namespace Mechaduino
 
 
 
-        private void btnLoad_Click(object sender, EventArgs e)
+
+
+        private void BtnLoad_Click(object sender, EventArgs e)
         {
-            if (serialPort1.IsOpen)
-            {
-                serialPort1.Write("load_param\n");
-            }
+            Get_parameter();
         }
 
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void BtnSave_Click(object sender, EventArgs e)
         {
             if (saveFileDialogConfig.ShowDialog() == DialogResult.OK)
             {
                 CSVFileName = saveFileDialogConfig.FileName;
                 File.WriteAllText(CSVFileName, "");
-                File.AppendAllText(CSVFileName, "#include \"Configuration.h\" \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "//-------------------------------------------------- Identifier ------------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "// char to identify the mechaduino with the Serial monitor \n");
+                File.AppendAllText(CSVFileName, "#include \"Configuration.h\" \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "//-------------------------------------------------- Identifier -------------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------------------------------------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "// char to identify the mechaduino with the Serial monitor\r");
                 File.AppendAllText(CSVFileName, "char identifier = '");
                 File.AppendAllText(CSVFileName, txtIdentifier.Text);
-                File.AppendAllText(CSVFileName, "'; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "//---------------------------------------------- Hardware Section ---------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "// max current per coil 2000 mA for A4954 driver should be lower (thermal conditions) \n");
+                File.AppendAllText(CSVFileName, "';\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------- Hardware Section ----------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------------------------------------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "// max current per coil 2000 mA for A4954 driver should be lower (thermal conditions)\r");
                 File.AppendAllText(CSVFileName, "int iMAX = ");
                 File.AppendAllText(CSVFileName, txtCurrent.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "//set to 1 if you want to use a enable pin \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "//set to 1 if you want to use a enable pin\r");
                 if (checkEnable.Checked)
                 {
-                    File.AppendAllText(CSVFileName, "int USE_ENABLE_PIN = 1; \n");
+                    File.AppendAllText(CSVFileName, "int USE_ENABLE_PIN = 1;\r");
                 }
                 else
                 {
-                    File.AppendAllText(CSVFileName, "int USE_ENABLE_PIN = 0; \n");
+                    File.AppendAllText(CSVFileName, "int USE_ENABLE_PIN = 0;\r");
                 }
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// microstepping setting for step input \n");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "// microstepping setting for step input\r");
                 File.AppendAllText(CSVFileName, "int microstepping = ");
                 File.AppendAllText(CSVFileName, txtMicrostep.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// fullsteps for 360 degrees \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "// fullsteps for 360 degrees\r");
                 File.AppendAllText(CSVFileName, "int steps_per_revolution = ");
                 File.AppendAllText(CSVFileName, txtFullstep.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// mm per revolution \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "// mm per revolution\r");
                 File.AppendAllText(CSVFileName, "int mm_rev  =");
                 File.AppendAllText(CSVFileName, txtmmRev.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// max error in mm, if the error gets bigger the led turns off \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "// max error in mm, if the error gets bigger the led turns off\r");
                 File.AppendAllText(CSVFileName, "float error_led_value = ");
                 File.AppendAllText(CSVFileName, txtMaxE.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "//set to 1 to invert your motor direction \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "//set to 1 to invert your motor direction\r");
                 if (checkInvert.Checked)
                 {
-                    File.AppendAllText(CSVFileName, "int INVERT = 1; \n");
+                    File.AppendAllText(CSVFileName, "int INVERT = 1;\r");
                 }
                 else
                 {
-                    File.AppendAllText(CSVFileName, "int INVERT = 0; \n");
+                    File.AppendAllText(CSVFileName, "int INVERT = 0;\r");
                 }
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "//------------------------------------------------ Motor Section ------------------------------------------------ \n");
-                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "// max moment in Nm \n");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "//------------------------------------------------ Motor Section ------------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------------------------------------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "// max moment in Nm\r");
                 File.AppendAllText(CSVFileName, "float M_max = ");
                 File.AppendAllText(CSVFileName, txtMaxM.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// rated current for max moment in mA \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "// rated current for max moment in mA\r");
                 File.AppendAllText(CSVFileName, "int I_rated = ");
                 File.AppendAllText(CSVFileName, txtMaxI.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "//---------------------------------------------- Controller Section ---------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "//---- PID Values current control ----- \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------- Controller Section ----------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------------------------------------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "//---- PID Values current control -----\r");
                 File.AppendAllText(CSVFileName, "//");
                 File.AppendAllText(CSVFileName, txtCurrent.Text);
-                File.AppendAllText(CSVFileName, " mA coil current \n");
+                File.AppendAllText(CSVFileName, " mA coil current\r");
                 File.AppendAllText(CSVFileName, "float Kp = ");
                 File.AppendAllText(CSVFileName, txtKp.Text);
-                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, ";\r");
                 File.AppendAllText(CSVFileName, "float Ki = ");
                 File.AppendAllText(CSVFileName, txtKi.Text);
-                File.AppendAllText(CSVFileName, "; \n");
+                File.AppendAllText(CSVFileName, ";\r");
                 File.AppendAllText(CSVFileName, "float Kd = ");
                 File.AppendAllText(CSVFileName, txtKd.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
                 File.AppendAllText(CSVFileName, "float Kff = ");
                 File.AppendAllText(CSVFileName, txtKff.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
                 File.AppendAllText(CSVFileName, "float Kacc = ");
                 File.AppendAllText(CSVFileName, txtKacc.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "//----------------------------------------------- Filter  Section ----------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "//--------------------------------------------------------------------------------------------------------------- \n");
-                File.AppendAllText(CSVFileName, "// break frequency in hertz for DTerm \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "//----------------------------------------------- Filter  Section -----------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "//---------------------------------------------------------------------------------------------------------------\r");
+                File.AppendAllText(CSVFileName, "// break frequency in hertz for DTerm\r");
                 File.AppendAllText(CSVFileName, "int D_Term_LPF = ");
                 File.AppendAllText(CSVFileName, txtPLPF.Text);
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, "// break frequency in hertz for the effort filter \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, "// break frequency in hertz for the effort filter\r");
                 File.AppendAllText(CSVFileName, "int u_LPF = ");
                 double ulpf = Convert.ToDouble(txtuLPF.Text, System.Globalization.CultureInfo.InvariantCulture);
                 File.AppendAllText(CSVFileName, Convert.ToString(ulpf));
-                File.AppendAllText(CSVFileName, "; \n");
-                File.AppendAllText(CSVFileName, " \n");
-                File.AppendAllText(CSVFileName, " \n");
+                File.AppendAllText(CSVFileName, ";\r");
+                File.AppendAllText(CSVFileName, " \r");
+                File.AppendAllText(CSVFileName, " \r");
             }
         }
 
 
-
-
-
-        private void btnSendIdentifier_Click(object sender, EventArgs e)
+        
+        private void Btnmp100_Click(object sender, EventArgs e)
         {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    String cmd = "";
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("a\n");
-                    Thread.Sleep(10);
-                    String identifier = (txtIdentifier.Text);
-                    cmd = Convert.ToString(identifier, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                }
-                catch
-                {
-                }
-            }
+            Setpoint(100 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
-
-
-
-
-
-
-        private void btnSendStepSettings_Click(object sender, EventArgs e)
+        private void Btnmp10_Click(object sender, EventArgs e)
         {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("n\n");
-                    Thread.Sleep(10);
-                    int steps_per_revolution = Convert.ToInt32(txtFullstep.Text);
-                    String cmd = Convert.ToString(steps_per_revolution, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("m\n");
-                    Thread.Sleep(10);
-                    int microstepping = Convert.ToInt32(txtMicrostep.Text);
-                    cmd = Convert.ToString(microstepping, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                }
-                catch
-                {
-                }
-            }
+            Setpoint(10 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
-
-
-
-
-
-        private void btnSendMotorSettings_Click(object sender, EventArgs e)
+        private void Btnmp1_Click(object sender, EventArgs e)
         {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("r\n");
-                    Thread.Sleep(10);
-                    int iMax = Convert.ToInt32(txtCurrent.Text);
-                    String cmd = Convert.ToString(iMax, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("f\n");
-                    Thread.Sleep(10);
-                    double mMax = Convert.ToDouble(txtMaxM.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(mMax, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("g\n");
-                    Thread.Sleep(10);
-                    int i_rated = Convert.ToInt32(txtMaxI.Text);
-                    cmd = Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                }
-                catch
-                {
-                }
-            }
+            Setpoint(1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
-
-
-
-
-
-        private void btnSendPins_Click(object sender, EventArgs e)
+        private void Btnmn1_Click(object sender, EventArgs e)
         {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("o\n");
-                    Thread.Sleep(10);
-                    int enable = Convert.ToInt32(checkEnable.Checked);
-                    String cmd = Convert.ToString(enable, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("q\n");
-                    Thread.Sleep(10);
-                    int invert = Convert.ToInt32(checkInvert.Checked);
-                    cmd = Convert.ToString(invert, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                }
-                catch
-                {
-                }
-            }
+            Setpoint(-1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
-
-
-
-
-
-
-        private void btnSendKinematics_Click(object sender, EventArgs e)
+        private void Btnmn10_Click(object sender, EventArgs e)
         {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    Thread.Sleep(10);
-                    serialPort1.Write("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.Write("e\n");
-                    Thread.Sleep(10);
-                    double max_e = Convert.ToDouble(txtMaxE.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    String cmd = Convert.ToString(max_e, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("b\n");
-                    Thread.Sleep(10);
-                    int mm_rev = Convert.ToInt32(txtmmRev.Text);
-                    cmd = Convert.ToString(mm_rev, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                }
-                catch
-                {
-                }
-            }
+            Setpoint(-10 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
-
-
-
-
-        private void btnSendControllerSettings_Click(object sender, EventArgs e)
+        private void Btnmn100_Click(object sender, EventArgs e)
         {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("p\n");
-                    Thread.Sleep(10);
-                    double Kp = Convert.ToDouble(txtKp.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    String cmd = Convert.ToString(Kp, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("i\n");
-                    Thread.Sleep(10);
-                    double Ki = Convert.ToDouble(txtKi.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Ki, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("d\n");
-                    Thread.Sleep(10);
-                    double Kd = Convert.ToDouble(txtKd.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("f\n");
-                    Thread.Sleep(10);
-                    double Kff = Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kff, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("a\n");
-                    Thread.Sleep(10);
-                    double Kacc = Convert.ToDouble(txtKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-                }
-                catch
-                {
-                }
-            }
+            Setpoint(-100 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
         }
 
-
-
-
-
-        private void btnSendFilterSettings_Click(object sender, EventArgs e)
-        {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("k\n");
-                    Thread.Sleep(10);
-                    int pLPF = Convert.ToInt32(txtPLPF.Text);
-                    String cmd = Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("editparam d\n");
-                    Thread.Sleep(10);
-                    serialPort1.WriteLine("x\n");
-                    Thread.Sleep(10);
-                    int uLPF = Convert.ToInt32(txtuLPF.Text);
-                    cmd = Convert.ToString(uLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + "\n");
-
-                }
-                catch
-                {
-                }
-            }
-        }
-
-
-
-
-        private void btnDirac_Click(object sender, EventArgs e)
-        {
-            double setpoint = Convert.ToDouble(r);
-            double high = (setpoint + 10000) / 100;
-            double low = (setpoint) / 100;
-            string cmd_jump = Convert.ToString(high, System.Globalization.CultureInfo.InvariantCulture);
-            string cmd_jump_back = Convert.ToString(low, System.Globalization.CultureInfo.InvariantCulture);
-
-            if (serialPort1.IsOpen)
-            {
-                serialPort1.Write("set " + cmd_jump + " \n");
-                serialPort1.Write(" \n");
-                Thread.Sleep(1);
-                serialPort1.Write("set " + cmd_jump_back + " \n");
-            }
-
-        }
-
-        private void btnmp100_Click(object sender, EventArgs e)
-        {
-            setpoint(100 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
-        }
-
-        private void btnmp10_Click(object sender, EventArgs e)
-        {
-            setpoint(10 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
-        }
-
-        private void btnmp1_Click(object sender, EventArgs e)
-        {
-            setpoint(1.8 / Convert.ToInt32(txtMicrostep.Text));
-        }
-
-        private void btnmn1_Click(object sender, EventArgs e)
-        {
-            setpoint(-1.8 / Convert.ToInt32(txtMicrostep.Text));
-        }
-
-        private void btnmn10_Click(object sender, EventArgs e)
-        {
-            setpoint(-10 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
-        }
-
-        private void btnmn100_Click(object sender, EventArgs e)
-        {
-            setpoint(-100 * 1.8 / Convert.ToInt32(txtMicrostep.Text));
-        }
-
-        private void btnStepResponse_Click(object sender, EventArgs e)
+        private void BtnStepResponse_Click(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen)
             {
@@ -1918,32 +1735,22 @@ namespace Mechaduino
                 string cmd_frequency = Convert.ToString(frequency, System.Globalization.CultureInfo.InvariantCulture);
 
                 saveFileDialog1.FileName = "step_response_" + cmd_frequency + "Hz";
-                saveFileDialog1.Title = "Save xtep response data";
+                saveFileDialog1.Title = "Save step response data";
 
                 pltresponse.Series[0].Points.Clear();
                 pltresponse.Series[1].Points.Clear();
 
                 response_command_Length = 0;
 
-                serialPort1.Write("stop_stream \n");
+                serialPort1.Write("stream -off\r");
                 Thread.Sleep(100);
-                serialPort1.Write("response \n");
-                Thread.Sleep(100);
-                serialPort1.Write(cmd_response + "\n");
-                Thread.Sleep(100);
-                serialPort1.Write(cmd_frequency + "\n");
+                serialPort1.Write("step_response -f " + cmd_frequency + " -s " + cmd_response + " \r");
 
 
             }
         }
-
-        private void btnresetzoom_Click(object sender, EventArgs e)
-        {
-            pltresponse.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
-            pltresponse.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
-        }
-
-        private void btnDirac_Click_1(object sender, EventArgs e)
+        
+        private void BtnDirac_Click(object sender, EventArgs e)
         {
 
 
@@ -1960,14 +1767,12 @@ namespace Mechaduino
 
                 response_command_Length = 0;
 
-                serialPort1.Write("dirac \n");
-                Thread.Sleep(100);
-                serialPort1.Write(cmd_frequency + "\n");
+                serialPort1.Write("dirac -f " + cmd_frequency + " \r");
             }
 
         }
 
-        private void timerCSV_Tick(object sender, EventArgs e)
+        private void TimerCSV_Tick(object sender, EventArgs e)
         {
 
 
@@ -1977,7 +1782,7 @@ namespace Mechaduino
                 {
                     for (int i = 0; i < buffer_counter; i++)
                     {
-                        sw.Write(buffer[i] + "\n");
+                        sw.Write(buffer[i] + " \r");
                     }
                     buffer_counter = 0;
                 }
@@ -1986,14 +1791,14 @@ namespace Mechaduino
 
 
 
-        private void btnExport_Click(object sender, EventArgs e)
+        private void BtnExport_Click(object sender, EventArgs e)
         {
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
 
                 CSVFileName = saveFileDialog1.FileName;
                 File.WriteAllText(CSVFileName, "");
-                File.AppendAllText(CSVFileName, "position;target\n");
+                File.AppendAllText(CSVFileName, "position;target\r");
 
                 using (FileStream fs = new FileStream(CSVFileName, FileMode.Append, FileAccess.Write))
                 using (StreamWriter sw = new StreamWriter(fs))
@@ -2003,7 +1808,7 @@ namespace Mechaduino
 
                         for (int i = 0; i < response_position.Length; i++)
                         {
-                            sw.Write(Convert.ToString(response_position[i]) + ";" + Convert.ToString(response_target[i]) + "\n");
+                            sw.Write(Convert.ToString(response_position[i]) + ";" + Convert.ToString(response_target[i]) + " \r");
                         }
 
                     }
@@ -2012,8 +1817,8 @@ namespace Mechaduino
 
         }
 
-
-        private void button1_Click(object sender, EventArgs e)
+        
+        private void BtnSend_Click(object sender, EventArgs e)
         {
 
 
@@ -2021,6 +1826,10 @@ namespace Mechaduino
             {
                 int frequency = Convert.ToInt32(txtfrequency.Text);
                 string cmd_frequency = Convert.ToString(frequency, System.Globalization.CultureInfo.InvariantCulture);
+
+
+                int velocity = Convert.ToInt32(txtStepVelocity.Text);
+                string cmd_velocity = Convert.ToString(velocity, System.Globalization.CultureInfo.InvariantCulture);
 
                 saveFileDialog1.FileName = "test_move_" + cmd_frequency + "Hz";
                 saveFileDialog1.Title = "Save test move data";
@@ -2030,13 +1839,11 @@ namespace Mechaduino
 
                 response_command_Length = 0;
 
-                serialPort1.Write("test \n");
-                Thread.Sleep(100);
-                serialPort1.Write(cmd_frequency + "\n");
+                serialPort1.Write("testmove -f " + cmd_frequency + " -v " + cmd_velocity + " -o\r");
             }
 
         }
-
+        
 
 
         private void Variable_1_pltPosition_color_Click(object sender, EventArgs e)
@@ -2110,12 +1917,12 @@ namespace Mechaduino
             if (MyDialog.ShowDialog() == DialogResult.OK)
             {
                 Variable_2_pltError_color.ForeColor = MyDialog.Color;
-                pltError.Series[0].Color = MyDialog.Color;
+                pltError.Series[1].Color = MyDialog.Color;
             }
 
         }
 
-        private void response_plot_variable_SelectedIndexChanged(object sender, EventArgs e)
+        private void Response_plot_variable_SelectedIndexChanged(object sender, EventArgs e)
         {
             response_income = false;
             pltresponse.Series[0].Points.Clear();
@@ -2133,19 +1940,10 @@ namespace Mechaduino
                 pltresponse.Series[0].Name = "position [deg/s]";
                 pltresponse.Series[1].Name = "target [deg/s]";
 
-                for (int j = 0; j < 50; j++)
-                {
-                    start_position = start_position + omegaValues[j];
-                    start_target = start_target + omega_targetValues[j];
-                }
-                start_position = start_position / 50;
-                start_target = start_target / 50;
-
                 for (int j = 0; j < response_command_Length; j++)
                 {
-                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * (omegaValues[j] - start_position) / 100.0);
-                    pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_targetValues[j] - start_position) / 100.0);
-                    //pltresponse.Series[1].Points.AddXY(j * dt, 5000 * (omega_targetValues[j] - start_target) / 100.0);
+                    pltresponse.Series[0].Points.AddXY(j * dt, (5000 * omegaValues[j]) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, (5000 * omega_targetValues[j]) / 100.0);
                 }
 
             }
@@ -2167,7 +1965,6 @@ namespace Mechaduino
                 {
                     pltresponse.Series[0].Points.AddXY(j * dt, (response_position[j] - start_position) / 100.0);
                     pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_position) / 100.0);
-                    //pltresponse.Series[1].Points.AddXY(j * dt, (response_target[j] - start_target) / 100.0);
                 }
 
             }
@@ -2203,18 +2000,18 @@ namespace Mechaduino
 
                 for (int j = 0; j < response_command_Length; j++)
                 {
-                    pltresponse.Series[0].Points.AddXY(j * dt, 5000 * ((omega_targetValues[j] - omegaValues[j]) - start_position) / 100.0);
+                    pltresponse.Series[0].Points.AddXY(j * dt, Convert.ToInt32(txtfrequency.Text) * ((omega_targetValues[j] - omegaValues[j]) - start_position) / 100.0);
                 }
 
             }
 
-            
+
             changeYScala(pltresponse, 5);
         }
 
 
         // gets called if a set of tuning data is received 
-        private void plot_tune(object sender, EventArgs e)
+        private void Plot_tune(object sender, EventArgs e)
         {
 
             tuning_income = false;
@@ -2226,7 +2023,7 @@ namespace Mechaduino
 
             double start_position = 0;
             double dt = 1 / 5000;
-            
+
             for (int j = 0; j < 50; j++)
             {
                 start_position = start_position + tuning_position[j];
@@ -2240,17 +2037,11 @@ namespace Mechaduino
                 pltAutotune_1.Series[1].Points.AddXY(j * dt, (tuning_target[j] - start_position) / 100.0);
             }
 
-            start_position = 0;
-            for (int j = 0; j < 50; j++)
-            {
-                start_position = start_position + tuning_omega[j];
-            }
-            start_position = start_position / 50;
 
             for (int j = 0; j < tuning_command_Length; j++)
             {
-                pltAutotune_2.Series[0].Points.AddXY(j * dt, 5000 * (tuning_omega[j] - start_position) / 100.0);
-                pltAutotune_2.Series[1].Points.AddXY(j * dt, 5000 * (tuning_omega_target[j] - start_position) / 100.0);
+                pltAutotune_2.Series[0].Points.AddXY(j * dt, (5000 * tuning_omega[j]) / 100.0);
+                pltAutotune_2.Series[1].Points.AddXY(j * dt, (5000 * tuning_omega_target[j]) / 100.0);
             }
 
             tuning_command_Length = 0;
@@ -2259,36 +2050,189 @@ namespace Mechaduino
 
         }
 
-        private void btnDownhill_Click(object sender, EventArgs e)
+        private void BtnDownhill_Click(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen)
             {
-                serialPort1.WriteLine("downhill\n");
-                Thread.Sleep(100);
-                //  serialPort1.Write(Convert.ToString(int_frequency) + "\n");
+
+                string cmd = "parameter -set -Kp " + TxttuneKp.Text + " -Ki " + txttuneKi.Text + " -Kd " + txttuneKd.Text;
+                serialPort1.Write(cmd + " \r");
+                cmd = "parameter -set -Kff " + txttuneKff.Text + " -Kacc " + txttuneKacc.Text;
+                serialPort1.Write(cmd + " \r");
+
+                int frequency = Convert.ToInt32(txttunefrequency.Text);
+                int velocity = Convert.ToInt32(txttunevelocity.Text);
+                string cmd_frequency = Convert.ToString(frequency, System.Globalization.CultureInfo.InvariantCulture);
+                string cmd_velocity = Convert.ToString(velocity, System.Globalization.CultureInfo.InvariantCulture);
+                string cmd_max_Kp = Convert.ToString(max_Kp, System.Globalization.CultureInfo.InvariantCulture);
+                string cmd_max_Ki = Convert.ToString(max_Ki, System.Globalization.CultureInfo.InvariantCulture);
+                string cmd_max_Kd = Convert.ToString(max_Kd, System.Globalization.CultureInfo.InvariantCulture);
+                string cmd_max_Kff = Convert.ToString(max_Kff, System.Globalization.CultureInfo.InvariantCulture);
+                string cmd_max_Kacc = Convert.ToString(max_Kacc, System.Globalization.CultureInfo.InvariantCulture);
+
+                cmd = "downhill -f " + cmd_frequency + " -v " + cmd_velocity + " -gui -p " + cmd_max_Kp + " -i " + cmd_max_Ki + " -d " + cmd_max_Kd + " -kf " + cmd_max_Kff + " -ka " + cmd_max_Kacc;
+
+                serialPort1.Write(cmd + " \r");
             }
         }
 
-        private void btnCancle_Click(object sender, EventArgs e)
+        private void BtnCancle_Click(object sender, EventArgs e)
         {
             if (serialPort1.IsOpen)
             {
-                serialPort1.WriteLine("c\n");
-                Thread.Sleep(100);
-                //  serialPort1.Write(Convert.ToString(int_frequency) + "\n");
+                serialPort1.Write("c \r");
             }
 
+        }
+
+
+        private void TrackBarKp_Scroll(object sender, EventArgs e)
+        {
+            TxttuneKp.Text = Convert.ToString(Convert.ToDouble(trackBarKp.Value) * Kp_gain, System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private void TrackBarKi_Scroll(object sender, EventArgs e)
+        {
+            txttuneKi.Text = Convert.ToString(Convert.ToDouble(trackBarKi.Value) * Ki_gain, System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private void TrackBarKd_Scroll(object sender, EventArgs e)
+        {
+            txttuneKd.Text = Convert.ToString(Convert.ToDouble(trackBarKd.Value) * Kd_gain, System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private void TrackBarKff_Scroll(object sender, EventArgs e)
+        {
+            txttuneKff.Text = Convert.ToString(Convert.ToDouble(trackBarKff.Value) * Kff_gain, System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        private void TrackBarKacc_Scroll(object sender, EventArgs e)
+        {
+            txttuneKacc.Text = Convert.ToString(Convert.ToDouble(trackBarKacc.Value) * Kacc_gain, System.Globalization.CultureInfo.InvariantCulture);
+        }
+        
+
+        private void Pltresponse_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            pltresponse.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
+            pltresponse.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
+        }
+
+        private void TxtSend_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                BtnSend_Click_1(sender, e);
+            }
+        }
+
+        private void TxtFrequencyFrame_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                BtnSetTimeframe_Click(sender, e);
+            }
+            
+        }
+
+        private void TxtTimeframe_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                BtnSetTimeframe_Click(sender, e);
+            }
+        }
+
+        private void PltAutotune_1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            pltAutotune_1.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
+            pltAutotune_1.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
+        }
+
+        private void PltAutotune_2_Click(object sender, EventArgs e)
+        {
+            pltAutotune_2.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
+            pltAutotune_2.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
+        }
+
+        private void BtnReload_Click(object sender, EventArgs e)
+        {
+            Get_parameter();
+        }
+
+        private void Calculate_gains_tune_settings()
+        {
+            double Kp_val = Convert.ToDouble(TxttuneKp.Text, System.Globalization.CultureInfo.InvariantCulture);
+            double Ki_val = Convert.ToDouble(txttuneKi.Text, System.Globalization.CultureInfo.InvariantCulture);
+            double Kd_val = Convert.ToDouble(txttuneKd.Text, System.Globalization.CultureInfo.InvariantCulture);
+            double Kff_val = Convert.ToDouble(txttuneKff.Text, System.Globalization.CultureInfo.InvariantCulture);
+            double Kacc_val = Convert.ToDouble(txttuneKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
+
+
+            max_Kp = Convert.ToDouble(txtmaxKp.Text, System.Globalization.CultureInfo.InvariantCulture);
+            max_Ki = Convert.ToDouble(txtmaxKi.Text, System.Globalization.CultureInfo.InvariantCulture);
+            max_Kd = Convert.ToDouble(txtmaxKd.Text, System.Globalization.CultureInfo.InvariantCulture);
+            max_Kff = Convert.ToDouble(txtmaxKff.Text, System.Globalization.CultureInfo.InvariantCulture);
+            max_Kacc = Convert.ToDouble(txtmaxKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
+            
+            Kp_gain = 100.0 / max_Kp;
+            Ki_gain = 100.0 / max_Ki;
+            Kd_gain = 100.0 / max_Kd;
+            Kff_gain = 100.0 / max_Kff;
+            Kacc_gain = 100.0 / max_Kacc;
+
+            trackBarKp.Value = Convert.ToInt16(Kp_gain * Kp_val);
+            trackBarKi.Value = Convert.ToInt16(Ki_gain * Ki_val);
+            trackBarKd.Value = Convert.ToInt16(Kd_gain * Kd_val);
+            trackBarKff.Value = Convert.ToInt16(Kff_gain * Kff_val);
+            trackBarKacc.Value = Convert.ToInt16(Kacc_gain * Kacc_val);
+
+        }
+
+        private void Calculate_gains(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Calculate_gains_tune_settings();
+            }
+        }
+
+        private void txtmaxKi_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Calculate_gains_tune_settings();
+            }
+        }
+
+        private void txtmaxKd_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Calculate_gains_tune_settings();
+            }
+        }
+
+        private void txtmaxKff_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Calculate_gains_tune_settings();
+            }
+        }
+
+        private void txtmaxKacc_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                Calculate_gains_tune_settings();
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            pltAutotune_1.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
-            pltAutotune_1.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
-            pltAutotune_2.ChartAreas[0].AxisX.ScaleView.ZoomReset(0);
-            pltAutotune_2.ChartAreas[0].AxisY.ScaleView.ZoomReset(0);
+            Calculate_gains_tune_settings();
         }
     }
-
-
 }
 
