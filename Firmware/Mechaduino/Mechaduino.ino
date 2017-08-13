@@ -21,18 +21,10 @@
 
 */
 
-#include "SanityCheck.h"
-#include "Configuration.h"
-#include "Configurationals.h"
-#include "State.h"
 #include "Utils.h"
-#include "board.h"
-#include "analogFastWrite.h"
-#include "lookup_table.h"
-#include "Encoder.h"
 #include "Serial.h"
-#include "Language.h"
-
+#include "State.h"
+#include "Cmd.h"
 
 
 //////////////////////////////////////
@@ -41,6 +33,13 @@
 
 void setup() {
   boot();
+  init_menu();
+
+/*  
+  insert_command("state");
+
+  insert_command("diagnose");
+  */
 
 }
 
@@ -52,10 +51,7 @@ void setup() {
 
 void loop()
 {
-  serialCheck();
+  streaming_handler();
   error_led();
-  Streaming();
-
-
-
+  cmdPoll();
 }

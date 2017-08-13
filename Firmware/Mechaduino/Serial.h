@@ -1,49 +1,38 @@
 #ifndef __Serial_H__
 #define __Serial_H__
+
+#pragma once
+
 #include <arduino.h>
 
-void serialCheck();
 
-void SoftReset();
 
-void getstate();
+void init_menu();
 
-void enable();
+void set_TC(int arg_cnt, char **args);
 
-void disable();
+void state(int arg_cnt, char **args);
 
-void Serial_menu();
+void SoftReset(int arg_cnt, char **args);
 
-void setpoint(String arg = "");
+void Serial_menu(int arg_cnt, char **args);
 
-void readangle();
+void setpoint(int arg_cnt, char **args);
 
-void parameterQuery();
+void parameterEdit(int arg_cnt, char **args);
 
-void parameterEdit(String arg = "");
+void step_response(int arg_cnt, char **args);
 
-void step_response();
+void dirac(int arg_cnt, char **args);
 
-void dirac();
+void readEncoderDiagnostics(int arg_cnt, char **args); 
 
-void get_max_frequency();
+void error_reg(int arg_cnt, char **args);
 
-void readEncoderDiagnostics(); //check encoder diagnostics registers
+void set_streaming(int arg_cnt, char **args);
 
-void print_error_register();
+void streaming_handler();
 
-void reset_error_register();
-
-int measure_noise(bool serialoutput = true);
-
-int measure_setpoint();
-
-bool read_serialcommand(int timeout, String *command, String *argument);
-
-bool split_command(String *Input_pointer, String *first_substring, String *second_substring);
-
-void Streaming();
-
-void send_param();
+void start_testmove(int arg_cnt, char **args);
 
 #endif

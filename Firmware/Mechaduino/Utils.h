@@ -2,6 +2,9 @@
 
 #ifndef __UTILS_H__
 #define __UTIL_H__
+#pragma once
+
+#include <arduino.h>
 
 void setupPins();
 
@@ -13,7 +16,7 @@ void enaInterrupt();
 
 void dirInterrupt();
 
-void calibration();
+void calibration(int arg_cnt, char **args);
 
 void oneStep();
 
@@ -27,11 +30,11 @@ void disableTC4Interrupts();
 
 void disableTC5Interrupts();
 
-void antiCoggingCal();
-
-void PID_autotune();
+void PID_autotune(int arg_cnt, char **args);
 
 float digitalSmooth(int rawIn, int *sensSmoothArray);
+
+int measure_noise();
 
 bool canceled();
 
@@ -41,9 +44,13 @@ int sign(int input);
 
 void boot();
 
-bool check_lookup(bool output);
-
 void error_led();
+
+float test_move(int steps, int F_Sample, bool output, char identifier);
+
+void downhill_simplex(int arg_cnt, char **args);
+
+void paramter_streamer(bool output, bool gui) ;
 
 #endif
 

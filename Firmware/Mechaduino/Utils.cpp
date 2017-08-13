@@ -12,6 +12,7 @@
 #include "board.h"
 #include "Serial.h"
 #include "Language.h"
+#include "Cmd.h"
 
 void setupPins() {
 
@@ -93,33 +94,26 @@ void enaInterrupt() {
 }
 
 
-void calibration() {
+void calibration(int arg_cnt, char **args) {
 
   disableTC5Interrupts();
   disableTC4Interrupts();
 
   int avg = 100;
-
+  bool force = return_bool_argument(args, arg_cnt, "-f", false);
 
   SerialUSB.println(calibrate_header);
-  enabled = false;
+
+  enabled = true;
 
 
   float encoderReading = 0;
 
-  encoderReading = readEncoder();
-
-
-
-  SerialUSB.println("searching zeropoint");
-  step_target = 0;
-  if (encoderReading < (16384 / steps_per_revolution)) {
-    dir = true;
-    while (readEncoder() < (16384 / steps_per_revolution)) {
-      oneStep();
-      delay(100);
-    }
+  for (int i = 0; i < 50; i++) {
+    encoderReading = encoderReading + readEncoder();
   }
+  encoderReading = encoderReading / 50.0;
+
 
 
   dir = true;
@@ -129,13 +123,21 @@ void calibration() {
   delay(100);
   oneStep();
 
-  if ((readEncoder() - encoderReading) < 0)
-  {
-    SerialUSB.println("Wired backwards");
-    enableTC5Interrupts();
-    return;
-  }
 
+  float temp_pos = 0;
+  for (int i = 0; i < 50; i++) {
+    temp_pos = temp_pos + readEncoder();
+  }
+  temp_pos = temp_pos / 50.0;
+
+  if (!force) {
+    if ((temp_pos - encoderReading) > 0)
+    {
+      SerialUSB.println("Wired backwards");
+      enableTC5Interrupts();
+      return;
+    }
+  }
 
   dir = false;
   step_target = 0;
@@ -160,7 +162,11 @@ void calibration() {
   // step to every single fullstep position and read the Encoder
   for (int i = 0; i < steps_per_revolution; i++) {
 
-    if (canceled()) return;
+    if (canceled()) {
+      enabled = false;
+      return;
+    }
+
     counter += 1;
 
     delay(100);
@@ -192,10 +198,12 @@ void calibration() {
       readings[i] = readings[i] - 65536;
     }
 
-    if (i >= 1) {
-      if (abs(readings[i] - readings[i - 1]) < (65536 / (1.1 * steps_per_revolution))) {
-        SerialUSB.println("Motor is not moving -> abbort");
-        return;
+    if (!force) {
+      if (i >= 1) {
+        if (abs(readings[i] - readings[i - 1]) < (65536 / (1.1 * steps_per_revolution))) {
+          SerialUSB.println("Motor is not moving -> abbort");
+          return;
+        }
       }
     }
 
@@ -346,11 +354,11 @@ void calibration() {
       delayMicroseconds(100);
     }
 
-    if ((encoderReading / avg) > 65536) {
-      encoderReading = encoderReading - (avg * 65536);
-    }
+    float temp =  abs(x[i] - (encoderReading / avg));
 
-    float temp =  abs((encoderReading / avg) - x[i]);
+    if (temp > 32768.0) {
+      temp = 65536.0 - temp;
+    }
 
     if (temp > smoothed_error) {
       smoothed_error = temp;
@@ -587,63 +595,16 @@ void disableTC4Interrupts() {
 }
 
 
-void antiCoggingCal() {
-
-  bool last_enabled = enabled;
-
-  float temp_u_cogging = 0;
 
 
-  SerialUSB.println("//---- Calculating friciton ----");
-
-  step_target = 0;
-
-  enabled = true;
-
-  step_target = 0;
-
-  delay(500);
-
-  for (int i = 0; i < 3600; i++) {
-
-    step_target += (10 / stepangle);
-
-    delay(10);
-
-    float sum = 0;
-    for (int k = 0; k < 50; k++) {
-      sum = sum + u;
-      delayMicroseconds(20);
-    }
-
-    temp_u_cogging += (sum / 50.0);
-  }
-
-
-  temp_u_cogging = temp_u_cogging / 3600;
-
-  enabled = last_enabled;
-
-  SerialUSB.print("int u_cogging = ");
-  SerialUSB.print((int)(temp_u_cogging + 0.5));
-
-  SerialUSB.println(";");
-  SerialUSB.println();
-}
-
-
-
-
-
-
-void PID_autotune() {
+void PID_autotune(int arg_cnt, char **args) {
+  SerialUSB.println(autotune_header);
 
   disableTC5Interrupts();
  
 
-  int loops = 0;
-  int outputStep = uMAX;
-  int frequency = FPID;
+  float outputStep = uMAX;
+  int frequency = 2 * FPID;
   int dt = (1000000 / frequency);
   int scan_dt = dt - 2;
 
@@ -651,116 +612,59 @@ void PID_autotune() {
   float temp_Ki = 0;
   float temp_Kd = 0;
 
-  bool received = false;
-  bool debug = false;
   unsigned long now = millis();
   int k = 1;
 
 
-  SerialUSB.println(autotune_header);
   SerialUSB.println(cancle_header);
+  bool debug = check_argument(args, arg_cnt, "-d");
+  bool gui = check_argument(args, arg_cnt, "-gui");
+  int loops = return_integer_argument(args, arg_cnt, "-c", 1, 1, 10);
 
-
-
-  SerialUSB.print("The motor will vibrate violently, continue? (y/n) = ");
-  while (!received) {
-
-    if (timed_out(now, 5000)) return;
-
-    if (SerialUSB.available()) {
-
-      if (SerialUSB.read() == 'n') {
-
-        SerialUSB.println('n');
-        while (SerialUSB.available()) {
-          SerialUSB.read();
-        }
-        return;
-      }
-
-      received = true;
-    }
+  if (!gui) {
+    SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
   }
-  SerialUSB.println('y');
-
-
-  // flsuh the serial port
-  while (SerialUSB.available()) {
-    SerialUSB.read();
-  }
-
-
-  SerialUSB.print("Cycles = ");
-  received = false;
-  now = millis();
-
-
-  while (!received) {
-    if (canceled()) return;
-
-    if (timed_out(now, 5000)) return;
-
-    if (SerialUSB.available()) {
-
-      if (SerialUSB.peek() == 'd') {
-        SerialUSB.println("");
-        SerialUSB.println("debug mode!");
-        debug = true;
-      }
-
-      loops = SerialUSB.parseInt();
-
-      SerialUSB.println(loops);
-      SerialUSB.println("");
-
-      received = true;
-    }
-  }
-
-  // flsuh the serial port
-  while (SerialUSB.available()) {
-    SerialUSB.read();
-  }
-
-  SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
-
 
   // start autotune
   while (k <= loops) {
 
-    SerialUSB.println("|-----------------------------------------------------------------|");
-    SerialUSB.print("|   ");
-    SerialUSB.print(k);
-    if (k >= 10) {
-      SerialUSB.print(" ");
-    }
-    else {
-      SerialUSB.print("  ");
-    }
 
+    if (!gui) {
+      SerialUSB.println("|-----------------------------------------------------------------|");
+      SerialUSB.print("|   ");
+      SerialUSB.print(k);
+      if (k >= 10) {
+        SerialUSB.print(" ");
+      }
+      else {
+        SerialUSB.print("  ");
+      }
+    }
     delay(200);
 
     // measure current setpoint
-    int setpoint = measure_setpoint() + 0.5;
+    int setpoint = r;
 
     // measure the noise from the controller
-    int noiseBand = measure_noise(false);
+
+    int noiseBand = measure_noise();
     disableTC5Interrupts();
 
-    SerialUSB.print("|   ");
-    SerialUSB.print(noiseBand);
-    if (noiseBand >= 10) {
-      SerialUSB.print("  ");
+    if (!gui) {
+      SerialUSB.print("|   ");
+      SerialUSB.print(noiseBand);
+      if (noiseBand >= 10) {
+        SerialUSB.print("  ");
+      }
+      else {
+        SerialUSB.print("   ");
+      }
     }
-    else {
-      SerialUSB.print("   ");
-    }
-
 
     int points[1124] = {0};
     float smoothed[1124] = {0};
 
-#define filterSamples   25
+#define filterSamples   3
     int sensSmoothArray1 [filterSamples];
 
     int peakType = 0;
@@ -804,7 +708,6 @@ void PID_autotune() {
         }
 
         int electric_angle = -(raw_0 + (sign(u) * PA));
-
 
         // write the output
         output(electric_angle, u);
@@ -874,7 +777,6 @@ void PID_autotune() {
       sum = 0;
 
       for (int k = 1; k < len - i; k++) {
-        //sum = sum + (points[k]) * (points[k + i]);
         sum = sum + (smoothed[k]) * (smoothed[k + i]);
       }
 
@@ -904,36 +806,38 @@ void PID_autotune() {
     }
 
     float frequency = (1000000.0 / (float)(dt)) / period;
-    double Tu = 1.0 / frequency;
+    float Tu = 1.0 / frequency;
 
-    SerialUSB.print("|   ");
-    SerialUSB.print(frequency, 1);
-    if (frequency >= 100.0) {
-      SerialUSB.print("   ");
-    }
-    else if (frequency >= 1000.0) {
-      SerialUSB.print("  ");
-    }
-    else {
-      SerialUSB.print("    ");
-    }
+    if (!gui) {
+      SerialUSB.print("|   ");
+      SerialUSB.print(frequency, 1);
+      if (frequency >= 100.0) {
+        SerialUSB.print("   ");
+      }
+      else if (frequency >= 1000.0) {
+        SerialUSB.print("  ");
+      }
+      else {
+        SerialUSB.print("    ");
+      }
 
-    if (frequency < 2.0 || frequency > 9950.0) {
-      SerialUSB.println();
-      SerialUSB.println("Autotune failed, frequency not in usable range!");
-      return;
+      if (frequency < 2.0 || frequency > 9950.0) {
+        SerialUSB.println();
+        SerialUSB.println("Autotune failed, frequency not in usable range!");
+        return;
+      }
     }
-
     // calculating lookback points
     int nLookBack = ((1000000 * Tu) / dt) / 4;
     if (nLookBack >= 99) {
       nLookBack = 99;
     }
-    SerialUSB.print("|   ");
-    SerialUSB.print(nLookBack);
-    SerialUSB.print("     ");
 
-
+    if (!gui) {
+      SerialUSB.print("|   ");
+      SerialUSB.print(nLookBack);
+      SerialUSB.print("     ");
+    }
     // searching the min and max in data
     int peaks[20] = {0};
     int lastInputs[101] = {0};
@@ -1000,7 +904,7 @@ void PID_autotune() {
     A = A / (peakCount - 1);
 
     // calculating PID settings
-    float Ku = 4 * 2 * outputStep * 1000 / (PI * 2 * A);
+    float Ku = (4.0 * (2.0 * (float)outputStep))  / (PI * 2.0 * A);
 
     if (k == 1) {
       temp_Kp = (0.6 * Ku);
@@ -1013,15 +917,17 @@ void PID_autotune() {
       temp_Kd = temp_Kd + ((0.6 * Ku * Tu * FPID) / 8);
     }
 
-    SerialUSB.print("| ");
-    SerialUSB.print((0.6 * Ku) / 1000.0, 4);
-    SerialUSB.print(" | ");
-    SerialUSB.print(((1.2 * Ku) / (Tu * FPID)) / 1000.0, 4);
-    SerialUSB.print(" | ");
-    SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8) / 1000.0, 4);
-    SerialUSB.print(" |");
+    if (!gui) {
+      SerialUSB.print("| ");
+      SerialUSB.print((0.6 * Ku), 4);
+      SerialUSB.print(" | ");
+      SerialUSB.print(((1.2 * Ku) / (Tu * FPID)), 4);
+      SerialUSB.print(" | ");
+      SerialUSB.print(((0.6 * Ku * Tu * FPID) / 8.0) , 4);
+      SerialUSB.print(" |");
 
-    SerialUSB.println("");
+      SerialUSB.println("");
+    }
     delay(500);
     k++;
   }
@@ -1029,26 +935,32 @@ void PID_autotune() {
 
   // we are finished
 
-  SerialUSB.println("|-----------------------------------------------------------------|");
-  SerialUSB.println();
-  SerialUSB.println();
-
-  int_Kp = (((temp_Kp / loops)) + 0.5);
-  int_Ki = (((temp_Ki / loops)) + 0.5);
-  int_Kd = (((temp_Kd / loops)) + 0.5);
-
-  if (loops > 0) {
-    Kp = int_Kp / 1000.0;
-    Ki = int_Ki / 1000.0;
-    Kd = int_Kd / 1000.0;
+  if (!gui) {
+    SerialUSB.println("|-----------------------------------------------------------------|");
+    SerialUSB.println();
+    SerialUSB.println();
   }
 
-  SerialUSB.print("Kp = ");
-  SerialUSB.println(Kp, 5);
-  SerialUSB.print("Ki = ");
-  SerialUSB.println(Ki, 5);
-  SerialUSB.print("Kd = ");
-  SerialUSB.println(Kd, 5);
+  Kp = temp_Kp / loops;
+  Ki = temp_Ki / loops;
+  Kd = temp_Kd / loops;
+
+  int_Kp = ((1024.0 * (temp_Kp / loops)) + 0.5);
+  int_Ki = ((1024.0 * (temp_Ki / loops)) + 0.5);
+  int_Kd = ((1024.0 * (temp_Kd / loops)) + 0.5);
+
+
+  if (!gui) {
+    SerialUSB.print("Kp = ");
+    SerialUSB.println(Kp, 5);
+    SerialUSB.print("Ki = ");
+    SerialUSB.println(Ki, 5);
+    SerialUSB.print("Kd = ");
+    SerialUSB.println(Kd, 5);
+  }
+  if (gui) {
+    paramter_streamer(false, true);
+  }
 
   enableTC5Interrupts();
 }
@@ -1100,6 +1012,72 @@ float digitalSmooth(int rawIn, int *sensSmoothArray) {    // "int *sensSmoothArr
 
 
 
+int measure_noise() {
+
+  disableTC5Interrupts();
+
+
+  delay(100);
+  int counter = 0;
+  float points[500] = {0};
+
+  unsigned long now = micros();
+  unsigned long last_time = now;
+  int dt = ((1000000.0 / FPID) - 1);
+
+
+  while (counter < 500) {
+    now = micros();
+    if (now > last_time + dt) {
+      last_time = now;
+
+      points[counter] = y;
+      counter++;
+    }
+  }
+
+  float mean = 0;
+  for (int i = 0; i < 500; i++) {
+    mean = mean + points[i];
+  }
+  mean = mean / 500.0;
+
+  float upper = 0;
+  float lower = 0;
+  int upcounter = 0;
+  int lowcounter = 0;
+
+  for (int i = 0; i < 500; i++) {
+    if (points[i] > mean ) {
+      upcounter++;
+      upper = upper + points[i];
+    }
+    else if (points[i] < mean) {
+      lowcounter++;
+      lower = lower + points[i];
+    }
+  }
+  upper = upper / upcounter;
+  lower = lower / lowcounter;
+
+  float highest = mean;
+  float lowest = mean;
+
+  for (int i = 0; i < 500; i++) {
+    if (points[i] > highest) {
+      highest = points[i];
+    }
+    else if (points[i] < lowest) {
+      lowest = points[i];
+    }
+  }
+
+  enableTC5Interrupts();
+  return abs((abs(highest) - abs(lowest)));
+
+}
+
+
 
 bool canceled() {
   if (SerialUSB.peek() == 'c') {
@@ -1108,6 +1086,8 @@ bool canceled() {
     SerialUSB.read();
     SerialUSB.println();
     SerialUSB.println("canceled!");
+    enabled = false;
+    error_register = 0B1000000000000000;
     enableTC5Interrupts();
     return true;
   }
@@ -1146,6 +1126,7 @@ int sign(int input) {
 
 void boot() {
   SerialUSB.begin(baudrate);
+  cmdInit(&SerialUSB);
 
   delay(1000);
 
@@ -1187,14 +1168,6 @@ void boot() {
   // resetting the error register
   error_register = 0B1000000000000000;
 
-  SerialUSB.print("checking lookup table:");
-  bool error = check_lookup(false);
-  if (error) {
-    SerialUSB.println(" ERROR! The lookup table has some failure! send \" check \" to get further informations!");
-  }
-  else {
-    SerialUSB.println(" OK");
-  }
 
 
   SerialUSB.println(bootscreen_1);
@@ -1217,126 +1190,13 @@ void boot() {
   SerialUSB.print("   identifier: ");
   SerialUSB.println(identifier);
   SerialUSB.println("");
+  SerialUSB.print("CMD >> ");
 
-  Serial_menu();
-
-  SerialUSB.println("");
-  SerialUSB.println(":>");
 
 }
 
 
 
-bool check_lookup(bool output) {
-
-  if (output) {
-    SerialUSB.println("//---- checking lookup table ----");
-    SerialUSB.println("");
-  }
-
-  int minimal = 36000;
-  int maximal = 0;
-  int max_dx = 0;
-  int dx = 0;
-
-  int last_temp = pgm_read_word_near(lookup + 16383);
-  // int temp = 0;
-  bool error = false;
-
-
-  for (int i = 0; i < 16384; i++) {
-    int temp = pgm_read_word_near(lookup + i);
-
-    if (temp < minimal) {
-      minimal = temp;
-    }
-    else if (temp > maximal) {
-      maximal = temp;
-    }
-
-    dx = temp - last_temp;
-
-    if (dx < -18000) {
-      dx = dx + 36000;
-    }
-
-    if (dx > max_dx) {
-      max_dx = dx;
-    }
-
-    last_temp = temp;
-  }
-
-  if (output) {
-    SerialUSB.print("delta value: ");
-    SerialUSB.println(max_dx);
-
-    SerialUSB.print("minimal value: ");
-    SerialUSB.println(minimal);
-
-    SerialUSB.print("maximal value: ");
-    SerialUSB.println(maximal);
-
-    SerialUSB.println("");
-  }
-
-  if (minimal > 3) {
-    if (output) {
-      SerialUSB.println("minimal value to high");
-    }
-    error = true;
-    error_register = error_register | 0B0000000000001000;
-  }
-
-  if (minimal < 0) {
-    if (output) {
-      SerialUSB.println("minimal value to low");
-    }
-    error = true;
-    error_register = error_register | 0B0000000000001000;
-  }
-
-  if (maximal > 36000) {
-    if (output) {
-      SerialUSB.println("maximal value to high");
-    }
-    error = true;
-    error_register = error_register | 0B0000000000001000;
-  }
-
-  if (maximal < 35995) {
-    if (output) {
-      SerialUSB.println("maximal value to low");
-    }
-    error = true;
-    error_register = error_register | 0B0000000000001000;
-  }
-
-  if (max_dx > 5) {
-    if (output) {
-      SerialUSB.println("step between elements to high");
-    }
-    error = true;
-    error_register = error_register | 0B0000000000001000;
-  }
-
-  if (max_dx < 1) {
-    if (output) {
-      SerialUSB.println("step between elements to low");
-    }
-    error = true;
-    error_register = error_register | 0B0000000000001000;
-  }
-
-
-  if (output && !error) {
-
-    SerialUSB.println("");
-    SerialUSB.println("Looks good!");
-  }
-
-  return error;
-}
 
 //                            timing error                    maximal error                   maximal current                       lookuptable
 bool LED_pattern[4][10] = { {1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}, {1, 1, 1, 1, 1, 1, 0, 1, 0, 1}};
@@ -1419,4 +1279,690 @@ void error_led() {
     last_time = current_time;
   }
 }
+
+
+float test_move(int steps, int F_Sample, bool output, char identifier) {
+
+  unsigned int current_time = micros();
+  unsigned int next_time = current_time;
+
+  unsigned int dt = 1000000 / F_Sample;
+
+  int counter = 0;
+
+  int answer[1000];
+  int target[1000];
+
+  int omega_answer[1000];
+  int omega_target[1000];
+
+  int int_pessen_Kp_old = int_pessen_Kp;
+  int int_pessen_Ki_old = int_pessen_Ki;
+  int int_pessen_Kd_old = int_pessen_Kd;
+
+
+  int_pessen_Kp = int_Kp;
+  int_pessen_Ki = int_Ki;
+  int_pessen_Kd = int_Kd;
+
+
+  enabled = true;
+
+  // save the first value;
+  target[0] = step_target;
+
+  // calculate the target vector
+  for (int i = 1; i < 1000; i++) {
+
+    if (i <= 100) {
+      target[i] = target[i - 1] + ((i * steps) / 100.0);
+    }
+    else if (100 < i && i <= 400) {
+      // const velocity
+      target[i] = target[i - 1] + steps;
+    }
+    else if (400 < i && i <= 500) {
+      //slow down
+      target[i] = target[i - 1] + (((500 - i) * steps) / 100.0);
+    }
+    else if (500 < i && i <= 600) {
+      // accelerate
+      target[i] = target[i - 1] - (((i - 500) * steps) / 100.0);
+    }
+    else if (600 < i && i < 900) {
+      // const velocity
+      target[i] = target[i - 1] - steps;
+    }
+    else {
+      //slow down
+      target[i] = target[i - 1] - (((1000 - i) * steps) / 100.0);
+    }
+
+  }
+
+  while (counter < 1000) {
+    current_time = micros();
+
+
+    if (current_time >= next_time) {
+      next_time = current_time + dt;
+
+      answer[counter] = y;
+      omega_answer[counter] = omega;
+      step_target = target[counter];
+
+      counter += 1;
+    }
+  }
+
+  // canceling call if something goes wrong
+  if (canceled()) {
+    return -1;
+  }
+
+  for (int i = 0; i < 1000; i++) {
+    target[i] = target[i] * stepangle;
+  }
+
+
+  //disable motor
+  enabled = false;
+
+
+  // calculate the velocity profiles
+  for (int i = 0; i < 999; i++) {
+    omega_target[i] = ((target[i + 1] - target[i]) * F_Sample) / FPID;
+  }
+  omega_target[999] = omega_target[998];
+
+
+
+  float error_omega = 0.0;
+  for (int i = 0; i < 1000; i++) {
+    error_omega = error_omega + ((omega_target[i] - omega_answer[i]) * (omega_target[i] - omega_answer[i])) ;
+  }
+  error_omega = error_omega;
+
+  float error_position = 0.0;
+  for (int i = 0; i < 1000; i++) {
+    error_position = error_position + ((target[i] - answer[i]) * (target[i] - answer[i])) ;
+  }
+  error_position = error_position / 15.0;
+
+  float cost = error_position + error_omega;
+
+  int_pessen_Kp = int_pessen_Kp_old;
+  int_pessen_Ki = int_pessen_Ki_old;
+  int_pessen_Kd = int_pessen_Kd_old;
+
+  delay(100);
+  if (output) {
+    for (int i = 0; i < 1000; i++) {
+      SerialUSB.print(identifier);
+      SerialUSB.print(',');
+      SerialUSB.print(target[i]);
+      SerialUSB.print(';');
+      SerialUSB.print(answer[i]);
+      SerialUSB.print(';');
+      SerialUSB.print(omega_target[i]);
+      SerialUSB.print(';');
+      SerialUSB.println(omega_answer[i]);
+    }
+  }
+  return (cost);
+}
+
+
+
+void downhill_simplex(int arg_cnt, char **args) {
+
+
+  int F_Sample = return_integer_argument(args, arg_cnt, "-f", 5000, 200, 10000);
+  int velocity = return_integer_argument(args, arg_cnt, "-v", 60, 10, 100);
+  bool output = check_argument(args, arg_cnt, "-o");
+  bool gui = check_argument(args, arg_cnt, "-gui");
+
+  if (gui) {
+    output = true;
+  }
+
+  if (!gui) {
+    SerialUSB.println(downhill_header);
+    SerialUSB.println(cancle_header);
+    SerialUSB.println(" ");
+
+    SerialUSB.print("Samplerate = ");
+    SerialUSB.print(F_Sample);
+    SerialUSB.println(" Hz");
+    SerialUSB.print("velocity = ");
+    SerialUSB.print(velocity);
+    SerialUSB.println(" mm/s");
+  }
+
+  int steps = (velocity * steps_per_revolution * microstepping * step_add) / (mm_rev * F_Sample);
+
+  if (Kff == 0.0) {
+    Kff = 0.01;
+  }
+  if (Kacc == 0.0) {
+    Kacc = 0.01;
+  }
+
+  int_Kp = (1024.0 * Kp) + 0.5;
+  int_Ki = (1024.0 * Ki) + 0.5;
+  int_Kd = (1024.0 * Kd) + 0.5;
+  int_Kff = (Kff * 1024.0) + 0.5;
+  int_Kacc = (Kacc * 1024.0) + 0.5;
+
+  paramter_streamer(false, true);
+
+  float init_jump = 1.2;
+  float p_max = return_float_argument(args, arg_cnt, "-p", 2.0);
+  float i_max = return_float_argument(args, arg_cnt, "-i", 0.5);
+  float d_max = return_float_argument(args, arg_cnt, "-d", 8.0);
+  float Kff_max = return_float_argument(args, arg_cnt, "-kf", 0.02);
+  float Kacc_max = return_float_argument(args, arg_cnt, "-ka", 0.02);
+
+  // generate startpoints
+  float p[6][5] = {{Kp, Ki, Kd, Kff, Kacc},
+    {init_jump * Kp, Ki, Kd, Kff, Kacc},
+    {Kp, init_jump * Ki, Kd, Kff, Kacc},
+    {Kp, Ki, init_jump * Kd, Kff, Kacc},
+    {Kp, Ki, Kd, init_jump * Kff, Kacc},
+    {Kp, Ki, Kd, Kff, init_jump * Kacc}
+  };
+
+
+  float alpha = 1.0;
+  float gamma = 2.0;
+  float beta = 0.5;
+  float sigma = 0.5;
+
+  float last_Kp = Kp;
+  float last_Ki = Ki;
+  float last_Kd = Kd;
+  float last_Kff = Kff;
+  float last_Kacc = Kacc;
+
+  float cost[6] = {0, 0, 0, 0, 0, 0};
+
+  bool changed[6] = {1, 1, 1, 1, 1, 1};
+
+  byte worst_idx = 0;
+  byte mid_idx = 0;
+  byte best_idx = 0;
+
+  int counter = 0;
+
+  float r[5];
+  float e[5];
+  float c[5];
+
+  bool  cancle_crit = 1;
+
+  while (cancle_crit) {
+    counter = counter + 1;
+
+    // canceling call if something goes wrong
+    if (canceled()) return;
+
+    for (int i = 0; i < 6; i++) {
+      if (changed[i] == 1) {
+        changed[i] = 0;
+
+        Kp = p[i][0];
+        Ki = p[i][1];
+        Kd = p[i][2];
+        Kff = p[i][3];
+        Kacc = p[i][4];
+
+        int_Kp = (1024.0 * Kp) + 0.5;
+        int_Ki = (1024.0 * Ki) + 0.5;
+        int_Kd = (1024.0 * Kd) + 0.5;
+        int_Kff = (Kff * 1024.0) + 0.5;
+        int_Kacc = (Kacc * 1024.0) + 0.5;
+
+        cost[i] = 0;
+        for (byte j = 0; j < 4; j++) {
+          if (j < 3) {
+            cost[i] = cost[i] + test_move(steps, F_Sample, 0, 'a');
+          }
+          else {
+            cost[i] = cost[i] + test_move(steps, F_Sample, output, 'a');
+          }
+
+          // canceling call if something goes wrong
+          if (canceled()) return;
+        }
+        cost[i] = cost[i] / 4.0;
+
+        if (gui) {
+          paramter_streamer(false, true);
+        }
+
+      }
+    }
+
+    float min_cost = 100000;
+    float max_cost = 0;
+
+    for (int i = 0; i < 6; i++) {
+
+      if (cost[i] < min_cost) {
+        min_cost = cost[i];
+        best_idx = i;
+      }
+
+      if (cost[i] > max_cost) {
+        max_cost = cost[i];
+        worst_idx = i;
+      }
+
+    }
+
+
+    byte mid_idxs[4] = {0, 0, 0, 0};
+    byte mid_counter = 0;
+    for (int i = 0; i < 6; i++) {
+
+      if (i != best_idx && i != worst_idx) {
+        mid_idxs[i] = i;
+
+        mid_counter++;
+      }
+    }
+
+    int best_mid_cost = 1000000;
+
+    for (int i = 0; i > 4; i++) {
+      if (cost[mid_idxs[i]] < best_mid_cost) {
+        best_mid_cost = cost[mid_idxs[i]];
+        mid_idx = mid_idxs[i];
+      }
+
+    }
+
+
+    float p_sum = 0;
+    float i_sum = 0;
+    float d_sum = 0;
+    float Kff_sum = 0;
+    float Kacc_sum = 0;
+
+    for (int i = 0; i < 6; i++) {
+      if (i != worst_idx) {
+        p_sum = p_sum + p[i][0];
+        i_sum = i_sum + p[i][1];
+        d_sum = d_sum + p[i][2];
+        Kff_sum = Kff_sum + p[i][3];
+        Kacc_sum = Kacc_sum + p[i][4];
+      }
+    }
+    p_sum = p_sum / 5.0;
+    i_sum = i_sum / 5.0;
+    d_sum = d_sum / 5.0;
+    Kff_sum = Kff_sum / 5.0;
+    Kacc_sum = Kacc_sum / 5.0;
+
+
+    r[0] = (1 + alpha) * p_sum - alpha * p[worst_idx][0];
+    r[1] = (1 + alpha) * i_sum - alpha * p[worst_idx][1];
+    r[2] = (1 + alpha) * d_sum - alpha * p[worst_idx][2];
+    r[3] = (1 + alpha) * Kff_sum - alpha * p[worst_idx][3];
+    r[4] = (1 + alpha) * Kacc_sum - alpha * p[worst_idx][4];
+
+    r[0] = constrain(r[0], 0, p_max);
+    r[1] = constrain(r[1], 0, i_max);
+    r[2] = constrain(r[2], 0, d_max);
+    r[3] = constrain(r[3], 0, Kff_max);
+    r[4] = constrain(r[4], 0, Kacc_max);
+
+    Kp = r[0];
+    Ki = r[1];
+    Kd = r[2];
+    Kff = r[3];
+    Kacc = r[4];
+
+    int_Kp = (1024.0 * Kp) + 0.5;
+    int_Ki = (1024.0 * Ki) + 0.5;
+    int_Kd = (1024.0 * Kd) + 0.5;
+    int_Kff = (Kff * 1024.0) + 0.5;
+    int_Kacc = (Kacc * 1024.0) + 0.5;
+
+    float temp_Cost_r = 0;
+
+    for (byte j = 0; j < 4; j++) {
+
+      if (j < 3) {
+        temp_Cost_r = temp_Cost_r + test_move(steps, F_Sample, 0, 'a');
+      }
+      else {
+        temp_Cost_r = temp_Cost_r +  test_move(steps, F_Sample, output, 'a');
+      }
+
+      // canceling call if something goes wrong
+      if (canceled()) return;
+    }
+    temp_Cost_r = temp_Cost_r / 4.0;
+
+    if (gui) {
+      paramter_streamer(false, true);
+    }
+
+
+    if (temp_Cost_r < cost[best_idx]) {
+      e[0] = (1 + gamma) * p_sum - gamma * p[worst_idx][0];
+      e[1] = (1 + gamma) * i_sum - gamma * p[worst_idx][1];
+      e[2] = (1 + gamma) * d_sum - gamma * p[worst_idx][2];
+      e[3] = (1 + gamma) * Kff_sum - gamma * p[worst_idx][3];
+      e[4] = (1 + gamma) * Kacc_sum - gamma * p[worst_idx][4];
+
+      e[0] = constrain(e[0], 0, p_max);
+      e[1] = constrain(e[1], 0, i_max);
+      e[2] = constrain(e[2], 0, d_max);
+      e[3] = constrain(e[3], 0, Kff_max);
+      e[4] = constrain(e[4], 0, Kacc_max);
+
+      Kp = e[0];
+      Ki = e[1];
+      Kd = e[2];
+      Kff = e[3];
+      Kacc = e[4];
+
+
+      int_Kp = (1024.0 * Kp) + 0.5;
+      int_Ki = (1024.0 * Ki) + 0.5;
+      int_Kd = (1024.0 * Kd) + 0.5;
+      int_Kff = (Kff * 1024.0) + 0.5;
+      int_Kacc = (Kacc * 1024.0) + 0.5;
+
+      float temp_Cost_e = 0;
+      for (byte j = 0; j < 4; j++) {
+        if (j < 3) {
+          temp_Cost_e = temp_Cost_e + test_move(steps, F_Sample, 0, 'a');
+        }
+        else {
+          temp_Cost_e = temp_Cost_e +  test_move(steps, F_Sample, output, 'a');
+        }
+
+        // canceling call if something goes wrong
+        if (canceled()) return;
+      }
+      temp_Cost_e = temp_Cost_e / 4.0;
+
+      if (gui) {
+        paramter_streamer(false, true);
+      }
+
+      if (temp_Cost_e < temp_Cost_r) {
+
+        p[worst_idx][0] = e[0];
+        p[worst_idx][1] = e[1];
+        p[worst_idx][2] = e[2];
+        p[worst_idx][3] = e[3];
+        p[worst_idx][4] = e[4];
+
+        changed[worst_idx] = 1;
+
+      }
+      else {
+        p[worst_idx][0] = r[0];
+        p[worst_idx][1] = r[1];
+        p[worst_idx][2] = r[2];
+        p[worst_idx][3] = r[3];
+        p[worst_idx][4] = r[4];
+
+        changed[worst_idx] = 1;
+      }
+
+    }
+    else {
+
+
+      if (temp_Cost_r < cost[mid_idx]) {
+
+        p[worst_idx][0] = r[0];
+        p[worst_idx][1] = r[1];
+        p[worst_idx][2] = r[2];
+        p[worst_idx][3] = r[3];
+        p[worst_idx][4] = r[4];
+
+        changed[worst_idx] = 1;
+
+      }
+      else {
+
+        if (temp_Cost_r < cost[worst_idx]) {
+          c[0] = beta * p_sum + (1 - beta) * r[0];
+          c[1] = beta * i_sum + (1 - beta) * r[1];
+          c[2] = beta * d_sum + (1 - beta) * r[2];
+          c[3] = beta * Kff_sum + (1 - beta) * r[3];
+          c[4] = beta * Kacc_sum + (1 - beta) * r[4];
+        }
+        else {
+          c[0] = beta * p_sum + (1 - beta) * p[worst_idx][0];
+          c[1] = beta * i_sum + (1 - beta) * p[worst_idx][1];
+          c[2] = beta * d_sum + (1 - beta) * p[worst_idx][2];
+          c[3] = beta * Kff_sum + (1 - beta) * p[worst_idx][3];
+          c[4] = beta * Kacc_sum + (1 - beta) * p[worst_idx][4];
+        }
+
+        c[0] = constrain(c[0], 0, p_max);
+        c[1] = constrain(c[1], 0, i_max);
+        c[2] = constrain(c[2], 0, d_max);
+        c[3] = constrain(c[3], 0, Kff_max);
+        c[4] = constrain(c[4], 0, Kacc_max);
+
+        Kp = c[0];
+        Ki = c[1];
+        Kd = c[2];
+        Kff = c[3];
+        Kacc = c[4];
+
+
+        int_Kp = (1024.0 * Kp) + 0.5;
+        int_Ki = (1024.0 * Ki) + 0.5;
+        int_Kd = (1024.0 * Kd) + 0.5;
+        int_Kff = (Kff * 1024.0) + 0.5;
+        int_Kacc = (Kacc * 1024.0) + 0.5;
+
+        float temp_Cost_c = 0;
+        for (byte j = 0; j < 4; j++) {
+          if (j < 3) {
+            temp_Cost_c = temp_Cost_c +  test_move(steps, F_Sample, 0, 'a');
+          }
+          else {
+            temp_Cost_c = temp_Cost_c +  test_move(steps, F_Sample, output, 'a');
+          }
+
+          // canceling call if something goes wrong
+          if (canceled()) return;
+        }
+        temp_Cost_c = temp_Cost_c / 4.0;
+
+        if (gui) {
+          paramter_streamer(false, true);
+        }
+
+        if (temp_Cost_c < cost[worst_idx]) {
+
+          p[worst_idx][0] = c[0];
+          p[worst_idx][1] = c[1];
+          p[worst_idx][2] = c[2];
+          p[worst_idx][3] = c[3];
+          p[worst_idx][4] = c[4];
+
+          changed[worst_idx] = 1;
+        }
+        else {
+
+          for (int i = 0; i < 6; i++) {
+            if (i != best_idx) {
+              p[i][0] = sigma * p[best_idx][0] + (1 - sigma) * p[i][0];
+              p[i][1] = sigma * p[best_idx][1] + (1 - sigma) * p[i][1];
+              p[i][2] = sigma * p[best_idx][2] + (1 - sigma) * p[i][2];
+              p[i][3] = sigma * p[best_idx][3] + (1 - sigma) * p[i][3];
+              p[i][4] = sigma * p[best_idx][4] + (1 - sigma) * p[i][4];
+
+              changed[i] = 1;
+            }
+          }
+
+        }
+
+      }
+
+    }
+
+    float dKp = abs(Kp - last_Kp) * 1024.0;
+    float dKi = abs(Ki - last_Ki) * 1024.0;
+    float dKd = abs(Kd - last_Kd) * 1024.0;
+    float dKff = abs(Kff - last_Kff) * 1024.0;
+    float dKacc = abs(Kacc - last_Kacc) * 1024.0;
+
+    cancle_crit = (dKp > 1.0) || (dKi > 1.0) || (dKd > 1.0) || (dKff > 1.0) || (dKacc > 1.0);
+
+    last_Kp = Kp;
+    last_Ki = Ki;
+    last_Kd = Kd;
+    last_Kff = Kff;
+    last_Kacc = Kacc;
+
+  }
+
+
+  // we are ready search the best settings of all and set them
+  float min_cost = 1000000;
+  for (int i = 0; i < 4; i++) {
+
+    if (cost[i] < min_cost) {
+      min_cost = cost[i];
+      best_idx = i;
+    }
+  }
+
+  Kp = p[best_idx][0];
+  Ki = p[best_idx][1];
+  Kd = p[best_idx][2];
+  Kff = p[best_idx][3];
+  Kacc = p[best_idx][4];
+
+  int_Kp = (1024.0 * Kp) + 0.5;
+  int_Ki = (1024.0 * Ki) + 0.5;
+  int_Kd = (1024.0 * Kd) + 0.5;
+  int_Kff = (Kff * 1024.0) + 0.5;
+  int_Kacc = (Kacc * 1024.0) + 0.5;
+
+
+  // we are finished there is no improvment possible
+  int_pessen_Kp = (1024.0 * ((Kp * 0.7) / (0.6))) + 0.5;
+  int_pessen_Ki = (1024.0 * ((Ki * 0.7 * 2.5) / (2 * 0.6))) + 0.5;
+  int_pessen_Kd = (1024.0 * ((Kd * 8.0 * 0.7) / (20.0 * 0.6))) + 0.5;
+
+
+  if (!gui) {
+    paramter_streamer (true, false);
+  } else {
+    paramter_streamer(false, true);
+  }
+
+
+}
+
+
+void paramter_streamer (bool output, bool gui) {
+
+  if (output) {
+    SerialUSB.print("identifier = ");
+    SerialUSB.println(identifier);
+
+    SerialUSB.print("steps_per_revolution = ");
+    SerialUSB.println(steps_per_revolution);
+
+    SerialUSB.print("microstepping = ");
+    SerialUSB.println(microstepping);
+
+    SerialUSB.print("iMAX = ");
+    SerialUSB.println(iMAX);
+
+    SerialUSB.print("error_led_value = ");
+    SerialUSB.println(error_led_value);
+
+    SerialUSB.print("M_max = ");
+    SerialUSB.println(M_max);
+
+    SerialUSB.print("I_rated = ");
+    SerialUSB.println(I_rated);
+
+    SerialUSB.print("Kp = ");
+    SerialUSB.println(Kp, 5);
+
+    SerialUSB.print("Ki = ");
+    SerialUSB.println(Ki, 5);
+
+    SerialUSB.print("Kd = ");
+    SerialUSB.println(Kd, 5);
+
+    SerialUSB.print("Kff = ");
+    SerialUSB.println(Kff, 5);
+
+    SerialUSB.print("Kacc = ");
+    SerialUSB.println(Kacc, 5);
+
+    SerialUSB.print("D_Term_LPF = ");
+    SerialUSB.println(D_Term_LPF);
+
+    SerialUSB.print("effort_LPF = ");
+    SerialUSB.println(u_LPF);
+
+    SerialUSB.print("mm_rev = ");
+    SerialUSB.println(mm_rev);
+
+    SerialUSB.print("USE_ENABLE_PIN = ");
+    SerialUSB.println(USE_ENABLE_PIN);
+
+    SerialUSB.print("INVERT = ");
+    SerialUSB.println(INVERT);
+  }
+
+  if (gui) {
+    SerialUSB.print('p');
+    SerialUSB.write(',');
+    SerialUSB.print(identifier);
+    SerialUSB.write(';');
+    SerialUSB.print(steps_per_revolution);
+    SerialUSB.write(';');
+    SerialUSB.print(microstepping);
+    SerialUSB.write(';');
+    SerialUSB.print(iMAX);
+    SerialUSB.write(';');
+    SerialUSB.print(M_max);
+    SerialUSB.write(';');
+    SerialUSB.print(I_rated);
+    SerialUSB.write(';');
+    SerialUSB.print(Kp, 5);
+    SerialUSB.write(';');
+    SerialUSB.print(Ki, 5);
+    SerialUSB.write(';');
+    SerialUSB.print(Kd, 5);
+    SerialUSB.write(';');
+    SerialUSB.print(D_Term_LPF);
+    SerialUSB.write(';');
+    SerialUSB.print(mm_rev);
+    SerialUSB.write(';');
+    SerialUSB.print(error_led_value);
+    SerialUSB.write(';');
+    SerialUSB.print(USE_ENABLE_PIN);
+    SerialUSB.write(';');
+    SerialUSB.print(INVERT);
+    SerialUSB.write(';');
+    SerialUSB.print(u_LPF);
+    SerialUSB.write(';');
+    SerialUSB.print(Kff, 5);
+    SerialUSB.write(';');
+    SerialUSB.print(Kacc, 5);
+    SerialUSB.println();
+  }
+}
+
 

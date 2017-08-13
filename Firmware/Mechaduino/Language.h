@@ -2,111 +2,107 @@
 #define __LANGUAGE_H__
 #include "Configuration.h"
 
-const String cancle_header = "press c to cancle";
 
-const String calibrate_command = "calibrate";
-const String calibrate_menu = "starts the calibration routine";
-const String calibrate_header = "//---- Starting calibration routine ----";
-
-
-const String diagnostics_command  = "diagnose";
-const String diagnostics_menu = "read Encoder Diagnostics";
-const String diagnostics_header = "//---- Checking AS5047 diagnostic and error registers ---- \n\r See AS5047 datasheet for details";
-
-
-const String disable_command  = "disable";
-const String disable_menu = "disables the motor";
-const String disable_header = "//---- Motor disabled ----";
-
-
-const String getstate_command  = "state";
-const String getstate_menu = "shows the current motor state";
-const String getstate_header = "//---- State ----";
-
-
-const String editparam_command  = "editparam";
-const String editparam_menu = "submenu to edit the parameter";
-const String editparam_header = "//---- Edit parameter ----";
+// command structure, can be modified in Serial.cpp
+/*
+  cmdAdd("help", Serial_menu);
+  cmdAdd("calibrate", calibration);
+  cmdAdd("diagnose", readEncoderDiagnostics);
+  cmdAdd("state", state);
+  cmdAdd("stream",  set_streaming);
+  cmdAdd("parameter", parameterEdit);
+  cmdAdd("setpoint", setpoint );
+  cmdAdd("reset", SoftReset);
+  cmdAdd("dirac", dirac);
+  cmdAdd("response", step_response);
+  cmdAdd("error", error_reg);
+  cmdAdd("autotune", PID_autotune);
+  cmdAdd("downhill", downhill_simplex);
+  cmdAdd("testmove", start_testmove);
+  cmdAdd("interrupt", set_TC);
+*/
 
 
-const String enable_command  = "enable";
-const String enable_menu = "enables the motor";
-const String enable_header = "//---- Motor enabled ----";
-const String dir_header = "//---- Direction = ";
+const String help_command ="help";
+const String help_menu ="prints this menu";
+const String help_header ="//---- Mainmenu -----";
 
 
-const String read_command  = "read";
-const String read_menu = "reads the current angle";
-const String read_header = "//---- current Setpoint ---- \n\r current setpoint = ";
+const String cancle_header ="press c to cancle";
 
 
-const String reset_command  = "reset";
-const String reset_menu = "resets the board";
-const String reset_header = "//---- reseting ---- \n\r Please re-open the Serialmonitor";
+const String calibrate_command ="calibrate";
+const String calibrate_menu ="starts the calibration routine";
+const String calibrate_header ="//---- Starting calibration routine ----";
 
 
-const String step_response_command  = "response";
-const String step_response_menu = "generates a step response";
-const String step_response_header = "//---- Step response ---- \n Number of steps = ";
-
-const String dirac_command  = "dirac";
-const String dirac_header = "//---- Dirac delta function ---- \n";
+const String diagnostics_command  ="diagnose";
+const String diagnostics_menu ="read Encoder Diagnostics";
+const String diagnostics_header ="//---- Checking AS5047 diagnostic and error registers ---- \n\r See AS5047 datasheet for details";
 
 
-const String help_command  = "help";
-const String help_menu = "prints this menu";
-const String help_header = "//---- Mainmenu -----";
+const String state_command  ="state";
+const String state_menu ="shows and sets the motor state [-on, -off]";
+const String state_header ="//---- State ----";
 
 
-const String parameter_command  = "param";
-const String parameter_menu = "print the current PID parameter";
-const String parameter_header = "//---- PID Values -----";
+const String stream_command ="stream";
+const String stream_menu ="streams servo parameters [-f {int}, -on, -off]";
+const String stream_header ="//---- Streaming Handler ----";
 
 
-const String set_command  = "set";
-const String set_menu = "enter new set point";
-const String set_header = "//---- Setpoint ---- \n\r new setpoint = ";
+const String parameter_command  ="parameter";
+const String parameter_menu ="Get or set parameter [-set {-parameter} {value}, -get]";
+const String parameter_header ="//---- Parameter menu ----";
 
 
-const String autotune_command  = "autotune";
-const String autotune_menu = "PID auto tune";
-const String autotune_header = "//---- Autotuning the current PID controller --- \n\r Enter number of tuning cycles";
+const String setpoint_command ="setpoint";
+const String setpoint_menu ="Get or set setpoint [-set {float}]";
+const String setpoint_header ="//----  Setpoint ----";
 
 
-const String looptime_command  = "loop";
-const String looptime_menu = "calculates the maximal loopfrequency";
-const String looptime_header = "//---- Measuring loop time ---- \n\r make sure the motor is moving!";
+const String reset_command  ="reset";
+const String reset_menu ="resets the board";
+const String reset_header ="//---- reseting ---- \n\r Please re-open the Serialmonitor";
 
 
-const String noise_command  = "noise";
-const String noise_menu = "measures the noise of the encoder";
-const String noise_header = "//---- Measuring noise ----";
+const String dirac_command  ="dirac";
+const String dirac_menu ="generates a dirac delta distrebution [-f {int}]";
+const String dirac_header ="//---- Dirac delta function ----";
 
 
-const String check_lookup_command = "check";
-const String check_lookup_menu = "check the lookup table";
-const String check_lookup_header = "//---- checking lookup table ----";
+const String step_response_command  ="response";
+const String step_response_menu ="generates a step response [-f {int}, -s {int}]";
+const String step_response_header ="//---- Step response ---- \n";
 
 
-const String print_error_command = "error";
-const String print_error_menu = "outputs the mechaduino error register";
-const String print_error_header = "//---- Checking Mechaduino diagnostic and error register ----";
-
-const String reset_error_command = "reset_error";
-const String reset_error_menu = "resets the mechaduino error register";
-const String reset_error_header = "//---- resetting error register ----";
+const String error_command ="error";
+const String error_menu ="get or reset the error register [-reset]";
+const String error_header ="//---- Checking Mechaduino diagnostic and error register ----";
 
 
+const String autotune_command  ="autotune";
+const String autotune_menu ="PID auto tune [-c {byte}, -d]";
+const String autotune_header ="//---- Autotuning the current PID controller ----";
 
-const String stream_start_command = "start_stream";
-const String stream_stop_command = "stop_stream";
 
-const String anticogging_command = "cogging";
+const String downhill_command ="downhill";
+const String downhill_menu ="Downhhill simplex algorithm [-f {int}, -v {int}, -o]";
+const String downhill_header ="//---- Autotuning the current PID controller ----";
 
-const String load_param_command = "load_param";
 
-const String disableTC5 = "TC_off";
-const String enableTC5 = "TC_on";
+const String test_command ="testmove";
+const String test_menu ="Starts a testmove for the servo [-f {int}, -v {int}, -o]";
+const String test_header ="//---- Test move ----";
+
+
+const String interrupt_command ="interrupt";
+const String interrupt_menu= "Starts or stops the ISR [-TC5 {bool}, -TC4 {bool}]";
+const String interrupt_header ="//---- ISR ----";
+
+
+
+
 
 
 const String procent_bar = "|---+----+----+----+----+----+----+----+----+----|";

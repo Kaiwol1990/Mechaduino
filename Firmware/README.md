@@ -15,6 +15,7 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - added some filtering to the effort and D-Term
 - Changed the frequency of the PID loop to 5 kHz
 - Encoder readings are placed in its own ISR that runs with 10 kHz (oversampling)
+- maximal step frequency = 40 kHz
 - changed the PWM resolution from 8 bit to 9 bit
 - PID auto tuning
 - The lookup table is now in its own file (lookup_table.cpp)
@@ -23,7 +24,7 @@ Original code can be found under: https://github.com/jcchurch13/Mechaduino-Firmw
 - added an invert direction setting
 - simple error register to save if an error occurred
 - LED shows errors by different blinking patterns
-
+- downhill simplex algorithm to fine tune the pid settings
 
 ### LED blink pattern:
 If an error occures the led will switch from constant on to different patterns. These patterns are separated from each other by a longer pause. After this pause one pattern will be shown and then after the pause the next pattern will be shown.
@@ -39,25 +40,22 @@ If an error occures the led will switch from constant on to different patterns. 
 ### List of commands
 To get an list of the possible commands send help over the serial monitor
 
-|Command|Description|
-|-------|-----------|
-|help | prints this menu|
-|error | outputs the mechaduino error register|
-|reset_error | resets the mechaduino error register|
-|diagnose | read Encoder Diagnostics|
-|check | check the lookup table|
-|enable | enables the motor|
-|disable | disables the motor|
-|param | print the current PID parameter|
-|editparam | submenu to edit the parameter|
-|read | reads the current angle|
-|set | enter new set point|
-|state | shows the current motor state|
-|calibrate | starts the calibration routine|
-|autotune | PID auto tune|
-|response | generates a step response|
-|noise | measures the noise of the encoder|
-|reset | resets the board|
+|Command|Description|Arguments|
+|-------|-----------|---------|
+|help | prints this menu |
+|calibrate | starts the calibration routine | |
+|diagnose | read Encoder Diagnostics | |
+|state | shows and sets the motor state | -on, -off |
+|stream | streams servo parameters | -f {int}, -on, -off |
+|parameter | Get or set parameter | -set {-parameter} {value}, -get |
+|error | get or reset the error register | -reset |
+|dirac | generates a Delta-Distribution | -f {int} |
+|response | generates a step response | -f {int}, -s {int} |
+|error | get or reset the error register | -reset |
+|autotune | PID auto tune | -c {byte}, -d |
+|downhill | Downhhill simplex algorithm | -f {int}, -v {int}, -o |
+|testmove | Starts a testmove for the servo | -f {int}, -v {int}, -o |
+|interrupt | Starts or stops the ISR | -TC5 {bool}, -TC4 {bool} |
 
 # License
 All Mechaduino related materials are released under the Creative Commons Attribution Share-Alike 4.0 License

@@ -5,7 +5,7 @@
 
 //----current settings-----
 const float rSense = 0.150;                           		// resistor value
-int uMAX = ((512.0 * iMAX * 10 * rSense) / (1000 * 3.3)); 	// max voltage for the vref pins
+int uMAX = ((512.0 * iMAX * 10.0 * rSense) / (1000.0 * 3.3)); 	// max voltage for the vref pins
 int phase_multiplier = ((steps_per_revolution / 4) / 10);
 
 
@@ -20,5 +20,5 @@ int target_dt = 1.1 * (1000000 / FPID);
 
 int step_add = 1024 / microstepping;
 
-int32_t ITerm_max = uMAX * 1000;
+int ITerm_max = uMAX * 1024.0;
 

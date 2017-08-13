@@ -1,8 +1,6 @@
 #include "Arduino.h"
 #include "wiring_private.h"
 
-static uint_fast8_t _readResolution = 9;
-static uint_fast8_t _ADCResolution = 9;
 static uint_fast8_t _writeResolution = 9;
 
 // Wait for synchronization of registers between the clock domains
@@ -86,7 +84,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
 
   if ((attr & PIN_ATTR_PWM) == PIN_ATTR_PWM)
   {
-    value = mapResolution(value, _writeResolution, 9);
+    //value = mapResolution(value, _writeResolution, 9);
 
     uint32_t tcNum = GetTCNumber(pinDesc.ulPWMChannel);
     uint8_t tcChannel = GetTCChannelNumber(pinDesc.ulPWMChannel);

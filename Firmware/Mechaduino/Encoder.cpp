@@ -9,7 +9,7 @@
 int readEncoder() {
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
-  SPI.transfer(0xFF);
+  SPI.transfer(0x3F);
   SPI.transfer(0xFF);
 
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
@@ -17,7 +17,7 @@ int readEncoder() {
   delayMicroseconds(1);
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
-  byte hibyte = SPI.transfer(0xFF);
+  byte hibyte = SPI.transfer(0x3F);
   byte lobyte = SPI.transfer(0xFF);
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 
@@ -35,7 +35,7 @@ int readAngle(int last_angle, int last_raw) {
   int32_t temp_angle;
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
-  SPI.transfer(0xFF);
+  SPI.transfer(0x3F);
   SPI.transfer(0xFF);
 
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
@@ -43,7 +43,7 @@ int readAngle(int last_angle, int last_raw) {
   delayMicroseconds(1);
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
-  byte hibyte = SPI.transfer(0xFF);
+  byte hibyte = SPI.transfer(0x3F);
   byte lobyte = SPI.transfer(0xFF);
   REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
 

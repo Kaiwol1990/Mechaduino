@@ -7,7 +7,6 @@
 #include "State.h"
 #include "lookup_table.h"
 
-#include <avr/pgmspace.h>
 
 
 //---- lookup tables for the sin and cosin shiftet by 45° ----
