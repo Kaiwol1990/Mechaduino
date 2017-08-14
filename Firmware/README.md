@@ -62,7 +62,7 @@ To get an list of the possible commands send help over the serial monitor
 |-------|-----------|
 |parameter -set -Kp 1.095 | Sets the proportional gain of the servo to 1.095 |
 |testmove -f 2500 -v 60 | Starts a test move with the velocity of 60 mm/s and a sampling rate of 2500 Hz |
-|testmove -v 60 | Starts a test move with the velocity of 60 mm/s and the default sampling rate of 5000 Hz |
+|testmove -v 60 -o | Starts a test move with the velocity of 60 mm/s and the default sampling rate of 5000 Hz. Outputs the sampled points to the serial monitor |
 
 # License
 All Mechaduino related materials are released under the Creative Commons Attribution Share-Alike 4.0 License
