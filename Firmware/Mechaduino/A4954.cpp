@@ -5,7 +5,6 @@
 #include "Configurationals.h"
 #include "analogFastWrite.h"
 #include "State.h"
-#include "lookup_table.h"
 
 
 

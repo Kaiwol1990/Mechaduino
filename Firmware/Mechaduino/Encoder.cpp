@@ -1,9 +1,9 @@
 #include "Encoder.h"
 #include <SPI.h>
-#include "lookup_table.h"
 #include "State.h"
 #include "Configuration.h"
 #include "Configurationals.h"
+#include "State.h"
 
 
 int readEncoder() {

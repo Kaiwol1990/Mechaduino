@@ -8,28 +8,27 @@
 #include "analogFastWrite.h"
 #include "A4954.h"
 #include "Encoder.h"
-#include "lookup_table.h"
 #include "board.h"
 #include "Language.h"
 #include "Cmd.h"
 
 void init_menu() {
 
-  cmdAdd("help", Serial_menu);
-  cmdAdd("calibrate", calibration);
-  cmdAdd("diagnose", readEncoderDiagnostics);
-  cmdAdd("state", state);
-  cmdAdd("stream",  set_streaming);
-  cmdAdd("parameter", parameterEdit);
-  cmdAdd("setpoint", setpoint );
-  cmdAdd("reset", SoftReset);
-  cmdAdd("dirac", dirac);
-  cmdAdd("response", step_response);
-  cmdAdd("error", error_reg);
-  cmdAdd("autotune", PID_autotune);
-  cmdAdd("downhill", downhill_simplex);
-  cmdAdd("testmove", start_testmove);
-  cmdAdd("interrupt", set_TC);
+  cmdAdd(help_command, Serial_menu);
+  cmdAdd(calibrate_command, calibration);
+  cmdAdd(diagnostics_command, readEncoderDiagnostics);
+  cmdAdd(state_command, state);
+  cmdAdd(stream_command,  set_streaming);
+  cmdAdd(parameter_command, parameterEdit);
+  cmdAdd(setpoint_command, setpoint );
+  cmdAdd(reset_command, SoftReset);
+  cmdAdd(dirac_command, dirac);
+  cmdAdd(step_response_command, step_response);
+  cmdAdd(error_command, error_reg);
+  cmdAdd(autotune_command, PID_autotune);
+  cmdAdd(downhill_command, downhill_simplex);
+  cmdAdd(test_command, start_testmove);
+  cmdAdd(interrupt_command, set_TC);
 
 }
 
@@ -76,20 +75,20 @@ void set_TC(int arg_cnt, char **args) {
 void Serial_menu(int arg_cnt, char **args) {
 
   SerialUSB.println(help_header);
-  SerialUSB.println(help_command + " - " + help_menu);
-  SerialUSB.println(calibrate_command + " - " + calibrate_menu);
-  SerialUSB.println(diagnostics_command + " - " + diagnostics_menu);
-  SerialUSB.println(state_command + " - " + state_menu);
-  SerialUSB.println(stream_command + " - " + stream_menu);
-  SerialUSB.println(parameter_command + " - " + parameter_menu);
-  SerialUSB.println(error_command + " - " + error_menu);
-  SerialUSB.println(dirac_command + " - " + dirac_menu);
-  SerialUSB.println(step_response_command + " - " + step_response_menu);
-  SerialUSB.println(error_command + " - " + error_menu);
-  SerialUSB.println(autotune_command + " - " + autotune_menu);
-  SerialUSB.println(downhill_command + " - " + downhill_menu);
-  SerialUSB.println(test_command + " - " + test_menu);
-  SerialUSB.println(interrupt_command + " - " + interrupt_menu);
+  SerialUSB.println(help_command " - " help_menu);
+  SerialUSB.println(calibrate_command " - " calibrate_menu);
+  SerialUSB.println(diagnostics_command " - " diagnostics_menu);
+  SerialUSB.println(state_command " - " state_menu);
+  SerialUSB.println(stream_command " - " stream_menu);
+  SerialUSB.println(parameter_command " - " parameter_menu);
+  SerialUSB.println(error_command " - " error_menu);
+  SerialUSB.println(dirac_command " - " dirac_menu);
+  SerialUSB.println(step_response_command " - " step_response_menu);
+  SerialUSB.println(error_command " - " error_menu);
+  SerialUSB.println(autotune_command " - " autotune_menu);
+  SerialUSB.println(downhill_command " - " downhill_menu);
+  SerialUSB.println(test_command " - " test_menu);
+  SerialUSB.println(interrupt_command " - " interrupt_menu);
 
 }
 
@@ -125,15 +124,15 @@ void parameterEdit(int arg_cnt, char **args) {
     Kd = return_float_argument(args, arg_cnt, "-Kd", Kd, 0, 100);
     Kff = return_float_argument(args, arg_cnt, "-Kff", Kff, 0, 1);
     Kacc = return_float_argument(args, arg_cnt, "-Kacc", Kacc, 0, 1);
-    PA = return_integer_argument(args, arg_cnt, "-steps_per_revolution", PA, 90, 180);
-    microstepping = return_integer_argument(args, arg_cnt, "-microsteps", microstepping, 1, 128);
-    iMAX = return_integer_argument(args, arg_cnt, "-iMax", iMAX, 100, 2000);
-    error_led_value = return_integer_argument(args, arg_cnt, "-error_led_value", error_led_value, 1, 100);
+    PA = return_float_argument(args, arg_cnt, "-steps_per_revolution", PA, 90, 180);
+    microstepping = return_float_argument(args, arg_cnt, "-microsteps", microstepping, 1, 128);
+    iMAX = return_float_argument(args, arg_cnt, "-iMax", iMAX, 100, 2000);
+    error_led_value = return_float_argument(args, arg_cnt, "-error_led_value", error_led_value, 1, 100);
     M_max = return_float_argument(args, arg_cnt, "-M_Max", M_max, 0.05, 5.0);
-    I_rated = return_integer_argument(args, arg_cnt, "-I_rated", I_rated, 1, 5000);
-    D_Term_LPF = return_integer_argument(args, arg_cnt, "-D_Term_LPF", D_Term_LPF, 100, 5000);
-    u_LPF = return_integer_argument(args, arg_cnt, "-effort_LPF", u_LPF, 100, 5000);
-    mm_rev = return_integer_argument(args, arg_cnt, "-mm_rev", mm_rev, 1, 500);
+    I_rated = return_float_argument(args, arg_cnt, "-I_rated", I_rated, 1, 5000);
+    D_Term_LPF = return_float_argument(args, arg_cnt, "-D_Term_LPF", D_Term_LPF, 100, 5000);
+    u_LPF = return_float_argument(args, arg_cnt, "-effort_LPF", u_LPF, 100, 5000);
+    mm_rev = return_float_argument(args, arg_cnt, "-mm_rev", mm_rev, 1, 500);
     USE_ENABLE_PIN = return_bool_argument(args, arg_cnt, "-USE_ENABLE_PIN",  USE_ENABLE_PIN);
     INVERT = return_bool_argument(args, arg_cnt, "-INVERT",  INVERT);
 
@@ -177,9 +176,9 @@ void parameterEdit(int arg_cnt, char **args) {
 void step_response(int arg_cnt, char **args) {
   SerialUSB.println(step_response_header);
 
-  int response_steps = return_integer_argument(args, arg_cnt, "-s", 1000, 200, 5000);
+  int response_steps = return_float_argument(args, arg_cnt, "-s", 1000, 200, 5000);
 
-  int frequency = return_integer_argument(args, arg_cnt, "-f", 5000, 1000, 10000);
+  int frequency = return_float_argument(args, arg_cnt, "-f", 5000, 1000, 10000);
 
   SerialUSB.print("Steps = ");
   SerialUSB.println(response_steps);
@@ -275,7 +274,7 @@ void dirac(int arg_cnt, char **args) {
   SerialUSB.println(dirac_header);
 
 
-  int frequency = return_integer_argument(args, arg_cnt, "-f", 5000, 1000, 10000);
+  int frequency = return_float_argument(args, arg_cnt, "-f", 5000, 1000, 10000);
 
   SerialUSB.print("Frequency = ");
   SerialUSB.println(frequency);
@@ -461,9 +460,9 @@ void error_reg(int arg_cnt, char **args) {
 void set_streaming(int arg_cnt, char **args) {
   SerialUSB.println(stream_header);
 
-  int frequency = (FPID / max_serial_counter);
+  float frequency = (FPID / max_serial_counter);
 
-  frequency = return_integer_argument(args, arg_cnt, "-f", frequency, 1, 500);
+  frequency = return_float_argument(args, arg_cnt, "-f", frequency, 1, 500);
 
   bool temp_streaming = streaming;
 
@@ -474,13 +473,15 @@ void set_streaming(int arg_cnt, char **args) {
     temp_streaming = false;
   }
 
+  max_serial_counter = ((float)FPID / frequency) + 0.5;
+  float used_frequency = (float)FPID / (float)max_serial_counter;
+
   SerialUSB.print("state = ");
   SerialUSB.print(temp_streaming);
   SerialUSB.print(",f = ");
-  SerialUSB.print(frequency);
+  SerialUSB.print(used_frequency);
+  SerialUSB.print(" Hz");
 
-  max_serial_counter = (FPID / frequency) + 0.5;
-  serial_delay = 1000000.0 / frequency;
 
   streaming = temp_streaming;
 
@@ -513,8 +514,8 @@ void streaming_handler() {
 void start_testmove(int arg_cnt, char **args) {
   SerialUSB.println(test_header);
 
-  int F_Sample = return_integer_argument(args, arg_cnt, "-f", 5000, 200, 10000);
-  int velocity = return_integer_argument(args, arg_cnt, "-v", 60, 10, 100);
+  int F_Sample = return_float_argument(args, arg_cnt, "-f", 5000, 200, 10000);
+  int velocity = return_float_argument(args, arg_cnt, "-v", 60, 10, 100);
   bool output = check_argument(args, arg_cnt, "-o");
 
   SerialUSB.print("Samplerate = ");

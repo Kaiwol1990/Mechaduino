@@ -52,7 +52,6 @@ float D_pulley = (mm_rev / (10 * 3.14159283));
 volatile int step_target = 0;      // target as step gets incremented if an step is received
 
 
-int Serial_Buffer[10] = {0};
 
 //---- filter section ----
 int D_Term_LPFa = ((128.0 * exp(D_Term_LPF * -2 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
@@ -70,8 +69,6 @@ int max_serial_counter = 20;
 int fifo[8][100] = {0};
 int fifo_counter = 0;
 int serial_counter = 0;
-
-int serial_delay = 0;
 
 
 

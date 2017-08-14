@@ -1,16 +1,13 @@
 //Contains TC5 Controller definition
 //The main control loop is executed by the TC5 timer interrupt:
 
-
 #include "State.h"
 #include "Utils.h"
-
 #include "A4954.h"
 #include "board.h"
 #include "Configuration.h"
 #include "Configurationals.h"
 #include "Encoder.h"
-#include "lookup_table.h"
 #include "Serial.h"
 
 

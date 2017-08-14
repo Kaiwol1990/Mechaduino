@@ -8,7 +8,6 @@
 #include "analogFastWrite.h"
 #include "A4954.h"
 #include "Encoder.h"
-#include "lookup_table.h"
 #include "board.h"
 #include "Serial.h"
 #include "Language.h"
@@ -425,7 +424,7 @@ void calibration(int arg_cnt, char **args) {
   float lookupAngle;
   float tick;
 
-  SerialUSB.print("const unsigned int lookup[] = {");
+  SerialUSB.print("const uint16_t lookup[] = {");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
 
@@ -618,7 +617,7 @@ void PID_autotune(int arg_cnt, char **args) {
 
   bool debug = check_argument(args, arg_cnt, "-d");
   bool gui = check_argument(args, arg_cnt, "-gui");
-  int loops = return_integer_argument(args, arg_cnt, "-c", 1, 1, 10);
+  int loops = return_float_argument(args, arg_cnt, "-c", 1, 1, 10);
 
   if (!gui) {
     SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
@@ -1411,8 +1410,8 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
 void downhill_simplex(int arg_cnt, char **args) {
 
 
-  int F_Sample = return_integer_argument(args, arg_cnt, "-f", 5000, 200, 10000);
-  int velocity = return_integer_argument(args, arg_cnt, "-v", 60, 10, 100);
+  int F_Sample = return_float_argument(args, arg_cnt, "-f", 5000, 200, 10000);
+  int velocity = return_float_argument(args, arg_cnt, "-v", 60, 10, 100);
   bool output = check_argument(args, arg_cnt, "-o");
   bool gui = check_argument(args, arg_cnt, "-gui");
 

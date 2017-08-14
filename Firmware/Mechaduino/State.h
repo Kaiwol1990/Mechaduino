@@ -2,6 +2,7 @@
 
 #ifndef __STATE_H__
 #define __STATE_H__
+#include <stdint.h>
 
 //---- interrupt vars ----
 extern volatile int r;            //target angle
@@ -40,8 +41,6 @@ extern volatile int int_pessen_Kd;
 extern volatile int step_target;        // target as step gets incremented if an step is received
 
 
-extern int Serial_Buffer[10];
-
 //---- filter section ----
 extern int D_Term_LPFa; // z = e^st pole mapping
 extern int D_Term_LPFb;
@@ -56,7 +55,10 @@ extern int max_serial_counter;
 extern int fifo[8][100];
 extern int fifo_counter;
 extern int serial_counter;
-extern int serial_delay;
+
+
+
+extern const uint16_t lookup[]; // lookup table for the encoder reading
 
 
 
