@@ -57,6 +57,13 @@ To get an list of the possible commands send help over the serial monitor
 |testmove | Starts a testmove for the servo | -f {int}, -v {int}, -o |
 |interrupt | Starts or stops the ISR | -TC5 {bool}, -TC4 {bool} |
 
+#### Examples
+|Command|Description|
+|-------|-----------|
+|parameter -set -Kp 1.095 | Sets the proportional gain of the servo to 1.095 |
+|testmove -f 2500 -v 60 | Starts a test move with the velocity of 60 mm/s and a sampling rate of 2500 Hz |
+|testmove -v 60 | Starts a test move with the velocity of 60 mm/s and the default sampling rate of 5000 Hz |
+
 # License
 All Mechaduino related materials are released under the Creative Commons Attribution Share-Alike 4.0 License
 https://creativecommons.org/licenses/by-sa/4.0/
