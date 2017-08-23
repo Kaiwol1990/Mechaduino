@@ -22,6 +22,7 @@ namespace Mechaduino
         double[] rValues = new double[500];
         double[] eValues = new double[500];
         double[] tValues = new double[1500];
+        double[] electrical_angleValues = new double[1500];
         double[] omegaValues = new double[1500];
         double[] omega_targetValues = new double[1500];
 
@@ -87,17 +88,17 @@ namespace Mechaduino
             InitializeComponent();
         }
 
-        double max_Kp = 2.0;
-        double max_Ki = 0.5;
-        double max_Kd = 10.0;
-        double max_Kff = 0.05;
-        double max_Kacc = 0.05;
+        double max_Kp = 1.0;
+        double max_Ki = 0.05;
+        double max_Kd = 20.0;
+        double max_Kff = 1;
+        double max_Kacc = 5;
 
-        double Kp_gain = 50.0;
-        double Ki_gain = 200.0;
-        double Kd_gain = 10.0;
-        double Kff_gain = 2000.0;
-        double Kacc_gain = 2000.0;
+        double Kp_gain = 100.0;
+        double Ki_gain = 2000.0;
+        double Kd_gain = 5.0;
+        double Kff_gain = 200.0;
+        double Kacc_gain = 50.0;
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -381,7 +382,7 @@ namespace Mechaduino
 
                     u = Convert.ToInt32(substrings[6]);
 
-                    electrical_angle = Math.Abs(Convert.ToInt32(substrings[7]));
+                    electrical_angle = (Convert.ToInt32(substrings[7]));
                     fifo_workload = (Convert.ToDouble(substrings[8]));
 
 
@@ -392,8 +393,9 @@ namespace Mechaduino
                     rValues[wrap_pointer] = r / 100.0;
                     yValues[wrap_pointer] = y / 100.0;
                     eValues[wrap_pointer] = e / 100.0;
-                    omega_targetValues[wrap_pointer] = 50.0 * omega_target;
-                    omegaValues[wrap_pointer] = 50.0 * omega;
+                    electrical_angleValues[wrap_pointer] = electrical_angle / 100.0;
+                    omega_targetValues[wrap_pointer] = omega_target / 100.0;
+                    omegaValues[wrap_pointer] = omega / 100.0;
                     uValues[wrap_pointer] = (u * 1000.0 * 3.3) / (512.0 * 10.0 * 0.15);
 
 
@@ -413,23 +415,9 @@ namespace Mechaduino
                     txtKp.Text = substrings[6];
                     txtKi.Text = substrings[7];
                     txtKd.Text = substrings[8];
-                    txtPLPF.Text = substrings[9];
+                    txterrorLPF.Text = substrings[9];
                     txtmmRev.Text = substrings[10];
                     txtMaxE.Text = substrings[11];
-
-
-                    TxttuneKp.Text = substrings[6];
-                    txttuneKi.Text = substrings[7];
-                    txttuneKd.Text = substrings[8];
-                    txttuneKff.Text = substrings[15];
-                    txttuneKacc.Text = substrings[16];
-                    
-
-                    trackBarKp.Value = Convert.ToInt32((Kp_gain * Convert.ToDouble(substrings[6], System.Globalization.CultureInfo.InvariantCulture)));
-                    trackBarKi.Value = Convert.ToInt32((Ki_gain * Convert.ToDouble(substrings[7], System.Globalization.CultureInfo.InvariantCulture)));
-                    trackBarKd.Value = Convert.ToInt32((Kd_gain * Convert.ToDouble(substrings[8], System.Globalization.CultureInfo.InvariantCulture)));
-                    trackBarKff.Value = Convert.ToInt32((Kff_gain * Convert.ToDouble(substrings[15], System.Globalization.CultureInfo.InvariantCulture)));
-                    trackBarKacc.Value = Convert.ToInt32((Kacc_gain * Convert.ToDouble(substrings[16], System.Globalization.CultureInfo.InvariantCulture)));
 
                     if (Convert.ToInt16(substrings[12]) == 1)
                     {
@@ -447,9 +435,24 @@ namespace Mechaduino
                     {
                         checkInvert.Checked = false;
                     }
-                    txtuLPF.Text = substrings[14];
-                    txtKff.Text = substrings[15];
-                    txtKacc.Text = substrings[16];
+
+                    txtKff.Text = substrings[14];
+                    txtKacc.Text = substrings[15];
+
+
+                    TxttuneKp.Text = txtKp.Text;
+                    txttuneKi.Text = txtKi.Text;
+                    txttuneKd.Text = txtKd.Text;
+                    txttuneKff.Text = txtKff.Text;
+                    txttuneKacc.Text = txtKacc.Text;
+                    
+
+                    trackBarKp.Value = Convert.ToInt32((Kp_gain * Convert.ToDouble(txtKp.Text, System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKi.Value = Convert.ToInt32((Ki_gain * Convert.ToDouble(txtKi.Text, System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKd.Value = Convert.ToInt32((Kd_gain * Convert.ToDouble(txtKd.Text, System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKff.Value = Convert.ToInt32((Kff_gain * Convert.ToDouble(txtKff.Text, System.Globalization.CultureInfo.InvariantCulture)));
+                    trackBarKacc.Value = Convert.ToInt32((Kacc_gain * Convert.ToDouble(txtKacc.Text, System.Globalization.CultureInfo.InvariantCulture)));
+
 
                     break;
 
@@ -801,6 +804,16 @@ namespace Mechaduino
                         pltPosition.Series[0].Points.AddXY(tValues[pointer], rValues[pointer]);
                     }
                 }
+                else if (Variable_1_pltPosition.Text == "Electrical Angle")
+                {
+                    Variable_1_unit_pltPosition.Text = "[deg]";
+                    for (int i = 0; i <= yValues.Length - 1; i++)
+                    {
+                        int pointer = wrap_pointer + i;
+                        pointer = pointer % yValues.Length;
+                        pltPosition.Series[0].Points.AddXY(tValues[pointer], electrical_angleValues[pointer]);
+                    }
+                }
                 else if (Variable_1_pltPosition.Text == "Error")
                 {
                     Variable_1_unit_pltPosition.Text = "[deg]";
@@ -863,6 +876,16 @@ namespace Mechaduino
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
                         pltPosition.Series[1].Points.AddXY(tValues[pointer], rValues[pointer]);
+                    }
+                }
+                else if (Variable_2_pltPosition.Text == "Electrical Angle")
+                {
+                    Variable_1_unit_pltPosition.Text = "[deg]";
+                    for (int i = 0; i <= yValues.Length - 1; i++)
+                    {
+                        int pointer = wrap_pointer + i;
+                        pointer = pointer % yValues.Length;
+                        pltPosition.Series[1].Points.AddXY(tValues[pointer], electrical_angleValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltPosition.Text == "Error")
@@ -929,6 +952,16 @@ namespace Mechaduino
                         pltError.Series[0].Points.AddXY(tValues[pointer], rValues[pointer]);
                     }
                 }
+                else if (Variable_1_pltError.Text == "Electrical Angle")
+                {
+                    Variable_1_unit_pltPosition.Text = "[deg]";
+                    for (int i = 0; i <= yValues.Length - 1; i++)
+                    {
+                        int pointer = wrap_pointer + i;
+                        pointer = pointer % yValues.Length;
+                        pltError.Series[0].Points.AddXY(tValues[pointer], electrical_angleValues[pointer]);
+                    }
+                }
                 else if (Variable_1_pltError.Text == "Error")
                 {
                     Variable_1_unit_pltError.Text = "[deg]";
@@ -992,6 +1025,16 @@ namespace Mechaduino
                         int pointer = wrap_pointer + i;
                         pointer = pointer % yValues.Length;
                         pltError.Series[1].Points.AddXY(tValues[pointer], rValues[pointer]);
+                    }
+                }
+                else if (Variable_2_pltError.Text == "Electrical Angle")
+                {
+                    Variable_1_unit_pltPosition.Text = "[deg]";
+                    for (int i = 0; i <= yValues.Length - 1; i++)
+                    {
+                        int pointer = wrap_pointer + i;
+                        pointer = pointer % yValues.Length;
+                        pltError.Series[1].Points.AddXY(tValues[pointer], electrical_angleValues[pointer]);
                     }
                 }
                 else if (Variable_2_pltError.Text == "Error")
@@ -1342,14 +1385,10 @@ namespace Mechaduino
                     cmd = "parameter -set -I_rated " + Convert.ToString(i_rated, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + " \r");
 
-                    int pLPF = Convert.ToInt32(txtPLPF.Text);
+                    int pLPF = Convert.ToInt32(txterrorLPF.Text);
                     cmd = "parameter -set -D_Term_LPF " + Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + " \r");
-
-                    int uLPF = Convert.ToInt32(txtuLPF.Text);
-                    cmd = "parameter -set -effort_LPF " + Convert.ToString(uLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + " \r");
-
+                    
                     int mm_rev = Convert.ToInt32(txtmmRev.Text);
                     cmd = "parameter -set -mm_rev " + Convert.ToString(mm_rev, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + " \r");
@@ -1522,7 +1561,7 @@ namespace Mechaduino
                     serialPort1.Write(cmd + " \r");
 
                     double Kacc = Convert.ToDouble(txtKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
-                    cmd = "parameter -set -Kacc " + Convert.ToString(Kd, System.Globalization.CultureInfo.InvariantCulture);
+                    cmd = "parameter -set -Kacc " + Convert.ToString(Kacc, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + " \r");
                 }
                 catch
@@ -1541,12 +1580,8 @@ namespace Mechaduino
             {
                 try
                 {
-                    int pLPF = Convert.ToInt32(txtPLPF.Text);
-                    string cmd = "parameter -set -D_Term_LPF " + Convert.ToString(pLPF, System.Globalization.CultureInfo.InvariantCulture);
-                    serialPort1.Write(cmd + " \r");
-
-                    int uLPF = Convert.ToInt32(txtuLPF.Text);
-                    cmd = "parameter -set -effort_LPF " + Convert.ToString(uLPF, System.Globalization.CultureInfo.InvariantCulture);
+                    int errorLPF = Convert.ToInt32(txterrorLPF.Text);
+                    string cmd = "parameter -set -error_LPF " + Convert.ToString(errorLPF, System.Globalization.CultureInfo.InvariantCulture);
                     serialPort1.Write(cmd + " \r");
 
                 }
@@ -1581,10 +1616,10 @@ namespace Mechaduino
                 File.AppendAllText(CSVFileName, " \r");
                 File.AppendAllText(CSVFileName, "//-------------------------------------------------- Identifier -------------------------------------------------\r");
                 File.AppendAllText(CSVFileName, "//---------------------------------------------------------------------------------------------------------------\r");
-                File.AppendAllText(CSVFileName, "// char to identify the mechaduino with the Serial monitor\r");
-                File.AppendAllText(CSVFileName, "char identifier = '");
+                File.AppendAllText(CSVFileName, "// String to identify the mechaduino with the Serial monitor\r");
+                File.AppendAllText(CSVFileName, "String identifier = \"");
                 File.AppendAllText(CSVFileName, txtIdentifier.Text);
-                File.AppendAllText(CSVFileName, "';\r");
+                File.AppendAllText(CSVFileName, "\";\r");
                 File.AppendAllText(CSVFileName, " \r");
                 File.AppendAllText(CSVFileName, " \r");
                 File.AppendAllText(CSVFileName, " \r");
@@ -1678,15 +1713,10 @@ namespace Mechaduino
                 File.AppendAllText(CSVFileName, " \r");
                 File.AppendAllText(CSVFileName, "//----------------------------------------------- Filter  Section -----------------------------------------------\r");
                 File.AppendAllText(CSVFileName, "//---------------------------------------------------------------------------------------------------------------\r");
-                File.AppendAllText(CSVFileName, "// break frequency in hertz for DTerm\r");
-                File.AppendAllText(CSVFileName, "int D_Term_LPF = ");
-                File.AppendAllText(CSVFileName, txtPLPF.Text);
-                File.AppendAllText(CSVFileName, ";\r");
-                File.AppendAllText(CSVFileName, " \r");
-                File.AppendAllText(CSVFileName, "// break frequency in hertz for the effort filter\r");
-                File.AppendAllText(CSVFileName, "int u_LPF = ");
-                double ulpf = Convert.ToDouble(txtuLPF.Text, System.Globalization.CultureInfo.InvariantCulture);
-                File.AppendAllText(CSVFileName, Convert.ToString(ulpf));
+                File.AppendAllText(CSVFileName, "// break frequency in hertz for the error filter\r");
+                File.AppendAllText(CSVFileName, "int error_LPF = ");
+                double errorLPF = Convert.ToDouble(txterrorLPF.Text, System.Globalization.CultureInfo.InvariantCulture);
+                File.AppendAllText(CSVFileName, Convert.ToString(errorLPF));
                 File.AppendAllText(CSVFileName, ";\r");
                 File.AppendAllText(CSVFileName, " \r");
                 File.AppendAllText(CSVFileName, " \r");
@@ -1744,7 +1774,7 @@ namespace Mechaduino
 
                 serialPort1.Write("stream -off\r");
                 Thread.Sleep(100);
-                serialPort1.Write("step_response -f " + cmd_frequency + " -s " + cmd_response + " \r");
+                serialPort1.Write("response -f " + cmd_frequency + " -s " + cmd_response + " \r");
 
 
             }
@@ -1942,8 +1972,8 @@ namespace Mechaduino
 
                 for (int j = 0; j < response_command_Length; j++)
                 {
-                    pltresponse.Series[0].Points.AddXY(j * dt, (5000 * omegaValues[j]) / 100.0);
-                    pltresponse.Series[1].Points.AddXY(j * dt, (5000 * omega_targetValues[j]) / 100.0);
+                    pltresponse.Series[0].Points.AddXY(j * dt, (omegaValues[j]) / 100.0);
+                    pltresponse.Series[1].Points.AddXY(j * dt, (omega_targetValues[j]) / 100.0);
                 }
 
             }
@@ -2040,8 +2070,8 @@ namespace Mechaduino
 
             for (int j = 0; j < tuning_command_Length; j++)
             {
-                pltAutotune_2.Series[0].Points.AddXY(j * dt, (5000 * tuning_omega[j]) / 100.0);
-                pltAutotune_2.Series[1].Points.AddXY(j * dt, (5000 * tuning_omega_target[j]) / 100.0);
+                pltAutotune_2.Series[0].Points.AddXY(j * dt, (tuning_omega[j]) / 100.0);
+                pltAutotune_2.Series[1].Points.AddXY(j * dt, (tuning_omega_target[j]) / 100.0);
             }
 
             tuning_command_Length = 0;
@@ -2072,7 +2102,7 @@ namespace Mechaduino
 
                 cmd = "downhill -f " + cmd_frequency + " -v " + cmd_velocity + " -gui -p " + cmd_max_Kp + " -i " + cmd_max_Ki + " -d " + cmd_max_Kd + " -kf " + cmd_max_Kff + " -ka " + cmd_max_Kacc;
 
-                serialPort1.Write(cmd + " \r");
+                serialPort1.Write(cmd + "\r");
             }
         }
 
@@ -2088,27 +2118,27 @@ namespace Mechaduino
 
         private void TrackBarKp_Scroll(object sender, EventArgs e)
         {
-            TxttuneKp.Text = Convert.ToString(Convert.ToDouble(trackBarKp.Value) * Kp_gain, System.Globalization.CultureInfo.InvariantCulture);
+            TxttuneKp.Text = Convert.ToString(Convert.ToDouble(trackBarKp.Value) / Kp_gain, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void TrackBarKi_Scroll(object sender, EventArgs e)
         {
-            txttuneKi.Text = Convert.ToString(Convert.ToDouble(trackBarKi.Value) * Ki_gain, System.Globalization.CultureInfo.InvariantCulture);
+            txttuneKi.Text = Convert.ToString(Convert.ToDouble(trackBarKi.Value) / Ki_gain, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void TrackBarKd_Scroll(object sender, EventArgs e)
         {
-            txttuneKd.Text = Convert.ToString(Convert.ToDouble(trackBarKd.Value) * Kd_gain, System.Globalization.CultureInfo.InvariantCulture);
+            txttuneKd.Text = Convert.ToString(Convert.ToDouble(trackBarKd.Value) / Kd_gain, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void TrackBarKff_Scroll(object sender, EventArgs e)
         {
-            txttuneKff.Text = Convert.ToString(Convert.ToDouble(trackBarKff.Value) * Kff_gain, System.Globalization.CultureInfo.InvariantCulture);
+            txttuneKff.Text = Convert.ToString(Convert.ToDouble(trackBarKff.Value) / Kff_gain, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         private void TrackBarKacc_Scroll(object sender, EventArgs e)
         {
-            txttuneKacc.Text = Convert.ToString(Convert.ToDouble(trackBarKacc.Value) * Kacc_gain, System.Globalization.CultureInfo.InvariantCulture);
+            txttuneKacc.Text = Convert.ToString(Convert.ToDouble(trackBarKacc.Value) / Kacc_gain, System.Globalization.CultureInfo.InvariantCulture);
         }
         
 
@@ -2167,7 +2197,7 @@ namespace Mechaduino
             double Kd_val = Convert.ToDouble(txttuneKd.Text, System.Globalization.CultureInfo.InvariantCulture);
             double Kff_val = Convert.ToDouble(txttuneKff.Text, System.Globalization.CultureInfo.InvariantCulture);
             double Kacc_val = Convert.ToDouble(txttuneKacc.Text, System.Globalization.CultureInfo.InvariantCulture);
-
+          
 
             max_Kp = Convert.ToDouble(txtmaxKp.Text, System.Globalization.CultureInfo.InvariantCulture);
             max_Ki = Convert.ToDouble(txtmaxKi.Text, System.Globalization.CultureInfo.InvariantCulture);
@@ -2180,6 +2210,7 @@ namespace Mechaduino
             Kd_gain = 100.0 / max_Kd;
             Kff_gain = 100.0 / max_Kff;
             Kacc_gain = 100.0 / max_Kacc;
+            
 
             trackBarKp.Value = Convert.ToInt16(Kp_gain * Kp_val);
             trackBarKi.Value = Convert.ToInt16(Ki_gain * Ki_val);
