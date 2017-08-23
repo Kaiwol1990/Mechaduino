@@ -1,122 +1,99 @@
 //Contains TC5 Controller definition
 //The main control loop is executed by the TC5 timer interrupt:
 
-
 #include "State.h"
 #include "Utils.h"
-
 #include "A4954.h"
 #include "board.h"
 #include "Configuration.h"
 #include "Configurationals.h"
 #include "Encoder.h"
-#include "lookup_table.h"
 #include "Serial.h"
+
+
+
+const int16_t u_LPF = 1000;
+const int16_t u_LPFa = ((2048.0 * exp(u_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int16_t u_LPFb = 2048 - u_LPFa;
 
 
 // ----- gets called with FPID -----
 // ----- calculates the target velocity and PID settings -----
 void TC5_Handler() {
 
-  static unsigned int last_micros = micros();
-  unsigned int current_micros;
+ // static int32_t t_1 = micros();
+ // int32_t t;
+ // int32_t dt;
+
+  int32_t domega_target;
 
   //----- Variables -----
-  static int ITerm;
-  static int DTerm;
+  static int32_t ITerm;
+  static int32_t DTerm;
 
-  static int e_1;        // last error term
-  static int r_1;        // target 1 loop ago
-  static int u_1;
-  static int omega_target_1;
+  static int32_t e_1;        // last error term
+  static int32_t omega_target_1;
 
-  static int serial_loop_counter;
-  static unsigned int last_time;
-  
-  int phase_advanced;
+  int16_t phase_advanced;
+
+  int32_t u_pid;
+  int32_t u_ff;
+  int32_t u_acc;
+
+  static uint16_t serial_loop_counter;
+
 
   //----- Calculations -----
 
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
+    serial_loop_counter++;
 
-    current_micros = micros();
-    int dt = current_micros - last_micros;
-    last_micros = current_micros;
-
-    if (dt > target_dt) {
-      error_register = error_register | 0B0000000000000001;    // log error in register
-    }
-
-
-    // calculate the current target from the received steps and the angle per step
-    r = (step_target * stepangle);
-
-    // target angular velocity buffered over two sample times
-    int omega_target = (r - r_1);
+    domega_target = omega_target - omega_target_1;
 
     // start the calculations only if the motor is enabled
     if (enabled) {
 
-      // ----------- PID loop ----------
-      // -------------------------------
-      // calculate the error
-      error = (r_1 - y);
-
-
-      // small errors and low speed ueses another pid gain set
-      if (abs(omega_target) <= 0 && abs(error) < 50) {
-
-        if (abs(u) < uMAX) {
-          // calculate the I- and DTerm
-          ITerm = ITerm + (int_pessen_Ki * error);
-        }
-        // constrain the ITerm
-        if (ITerm > ITerm_max) {
-          ITerm = ITerm_max;
-        }
-        else if (ITerm < -ITerm_max) {
-          ITerm = -ITerm_max;
-        }
-
-        DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * (int_pessen_Kd) * (error - e_1))) / 128;
-
-        // ------ Add up the Effort ------
-        // -------------------------------
-        //         u-pid
-        u = ((u_LPFa * u_1) + (u_LPFb * (((int_pessen_Kp * error) + ITerm + DTerm + (int_Kff * omega_target) + (int_Kacc * (omega_target - omega_target_1)))  / 1024))) / 128;
-
-
-
+      // ----------- PID loop -----------------------------------------
+      // calculate the I-Term
+      if (abs(u) < uMAX) {
+        ITerm = ITerm + (int_Ki * error);
       }
-      else {
 
-        if (abs(u) < uMAX) {
-          // calculate the I- and DTerm
-          ITerm = ITerm + (int_Ki * error);
-        }
-
-        // constrain the ITerm
-        if (ITerm > ITerm_max) {
-          ITerm = ITerm_max;
-        }
-        else if (ITerm < -ITerm_max) {
-          ITerm = -ITerm_max;
-        }
-
-        DTerm = ((D_Term_LPFa * DTerm) + (D_Term_LPFb * int_Kd * (error - e_1))) / 128;
-
-        // ------ Add up the Effort ------
-        // -------------------------------
-        //         u-pid
-        u = ((u_LPFa * u_1) + (u_LPFb * (((int_Kp * error) + ITerm + DTerm + (int_Kff * omega_target) + (int_Kacc * (omega_target - omega_target_1)))  / 1024))) / 128;
-
+      // constrain the ITerm
+      if (ITerm > ITerm_max) {
+        ITerm = ITerm_max;
       }
+      else if (ITerm < -ITerm_max) {
+        ITerm = -ITerm_max;
+      }
+
+      //calculate the D-Term
+      DTerm = int_Kd * (error - e_1);
+
+      // calculate the whole PID effort
+      u_pid = ((int_Kp * error) + ITerm + DTerm) / 1024;
+
+
+      // calculate the feedforward effort
+      u_ff = (int_Kff * omega_target) / (10000 * 1024);
+
+
+      // calculate the acceleration effort
+      u_acc = (int_Kacc * domega_target) / (10000 * 1024);
+
+
+
+      // ------ Add up the Effort -------------------------------------
+      //u = u_pid + u_ff + u_acc;
+      // lowpass filter with 1000 Hz cutoff
+
+      u = ((u_LPFa * u) + (u_LPFb * (u_pid + u_ff + u_acc))) / 2048;
 
 
     }
     else {
+      omega_target = 0;
       step_target = y / stepangle;
-      error = 0;
       u = 0;
       ITerm = 0;
     }
@@ -134,26 +111,18 @@ void TC5_Handler() {
 
 
     // calculate the phase advance term
-    // when the motor is commanded to hold its position the term will be calculate from the posiition error and a small amount of the PA Term
-    // when the motor is commanded to move the term will be set to it's maximum -> PA
-    if (omega_target == 0) {
-      phase_advanced = ((sign(u) * PA) / 4 ) + error;
+    phase_advanced = (sign(u) * PA) + (omega / FPID);
 
-      if (phase_advanced >= PA) {
-        phase_advanced = PA;
-      }
-      else if (phase_advanced <= -PA) {
-        phase_advanced = -PA;
-      }
-
+    if (phase_advanced >= PA) {
+      phase_advanced = PA;
     }
-    else {
-      phase_advanced = (sign(u) * PA) + omega;
+    else if (phase_advanced <= -PA) {
+      phase_advanced = -PA;
     }
 
 
     // calculate the electrical angle for the motor coils
-    electric_angle = -(raw_0 + phase_advanced);
+    electric_angle = y + phase_advanced;
 
 
     // write the output
@@ -162,8 +131,6 @@ void TC5_Handler() {
 
     // buffer the variables for the next loop
     e_1 = error;
-    u_1 = u;
-    r_1 = r;
     omega_target_1 = omega_target;
 
 
@@ -174,17 +141,14 @@ void TC5_Handler() {
 
 
     if (streaming) {
-      serial_loop_counter++;
 
       if (serial_loop_counter >= max_serial_counter) {
 
         fifo_counter++;
 
-        byte fifo_position = mod(fifo_counter, 99);
+        byte fifo_position = mod(fifo_counter, 49);
 
-        unsigned int current_time = micros();
-
-        fifo[0][fifo_position] = (current_time - last_time);
+        fifo[0][fifo_position] = (1000000 * max_serial_counter) / FPID;
         fifo[1][fifo_position] = r;
         fifo[2][fifo_position] = y;
         fifo[3][fifo_position] = error;
@@ -194,10 +158,8 @@ void TC5_Handler() {
         fifo[7][fifo_position] = electric_angle;
 
         serial_loop_counter = 0;
-        last_time = current_time;
       }
     }
-
 
     TC5->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }
@@ -210,63 +172,64 @@ void TC5_Handler() {
 
 
 
-
 // ----- reads the current shaft angle with 2*FPID -----
 // ----- Oversamples the shaft angle to reduce noise -----
 void TC4_Handler() {
-  static byte counter;
-  static int y_temp;
-  static int sum = 0;
-  static int omega_buffer[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-  static byte omega_pointer = 0;
 
+  static int32_t y_temp;
+
+  static int32_t r_1;
+  static int32_t y_1;
+
+  static uint16_t o_target_counter;
+  static uint16_t y_counter;
 
   if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {
 
-    counter++;
+    o_target_counter++;
+    y_counter ++;
 
-    switch (counter) {
-      case 1:
-
-        y_temp = readAngle(y, raw_0);
-
-        sum = sum - omega_buffer[omega_pointer];
-        omega_buffer[omega_pointer] = y_temp - y;
-        sum = sum + omega_buffer[omega_pointer];
-
-        omega_pointer++;
-        if (omega_pointer > 7) {
-          omega_pointer = 0;
-        }
-
-        break;
-      case 2:
-
-        int y_temp_2 = readAngle(y, raw_0);
-
-        sum = sum - omega_buffer[omega_pointer];
-        omega_buffer[omega_pointer] = y_temp_2 - y;
-        sum = sum + omega_buffer[omega_pointer];
-        omega_pointer++;
-        if (omega_pointer > 7) {
-          omega_pointer = 0;
-        }
+    // read the current angle
+    y_temp = y_temp + readAngle();
 
 
+    if (y_counter >= 4) {
 
-        omega = sum >> 3;
-
-
-        y = (y_temp + y_temp_2) / 2;
-        raw_0 = mod(y, 36000);
+      // calculate the current angle
+      y = y_temp / y_counter;
 
 
-        counter = 0;
-        break;
+      // calculate the current velocity
+      omega = (omega + ((y - y_1) * (Fs / y_counter)) ) / 2;
+
+
+      // buffer the variables for the next loop
+      y_temp = 0;
+      y_counter = 0;
+      y_1 = y;
     }
+
+
+    // calculate the current target from the received steps and the angle per step
+    r = step_target * stepangle;
+
+
+    //calculate the error
+    error = ((error_LPFa * error) + (error_LPFb * (r - y))) / 2048;
+
+
+    //calculate the target velocity
+    if (r != r_1) {
+      omega_target = (omega_target + ((r - r_1) * (Fs / o_target_counter) )) / 2;
+
+      o_target_counter = 0;
+
+      // buffer the variables for the next loop
+      r_1 = r;
+    }
+
 
 
     TC4->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }
 }
-

@@ -5,119 +5,118 @@
 
 // command structure, can be modified in Serial.cpp
 /*
-  cmdAdd("help", Serial_menu);
-  cmdAdd("calibrate", calibration);
-  cmdAdd("diagnose", readEncoderDiagnostics);
-  cmdAdd("state", state);
-  cmdAdd("stream",  set_streaming);
-  cmdAdd("parameter", parameterEdit);
-  cmdAdd("setpoint", setpoint );
-  cmdAdd("reset", SoftReset);
-  cmdAdd("dirac", dirac);
-  cmdAdd("response", step_response);
-  cmdAdd("error", error_reg);
-  cmdAdd("autotune", PID_autotune);
-  cmdAdd("downhill", downhill_simplex);
-  cmdAdd("testmove", start_testmove);
-  cmdAdd("interrupt", set_TC);
+  cmdAdd("help", Serial_menu)
+  cmdAdd("calibrate", calibration)
+  cmdAdd("diagnose", readEncoderDiagnostics)
+  cmdAdd("state", state)
+  cmdAdd("stream",  set_streaming)
+  cmdAdd("parameter", parameterEdit)
+  cmdAdd("setpoint", setpoint )
+  cmdAdd("reset", SoftReset)
+  cmdAdd("dirac", dirac)
+  cmdAdd("response", step_response)
+  cmdAdd("error", error_reg)
+  cmdAdd("autotune", PID_autotune)
+  cmdAdd("downhill", downhill_simplex)
+  cmdAdd("testmove", start_testmove)
+  cmdAdd("interrupt", set_TC)
 */
 
-
-const String help_command ="help";
-const String help_menu ="prints this menu";
-const String help_header ="//---- Mainmenu -----";
-
-
-const String cancle_header ="press c to cancle";
+#define help_command "help"
+#define help_menu "prints this menu"
+#define help_header "//---- Mainmenu -----"
 
 
-const String calibrate_command ="calibrate";
-const String calibrate_menu ="starts the calibration routine";
-const String calibrate_header ="//---- Starting calibration routine ----";
+#define cancle_header "press c to cancle"
 
 
-const String diagnostics_command  ="diagnose";
-const String diagnostics_menu ="read Encoder Diagnostics";
-const String diagnostics_header ="//---- Checking AS5047 diagnostic and error registers ---- \n\r See AS5047 datasheet for details";
+#define calibrate_command "calibrate"
+#define calibrate_menu "starts the calibration routine"
+#define calibrate_header "//---- Starting calibration routine ----"
 
 
-const String state_command  ="state";
-const String state_menu ="shows and sets the motor state [-on, -off]";
-const String state_header ="//---- State ----";
+#define diagnostics_command  "diagnose"
+#define diagnostics_menu "read Encoder Diagnostics"
+#define diagnostics_header "//---- Checking AS5047 diagnostic and error registers ---- \n\r See AS5047 datasheet for details"
 
 
-const String stream_command ="stream";
-const String stream_menu ="streams servo parameters [-f {int}, -on, -off]";
-const String stream_header ="//---- Streaming Handler ----";
+#define state_command  "state"
+#define state_menu "shows and sets the motor state [-on, -off]"
+#define state_header "//---- State ----"
 
 
-const String parameter_command  ="parameter";
-const String parameter_menu ="Get or set parameter [-set {-parameter} {value}, -get]";
-const String parameter_header ="//---- Parameter menu ----";
+#define stream_command "stream"
+#define stream_menu "streams servo parameters [-f {int}, -on, -off]"
+#define stream_header "//---- Streaming Handler ----"
 
 
-const String setpoint_command ="setpoint";
-const String setpoint_menu ="Get or set setpoint [-set {float}]";
-const String setpoint_header ="//----  Setpoint ----";
+#define parameter_command  "parameter"
+#define parameter_menu "Get or set parameter [-set {-parameter} {value}, -get]"
+#define parameter_header "//---- Parameter menu ----"
 
 
-const String reset_command  ="reset";
-const String reset_menu ="resets the board";
-const String reset_header ="//---- reseting ---- \n\r Please re-open the Serialmonitor";
+#define setpoint_command "setpoint"
+#define setpoint_menu "Get or set setpoint [-set {float}]"
+#define setpoint_header "//----  Setpoint ----"
 
 
-const String dirac_command  ="dirac";
-const String dirac_menu ="generates a dirac delta distrebution [-f {int}]";
-const String dirac_header ="//---- Dirac delta function ----";
+#define reset_command  "reset"
+#define reset_menu "resets the board"
+#define reset_header "//---- reseting ---- \n\r Please re-open the Serialmonitor"
 
 
-const String step_response_command  ="response";
-const String step_response_menu ="generates a step response [-f {int}, -s {int}]";
-const String step_response_header ="//---- Step response ---- \n";
+#define dirac_command  "dirac"
+#define dirac_menu "generates a dirac delta distrebution [-f {int}]"
+#define dirac_header "//---- Dirac delta function ----"
 
 
-const String error_command ="error";
-const String error_menu ="get or reset the error register [-reset]";
-const String error_header ="//---- Checking Mechaduino diagnostic and error register ----";
+#define step_response_command  "response"
+#define step_response_menu "generates a step response [-f {int}, -s {int}]"
+#define step_response_header "//---- Step response ---- \n"
 
 
-const String autotune_command  ="autotune";
-const String autotune_menu ="PID auto tune [-c {byte}, -d]";
-const String autotune_header ="//---- Autotuning the current PID controller ----";
+#define error_command "error"
+#define error_menu "get or reset the error register [-reset]"
+#define error_header "//---- Checking Mechaduino diagnostic and error register ----"
 
 
-const String downhill_command ="downhill";
-const String downhill_menu ="Downhhill simplex algorithm [-f {int}, -v {int}, -o]";
-const String downhill_header ="//---- Autotuning the current PID controller ----";
+#define autotune_command  "autotune"
+#define autotune_menu "PID auto tune [-c {byte}, -d]"
+#define autotune_header "//---- Autotuning the current PID controller ----"
 
 
-const String test_command ="testmove";
-const String test_menu ="Starts a testmove for the servo [-f {int}, -v {int}, -o]";
-const String test_header ="//---- Test move ----";
+#define downhill_command "downhill"
+#define downhill_menu "Downhhill simplex algorithm [-f {int}, -v {int}, -o]"
+#define downhill_header "//---- Autotuning the current PID controller ----"
 
 
-const String interrupt_command ="interrupt";
-const String interrupt_menu= "Starts or stops the ISR [-TC5 {bool}, -TC4 {bool}]";
-const String interrupt_header ="//---- ISR ----";
+#define test_command "testmove"
+#define test_menu "Starts a testmove for the servo [-f {int}, -v {int}, -o]"
+#define test_header "//---- Test move ----"
 
+
+#define interrupt_command "interrupt"
+#define interrupt_menu "Starts or stops the ISR [-TC5 {bool}, -TC4 {bool}]"
+#define interrupt_header "//---- ISR ----"
 
 
 
 
 
-const String procent_bar = "|---+----+----+----+----+----+----+----+----+----|";
+
+#define procent_bar "|---+----+----+----+----+----+----+----+----+----|"
 
 
-const String bootscreen_1   = "###################################################################################";
-const String bootscreen_2   = "#                                                                                 #";
-const String bootscreen_3   = "#  ##   ##  ######  ####   ##  ##   ####   #####   ##  ##  ######  ##  ##   ####  #";
-const String bootscreen_4   = "#  ### ###  ##     ##  ##  ##  ##  ##  ##  ##  ##  ##  ##    ##    ### ##  ##  ## #";
-const String bootscreen_5   = "#  ## # ##  ####   ##      ######  ######  ##  ##  ##  ##    ##    ## ###  ##  ## #";
-const String bootscreen_6   = "#  ##   ##  ##     ##  ##  ##  ##  ##  ##  ##  ##  ##  ##    ##    ##  ##  ##  ## #";
-const String bootscreen_7   = "#  ##   ##  ######  ####   ##  ##  ##  ##  #####    ####   ######  ##  ##   ####  #";
-const String bootscreen_8   = "#                                                                                 #";
-const String bootscreen_9   = "###################################################################################";
-const String bootscreen_10  = "  open-source industrial servo motor by Tropical Labs       written by Kai Wolter   ";
+#define bootscreen_1   "###################################################################################"
+#define bootscreen_2   "#                                                                                 #"
+#define bootscreen_3   "#  ##   ##  ######  ####   ##  ##   ####   #####   ##  ##  ######  ##  ##   ####  #"
+#define bootscreen_4   "#  ### ###  ##     ##  ##  ##  ##  ##  ##  ##  ##  ##  ##    ##    ### ##  ##  ## #"
+#define bootscreen_5   "#  ## # ##  ####   ##      ######  ######  ##  ##  ##  ##    ##    ## ###  ##  ## #"
+#define bootscreen_6   "#  ##   ##  ##     ##  ##  ##  ##  ##  ##  ##  ##  ##  ##    ##    ##  ##  ##  ## #"
+#define bootscreen_7   "#  ##   ##  ######  ####   ##  ##  ##  ##  #####    ####   ######  ##  ##   ####  #"
+#define bootscreen_8   "#                                                                                 #"
+#define bootscreen_9   "###################################################################################"
+#define bootscreen_10  "  open-source industrial servo motor by Tropical Labs       written by Kai Wolter   "
 
 
 #endif

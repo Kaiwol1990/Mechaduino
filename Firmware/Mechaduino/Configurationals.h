@@ -3,7 +3,7 @@
 
 
 
-#define firmware_version "0.3"
+#define firmware_version "0.4"
 #define counts_per_revolution 16384
 
 //----current settings-----
@@ -24,12 +24,9 @@ extern int target_dt;
 
 extern int step_add;
 
-extern int pLPFa;
-extern int pLPFb;
+extern int ITerm_max;
 
-extern int encoderLPFa;
-extern int encoderLPFb;
+extern bool LED_pattern[4][10];
 
-extern int ITerm_max ;
 
 #endif

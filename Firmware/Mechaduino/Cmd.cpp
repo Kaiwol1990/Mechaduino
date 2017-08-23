@@ -197,13 +197,13 @@ float return_float_argument(char **args, uint8_t arg_cnt, const char *identifier
 
 
 //Checks if a argument was called and returns the char value after it
-char return_char_argument(char **args, uint8_t arg_cnt, const char *identifier, const char default_value) {
+String return_char_argument(char **args, uint8_t arg_cnt, const char *identifier, const String default_value) {
 
-  char val = default_value;
+  String val = default_value;
   for ( byte i = 1; i < arg_cnt; i++) {
     String argument = args[i];
     if (argument == identifier) {
-      val = *args[i + 1];
+      val = args[i + 1];
     }
   }
   return val;

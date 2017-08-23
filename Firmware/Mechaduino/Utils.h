@@ -3,8 +3,9 @@
 #ifndef __UTILS_H__
 #define __UTIL_H__
 #pragma once
-
 #include <arduino.h>
+
+void boot();
 
 void setupPins();
 
@@ -38,11 +39,7 @@ int measure_noise();
 
 bool canceled();
 
-bool timed_out(unsigned long now, int time_out);
-
 int sign(int input);
-
-void boot();
 
 void error_led();
 

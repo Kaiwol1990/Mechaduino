@@ -22,3 +22,12 @@ int step_add = 1024 / microstepping;
 
 int ITerm_max = uMAX * 1024.0;
 
+
+
+//                            timing error                    maximal error                   maximal current                       lookuptable
+bool LED_pattern[4][10] = { {1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}, {1, 1, 1, 1, 1, 1, 0, 1, 0, 1}};
+
+
+
+
+

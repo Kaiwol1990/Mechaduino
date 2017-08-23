@@ -8,11 +8,80 @@
 #include "analogFastWrite.h"
 #include "A4954.h"
 #include "Encoder.h"
-#include "lookup_table.h"
 #include "board.h"
 #include "Serial.h"
 #include "Language.h"
 #include "Cmd.h"
+
+
+void boot() {
+  SerialUSB.begin(baudrate);
+  cmdInit(&SerialUSB);
+
+  delay(1000);
+
+  SerialUSB.print("setup pins:");
+  setupPins();
+  SerialUSB.println(" OK");
+
+  SerialUSB.print("setup SPI:");
+  setupSPI();
+  SerialUSB.println(" OK");
+
+  SerialUSB.print("setup Interrupts:");
+  setupTCInterrupts();
+  SerialUSB.println(" OK");
+
+
+  delay(1000);
+  SerialUSB.print("setup controller:");
+  enabled = false;
+  enableTC5Interrupts();
+  SerialUSB.println(" OK");
+
+  delay(200);
+
+  if (USE_ENABLE_PIN) {
+    SerialUSB.print("setup enable pin:");
+    enaInterrupt();
+  }
+  else {
+    enabled = true;
+  }
+  SerialUSB.println(" OK");
+
+
+  SerialUSB.print("setup direction pin:");
+  dirInterrupt();
+  SerialUSB.println(" OK");
+
+  // resetting the error register
+  error_register = 0B1000000000000000;
+
+  SerialUSB.println(bootscreen_1);
+  SerialUSB.println(bootscreen_2);
+  SerialUSB.println(bootscreen_3);
+  SerialUSB.println(bootscreen_4);
+  SerialUSB.println(bootscreen_5);
+  SerialUSB.println(bootscreen_6);
+  SerialUSB.println(bootscreen_7);
+  SerialUSB.println(bootscreen_8);
+  SerialUSB.println(bootscreen_9);
+  SerialUSB.println(bootscreen_10);
+
+  SerialUSB.print("   compiling date: ");
+  SerialUSB.println(__DATE__);
+
+  SerialUSB.print("   firmware-version: ");
+  SerialUSB.println(firmware_version);
+
+  SerialUSB.print("   identifier: ");
+  SerialUSB.println(identifier);
+  SerialUSB.println("");
+  SerialUSB.print("CMD >> ");
+}
+
+
 
 void setupPins() {
 
@@ -101,6 +170,8 @@ void calibration(int arg_cnt, char **args) {
 
   int avg = 100;
   bool force = return_bool_argument(args, arg_cnt, "-f", false);
+  bool smooth = return_bool_argument(args, arg_cnt, "-smooth", false);
+  bool debug = return_bool_argument(args, arg_cnt, "-debug", false);
 
   SerialUSB.println(calibrate_header);
 
@@ -122,6 +193,10 @@ void calibration(int arg_cnt, char **args) {
   oneStep();
   delay(100);
   oneStep();
+  delay(100);
+  oneStep();
+  delay(100);
+  oneStep();
 
 
   float temp_pos = 0;
@@ -131,22 +206,16 @@ void calibration(int arg_cnt, char **args) {
   temp_pos = temp_pos / 50.0;
 
   if (!force) {
-    if ((temp_pos - encoderReading) > 0)
+    if ((temp_pos - encoderReading) < 0)
     {
       SerialUSB.println("Wired backwards");
+      enabled = false;
       enableTC5Interrupts();
       return;
     }
   }
 
-  dir = false;
-  step_target = 0;
 
-  oneStep();
-  delay(100);
-  oneStep();
-  dir = true;
-  step_target = 0;
 
   SerialUSB.println("Calibrating fullsteps");
   SerialUSB.println(procent_bar);
@@ -159,6 +228,8 @@ void calibration(int arg_cnt, char **args) {
   int temp_reading = 4 * readEncoder();
   int last_reading = temp_reading;
 
+
+  step_target = 0;
   // step to every single fullstep position and read the Encoder
   for (int i = 0; i < steps_per_revolution; i++) {
 
@@ -171,6 +242,11 @@ void calibration(int arg_cnt, char **args) {
 
     delay(100);
 
+    // flush the encoder
+    readEncoder();
+    readEncoder();
+
+    // start real readings
     encoderReading = 0;
 
     for (int k = 0; k < avg; k++) {
@@ -200,7 +276,7 @@ void calibration(int arg_cnt, char **args) {
 
     if (!force) {
       if (i >= 1) {
-        if (abs(readings[i] - readings[i - 1]) < (65536 / (1.1 * steps_per_revolution))) {
+        if (abs(readings[i] - readings[i - 1]) < (65536 / (1.5 * steps_per_revolution))) {
           SerialUSB.println("Motor is not moving -> abbort");
           return;
         }
@@ -212,181 +288,117 @@ void calibration(int arg_cnt, char **args) {
       SerialUSB.print(".");
     }
 
+    //increase step_target with one fullstep
     oneStep();
+
   }
 
-
-  dir = false;
-  oneStep();
-  delay(100);
-  dir = true;
-
-  SerialUSB.println();
-  SerialUSB.println();
-
-
-  // generate a perfect lookup table
-  int perfect[steps_per_revolution];
-  for ( int i = 0; i < steps_per_revolution; i++) {
-    perfect[i] = ((i * 65536) / steps_per_revolution);
-  }
-
-
-
-  // find min value in full step readings and its index
-  float minimum = 65536;
-  int idx = 0;
-  for ( int i = 0; i < steps_per_revolution; i++) {
-    if (readings[i] < minimum) {
-      minimum = readings[i];
-      idx = i;
-    }
-  }
-
-
-  // shift the raw readings to sort them
-  float fullStepReadings[steps_per_revolution];
-  for ( int i = 0; i < steps_per_revolution; i++) {
-    counter = i + idx;
-    if (counter >= steps_per_revolution) {
-      counter = counter - steps_per_revolution;
-    }
-    fullStepReadings[i] = readings[counter];
-  }
-
-
-  // calculate the error between the measured and perfect lookup
-  float error_raw[steps_per_revolution];
-  for ( int i = 0; i < steps_per_revolution; i++) {
-    error_raw[i] =  (float)(perfect[i]) - (float)(fullStepReadings[i]);
-  }
-
-
-  // generate a normal distribution curve
-  // needed to smooth the fullstep readings
-  float gausian[31];
-  counter = 0;
-  float m = 0.0;
-  for (int i = -15; i <= 15; i++) {
-    gausian[counter] = exp(-0.5 * ((float)i * (float)i) / (25.0));
-    m = m + gausian[counter];
-    counter = counter + 1;
-  }
-  for (int i = 0; i < 31; i++) {
-    gausian[i] =  gausian[i] / m;
-  }
-
-
-  // smooth the fullstep readings with a ring buffer and the normal distribution
-  float error[steps_per_revolution];
-  counter = 0;
-  for ( int i = 0; i < steps_per_revolution; i++) {
-    m = 0;
-    counter = 0;
-    int lower = i - 15;
-    int higher = i + 15;
-
-    for (int j = lower; j < higher; j++) {
-      if (j >= steps_per_revolution) {
-        m = m + error_raw[j - steps_per_revolution] * gausian[counter];
-      }
-      else if (j < 0) {
-        m = m + error_raw[j + steps_per_revolution] * gausian[counter];
-      }
-      else {
-        m = m + error_raw[j] * gausian[counter];
-      }
-      counter += 1;
-    }
-    error[i] = m;
-  }
-
-
-  // recalculate the measured angles with the smoothed error
-  float angle_sorted[steps_per_revolution];
-  for ( int i = 0; i < steps_per_revolution; i++) {
-    angle_sorted[i] = (float)(perfect[i]) - (float)(error[i]);
-  }
-
-
-  // shift the sorted angle back
-  int x[steps_per_revolution];
-  for ( int i = 0; i < steps_per_revolution; i++) {
-    counter = i - idx;
-    if (counter < 0) {
-      counter = counter + steps_per_revolution;
-    }
-    x[i] = (angle_sorted[counter] + 0.5);
-  }
-
-  //  calibration check
-  SerialUSB.println("checking fullsteps");
-  SerialUSB.println(procent_bar);
-  counter = 0;
-  count = (steps_per_revolution) / 50;
-  float smoothed_error = 0.0;
-
-
-  temp_reading = 4 * readEncoder();
-  last_reading = temp_reading;
-  for (int i = 0; i < steps_per_revolution; i++) {
-
-    if (canceled()) return;
-    counter += 1;
-
-    delay(100);
-
-    encoderReading = 0;
-
-    for (int reading = 0; reading < avg; reading++) {
-
-      temp_reading = 4 * readEncoder();
-      if ((temp_reading - last_reading) < -32768) {
-        temp_reading += 65536;
-      }
-      else if ((temp_reading - last_reading) > 32768) {
-        temp_reading -= 65536;
-      }
-      last_reading = temp_reading;
-
-      encoderReading += temp_reading;
-
-      delayMicroseconds(100);
-    }
-
-    float temp =  abs(x[i] - (encoderReading / avg));
-
-    if (temp > 32768.0) {
-      temp = 65536.0 - temp;
-    }
-
-    if (temp > smoothed_error) {
-      smoothed_error = temp;
-    }
-
-    if (counter == count) {
-      counter = 0;
-      SerialUSB.print(".");
-    }
-    oneStep();
-  }
-
-
-  output(0, 0);
   step_target = 0;
+  enabled = false;
+  output(0, 0);
 
   SerialUSB.println();
-  SerialUSB.print("maximal error = ");
-  SerialUSB.print((100.0 * smoothed_error) / 65536.0);
-  SerialUSB.println("%");
-  SerialUSB.println("should be lower than 0.5 %");
-  SerialUSB.println("");
+  SerialUSB.println();
+
+  if (smooth) {
+    // generate a perfect lookup table
+    int perfect[steps_per_revolution];
+    for ( int i = 0; i < steps_per_revolution; i++) {
+      perfect[i] = ((i * 65536) / steps_per_revolution);
+    }
 
 
 
+    // find min value in full step readings and its index
+    float minimum = 65536;
+    int idx = 0;
+    for ( int i = 0; i < steps_per_revolution; i++) {
+      if (readings[i] < minimum) {
+        minimum = readings[i];
+        idx = i;
+      }
+    }
+
+
+    // shift the raw readings to sort them
+    float fullStepReadings[steps_per_revolution];
+    for ( int i = 0; i < steps_per_revolution; i++) {
+      counter = i + idx;
+      if (counter >= steps_per_revolution) {
+        counter = counter - steps_per_revolution;
+      }
+      fullStepReadings[i] = readings[counter];
+    }
+
+
+    // calculate the error between the measured and perfect lookup
+    float error_raw[steps_per_revolution];
+    for ( int i = 0; i < steps_per_revolution; i++) {
+      error_raw[i] =  (float)(perfect[i]) - (float)(fullStepReadings[i]);
+    }
+
+
+    // generate a normal distribution curve
+    // needed to smooth the fullstep readings
+    float gausian[31];
+    counter = 0;
+    float m = 0.0;
+    for (int i = -15; i <= 15; i++) {
+      gausian[counter] = exp(-0.5 * ((float)i * (float)i) / (25.0));
+      m = m + gausian[counter];
+      counter = counter + 1;
+    }
+    for (int i = 0; i < 31; i++) {
+      gausian[i] =  gausian[i] / m;
+    }
+
+
+    // smooth the fullstep readings with a ring buffer and the normal distribution
+    float error[steps_per_revolution];
+    counter = 0;
+    for ( int i = 0; i < steps_per_revolution; i++) {
+      m = 0;
+      counter = 0;
+      int lower = i - 15;
+      int higher = i + 15;
+
+      for (int j = lower; j < higher; j++) {
+        if (j >= steps_per_revolution) {
+          m = m + error_raw[j - steps_per_revolution] * gausian[counter];
+        }
+        else if (j < 0) {
+          m = m + error_raw[j + steps_per_revolution] * gausian[counter];
+        }
+        else {
+          m = m + error_raw[j] * gausian[counter];
+        }
+        counter += 1;
+      }
+      error[i] = m;
+    }
+
+
+    // recalculate the measured angles with the smoothed error
+    float angle_sorted[steps_per_revolution];
+    for ( int i = 0; i < steps_per_revolution; i++) {
+      angle_sorted[i] = (float)(perfect[i]) - (float)(error[i]);
+    }
+
+
+    // shift the sorted angle back
+    for ( int i = 0; i < steps_per_revolution; i++) {
+      counter = i - idx;
+      if (counter < 0) {
+        counter = counter + steps_per_revolution;
+      }
+      readings[i] = (angle_sorted[counter] + 0.5);
+    }
+
+  }
 
   // calculate the ticks between the fullsteps
   float ticks[steps_per_revolution];
+
   int low;
   int high;
   int iStart = 0;
@@ -400,9 +412,9 @@ void calibration(int arg_cnt, char **args) {
       high = high - steps_per_revolution;
     }
 
-    ticks[i] = x[high] - x[low];
+    ticks[i] = readings[high] - readings[low];
 
-    if (ticks[i] < 0) {
+    if (ticks[i] < -32768) {
       ticks[i] += 65536;
     }
     else if (ticks[i] > 32768) {
@@ -410,13 +422,22 @@ void calibration(int arg_cnt, char **args) {
     }
 
     for (int j = 0; j < ticks[i]; j++) {
-      stepNo = (mod(x[i] + j, 65536));
+      stepNo = (mod(readings[i] + j, 65536));
       if (stepNo == 0) {
         iStart = i;
         jStart = j;
       }
     }
   }
+
+  if (debug) {
+    SerialUSB.println("ticks ");
+    for (int i = 0; i < steps_per_revolution; i++) {
+      SerialUSB.println(ticks[i]);
+    }
+    SerialUSB.println("ticks done");
+  }
+
 
 
   // calculate the lookup table on the fly
@@ -425,7 +446,7 @@ void calibration(int arg_cnt, char **args) {
   float lookupAngle;
   float tick;
 
-  SerialUSB.print("const unsigned int lookup[] = {");
+  SerialUSB.print("const uint16_t lookup[] = {");
 
   for (int i = iStart; i < (iStart + steps_per_revolution + 1); i++) {
 
@@ -490,10 +511,10 @@ void calibration(int arg_cnt, char **args) {
 void oneStep() {
 
   if (dir == 0) {
-    step_target += 1024;
+    step_target -= 1024;
   }
   else {
-    step_target -= 1024;
+    step_target += 1024;
   }
 
   int target_raw = step_target * stepangle;
@@ -515,7 +536,7 @@ int mod(int xMod, int mMod) {
 
 void setupTCInterrupts() {
   const int overflow_TC_5 = (48000000 / FPID) - 1;
-  const int overflow_TC_4 = ((48000000 / (2 * FPID))) - 1;
+  const int overflow_TC_4 = (48000000 / Fs) - 1;
 
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (int) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
@@ -619,7 +640,7 @@ void PID_autotune(int arg_cnt, char **args) {
   SerialUSB.println(cancle_header);
   bool debug = check_argument(args, arg_cnt, "-d");
   bool gui = check_argument(args, arg_cnt, "-gui");
-  int loops = return_integer_argument(args, arg_cnt, "-c", 1, 1, 10);
+  int loops = return_float_argument(args, arg_cnt, "-c", 1, 1, 10);
 
   if (!gui) {
     SerialUSB.println("| loop | Noise | Frequency | lookback | P      | I      | D       |");
@@ -712,6 +733,15 @@ void PID_autotune(int arg_cnt, char **args) {
         // write the output
         output(electric_angle, u);
 
+<<<<<<< HEAD
+        if (u > 0) {
+          output(y + PA, u);
+        }
+        else {
+          output(y - PA, u);
+        }
+
+=======
         /*    if (u > 0) {
               output(-raw_0 - PA, u);
             }
@@ -719,6 +749,7 @@ void PID_autotune(int arg_cnt, char **args) {
               output(-raw_0 + PA, u);
             }
         */
+>>>>>>> origin/dev
         // wait half a second to get stable oscilations
         if (millis() > start_millis) {
           points[counter] = y;
@@ -730,7 +761,7 @@ void PID_autotune(int arg_cnt, char **args) {
       }
     }
 
-    output(-raw_0, 0);
+    output(y, 0);
 
 
     //smoothing the measured data
@@ -1098,21 +1129,6 @@ bool canceled() {
 
 
 
-
-bool timed_out(unsigned long now, int time_out) {
-  if (millis() > now + time_out) {
-    SerialUSB.println("");
-    SerialUSB.println("timed out!");
-    enableTC5Interrupts();
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-
-
 int sign(int input) {
   if (input < 0) {
     return -1;
@@ -1123,83 +1139,6 @@ int sign(int input) {
 }
 
 
-
-void boot() {
-  SerialUSB.begin(baudrate);
-  cmdInit(&SerialUSB);
-
-  delay(1000);
-
-  SerialUSB.print("setup pins:");
-  setupPins();
-  SerialUSB.println(" OK");
-
-  SerialUSB.print("setup SPI:");
-  setupSPI();
-  SerialUSB.println(" OK");
-
-  SerialUSB.print("setup Interrupts:");
-  setupTCInterrupts();
-  SerialUSB.println(" OK");
-
-
-  delay(1000);
-  SerialUSB.print("setup controller:");
-  enabled = false;
-  enableTC5Interrupts();
-  SerialUSB.println(" OK");
-
-  delay(200);
-
-  if (USE_ENABLE_PIN) {
-    SerialUSB.print("setup enable pin:");
-    enaInterrupt();
-  }
-  else {
-    enabled = true;
-  }
-  SerialUSB.println(" OK");
-
-
-  SerialUSB.print("setup direction pin:");
-  dirInterrupt();
-  SerialUSB.println(" OK");
-
-  // resetting the error register
-  error_register = 0B1000000000000000;
-
-
-
-  SerialUSB.println(bootscreen_1);
-  SerialUSB.println(bootscreen_2);
-  SerialUSB.println(bootscreen_3);
-  SerialUSB.println(bootscreen_4);
-  SerialUSB.println(bootscreen_5);
-  SerialUSB.println(bootscreen_6);
-  SerialUSB.println(bootscreen_7);
-  SerialUSB.println(bootscreen_8);
-  SerialUSB.println(bootscreen_9);
-  SerialUSB.println(bootscreen_10);
-
-  SerialUSB.print("   compiling date: ");
-  SerialUSB.println(__DATE__);
-
-  SerialUSB.print("   firmware-version: ");
-  SerialUSB.println(firmware_version);
-
-  SerialUSB.print("   identifier: ");
-  SerialUSB.println(identifier);
-  SerialUSB.println("");
-  SerialUSB.print("CMD >> ");
-
-
-}
-
-
-
-
-//                            timing error                    maximal error                   maximal current                       lookuptable
-bool LED_pattern[4][10] = { {1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}, {1, 1, 1, 1, 1, 1, 0, 1, 0, 1}};
 
 void error_led() {
 
@@ -1293,17 +1232,9 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
   int answer[1000];
   int target[1000];
 
-  int omega_answer[1000];
-  int omega_target[1000];
+  int o_answer[1000];
+  int o_target[1000];
 
-  int int_pessen_Kp_old = int_pessen_Kp;
-  int int_pessen_Ki_old = int_pessen_Ki;
-  int int_pessen_Kd_old = int_pessen_Kd;
-
-
-  int_pessen_Kp = int_Kp;
-  int_pessen_Ki = int_Ki;
-  int_pessen_Kd = int_Kd;
 
 
   enabled = true;
@@ -1348,7 +1279,8 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
       next_time = current_time + dt;
 
       answer[counter] = y;
-      omega_answer[counter] = omega;
+      o_answer[counter] = omega;
+      o_target[counter] = omega_target;
       step_target = target[counter];
 
       counter += 1;
@@ -1369,17 +1301,10 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
   enabled = false;
 
 
-  // calculate the velocity profiles
-  for (int i = 0; i < 999; i++) {
-    omega_target[i] = ((target[i + 1] - target[i]) * F_Sample) / FPID;
-  }
-  omega_target[999] = omega_target[998];
-
-
 
   float error_omega = 0.0;
   for (int i = 0; i < 1000; i++) {
-    error_omega = error_omega + ((omega_target[i] - omega_answer[i]) * (omega_target[i] - omega_answer[i])) ;
+    error_omega = error_omega + ((o_target[i] - o_answer[i]) * (o_target[i] - o_answer[i])) ;
   }
   error_omega = error_omega;
 
@@ -1391,9 +1316,6 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
 
   float cost = error_position + error_omega;
 
-  int_pessen_Kp = int_pessen_Kp_old;
-  int_pessen_Ki = int_pessen_Ki_old;
-  int_pessen_Kd = int_pessen_Kd_old;
 
   delay(100);
   if (output) {
@@ -1404,9 +1326,9 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
       SerialUSB.print(';');
       SerialUSB.print(answer[i]);
       SerialUSB.print(';');
-      SerialUSB.print(omega_target[i]);
+      SerialUSB.print(o_target[i]);
       SerialUSB.print(';');
-      SerialUSB.println(omega_answer[i]);
+      SerialUSB.println(o_answer[i]);
     }
   }
   return (cost);
@@ -1417,8 +1339,8 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
 void downhill_simplex(int arg_cnt, char **args) {
 
 
-  int F_Sample = return_integer_argument(args, arg_cnt, "-f", 5000, 200, 10000);
-  int velocity = return_integer_argument(args, arg_cnt, "-v", 60, 10, 100);
+  int F_Sample = return_float_argument(args, arg_cnt, "-f", 5000, 200, 10000);
+  int velocity = return_float_argument(args, arg_cnt, "-v", 60, 10, 500);
   bool output = check_argument(args, arg_cnt, "-o");
   bool gui = check_argument(args, arg_cnt, "-gui");
 
@@ -1854,12 +1776,6 @@ void downhill_simplex(int arg_cnt, char **args) {
   int_Kacc = (Kacc * 1024.0) + 0.5;
 
 
-  // we are finished there is no improvment possible
-  int_pessen_Kp = (1024.0 * ((Kp * 0.7) / (0.6))) + 0.5;
-  int_pessen_Ki = (1024.0 * ((Ki * 0.7 * 2.5) / (2 * 0.6))) + 0.5;
-  int_pessen_Kd = (1024.0 * ((Kd * 8.0 * 0.7) / (20.0 * 0.6))) + 0.5;
-
-
   if (!gui) {
     paramter_streamer (true, false);
   } else {
@@ -1909,11 +1825,8 @@ void paramter_streamer (bool output, bool gui) {
     SerialUSB.print("Kacc = ");
     SerialUSB.println(Kacc, 5);
 
-    SerialUSB.print("D_Term_LPF = ");
-    SerialUSB.println(D_Term_LPF);
-
-    SerialUSB.print("effort_LPF = ");
-    SerialUSB.println(u_LPF);
+    SerialUSB.print("error_LPF = ");
+    SerialUSB.println(error_LPF);
 
     SerialUSB.print("mm_rev = ");
     SerialUSB.println(mm_rev);
@@ -1946,7 +1859,7 @@ void paramter_streamer (bool output, bool gui) {
     SerialUSB.write(';');
     SerialUSB.print(Kd, 5);
     SerialUSB.write(';');
-    SerialUSB.print(D_Term_LPF);
+    SerialUSB.print(error_LPF);
     SerialUSB.write(';');
     SerialUSB.print(mm_rev);
     SerialUSB.write(';');
@@ -1956,13 +1869,13 @@ void paramter_streamer (bool output, bool gui) {
     SerialUSB.write(';');
     SerialUSB.print(INVERT);
     SerialUSB.write(';');
-    SerialUSB.print(u_LPF);
-    SerialUSB.write(';');
     SerialUSB.print(Kff, 5);
     SerialUSB.write(';');
     SerialUSB.print(Kacc, 5);
     SerialUSB.println();
   }
 }
+
+
 
 

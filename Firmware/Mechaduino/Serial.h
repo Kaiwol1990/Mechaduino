@@ -35,4 +35,8 @@ void streaming_handler();
 
 void start_testmove(int arg_cnt, char **args);
 
+void Serial_oneStep(int arg_cnt, char **args);
+
+void get_max_frequency(int arg_cnt, char **args);
+
 #endif

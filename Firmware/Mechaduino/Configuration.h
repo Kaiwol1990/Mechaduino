@@ -1,13 +1,13 @@
 
 #ifndef __CONFIGURATION_H__
 #define __CONFIGURATION_H__
-
+#include <arduino.h>
 
 //-------------------------------------------------- Identifier -------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
 // string to identify the mechaduino with the Serial monitor
-extern char identifier;
+extern String identifier;
 
 
 
@@ -62,14 +62,8 @@ extern float Kacc;
 
 //----------------------------------------------- Filter  Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
-
-// break frequency in hertz for DTerm
-extern int D_Term_LPF;
-
-// break frequency in hertz for effort filter
-extern int u_LPF;
-
-
+// break frequency in hertz for the error filter
+extern int error_LPF;
 
 
 
@@ -77,10 +71,11 @@ extern int u_LPF;
 //----------------------------------------------- Internal Section ----------------------------------------------
 //------------------------------------------------- don't change ------------------------------------------------
 // baudrate speed bit/s
-#define baudrate 1843200
+#define baudrate 250000
 
 // frequency of the PID loop change only if you know what you're doing
 #define FPID 5000
+#define Fs (4*FPID)
 #endif
 
 

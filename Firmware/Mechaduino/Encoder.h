@@ -4,5 +4,5 @@
 
 int readEncoder() __attribute__ ((optimize("O3")));
 
-int readAngle(int last_angle, int last_raw) __attribute__ ((optimize("O3")));
+int readAngle() __attribute__ ((optimize("O3")));
 #endif
