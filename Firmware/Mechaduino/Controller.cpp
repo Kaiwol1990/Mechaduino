@@ -12,18 +12,9 @@
 
 
 
-const int16_t u_LPF = 1000;
-const int16_t u_LPFa = ((2048.0 * exp(u_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int16_t u_LPFb = 2048 - u_LPFa;
-
-
 // ----- gets called with FPID -----
 // ----- calculates the target velocity and PID settings -----
 void TC5_Handler() {
-
- // static int32_t t_1 = micros();
- // int32_t t;
- // int32_t dt;
 
   int32_t domega_target;
 
@@ -87,7 +78,7 @@ void TC5_Handler() {
       //u = u_pid + u_ff + u_acc;
       // lowpass filter with 1000 Hz cutoff
 
-      u = ((u_LPFa * u) + (u_LPFb * (u_pid + u_ff + u_acc))) / 2048;
+      u = u_pid + u_ff + u_acc;
 
 
     }
@@ -97,6 +88,7 @@ void TC5_Handler() {
       u = 0;
       ITerm = 0;
     }
+
 
 
     // constrain the effort to the user spedified maximum
@@ -176,38 +168,23 @@ void TC5_Handler() {
 // ----- Oversamples the shaft angle to reduce noise -----
 void TC4_Handler() {
 
-  static int32_t y_temp;
 
   static int32_t r_1;
   static int32_t y_1;
 
   static uint16_t o_target_counter;
-  static uint16_t y_counter;
 
   if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {
 
     o_target_counter++;
-    y_counter ++;
 
     // read the current angle
-    y_temp = y_temp + readAngle();
+    y = readAngle();
 
 
-    if (y_counter >= 4) {
+    // calculate the current velocity
+    omega = (omega + ((y - y_1) * Fs) ) / 2;
 
-      // calculate the current angle
-      y = y_temp / y_counter;
-
-
-      // calculate the current velocity
-      omega = (omega + ((y - y_1) * (Fs / y_counter)) ) / 2;
-
-
-      // buffer the variables for the next loop
-      y_temp = 0;
-      y_counter = 0;
-      y_1 = y;
-    }
 
 
     // calculate the current target from the received steps and the angle per step
@@ -228,6 +205,7 @@ void TC4_Handler() {
       r_1 = r;
     }
 
+    y_1 = y;
 
 
     TC4->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
