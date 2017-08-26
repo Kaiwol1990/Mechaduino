@@ -75,7 +75,7 @@ extern int error_LPF;
 
 // frequency of the PID loop change only if you know what you're doing
 #define FPID 5000
-#define Fs (4*FPID)
+#define Fs (2*FPID)
 #endif
 
 

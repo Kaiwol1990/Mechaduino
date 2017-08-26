@@ -47,7 +47,7 @@ float test_move(int steps, int F_Sample, bool output, char identifier);
 
 void downhill_simplex(int arg_cnt, char **args);
 
-void paramter_streamer(bool output, bool gui) ;
+void paramter_streamer(bool output, bool gui);
 
 #endif
 

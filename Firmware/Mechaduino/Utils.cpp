@@ -617,12 +617,10 @@ void disableTC4Interrupts() {
 
 
 
-
 void PID_autotune(int arg_cnt, char **args) {
   SerialUSB.println(autotune_header);
 
   disableTC5Interrupts();
- 
 
   float outputStep = uMAX;
   int frequency = 2 * FPID;
@@ -638,6 +636,7 @@ void PID_autotune(int arg_cnt, char **args) {
 
 
   SerialUSB.println(cancle_header);
+
   bool debug = check_argument(args, arg_cnt, "-d");
   bool gui = check_argument(args, arg_cnt, "-gui");
   int loops = return_float_argument(args, arg_cnt, "-c", 1, 1, 10);
@@ -667,7 +666,6 @@ void PID_autotune(int arg_cnt, char **args) {
     int setpoint = r;
 
     // measure the noise from the controller
-
     int noiseBand = measure_noise();
     disableTC5Interrupts();
 
@@ -700,7 +698,6 @@ void PID_autotune(int arg_cnt, char **args) {
 
     int counter = 0;
     unsigned long start_millis = millis() + 500;
-    int last_raw = mod(y, 36000);
 
     u = outputStep;
     // start the oscilations and measure the behavior every 50 microsseconds
@@ -728,12 +725,8 @@ void PID_autotune(int arg_cnt, char **args) {
           u = outputStep;
         }
 
-        int electric_angle = -(raw_0 + (sign(u) * PA));
 
-        // write the output
-        output(electric_angle, u);
 
-<<<<<<< HEAD
         if (u > 0) {
           output(y + PA, u);
         }
@@ -741,15 +734,6 @@ void PID_autotune(int arg_cnt, char **args) {
           output(y - PA, u);
         }
 
-=======
-        /*    if (u > 0) {
-              output(-raw_0 - PA, u);
-            }
-            else {
-              output(-raw_0 + PA, u);
-            }
-        */
->>>>>>> origin/dev
         // wait half a second to get stable oscilations
         if (millis() > start_millis) {
           points[counter] = y;
@@ -1875,7 +1859,5 @@ void paramter_streamer (bool output, bool gui) {
     SerialUSB.println();
   }
 }
-
-
 
 

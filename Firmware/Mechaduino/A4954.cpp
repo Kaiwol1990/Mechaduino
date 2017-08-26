@@ -17,11 +17,17 @@ const int16_t cos_lookup[3600] = {2896 , 2891 , 2886 , 2881 , 2876 , 2871 , 2866
                                  };
 
 
+const int16_t u_LPF = 552;
+const int16_t u_LPFa = ((2048.0 * exp(u_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int16_t u_LPFb = 2048 - u_LPFa;
+
+
+
 
 
 void output(int electric_angle, int effort) {
-  int32_t v_ref_coil_A;
-  int32_t v_ref_coil_B;
+  static int32_t v_ref_coil_A;
+  static int32_t v_ref_coil_B;
 
   int32_t pole_angle;
 
@@ -35,8 +41,8 @@ void output(int electric_angle, int effort) {
     sine = sin_lookup[pole_angle];
     cosine = cos_lookup[pole_angle];
 
-    v_ref_coil_A = ((abs(effort) * sine) ) / 4096;
-    v_ref_coil_B = ((abs(effort) * cosine) ) / 4096;
+    v_ref_coil_A = ((u_LPFa * v_ref_coil_A) + (u_LPFb * ((abs(effort) * sine) ) / 4096)) / 2048;
+    v_ref_coil_B = ((u_LPFa * v_ref_coil_B) + (u_LPFb * ((abs(effort) * cosine) ) / 4096)) / 2048;
 
 
     if (v_ref_coil_A >= 0)  {
