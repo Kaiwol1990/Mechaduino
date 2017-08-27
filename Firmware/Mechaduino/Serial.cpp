@@ -32,6 +32,8 @@ void init_menu() {
   cmdAdd(interrupt_command, set_TC);
   cmdAdd("step", Serial_oneStep);
   cmdAdd("loop", get_max_frequency);
+  cmdAdd("test", test);
+  
 
 }
 
@@ -597,3 +599,6 @@ void get_max_frequency(int arg_cnt, char **args) {
 
 
 
+void test(int arg_cnt, char **args) {
+  userqst (5000, "Continue?");
+}

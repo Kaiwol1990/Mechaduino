@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Cmd.h"
+#include "Configuration.h"
 
 // command line message buffer and pointer
 static uint8_t msg[MAX_MSG_SIZE];
@@ -250,9 +251,9 @@ void insert_command(const char* command_string) {
 
   char buf[30];
 
-  // copy command to buffer and parse it to cmd_handler 
+  // copy command to buffer and parse it to cmd_handler
   strcpy(buf, command_string);
-  
+
   uint8_t msg_length = 0;
   while ((msg_length < 30) && buf[msg_length] != NULL) {
     cmd_handler( buf[msg_length]);
@@ -262,6 +263,53 @@ void insert_command(const char* command_string) {
   // attache carridge return to the end of the command
   cmd_handler(' ');
   cmd_handler('\r');
+
+}
+
+
+bool userqst(int timeout, const String qst_string) {
+
+  uint32_t end_time = millis() + timeout;
+  SerialUSB.print(qst_string);
+  SerialUSB.print(" (y/n): ");
+
+  bool answer = false;
+  bool received = false;
+
+  while (millis() < end_time && !received) {
+
+    if (SerialUSB.available()) {
+      if (SerialUSB.peek() == 'y') {
+        answer =  true;
+        received = true;
+      }
+      else if (SerialUSB.peek() == 'Y') {
+        answer =  true;
+        received = true;
+      }
+      else if (SerialUSB.peek() == 'n') {
+        answer =  false;
+        received = true;
+      }
+      else if (SerialUSB.peek() == 'N') {
+        answer =  false;
+        received = true;
+      }
+      delay(50);
+    }
+
+  }
+  SerialUSB.read();
+  SerialUSB.read();
+  
+  if (answer == true) {
+    SerialUSB.println("y");
+  }
+  else {
+    SerialUSB.println("n");
+  }
+
+  return answer;
 
 }
 

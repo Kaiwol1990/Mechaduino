@@ -3,6 +3,7 @@
 
 #define MAX_MSG_SIZE    256
 #include <stdint.h>
+#include "Configuration.h"
 
 // command line structure
 typedef struct _cmd_t
@@ -29,5 +30,7 @@ String return_char_argument(char **args, uint8_t arg_cnt, const char *identifier
 bool check_argument(char **args, uint8_t arg_cnt, const char *identifier);
 
 void insert_command(const char* command_string);
+
+bool userqst(int timeout, const String qst_string);
 
 #endif //CMD_H

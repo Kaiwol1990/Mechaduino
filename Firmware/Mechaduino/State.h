@@ -3,6 +3,7 @@
 #ifndef __STATE_H__
 #define __STATE_H__
 #include <stdint.h>
+#include <arduino.h>
 
 //---- interrupt vars ----
 extern volatile int r;            //target angle

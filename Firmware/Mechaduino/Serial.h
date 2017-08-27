@@ -39,4 +39,6 @@ void Serial_oneStep(int arg_cnt, char **args);
 
 void get_max_frequency(int arg_cnt, char **args);
 
+void test(int arg_cnt, char **args);
+
 #endif
