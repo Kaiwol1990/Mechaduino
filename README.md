@@ -42,7 +42,7 @@ To get an list of the possible commands send help over the serial monitor
 |Command|Description|Arguments|
 |-------|-----------|---------|
 |help | prints this menu |
-|calibrate | starts the calibration routine | |
+|calibrate | starts the calibration routine | -check -smooth |
 |diagnose | read Encoder Diagnostics | |
 |state | shows and sets the motor state | -on, -off |
 |stream | streams servo parameters | -f {int}, -on, -off |
