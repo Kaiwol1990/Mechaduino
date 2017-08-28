@@ -169,12 +169,12 @@ void calibration(int arg_cnt, char **args) {
   disableTC4Interrupts();
 
   int avg = 100;
-  bool force = check_argument(args, arg_cnt, "-force");
   bool smooth = check_argument(args, arg_cnt, "-smooth");
   bool debug = check_argument(args, arg_cnt, "-debug");
   bool check_readings = check_argument(args, arg_cnt, "-check");
 
   SerialUSB.println(calibrate_header);
+  SerialUSB.println();
 
   enabled = true;
   dir = true;
@@ -207,16 +207,13 @@ void calibration(int arg_cnt, char **args) {
   }
   temp_pos = temp_pos / 50.0;
 
-  if (!force) {
-    if ((temp_pos - encoderReading) < 0)
-    {
-      SerialUSB.println("Wired backwards");
-      enabled = false;
-      enableTC5Interrupts();
-      return;
-    }
+  if ((temp_pos - encoderReading) < 0)
+  {
+    SerialUSB.println("Wired backwards");
+    enabled = false;
+    enableTC5Interrupts();
+    return;
   }
-
 
 
   SerialUSB.println("Calibrating fullsteps");
@@ -226,6 +223,7 @@ void calibration(int arg_cnt, char **args) {
   dir = true;
 
   int readings[steps_per_revolution];
+  int reverse_readings[steps_per_revolution];
 
   int temp_reading = 4 * readEncoder();
   int last_reading = temp_reading;
@@ -250,6 +248,8 @@ void calibration(int arg_cnt, char **args) {
 
     // start real readings
     encoderReading = 0;
+    temp_reading = 4 * readEncoder();
+    last_reading = temp_reading;
 
     for (int k = 0; k < avg; k++) {
 
@@ -263,7 +263,6 @@ void calibration(int arg_cnt, char **args) {
       }
 
       encoderReading += temp_reading;
-
       last_reading = temp_reading;
 
       delayMicroseconds(100);
@@ -276,28 +275,135 @@ void calibration(int arg_cnt, char **args) {
       readings[i] = readings[i] - 65536;
     }
 
-    if (!force) {
-      if (i >= 1) {
-        if (abs(readings[i] - readings[i - 1]) < (65536 / (1.5 * steps_per_revolution))) {
-          SerialUSB.println("Motor is not moving -> abbort");
-          return;
-        }
-      }
+    if (counter == count) {
+      counter = 0;
+      SerialUSB.print(".");
     }
+
+    //increase step_target with one
+    if (i < 199) {
+      oneStep();
+    }
+
+  }
+  SerialUSB.println(" -> done! Reverse!");
+
+  if (debug) {
+    SerialUSB.println("");
+    SerialUSB.println("");
+    for (int i = 0; i < steps_per_revolution; i++) {
+      SerialUSB.print(readings[i]);
+      SerialUSB.print(",");
+    }
+    SerialUSB.println("");
+  }
+
+
+  //backwarts
+  delay(100);
+  oneStep();
+  delay(250);
+  dir = false;
+  delay(250);
+  oneStep();
+  delay(100);
+
+  temp_reading = 4 * readEncoder();
+  last_reading = temp_reading;
+
+  for (int i = (steps_per_revolution - 1); i >= 0; i--) {
+
+    if (canceled()) {
+      enabled = false;
+      return;
+    }
+    delay(100);
+
+    counter += 1;
+
+    // start real readings
+    encoderReading = 0;
+    temp_reading = 4 * readEncoder();
+    last_reading = temp_reading;
+
+    for (int k = 0; k < avg; k++) {
+
+      temp_reading = 4 * readEncoder();
+
+      if ((temp_reading - last_reading) <= -32768) {
+        temp_reading += 65536;
+      }
+      else if ((temp_reading - last_reading) >= 32768) {
+        temp_reading -= 65536;
+      }
+
+      encoderReading += temp_reading;
+      last_reading = temp_reading;
+
+      delayMicroseconds(100);
+    }
+
+    reverse_readings[i] =  (encoderReading / avg) + 0.5;
 
     if (counter == count) {
       counter = 0;
       SerialUSB.print(".");
     }
 
-    //increase step_target with one fullstep
-    oneStep();
+    //increase step_target with one
+    if (i > 0) {
+      oneStep();
+    }
+  }
+  SerialUSB.println(" -> done!");
 
+  if (debug) {
+    SerialUSB.println("");
+    SerialUSB.println("");
+    for (int i = 0; i < steps_per_revolution; i++) {
+      SerialUSB.print(reverse_readings[i]);
+      SerialUSB.print(",");
+    }
+    SerialUSB.println("");
+  }
+
+
+  // calculate the mean reading between forward and reverse
+  for (int i = 0; i < steps_per_revolution; i++) {
+    int temp = readings[i] - reverse_readings[i];
+
+    if (temp < 0) {
+      readings[i] = readings[i] - (temp / 2);
+    }
+    else {
+
+      readings[i] = reverse_readings[i] + (temp / 2);
+    }
+  }
+
+
+  if (debug) {
+    SerialUSB.println("");
+    SerialUSB.println("");
+    for (int i = 0; i < steps_per_revolution; i++) {
+      SerialUSB.print(readings[i]);
+      SerialUSB.print(",");
+    }
+    SerialUSB.println("");
   }
 
 
 
   if (check_readings) {
+
+    delay(100);
+    oneStep();
+    delay(250);
+    dir = true;
+    delay(250);
+    oneStep();
+    delay(100);
+
     SerialUSB.println("");
     SerialUSB.println("");
     SerialUSB.println("Checking fullsteps");
@@ -351,9 +457,105 @@ void calibration(int arg_cnt, char **args) {
       }
 
       //increase step_target with one fullstep
+      if (i < 199) {
+        oneStep();
+      }
+
+    }
+
+    SerialUSB.println(" -> done! Reverse!");
+
+
+    if (debug) {
+      SerialUSB.println("");
+      SerialUSB.println("");
+      for (int i = 0; i < steps_per_revolution; i++) {
+        SerialUSB.print(check_readings[i]);
+        SerialUSB.print(",");
+      }
+      SerialUSB.println("");
+    }
+
+    //backwarts
+    delay(100);
+    oneStep();
+    delay(250);
+    dir = false;
+    delay(250);
+    oneStep();
+    delay(100);
+
+    for (int i = (steps_per_revolution - 1); i >= 0; i--) {
+
+      if (canceled()) {
+        enabled = false;
+        return;
+      }
+
+      counter += 1;
+
+      delay(100);
+
+      // flush the encoder
+      readEncoder();
+      readEncoder();
+
+      // start real readings
+      encoderReading = 0;
+
+      for (int k = 0; k < avg; k++) {
+
+        temp_reading = 4 * readEncoder();
+
+        if ((temp_reading - last_reading) <= -32768) {
+          temp_reading += 65536;
+        }
+        else if ((temp_reading - last_reading) >= 32768) {
+          temp_reading -= 65536;
+        }
+
+        encoderReading += temp_reading;
+
+        last_reading = temp_reading;
+
+        delayMicroseconds(100);
+      }
+
+      int temp_reading =  (encoderReading / avg) + 0.5;
+
+
+      if (temp_reading > 65536) {
+        temp_reading = temp_reading - 65536;
+      }
+
+      check_readings[i] = (check_readings[i] + temp_reading) / 2;
+
+      if (counter == count) {
+        counter = 0;
+        SerialUSB.print(".");
+      }
+
+      //increase step_target with one fullstep
       oneStep();
 
     }
+    SerialUSB.println(" -> done!");
+
+    if (debug) {
+      SerialUSB.println("");
+      SerialUSB.println("");
+      for (int i = 0; i < steps_per_revolution; i++) {
+        SerialUSB.print(check_readings[i]);
+        SerialUSB.print(",");
+      }
+      SerialUSB.println("");
+
+    }
+
+
+
+
+
     SerialUSB.println("");
 
     float max_error = 0;
@@ -383,7 +585,7 @@ void calibration(int arg_cnt, char **args) {
     SerialUSB.print(100 * min_error, 5);
     SerialUSB.println(" %");
 
-    bool qst = userqst(5000, "Continue?");
+    bool qst = userqst(15000, "Continue?");
 
     if (qst == false) {
       step_target = 0;
@@ -392,15 +594,8 @@ void calibration(int arg_cnt, char **args) {
       return;
     }
 
-    if (debug) {
-      SerialUSB.println("");
-      SerialUSB.println("");
-      for (int i = 0; i < steps_per_revolution; i++) {
-        SerialUSB.print(readings[i]);
-        SerialUSB.print(",");
-      }
-      SerialUSB.println("");
 
+    if (debug) {
       for (int i = 0; i < steps_per_revolution; i++) {
         SerialUSB.print(check_readings[i]);
         SerialUSB.print(",");
@@ -413,12 +608,10 @@ void calibration(int arg_cnt, char **args) {
       }
       SerialUSB.println("");
       SerialUSB.println("");
-
-
     }
-
-
   }
+
+
 
 
 
@@ -554,7 +747,7 @@ void calibration(int arg_cnt, char **args) {
       SerialUSB.print(100 * min_error, 5);
       SerialUSB.println(" %");
 
-      bool qst = userqst(5000, "Continue?");
+      bool qst = userqst(15000, "Continue?");
 
       if (qst == false) {
         step_target = 0;
@@ -699,7 +892,7 @@ void oneStep() {
 
   int target_raw = step_target * stepangle;
   int raw_0 = mod(target_raw, 36000);
-  output(raw_0 , uMAX);
+  output_calibration(raw_0 , uMAX / 3);
 }
 
 
