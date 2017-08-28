@@ -168,7 +168,7 @@ void calibration(int arg_cnt, char **args) {
   disableTC5Interrupts();
   disableTC4Interrupts();
 
-  int avg = 100;
+  int avg = 50;
   bool smooth = check_argument(args, arg_cnt, "-smooth");
   bool debug = check_argument(args, arg_cnt, "-debug");
   bool check_readings = check_argument(args, arg_cnt, "-check");
@@ -179,7 +179,8 @@ void calibration(int arg_cnt, char **args) {
   enabled = true;
   dir = true;
   step_target = 0;
-  delay(500);
+  output_calibration(0, uMAX / 3);
+  delay(100);
 
 
   float encoderReading = 0;
@@ -193,11 +194,11 @@ void calibration(int arg_cnt, char **args) {
 
 
   oneStep();
-  delay(100);
+  delay(10);
   oneStep();
-  delay(100);
+  delay(10);
   oneStep();
-  delay(100);
+  delay(10);
   oneStep();
 
 
@@ -240,7 +241,7 @@ void calibration(int arg_cnt, char **args) {
 
     counter += 1;
 
-    delay(100);
+    delay(10);
 
     // flush the encoder
     readEncoder();
@@ -281,7 +282,7 @@ void calibration(int arg_cnt, char **args) {
     }
 
     //increase step_target with one
-    if (i < 199) {
+    if (i < (steps_per_revolution-1)) {
       oneStep();
     }
 
@@ -317,7 +318,7 @@ void calibration(int arg_cnt, char **args) {
       enabled = false;
       return;
     }
-    delay(100);
+    delay(10);
 
     counter += 1;
 
@@ -394,6 +395,8 @@ void calibration(int arg_cnt, char **args) {
 
 
 
+
+
   if (check_readings) {
 
     delay(100);
@@ -420,7 +423,7 @@ void calibration(int arg_cnt, char **args) {
 
       counter += 1;
 
-      delay(100);
+      delay(10);
 
       encoderReading = 0;
 
@@ -457,7 +460,7 @@ void calibration(int arg_cnt, char **args) {
       }
 
       //increase step_target with one fullstep
-      if (i < 199) {
+      if (i < (steps_per_revolution-1)) {
         oneStep();
       }
 
@@ -494,7 +497,7 @@ void calibration(int arg_cnt, char **args) {
 
       counter += 1;
 
-      delay(100);
+      delay(10);
 
       // flush the encoder
       readEncoder();
@@ -591,6 +594,7 @@ void calibration(int arg_cnt, char **args) {
       step_target = 0;
       enabled = false;
       output(0, 0);
+      enableTC5Interrupts();
       return;
     }
 
@@ -753,6 +757,7 @@ void calibration(int arg_cnt, char **args) {
         step_target = 0;
         enabled = false;
         output(0, 0);
+        enableTC5Interrupts();
         return;
       }
     }
@@ -810,7 +815,6 @@ void calibration(int arg_cnt, char **args) {
     SerialUSB.println("");
     SerialUSB.println("ticks done");
   }
-
 
 
   // calculate the lookup table on the fly
@@ -872,7 +876,6 @@ void calibration(int arg_cnt, char **args) {
   }
   SerialUSB.println();
   SerialUSB.println("};");
-
 
   enableTC5Interrupts();
 }
