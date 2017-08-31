@@ -17,10 +17,6 @@ void enaInterrupt();
 
 void dirInterrupt();
 
-void calibration(int arg_cnt, char **args);
-
-void oneStep();
-
 int mod(int xMod, int mMod) __attribute__ ((optimize("O3")));
 
 void setupTCInterrupts();

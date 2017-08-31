@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "wiring_private.h"
 
-static uint_fast8_t _writeResolution = 9;
+static uint_fast8_t _writeResolution = 10;
 
 // Wait for synchronization of registers between the clock domains
 static __inline__ void syncADC() __attribute__((always_inline, unused));
@@ -155,7 +155,7 @@ void analogFastWrite(uint32_t pin, uint32_t value)
         TCCx->CC[tcChannel].reg = (uint32_t) value;
         syncTCC(TCCx);
         // Set PER to maximum counter value (resolution : 0x3FF)
-        TCCx->PER.reg = 0X200;//0x3FF;
+        TCCx->PER.reg = 0x3FF;//0X200;
         syncTCC(TCCx);
         // Enable TCCx
         TCCx->CTRLA.bit.ENABLE = 1;

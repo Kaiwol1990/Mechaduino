@@ -105,11 +105,11 @@ void TC5_Handler() {
     // calculate the phase advance term
     phase_advanced = (sign(u) * PA) + (omega / FPID);
 
-    if (phase_advanced >= PA) {
-      phase_advanced = PA;
+    if (phase_advanced >= 2 * PA) {
+      phase_advanced = 2 * PA;
     }
-    else if (phase_advanced <= -PA) {
-      phase_advanced = -PA;
+    else if (phase_advanced <= -(2 * PA)) {
+      phase_advanced = -(2 * PA);
     }
 
 
@@ -164,6 +164,16 @@ void TC5_Handler() {
 
 
 
+const int16_t y_LPF = 1252;
+const int16_t y_LPFa = ((2048.0 * exp(y_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int16_t y_LPFb = 2048 - y_LPFa;
+
+
+
+
+
+
+
 // ----- reads the current shaft angle with 2*FPID -----
 // ----- Oversamples the shaft angle to reduce noise -----
 void TC4_Handler() {
@@ -179,7 +189,8 @@ void TC4_Handler() {
     o_target_counter++;
 
     // read the current angle
-    y = readAngle();
+    y = ((y_LPFa * y) + (y_LPFb * readAngle())) / 2048;
+    //y = readAngle();
 
 
     // calculate the current velocity

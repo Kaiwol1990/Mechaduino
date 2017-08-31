@@ -53,7 +53,15 @@ extern int serial_counter;
 
 
 
-extern const uint16_t lookup[]; // lookup table for the encoder reading
+extern const uint16_t lookup[16384]; // lookup table for the encoder reading
+
+
+
+
+//---- lookup tables for the sin and cosin shiftet by 45° ----
+extern const int16_t sin_lookup[3600];
+
+extern const int16_t cos_lookup[3600];
 
 
 

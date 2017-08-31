@@ -12,6 +12,7 @@
 #include "Language.h"
 #include "Cmd.h"
 #include "A4954.h"
+#include "Calibration.h"
 
 void init_menu() {
 
