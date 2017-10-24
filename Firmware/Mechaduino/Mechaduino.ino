@@ -21,6 +21,9 @@
 
 */
 
+#define no_millis
+#include <Arduino.h>
+
 #include "Utils.h"
 #include "Serial.h"
 #include "State.h"
