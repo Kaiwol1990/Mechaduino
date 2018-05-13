@@ -32,12 +32,18 @@ volatile int int_Kd = (Kd * 1024.0) + 0.5;
 
 volatile int int_Kff = (Kff * 1024.0) + 0.5;
 volatile int int_Kacc = (Kacc * 1024.0) + 0.5;
+volatile int int_Kb = (Kb * 1024.0) + 0.5;
+
 
 
 
 //---- Calculating the inertia of the system ----
 float D_pulley = (mm_rev / (10 * 3.14159283));
 
+
+// calculate maximal peak count from maximal peak time
+int countPEAK = 0;
+int countPEAKDEAD = 0;
 
 
 // variable for the target in steps

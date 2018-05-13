@@ -29,4 +29,9 @@ extern int ITerm_max;
 extern bool LED_pattern[4][10];
 
 
+// calculate maximal peak count from maximal peak time
+extern int countPEAKMax;
+extern int countPEAKDEADMax;
+extern int uPEAK;
+
 #endif

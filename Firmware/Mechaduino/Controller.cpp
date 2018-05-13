@@ -16,69 +16,104 @@
 // ----- calculates the target velocity and PID settings -----
 void TC5_Handler() {
 
-  int32_t domega_target;
+  //int32_t domega_target;
 
   //----- Variables -----
   static int32_t ITerm;
-  static int32_t DTerm;
+  int32_t DTerm;
+  static int32_t IntDTerm;
+  int32_t PTerm;
 
   static int32_t e_1;        // last error term
   static int32_t omega_target_1;
 
   int16_t phase_advanced;
 
-  int32_t u_pid;
+  int32_t Derror = 0;
+
+  static int u_pid;
   int32_t u_ff;
   int32_t u_acc;
 
   static uint16_t serial_loop_counter;
 
-
   //----- Calculations -----
-
   if (TC5->COUNT16.INTFLAG.bit.OVF == 1  || frequency_test == true) {  // A overflow caused the interrupt
     serial_loop_counter++;
 
-    domega_target = omega_target - omega_target_1;
+    //domega_target = omega_target - omega_target_1;
 
     // start the calculations only if the motor is enabled
     if (enabled) {
 
       // ----------- PID loop -----------------------------------------
-      // calculate the I-Term
-      if (abs(u) < uMAX) {
-        ITerm = ITerm + (int_Ki * error);
-      }
 
-      // constrain the ITerm
-      if (ITerm > ITerm_max) {
-        ITerm = ITerm_max;
-      }
-      else if (ITerm < -ITerm_max) {
-        ITerm = -ITerm_max;
-      }
+      // Integrational
+      ITerm = ITerm + (int_Ki * error) + (int_Kb * (u - u_pid));
+      ITerm = ITerm + ((int_Kff * int_Ki * error) / (1024 * constrain(1000 * abs(omega), 1, 1000000)));
+      // ITerm = constrain(ITerm, -ITerm_max, ITerm_max);
 
-      //calculate the D-Term
-      DTerm = int_Kd * (error - e_1);
+
+      // Derivation
+
+      Derror = (((error_LPFa * e_1) + (error_LPFb * error)) / 2048);
+      DTerm = (int_Kd * (Derror - e_1) * constrain(abs(omega), 1, 1000))  / (100 * int_Kacc);
+
+
+      DTerm = (DTerm - IntDTerm) * 100;
+      IntDTerm = IntDTerm + (DTerm / 5000);
+
+      // Proportional
+      PTerm  = (int_Kp * error);
 
       // calculate the whole PID effort
-      u_pid = ((int_Kp * error) + ITerm + DTerm) / 1024;
+      u_pid = (PTerm + ITerm + DTerm) / 1024;
 
 
-      // calculate the feedforward effort
-      u_ff = (int_Kff * omega_target) / (10000 * 1024);
+      // constrain the effort to the user spedified maximum
+      if (countPEAK < countPEAKMax) {
+
+        // allow peak current
+        if (u_pid > uPEAK) {
+          u = uPEAK;
+          countPEAK ++;
+          countPEAKDEAD = 0;
+        }
+        else if (u_pid < -uPEAK) {
+          u = -uPEAK;
+          countPEAK ++;
+          countPEAKDEAD = 0;
+        }
+        else {
+          u = u_pid;
+          countPEAKDEAD ++;
+        }
+      }
+      else {
+
+        // peak current limit is active
+        if (u_pid > uMAX) {
+          u = uMAX;
+        }
+        else if (u_pid < -uMAX) {
+          u = -uMAX;
+        }
+        else {
+          u = u_pid;
+          countPEAKDEAD ++;
+        }
+
+      }
+      countPEAK = constrain(countPEAK, 0, 100000);
+      countPEAKDEAD = constrain(countPEAKDEAD, 0, 100000);
+
+      if (countPEAKDEAD == countPEAKDEADMax) {
+        countPEAKDEAD = 0;
+        countPEAK = 0;
+      }
 
 
-      // calculate the acceleration effort
-      u_acc = (int_Kacc * domega_target) / (10000 * 1024);
 
-
-
-      // ------ Add up the Effort -------------------------------------
-      //u = u_pid + u_ff + u_acc;
-      // lowpass filter with 1000 Hz cutoff
-
-      u = u_pid + u_ff + u_acc;
 
 
     }
@@ -91,46 +126,21 @@ void TC5_Handler() {
 
 
 
-    // constrain the effort to the user spedified maximum
-    if (u > uMAX) {
-      u = uMAX;
-      error_register = error_register | 0B0000000000000100;    // log error in register
-    }
-    else if (u < -uMAX) {
-      u = -uMAX;
-      error_register = error_register | 0B0000000000000100;    // log error in register
-    }
 
 
     // calculate the phase advance term
-    phase_advanced = (sign(u) * PA) + (omega / FPID);
+    phase_advanced = sign(u) * PA;
 
-    if (phase_advanced >= 2 * PA) {
-      phase_advanced = 2 * PA;
-    }
-    else if (phase_advanced <= -(2 * PA)) {
-      phase_advanced = -(2 * PA);
-    }
-
-
+ 
     // calculate the electrical angle for the motor coils
     electric_angle = y + phase_advanced;
-
 
     // write the output
     output(electric_angle, u);
 
 
     // buffer the variables for the next loop
-    e_1 = error;
-    omega_target_1 = omega_target;
-
-
-    if (abs(error) > max_e) {
-      // set error register if the error was to high at some point
-      error_register = error_register | 0B0000000000000010;
-    }
-
+    e_1 = Derror;
 
     if (streaming) {
 
@@ -164,13 +174,15 @@ void TC5_Handler() {
 
 
 
-const int16_t y_LPF = 1252;
-const int16_t y_LPFa = ((2048.0 * exp(y_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int16_t y_LPFb = 2048 - y_LPFa;
+const int16_t omega_LPF = 150;
+const int16_t omega_LPFa = ((2048.0 * exp(omega_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int16_t omega_LPFb = 2048 - omega_LPFa;
 
 
 
-
+const int16_t y_LPF = 500;
+const int16_t y_LPFa = ((2048.0 * exp(omega_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
+const int16_t y_LPFb = 2048 - omega_LPFa;
 
 
 
@@ -178,46 +190,108 @@ const int16_t y_LPFb = 2048 - y_LPFa;
 // ----- Oversamples the shaft angle to reduce noise -----
 void TC4_Handler() {
 
-
+  static int32_t last_step_target = 0;
+  static int32_t y_1 = 0;
   static int32_t r_1;
-  static int32_t y_1;
 
-  static uint16_t o_target_counter;
+  static int32_t r_raw_1 = 0;
+  static int16_t r_counter = 0;
+  int32_t dr = 0;
+  static int16_t dt = 0;
+
+
+  // Matlab Code for filter design:
+  /*
+    [b,a]=butter(3,3000/10000);
+    b = round(b*512,0)
+    a = round(a*512,0)
+  */
+  // 3. Ordnung
+  const int32_t a[4] = {512, -595, 356, -71};
+  const int32_t b[4] = {25, 76, 76, 25};
+
+  static int32_t omega_buffer[4] = {0};
+  static int32_t omegaRaw_buffer[4] = {0};
+
+
 
   if (TC4->COUNT16.INTFLAG.bit.OVF == 1) {
 
-    o_target_counter++;
-
     // read the current angle
-    y = ((y_LPFa * y) + (y_LPFb * readAngle())) / 2048;
-    //y = readAngle();
+    y = ((y_LPFa * readAngle()) + (y_LPFb * y)) / 2048;
+
+    omegaRaw_buffer[0] = (((omega_LPFa * omega) + (omega_LPFb * ((y - y_1) * Fs))) / 2048);
+
+
+    omega_buffer[0] = (((b[0] * omegaRaw_buffer[0]) + (b[1] * omegaRaw_buffer[1]) + (b[2] * omegaRaw_buffer[2]) + (b[3] * omegaRaw_buffer[3])) - ((a[1] * omega_buffer[1]) + (a[2] * omega_buffer[2]) + (a[3] * omega_buffer[3]))) / 512;
 
 
     // calculate the current velocity
-    omega = (omega + ((y - y_1) * Fs) ) / 2;
+    omega = omega_buffer[0];
 
 
 
-    // calculate the current target from the received steps and the angle per step
-    r = step_target * stepangle;
+
+
+    // calculate the current target from the received steps and the angle per step and interpolate if no step was received
+    r_counter = r_counter + 1;
+
+    if (step_target != last_step_target) {
+      r = step_target * stepangle;
+
+      dr = r - r_raw_1;
+      dt = r_counter;
+
+      r_raw_1 = r;
+      r_counter = 0;
+
+    }
+    else {
+      if (dt > 0) {
+        r = r + r_counter * (dr / dt);
+      }
+    }
+
+    // stand still
+    if (r_counter > 15) {
+      dr = 0;
+    }
+
+    omega_target = ((omega_LPFa * omega_target) + (omega_LPFb * (r - r_1) * Fs)) / 2048;
 
 
     //calculate the error
-    error = ((error_LPFa * error) + (error_LPFb * (r - y))) / 2048;
+    error = r - y;
 
 
-    //calculate the target velocity
-    if (r != r_1) {
-      omega_target = (omega_target + ((r - r_1) * (Fs / o_target_counter) )) / 2;
+    // wrap the angle arround to allow for inf travel
+    if (y < -1000000) {
 
-      o_target_counter = 0;
+      y = mod(y, 36000);
+      r = mod(r, 36000);
+      step_target = y / stepangle;
+    }
+    else if (y > 1000000) {
 
-      // buffer the variables for the next loop
-      r_1 = r;
+      y = mod(y, 36000);
+      r = mod(r, 36000);
+      step_target = y / stepangle;
     }
 
-    y_1 = y;
 
+
+
+    // shift back
+    omegaRaw_buffer[3] = omegaRaw_buffer[2];
+    omegaRaw_buffer[2] = omegaRaw_buffer[1];
+    omegaRaw_buffer[1] = omegaRaw_buffer[0];
+
+    omega_buffer[3] = omega_buffer[2];
+    omega_buffer[2] = omega_buffer[1];
+    omega_buffer[1] = omega_buffer[0];
+
+    y_1 = y;
+    r_1 = r;
 
     TC4->COUNT16.INTFLAG.bit.OVF = 1;    // writing a one clears the flag ovf flag
   }

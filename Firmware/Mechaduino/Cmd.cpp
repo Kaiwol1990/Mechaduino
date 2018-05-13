@@ -279,23 +279,25 @@ bool userqst(int timeout, const String qst_string) {
   while (millis() < end_time && !received) {
 
     if (SerialUSB.available()) {
-      if (SerialUSB.peek() == 'y') {
+      char current = SerialUSB.read();
+      
+      if (current == 'y') {
         answer =  true;
         received = true;
       }
-      else if (SerialUSB.peek() == 'Y') {
+      else if (current == 'Y') {
         answer =  true;
         received = true;
       }
-      else if (SerialUSB.peek() == 'n') {
+      else if (current == 'n') {
         answer =  false;
         received = true;
       }
-      else if (SerialUSB.peek() == 'N') {
+      else if (current == 'N') {
         answer =  false;
         received = true;
       }
-      delay(50);
+     // delay(50);
     }
 
   }

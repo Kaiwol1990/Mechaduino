@@ -34,8 +34,9 @@ void init_menu() {
   cmdAdd("step", Serial_oneStep);
   cmdAdd("loop", get_max_frequency);
   cmdAdd("test", test);
+  cmdAdd("cogging", getCoggingTable);
+  cmdAdd("stiction", getStictionTable);
   
-
 }
 
 void state(int arg_cnt, char **args) {
@@ -521,7 +522,7 @@ void start_testmove(int arg_cnt, char **args) {
   SerialUSB.println(test_header);
 
   int F_Sample = return_float_argument(args, arg_cnt, "-f", 5000, 200, 10000);
-  int velocity = return_float_argument(args, arg_cnt, "-v", 60, 10, 500);
+  int velocity = return_float_argument(args, arg_cnt, "-v", 60, -500, 500);
   bool output = check_argument(args, arg_cnt, "-o");
 
   SerialUSB.print("Samplerate = ");

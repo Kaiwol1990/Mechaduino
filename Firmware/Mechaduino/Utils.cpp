@@ -92,14 +92,14 @@ void setupPins() {
   pinMode(IN_2, OUTPUT);
   pinMode(IN_1, OUTPUT);
   pinMode(ledPin, OUTPUT);
-  pinMode(step_pin, INPUT);
-  pinMode(dir_pin, INPUT);
+  pinMode(step_pin, INPUT_PULLUP);
+  pinMode(dir_pin, INPUT_PULLUP);
+  pinMode(ena_pin, INPUT_PULLUP);
   pinMode(chipSelectPin, OUTPUT); // CSn -- has to toggle high and low to signal chip to start data transfer
 
   attachInterrupt(step_pin, stepInterrupt, RISING);
   attachInterrupt(dir_pin, dirInterrupt, CHANGE);
 
-  pinMode(ena_pin, INPUT_PULLUP);
   attachInterrupt(ena_pin, enaInterrupt, CHANGE);
 
   digitalWriteDirect(IN_4, LOW);
@@ -133,7 +133,7 @@ void stepInterrupt() {
 
 void dirInterrupt() {
   if (!INVERT) {
-    if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
+    if (REG_PORT_IN0 & PORT_PA10) { // check if dir_pin is HIGH
       dir = false;
     }
     else {
@@ -141,7 +141,7 @@ void dirInterrupt() {
     }
   }
   else {
-    if (REG_PORT_IN0 & PORT_PA11) { // check if dir_pin is HIGH
+    if (REG_PORT_IN0 & PORT_PA10) { // check if dir_pin is HIGH
       dir = true;
     }
     else {
@@ -176,7 +176,14 @@ int mod(int xMod, int mMod) {
 void setupTCInterrupts() {
   const int overflow_TC_5 = (48000000 / FPID) - 1;
   const int overflow_TC_4 = (48000000 / Fs) - 1;
+/*
+  // Enable GCLK for TC4 and TC5 (timer counter input clock)
+  GCLK->PCHCTRL[TC4_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos); //use clock generator 1 (48Mhz)
 
+  while (GCLK->PCHCTRL[TC4_GCLK_ID].bit.CHEN == 0);*/
+  /* while (TC5->COUNT16.STATUS.reg);*/
+
+  //ATSAMD21
   // Enable GCLK for TC4 and TC5 (timer counter input clock)
   GCLK->CLKCTRL.reg = (int) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_TC4_TC5));
   while (GCLK->STATUS.bit.SYNCBUSY);
@@ -843,7 +850,119 @@ void error_led() {
 }
 
 
+
+
 float test_move(int steps, int F_Sample, bool output, char identifier) {
+
+
+  int last_step_target = step_target;
+  bool last_enabled = enabled;
+  bool last_dir = dir;
+  dir = true;
+  enabled = true;
+
+
+  int answer[1000];
+  int target[1000];
+  int error[1000];
+
+  int o_answer[1000];
+  int o_target[1000];
+
+  int counter = 0;
+
+  unsigned int current_time = micros();
+  unsigned int next_time = current_time;
+
+  unsigned int dt = 1000000 / F_Sample;
+
+
+  // calculate the target vector
+  target[0] = step_target;
+  for (int i = 1; i < 1000; i++) {
+    target[i] = target[i - 1];
+
+    if (i == 200) {
+      target[i] = target[i - 1]  + (steps * step_add);
+    }
+  }
+
+  while (counter < 1000) {
+    current_time = micros();
+
+    if (current_time >= next_time) {
+      next_time = current_time + dt;
+
+      answer[counter] = y;
+      o_answer[counter] = omega;
+      o_target[counter] = omega_target;
+
+      step_target = target[counter];
+
+      counter += 1;
+    }
+  }
+
+
+  for (int i = 0; i < 1000; i++) {
+    target[i] = target[i] * stepangle;
+  }
+
+
+
+  // move back to last position
+  while (step_target > last_step_target) {
+    current_time = micros();
+    if (current_time >= next_time) {
+      next_time = current_time + 5;
+      step_target -= 1;
+    }
+  }
+
+
+
+  // set parameters back to the values before the
+  enabled = last_enabled;
+  dir = last_dir;
+
+  // Error berechnen
+
+  for (int i = 0; i < 1000; i++) {
+    error[i] = abs(target[i] - answer[i]);
+  }
+
+  float cost = 0;
+  for (int i = 0; i < 1000; i++) {
+    cost = cost + ((i - 200) * error[i] * dt);
+  }
+
+
+
+  delay(100);
+  if (output) {
+    for (int i = 0; i < 1000; i++) {
+      SerialUSB.print(identifier);
+      SerialUSB.print(',');
+      SerialUSB.print(target[i]);
+      SerialUSB.print(';');
+      SerialUSB.print(answer[i]);
+      SerialUSB.print(';');
+      SerialUSB.print(o_target[i]);
+      SerialUSB.print(';');
+      SerialUSB.println(o_answer[i]);
+    }
+  }
+  return (cost);
+
+
+
+}
+
+
+
+/*
+
+  float test_move(int steps, int F_Sample, bool output, char identifier) {
 
   unsigned int current_time = micros();
   unsigned int next_time = current_time;
@@ -955,15 +1074,15 @@ float test_move(int steps, int F_Sample, bool output, char identifier) {
     }
   }
   return (cost);
-}
+  }
 
-
+*/
 
 void downhill_simplex(int arg_cnt, char **args) {
 
 
   int F_Sample = return_float_argument(args, arg_cnt, "-f", 5000, 200, 10000);
-  int velocity = return_float_argument(args, arg_cnt, "-v", 60, 10, 500);
+  int velocity = return_float_argument(args, arg_cnt, "-v", 60, 10, 1500);
   bool output = check_argument(args, arg_cnt, "-o");
   bool gui = check_argument(args, arg_cnt, "-gui");
 
@@ -1499,4 +1618,189 @@ void paramter_streamer (bool output, bool gui) {
   }
 }
 
+
+void getStictionTable(int arg_cnt, char **args) {
+
+  int32_t temp = 0;
+  // enable motor;
+
+  uint32_t now = millis();
+  // uint32_t nextTime = now;
+  //uint32_t wait2 = 10;
+
+  enabled = 1;
+
+  step_target = 0;
+
+  SerialUSB.println("Cogging caliration");
+  SerialUSB.println("");
+  SerialUSB.println("");
+  SerialUSB.println("stiction_cw[3600] = {");
+
+  for (int i = 0; i < 3600; i++) {
+    // go to next step
+    step_target = (10 * i) / stepangle;
+
+    // wait 25 ms to reach position
+    now = millis();
+    while (millis() - now < 25) {
+      delayMicroseconds(10);
+    }
+    // turn motor off
+    enabled = 0;
+
+    // turn PID off
+    disableTC5Interrupts();
+    u = 0;
+
+    // wind up till motor starts to move
+    while (abs(error) < 20 ) {
+      u = u + 1;
+      delayMicroseconds(10);
+    }
+
+    // print current effort
+    SerialUSB.print(u);
+    SerialUSB.print(" ,");
+
+    // reset effort
+    u = 0;
+
+    // turn pid on again
+    enableTC5Interrupts();
+    enabled = 1;
+  }
+  SerialUSB.println("}");
+
+  SerialUSB.println("");
+  SerialUSB.print("stiction_scw[3600] = {");
+  for (int i = 3599; i >= 0; i--) {
+    // go to next step
+    step_target = (10 * i) / stepangle;
+
+    // wait 25 ms to reach position
+    now = millis();
+    while (millis() - now < 25) {
+      delayMicroseconds(10);
+    }
+    // turn motor off
+    enabled = 0;
+
+    // turn PID off
+    disableTC5Interrupts();
+    u = 0;
+
+    // wind up till motor starts to move
+    while (abs(error) < 20 ) {
+      u = u - 1;
+      delayMicroseconds(10);
+    }
+
+    // print current effortv
+    SerialUSB.print(u);
+    SerialUSB.print(" ,");
+
+    // reset effort
+    u = 0;
+
+    // turn pid on again
+    enableTC5Interrupts();
+    enabled = 1;
+  }
+  SerialUSB.println("}");
+
+}
+
+
+
+
+
+void getCoggingTable(int arg_cnt, char **args) {
+
+  int32_t temp = 0;
+  // enable motor;
+
+  uint32_t now = millis();
+  // uint32_t nextTime = now;
+  //uint32_t wait2 = 10;
+
+  enabled = 1;
+
+  step_target = 0;
+
+  SerialUSB.println("Cogging caliration");
+  SerialUSB.println("");
+  SerialUSB.println("");
+  SerialUSB.println("cogging_cw[3600] = {");
+
+  for (int i = 0; i < 3600; i++) {
+    // go to next step
+    step_target = (10 * i) / stepangle;
+
+    // wait 25 ms to reach position
+    now = millis();
+    while (millis() - now < 25) {
+
+    }
+
+    // wind up till motor starts to move
+    while (abs(omega) > 0 ) {
+      delayMicroseconds(10);
+    }
+
+    // print current effort
+    SerialUSB.print(u);
+    SerialUSB.print(" ,");
+    SerialUSB.println(y);
+  }
+  SerialUSB.println("}");
+
+  SerialUSB.println("");
+  SerialUSB.print("cogging_ccw[3600] = {");
+  for (int i = 3599; i >= 0; i--) {
+    // go to next step
+    step_target = (10 * i) / stepangle;
+
+    // wait 25 ms to reach position
+    now = millis();
+    while (millis() - now < 25) {
+      delayMicroseconds(10);
+    }
+
+    // wind up till motor starts to move
+    while (abs(omega) > 0 ) {
+      delayMicroseconds(10);
+    }
+
+    // print current effortv
+    SerialUSB.print(u);
+    SerialUSB.print(" ,");
+    SerialUSB.println(y);
+
+  }
+  SerialUSB.println("}");
+
+  enabled = 0;
+}
+
+
+
+int rateLimiter(int currentValue, int lastValue, int RSR, int FSR) {
+  int newValue = 0;
+
+  // Build derivation of the signal
+  int dValue = currentValue - lastValue;
+
+  if (dValue > RSR) {
+    newValue = lastValue + RSR;
+  }
+  else if (dValue < FSR) {
+    newValue = lastValue - FSR;
+  }
+  else {
+    newValue = lastValue + dValue;
+  }
+
+  return newValue;
+}
 

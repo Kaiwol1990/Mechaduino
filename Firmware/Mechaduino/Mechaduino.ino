@@ -21,13 +21,26 @@
 
 */
 
-#define no_millis
+// ###################################################################################
+// #                                                                                 #
+// #  ##   ##  ######  ####   ##  ##   ####   #####   ##  ##  ######  ##  ##   ####  #
+// #  ### ###  ##     ##  ##  ##  ##  ##  ##  ##  ##  ##  ##    ##    ### ##  ##  ## #
+// #  ## # ##  ####   ##      ######  ######  ##  ##  ##  ##    ##    ## ###  ##  ## #
+// #  ##   ##  ##     ##  ##  ##  ##  ##  ##  ##  ##  ##  ##    ##    ##  ##  ##  ## #
+// #  ##   ##  ######  ####   ##  ##  ##  ##  #####    ####   ######  ##  ##   ####  #
+// #                                                                                 #
+// ###################################################################################
+//   open-source industrial servo motor by Tropical Labs       written by Kai Wolter   
+
+
+//#define no_millis
 #include <Arduino.h>
 
 #include "Utils.h"
 #include "Serial.h"
 #include "State.h"
 #include "Cmd.h"
+
 
 
 //////////////////////////////////////
@@ -38,10 +51,10 @@ void setup() {
   boot();
   init_menu();
 
-/*  
-  insert_command("state");
+  /*
+    insert_command("state");
 
-  insert_command("diagnose");
+    insert_command("diagnose");
   */
 
 }
@@ -52,9 +65,20 @@ void setup() {
 /////////////////LOOP/////////////////
 //////////////////////////////////////
 
-void loop()
-{
-  streaming_handler();
-  error_led();
-  cmdPoll();
+uint32_t counter = 0;
+uint32_t nextMilis = 0;
+
+void loop() {
+  while (1) {
+    streaming_handler();
+    cmdPoll();
+
+//    counter ++;
+//
+//    if (millis() > nextMilis) {
+//      nextMilis += 50;
+//      SerialUSB.println((float)100.0 * (counter / 50116.0));
+//      counter = 0;
+//    }
+  }
 }

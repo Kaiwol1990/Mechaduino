@@ -15,8 +15,8 @@
 #define IN_1 (8)          //PA06
 #define ledPin (13)       //PA17
 #define chipSelectPin (A2)//PB08
-#define dir_pin (0)       //PORT_PA11
-#define step_pin (1)      //Port_PA10
+#define step_pin (0)      //PORT_PA11
+#define dir_pin (1)       //PORT_PA10
 #define ena_pin (2)       //PORT_PA14
 
 

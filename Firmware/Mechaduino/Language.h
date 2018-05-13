@@ -106,7 +106,6 @@
 
 #define procent_bar "|---+----+----+----+----+----+----+----+----+----|"
 
-
 #define bootscreen_1   "###################################################################################"
 #define bootscreen_2   "#                                                                                 #"
 #define bootscreen_3   "#  ##   ##  ######  ####   ##  ##   ####   #####   ##  ##  ######  ##  ##   ####  #"
@@ -117,6 +116,9 @@
 #define bootscreen_8   "#                                                                                 #"
 #define bootscreen_9   "###################################################################################"
 #define bootscreen_10  "  open-source industrial servo motor by Tropical Labs       written by Kai Wolter   "
+
+
+
 
 
 #endif

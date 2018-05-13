@@ -4,6 +4,10 @@
 #include <arduino.h>
 
 
+#if defined(__SAMD51__)
+#define SerialUSB Serial
+#endif
+
 //-------------------------------------------------- Identifier -------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
@@ -17,6 +21,11 @@ extern String identifier;
 
 // max current per coil 2000 mA for A4954 driver should be lower (thermal conditions)
 extern int iMAX;
+
+// max current per coil 2000 mA for A4954 driver should be lower (thermal conditions)
+extern int iPEAK;
+extern int tPEAK;
+extern int tDEAD;
 
 
 //uncomment this if you want to use a enable pin
@@ -49,6 +58,11 @@ extern float M_max;
 extern int I_rated;
 
 
+//----- Coil calibrtaions---------
+extern int16_t gainCoilA;
+extern int16_t gainCoilB;
+
+
 //---------------------------------------------- Controller Section ----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
 
@@ -60,6 +74,7 @@ extern float Kd;
 
 extern float Kff;
 extern float Kacc;
+extern float Kb;
 
 //----------------------------------------------- Filter  Section -----------------------------------------------
 //---------------------------------------------------------------------------------------------------------------
@@ -76,7 +91,7 @@ extern int error_LPF;
 
 // frequency of the PID loop change only if you know what you're doing
 #define FPID 5000
-#define Fs (2*FPID)
+#define Fs (5*FPID)
 #endif
 
 

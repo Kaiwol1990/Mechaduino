@@ -24,6 +24,12 @@ int step_add = 1024 / microstepping;
 int ITerm_max = uMAX * 1024.0;
 
 
+// calculate maximal peak count from maximal peak time
+int countPEAKMax = (tPEAK*FPID) / 1000;
+int countPEAKDEADMax = (tDEAD*FPID) / 1000;
+
+int uPEAK = ((1024.0 * iPEAK * 10.0 * rSense) / (1000.0 * 3.3));  // max voltage for the vref pins
+
 
 //                            timing error                    maximal error                   maximal current                       lookuptable
 bool LED_pattern[4][10] = { {1, 0, 1, 0, 1, 0, 1, 0, 1, 0}, {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}, {1, 1, 1, 1, 1, 1, 1, 1, 0, 1}, {1, 1, 1, 1, 1, 1, 0, 1, 0, 1}};

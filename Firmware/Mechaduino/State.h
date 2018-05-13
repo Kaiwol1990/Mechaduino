@@ -33,6 +33,7 @@ extern volatile int int_Kd;
 
 extern volatile int int_Kff;
 extern volatile int int_Kacc;
+extern volatile int int_Kb;
 
 extern volatile int step_target;        // target as step gets incremented if an step is received
 
@@ -46,23 +47,31 @@ extern bool stream_variables[8];;
 
 extern int max_serial_counter;
 
+// calculate maximal peak count from maximal peak time
+extern int countPEAK;
+extern int countPEAKDEAD;
 
 extern int fifo[8][50];
 extern int fifo_counter;
 extern int serial_counter;
 
 
-
-extern const uint16_t lookup[16384]; // lookup table for the encoder reading
-
-
+//---- lookup table for the encoder reading ----
+extern const uint16_t lookup[16384];
 
 
 //---- lookup tables for the sin and cosin shiftet by 45° ----
 extern const int16_t sin_lookup[3600];
-
 extern const int16_t cos_lookup[3600];
 
+
+//---- lookup table for stiction torque ----
+extern const int16_t stiction_cw[3600];
+extern const int16_t stiction_ccw[3600];
+
+//---- lookup table for cogging torque ----
+extern const int16_t cogging_cw[3600];
+extern const int16_t cogging_ccw[3600];
 
 
 #endif

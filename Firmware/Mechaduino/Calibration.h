@@ -7,7 +7,9 @@ void calibration(int arg_cnt, char **args);
 
 void oneStep();
 
-void output_calibration(int electric_angle, int effort) __attribute__ ((optimize("O3")));
+void coil_calibration(bool debug);
+
+float read_encoder_calibration(int avg, bool mode);
 
 
 #endif

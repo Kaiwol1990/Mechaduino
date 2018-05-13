@@ -8,13 +8,13 @@
 
 int readEncoder() {
 
-  REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
-  SPI.transfer(0x3F);
-  SPI.transfer(0xFF);
-
-  REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
-
-  delayMicroseconds(1);
+//  REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
+//  SPI.transfer(0x3F);
+//  SPI.transfer(0xFF);
+//
+//  REG_PORT_OUTSET1 = PORT_PB09;  // write chipSelectPin HIGH
+//
+//  delayMicroseconds(1);
 
   REG_PORT_OUTCLR1 = PORT_PB09;  // write chipSelectPin LOW
   byte hibyte = SPI.transfer(0x3F);

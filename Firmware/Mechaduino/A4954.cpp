@@ -1,4 +1,3 @@
-
 #include "A4954.h"
 #include "board.h"
 #include "Configuration.h"
@@ -6,16 +5,6 @@
 #include "analogFastWrite.h"
 #include "State.h"
 #include <stdint.h>
-
-
-
-
-
-const int16_t u_LPF = 552;
-const int16_t u_LPFa = ((1024.0 * exp(u_LPF * -2.0 * 3.14159283 / FPID)) + 0.5); // z = e^st pole mapping
-const int16_t u_LPFb = 1024 - u_LPFa;
-
-
 
 
 
@@ -30,15 +19,15 @@ void output(int electric_angle, int effort) {
 
   if (effort != 0) {
     pole_angle = mod(-(phase_multiplier * electric_angle) , 3600);
-    
-
 
     sine = sin_lookup[pole_angle];
     cosine = cos_lookup[pole_angle];
 
-    v_ref_coil_A = ((u_LPFa * v_ref_coil_A) + (u_LPFb * ((abs(effort) * sine) ) / 4096)) / 1024;
-    v_ref_coil_B = ((u_LPFa * v_ref_coil_B) + (u_LPFb * ((abs(effort) * cosine) ) / 4096)) / 1024;
+    v_ref_coil_A = (abs(effort) * sine) / 4096;
+    v_ref_coil_B = (abs(effort) * cosine) / 4096;
 
+    v_ref_coil_A = (gainCoilA * v_ref_coil_A) / 8192;
+    v_ref_coil_B = (gainCoilB * v_ref_coil_B) / 8192;
 
     if (v_ref_coil_A > 0)  {
       digitalWriteDirect(IN_1, LOW);

@@ -45,5 +45,11 @@ void downhill_simplex(int arg_cnt, char **args);
 
 void paramter_streamer(bool output, bool gui);
 
+void getStictionTable(int arg_cnt, char **args);
+
+void getCoggingTable(int arg_cnt, char **args);
+
+int rateLimiter(int currentValue, int lastValue, int RSR, int FSR);
+
 #endif
 
