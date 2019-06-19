@@ -3,7 +3,7 @@
 #ifndef __UTILS_H__
 #define __UTIL_H__
 #pragma once
-#include <arduino.h>
+#include <Arduino.h>
 
 void boot();
 
@@ -52,4 +52,3 @@ void getCoggingTable(int arg_cnt, char **args);
 int rateLimiter(int currentValue, int lastValue, int RSR, int FSR);
 
 #endif
-

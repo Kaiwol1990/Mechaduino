@@ -1,7 +1,7 @@
 
 #ifndef __CONFIGURATION_H__
 #define __CONFIGURATION_H__
-#include <arduino.h>
+#include <Arduino.h>
 
 
 #if defined(__SAMD51__)
@@ -93,7 +93,3 @@ extern int error_LPF;
 #define FPID 5000
 #define Fs (5*FPID)
 #endif
-
-
-
-
