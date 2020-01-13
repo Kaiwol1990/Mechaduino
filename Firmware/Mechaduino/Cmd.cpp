@@ -255,7 +255,7 @@ void insert_command(const char* command_string) {
   strcpy(buf, command_string);
 
   uint8_t msg_length = 0;
-  while ((msg_length < 30) && buf[msg_length] != NULL) {
+  while ((msg_length < 30) && buf[msg_length] != 0) {
     cmd_handler( buf[msg_length]);
     msg_length++;
   }
@@ -314,4 +314,3 @@ bool userqst(int timeout, const String qst_string) {
   return answer;
 
 }
-
